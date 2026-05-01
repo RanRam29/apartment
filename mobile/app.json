@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "DirApp",
+    "slug": "dirapp",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1A1A2E"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.dirapp.rental",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Allow DirApp to access your photos to upload apartment images.",
+        "NSCameraUsageDescription": "Allow DirApp to use your camera to take apartment photos."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#1A1A2E"
+      },
+      "package": "com.dirapp.rental",
+      "permissions": ["READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE", "CAMERA"]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        { "photosPermission": "Allow DirApp to access your photos." }
+      ]
+    ],
+    "scheme": "dirapp",
+    "extra": {
+      "apiUrl": "http://localhost:3000"
+    }
+  }
+}
