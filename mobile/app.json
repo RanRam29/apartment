@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -25,22 +25,39 @@
         "backgroundColor": "#1A1A2E"
       },
       "package": "com.dirapp.rental",
-      "permissions": ["READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE", "CAMERA"]
+      "permissions": [
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "CAMERA",
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-router",
       "expo-secure-store",
       [
         "expo-image-picker",
-        { "photosPermission": "Allow DirApp to access your photos." }
+        { "photosPermission": "Allow DirApp to access your photos to upload apartment images." }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#6C5CE7",
+          "androidMode": "default",
+          "androidCollapsedTitle": "DirApp"
+        }
       ]
     ],
     "scheme": "dirapp",
     "extra": {
-      "apiUrl": "http://localhost:3000"
+      "eas": {
+        "projectId": "dirapp-rental"
+      }
     }
   }
 }
+
