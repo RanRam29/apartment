@@ -21,6 +21,7 @@ import ProfileScreen from '../screens/ProfileScreen';
 import ApartmentDetailScreen from '../screens/ApartmentDetailScreen';
 import CreateListingScreen from '../screens/CreateListingScreen';
 import PreferencesScreen from '../screens/PreferencesScreen';
+import OnboardingScreen from '../screens/OnboardingScreen';
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
 const TenantTab = createBottomTabNavigator<TenantTabParamList>();
@@ -85,13 +86,20 @@ function LandlordTabs() {
 }
 
 function MainNavigator() {
-  const { user } = useAuthStore();
+  const { user, needsOnboarding } = useAuthStore();
 
   return (
-    <MainStack.Navigator screenOptions={{ headerShown: false }}>
+    <MainStack.Navigator
+      screenOptions={{ headerShown: false }}
+      initialRouteName={needsOnboarding ? 'Onboarding' : 'Tabs'}
+    >
       <MainStack.Screen
         name="Tabs"
         component={user?.role === 'landlord' ? LandlordTabs : TenantTabs}
+      />
+      <MainStack.Screen
+        name="Onboarding"
+        component={OnboardingScreen}
       />
       <MainStack.Screen
         name="Chat"
