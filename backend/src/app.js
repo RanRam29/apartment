@@ -31,13 +31,32 @@ const globalLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
+
+// Stricter limit for auth endpoints to prevent brute-force
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many auth attempts, please try again later' },
+});
+
+// Swipe endpoint gets its own budget to prevent abuse
+const swipeLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Swipe rate limit exceeded' },
+});
+
 app.use(globalLimiter);
 
 app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/apartments', apartmentRoutes);
-app.use('/api/swipe', swipeRoutes);
+app.use('/api/swipe', swipeLimiter, swipeRoutes);
 app.use('/api/matches', matchRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/recommendations', recommendationRoutes);
