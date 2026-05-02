@@ -88,6 +88,11 @@ export const landlordApi = {
     api.get('/landlord/leads', { params }),
 };
 
+// ─── Payments ─────────────────────────────────────────────────────────────────
+export const paymentApi = {
+  startPremium: () => api.post('/payments/premium', {}),
+};
+
 // ─── Token helpers ────────────────────────────────────────────────────────────
 export const tokenStorage = {
   save: (token: string) => SecureStore.setItemAsync(TOKEN_KEY, token),
