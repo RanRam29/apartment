@@ -131,6 +131,8 @@ export type LandlordTabParamList = {
 };
 
 export type MainStackParamList = {
+  Tabs: undefined;
   Chat: { matchId: string; title: string };
   ApartmentDetail: { apartmentId: string };
+  CreateListing: undefined;
 };
