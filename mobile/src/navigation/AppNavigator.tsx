@@ -20,6 +20,7 @@ import ListingsScreen from '../screens/ListingsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import ApartmentDetailScreen from '../screens/ApartmentDetailScreen';
 import CreateListingScreen from '../screens/CreateListingScreen';
+import PreferencesScreen from '../screens/PreferencesScreen';
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
 const TenantTab = createBottomTabNavigator<TenantTabParamList>();
@@ -106,6 +107,11 @@ function MainNavigator() {
         name="CreateListing"
         component={CreateListingScreen}
         options={{ headerShown: true, headerTitle: 'פרסם מודעה', headerTintColor: '#fff', headerStyle: { backgroundColor: '#1A1A2E' } }}
+      />
+      <MainStack.Screen
+        name="Preferences"
+        component={PreferencesScreen}
+        options={{ headerShown: true, headerTitle: 'העדפות חיפוש', headerTintColor: '#fff', headerStyle: { backgroundColor: '#1A1A2E' } }}
       />
     </MainStack.Navigator>
   );
