@@ -154,4 +154,18 @@ router.get('/me', require('../middleware/auth').authenticate, async (req, res, n
   }
 });
 
+// PATCH /api/auth/push-token — store Expo push token (TTL 30 days in Redis)
+router.patch('/push-token', require('../middleware/auth').authenticate, async (req, res, next) => {
+  try {
+    const { pushToken } = req.body;
+    if (!pushToken || typeof pushToken !== 'string') {
+      return res.status(400).json({ error: 'pushToken required' });
+    }
+    await cacheSet(`push:token:${req.user.id}`, pushToken, 30 * 24 * 60 * 60);
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;

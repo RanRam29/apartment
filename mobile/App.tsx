@@ -4,6 +4,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StatusBar } from 'expo-status-bar';
 import AppNavigator from './src/navigation/AppNavigator';
+import { usePushNotifications } from './src/hooks/usePushNotifications';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -11,12 +12,21 @@ const queryClient = new QueryClient({
   },
 });
 
+function AppInner() {
+  usePushNotifications();
+  return (
+    <>
+      <StatusBar style="light" />
+      <AppNavigator />
+    </>
+  );
+}
+
 export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <QueryClientProvider client={queryClient}>
-        <StatusBar style="light" />
-        <AppNavigator />
+        <AppInner />
       </QueryClientProvider>
     </GestureHandlerRootView>
   );

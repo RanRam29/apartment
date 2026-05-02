@@ -36,6 +36,7 @@ export const authApi = {
     api.post('/auth/login', { email, password }),
   logout: () => api.post('/auth/logout'),
   me: () => api.get('/auth/me'),
+  savePushToken: (pushToken: string) => api.patch('/auth/push-token', { pushToken }),
 };
 
 // ─── Apartments ───────────────────────────────────────────────────────────────
