@@ -16,7 +16,10 @@ import SearchScreen from '../screens/SearchScreen';
 import ChatScreen from '../screens/ChatScreen';
 import LandlordDashboard from '../screens/LandlordDashboard';
 import LeadsScreen from '../screens/LeadsScreen';
+import ListingsScreen from '../screens/ListingsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import ApartmentDetailScreen from '../screens/ApartmentDetailScreen';
+import CreateListingScreen from '../screens/CreateListingScreen';
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
 const TenantTab = createBottomTabNavigator<TenantTabParamList>();
@@ -74,7 +77,7 @@ function LandlordTabs() {
     >
       <LandlordTab.Screen name="Dashboard" component={LandlordDashboard} options={{ title: 'דשבורד' }} />
       <LandlordTab.Screen name="Leads" component={LeadsScreen} options={{ title: 'לידים' }} />
-      <LandlordTab.Screen name="Listings" component={SwipeScreen} options={{ title: 'מודעות' }} />
+      <LandlordTab.Screen name="Listings" component={ListingsScreen} options={{ title: 'מודעות' }} />
       <LandlordTab.Screen name="Profile" component={ProfileScreen} options={{ title: 'פרופיל' }} />
     </LandlordTab.Navigator>
   );
@@ -93,6 +96,16 @@ function MainNavigator() {
         name="Chat"
         component={ChatScreen}
         options={{ headerShown: true, headerTitle: '' }}
+      />
+      <MainStack.Screen
+        name="ApartmentDetail"
+        component={ApartmentDetailScreen}
+        options={{ headerShown: true, headerTitle: 'פרטי דירה', headerTintColor: '#fff', headerStyle: { backgroundColor: '#1A1A2E' } }}
+      />
+      <MainStack.Screen
+        name="CreateListing"
+        component={CreateListingScreen}
+        options={{ headerShown: true, headerTitle: 'פרסם מודעה', headerTintColor: '#fff', headerStyle: { backgroundColor: '#1A1A2E' } }}
       />
     </MainStack.Navigator>
   );
