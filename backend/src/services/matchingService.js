@@ -1,6 +1,7 @@
 const { Match, Swipe, Apartment, User } = require('../models');
-const { cacheSet, cacheDel } = require('../config/redis');
+const { cacheSet, cacheDel, cacheGet } = require('../config/redis');
 const { getIO } = require('../config/socket');
+const { sendPushNotification } = require('./pushService');
 const logger = require('../utils/logger');
 
 /**
@@ -77,19 +78,44 @@ async function acceptMatch(matchId, landlordId) {
 }
 
 async function notifyMatch(match, apartment) {
+  const payload = {
+    matchId: match.id,
+    apartmentId: apartment.id,
+    apartmentTitle: apartment.title,
+    apartmentImage: apartment.images?.[0]?.url || null,
+    matchedAt: new Date().toISOString(),
+  };
+
+  // Socket.io (real-time, in-app)
   try {
     const io = getIO();
-    const payload = {
-      matchId: match.id,
-      apartmentId: apartment.id,
-      apartmentTitle: apartment.title,
-      apartmentImage: apartment.images?.[0]?.url || null,
-      matchedAt: new Date().toISOString(),
-    };
     io.to(`user:${match.tenantId}`).emit('new_match', payload);
     io.to(`user:${match.landlordId}`).emit('new_match', { ...payload, tenantId: match.tenantId });
   } catch {
     // Socket.io may not be initialized in tests
+  }
+
+  // Push notifications (out-of-app alerts)
+  try {
+    const [tenantToken, landlordToken] = await Promise.all([
+      cacheGet(`push:token:${match.tenantId}`),
+      cacheGet(`push:token:${match.landlordId}`),
+    ]);
+
+    await Promise.all([
+      tenantToken && sendPushNotification(tenantToken, {
+        title: 'התאמה חדשה! 🎉',
+        body: `נמצאה התאמה עבור ${apartment.title}`,
+        data: { matchId: match.id, type: 'new_match' },
+      }),
+      landlordToken && sendPushNotification(landlordToken, {
+        title: 'ליד חדש! 🏠',
+        body: `שוכר מתעניין ב${apartment.title}`,
+        data: { matchId: match.id, type: 'new_lead' },
+      }),
+    ]);
+  } catch {
+    // Non-critical — don't fail the match creation
   }
 }
 
