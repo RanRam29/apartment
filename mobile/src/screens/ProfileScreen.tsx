@@ -165,11 +165,11 @@ export default function ProfileScreen() {
             <MenuItem icon="options-outline" label="העדפות חיפוש" onPress={() => navigation.navigate('Preferences')} />
           )}
           <MenuItem icon="notifications-outline" label="התראות"
-            onPress={() => Alert.alert('בקרוב', 'הגדרות התראות יתווספו בקרוב')} />
+            onPress={() => Platform.OS === 'web' ? window.alert('בקרוב\nהגדרות התראות יתווספו בקרוב') : Alert.alert('בקרוב', 'הגדרות התראות יתווספו בקרוב')} />
           <MenuItem icon="shield-checkmark-outline" label="פרטיות ואבטחה"
-            onPress={() => Alert.alert('בקרוב', 'הגדרות פרטיות יתווספו בקרוב')} />
+            onPress={() => Platform.OS === 'web' ? window.alert('בקרוב\nהגדרות פרטיות יתווספו בקרוב') : Alert.alert('בקרוב', 'הגדרות פרטיות יתווספו בקרוב')} />
           <MenuItem icon="help-circle-outline" label="עזרה ותמיכה"
-            onPress={() => Alert.alert('תמיכה', 'support@dirapp.co.il')} />
+            onPress={() => Platform.OS === 'web' ? window.alert('תמיכה\nsupport@dirapp.co.il') : Alert.alert('תמיכה', 'support@dirapp.co.il')} />
         </View>
 
         <TouchableOpacity style={styles.logoutBtn} onPress={confirmLogout}>
