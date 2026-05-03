@@ -15,7 +15,10 @@ async function startServer() {
     await initPostgres();
     await initMongoDB();
     await initRedis();
-    await initKafka();
+    // Kafka is optional — not available in free-tier deployments (Render, etc.)
+    await initKafka().catch((err) =>
+      logger.warn('Kafka unavailable, running without event streaming:', err.message)
+    );
 
     const server = http.createServer(app);
     initSocket(server);
