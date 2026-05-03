@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import {
   View, Text, FlatList, StyleSheet,
   SafeAreaView, RefreshControl, ActivityIndicator,
@@ -8,6 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import { matchesApi } from '../services/api';
 import { useAuthStore } from '../store/useAuthStore';
 import MatchCard from '../components/MatchCard';
+import { C } from '../theme';
 import type { Match } from '../types';
 
 export default function MatchesScreen() {
@@ -24,16 +25,13 @@ export default function MatchesScreen() {
   const pending  = data?.filter((m) => m.status === 'pending')  ?? [];
 
   const openChat = useCallback((match: Match) => {
-    navigation.navigate('Chat', {
-      matchId: match.id,
-      title: match.apartment?.title ?? 'צ׳אט',
-    });
+    navigation.navigate('Chat', { matchId: match.id, title: match.apartment?.title ?? 'צ׳אט' });
   }, [navigation]);
 
   if (isLoading) {
     return (
       <SafeAreaView style={styles.centered}>
-        <ActivityIndicator size="large" color="#6C5CE7" />
+        <ActivityIndicator size="large" color={C.navy} />
       </SafeAreaView>
     );
   }
@@ -50,7 +48,7 @@ export default function MatchesScreen() {
           <RefreshControl
             refreshing={isRefetching}
             onRefresh={refetch}
-            tintColor="#6C5CE7"
+            tintColor={C.navy}
           />
         }
         ListHeaderComponent={
@@ -58,7 +56,6 @@ export default function MatchesScreen() {
             <Text style={styles.sectionLabel}>פעיל ({accepted.length})</Text>
           ) : null
         }
-        ItemSeparatorComponent={() => null}
         renderItem={({ item, index }) => {
           const showPendingHeader = index === accepted.length && pending.length > 0;
           return (
@@ -88,13 +85,20 @@ export default function MatchesScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1A1A2E' },
-  centered: { flex: 1, backgroundColor: '#1A1A2E', justifyContent: 'center', alignItems: 'center' },
-  header: { fontSize: 22, fontWeight: '800', color: '#fff', padding: 20, paddingBottom: 8, textAlign: 'right' },
+  container: { flex: 1, backgroundColor: C.bg },
+  centered:  { flex: 1, backgroundColor: C.bg, justifyContent: 'center', alignItems: 'center' },
+  header: {
+    fontSize: 22, fontWeight: '800', color: C.text,
+    padding: 20, paddingBottom: 8, textAlign: 'right',
+  },
   list: { padding: 16, paddingTop: 8 },
-  sectionLabel: { color: '#A0A0B2', fontSize: 12, fontWeight: '600', textAlign: 'right', marginBottom: 8, marginTop: 4 },
+  sectionLabel: {
+    color: C.textSub, fontSize: 11, fontWeight: '700',
+    textAlign: 'right', marginBottom: 8, marginTop: 4,
+    textTransform: 'uppercase', letterSpacing: 0.5,
+  },
   empty: { flex: 1, alignItems: 'center', paddingTop: 80, gap: 10 },
-  emptyEmoji: { fontSize: 56 },
-  emptyTitle: { fontSize: 18, fontWeight: '700', color: '#fff' },
-  emptySub: { fontSize: 13, color: '#A0A0B2' },
+  emptyEmoji: { fontSize: 52 },
+  emptyTitle: { fontSize: 18, fontWeight: '700', color: C.text },
+  emptySub:   { fontSize: 13, color: C.textSub },
 });
