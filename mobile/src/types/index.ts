@@ -71,6 +71,7 @@ export interface Match {
   tenantLikedAt: string | null;
   landlordLikedAt: string | null;
   lastMessageAt: string | null;
+  unreadCount?: number;
   createdAt: string;
 }
 

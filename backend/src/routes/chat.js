@@ -130,6 +130,16 @@ router.patch('/:matchId/read', authenticate, async (req, res, next) => {
       { isRead: true, readAt: new Date() }
     );
 
+    if (result.modifiedCount > 0) {
+      try {
+        getIO().to(`chat:${req.params.matchId}`).emit('messages_read', { matchId: req.params.matchId });
+      } catch { /* Socket.io unavailable */ }
+      await Promise.all([
+        cacheDel(`matches:tenant:${match.tenantId}`),
+        cacheDel(`matches:landlord:${match.landlordId}`),
+      ]).catch(() => {});
+    }
+
     res.json({ updated: result.modifiedCount });
   } catch (err) {
     next(err);
