@@ -4,13 +4,20 @@ const logger = require('../utils/logger');
 let redisClient;
 
 async function initRedis() {
-  redisClient = new Redis({
-    host: process.env.REDIS_HOST || 'localhost',
-    port: parseInt(process.env.REDIS_PORT) || 6379,
-    password: process.env.REDIS_PASSWORD || undefined,
+  const redisOpts = {
     retryStrategy: (times) => Math.min(times * 100, 3000),
     maxRetriesPerRequest: 3,
-  });
+  };
+
+  // Upstash (and other hosted Redis) provide a full URL; fall back to host/port for local/K8s
+  redisClient = process.env.REDIS_URL
+    ? new Redis(process.env.REDIS_URL, redisOpts)
+    : new Redis({
+        host: process.env.REDIS_HOST || 'localhost',
+        port: parseInt(process.env.REDIS_PORT) || 6379,
+        password: process.env.REDIS_PASSWORD || undefined,
+        ...redisOpts,
+      });
 
   await new Promise((resolve, reject) => {
     redisClient.on('ready', () => {
