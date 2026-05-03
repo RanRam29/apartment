@@ -11,7 +11,7 @@ const router = express.Router();
 
 // ─── Validators ───────────────────────────────────────────────────────────────
 const createApartmentValidator = [
-  body('title').trim().isLength({ min: 5, max: 200 }).withMessage('Title must be 5-200 chars'),
+  body('title').trim().isLength({ min: 2, max: 200 }).withMessage('Title must be 2-200 chars'),
   body('price').isInt({ min: 100 }).withMessage('Price must be a positive number'),
   body('rooms').isFloat({ min: 1 }).withMessage('Rooms must be at least 1'),
   body('city').trim().notEmpty().withMessage('City is required'),
