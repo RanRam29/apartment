@@ -10,6 +10,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import ApartmentCard, { CARD_WIDTH, CARD_HEIGHT } from './ApartmentCard';
+import { C } from '../theme';
 import type { Apartment, SwipeDirection } from '../types';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -29,7 +30,6 @@ export default function SwipeableCard({ apartment, onSwipe, isTop }: Props) {
 
   const flyOut = useCallback(
     (direction: SwipeDirection) => {
-      const seenMs = Date.now() - startTime.value;
       onSwipe(direction);
     },
     [onSwipe]
@@ -37,9 +37,7 @@ export default function SwipeableCard({ apartment, onSwipe, isTop }: Props) {
 
   const pan = Gesture.Pan()
     .enabled(isTop)
-    .onBegin(() => {
-      startTime.value = Date.now();
-    })
+    .onBegin(() => { startTime.value = Date.now(); })
     .onUpdate((e) => {
       translateX.value = e.translationX;
       translateY.value = e.translationY * 0.3;
@@ -85,7 +83,6 @@ export default function SwipeableCard({ apartment, onSwipe, isTop }: Props) {
     };
   });
 
-  // Like / dislike overlay opacity
   const likeOpacity = useAnimatedStyle(() => ({
     opacity: interpolate(translateX.value, [0, SWIPE_THRESHOLD * 0.5], [0, 1], Extrapolate.CLAMP),
   }));
@@ -101,14 +98,19 @@ export default function SwipeableCard({ apartment, onSwipe, isTop }: Props) {
       <Animated.View style={[styles.container, animatedStyle]}>
         <ApartmentCard apartment={apartment} isTop={isTop} />
 
+        {/* LIKE — cyan */}
         <Animated.View style={[styles.labelLike, likeOpacity]}>
-          <Animated.Text style={styles.labelLikeText}>❤️ Like</Animated.Text>
+          <Animated.Text style={styles.labelLikeText}>LIKE</Animated.Text>
         </Animated.View>
+
+        {/* NOPE — coral */}
         <Animated.View style={[styles.labelNope, nopeOpacity]}>
-          <Animated.Text style={styles.labelNopeText}>✕ Nope</Animated.Text>
+          <Animated.Text style={styles.labelNopeText}>NOPE</Animated.Text>
         </Animated.View>
+
+        {/* SUPER — navy */}
         <Animated.View style={[styles.labelSuper, superOpacity]}>
-          <Animated.Text style={styles.labelSuperText}>⭐ Super</Animated.Text>
+          <Animated.Text style={styles.labelSuperText}>SUPER ★</Animated.Text>
         </Animated.View>
       </Animated.View>
     </GestureDetector>
@@ -122,21 +124,28 @@ const styles = StyleSheet.create({
     height: CARD_HEIGHT,
   },
   labelLike: {
-    position: 'absolute', top: 40, left: 20,
-    borderWidth: 3, borderColor: '#00E676', borderRadius: 8,
-    paddingHorizontal: 12, paddingVertical: 6, transform: [{ rotate: '-20deg' }],
+    position: 'absolute', top: 36, left: 18,
+    borderWidth: 3, borderColor: C.cyan, borderRadius: 10,
+    paddingHorizontal: 14, paddingVertical: 7,
+    transform: [{ rotate: '-18deg' }],
+    backgroundColor: C.cyanAlpha(0.08),
   },
-  labelLikeText: { color: '#00E676', fontSize: 22, fontWeight: '800' },
+  labelLikeText: { color: C.cyan, fontSize: 22, fontWeight: '800', letterSpacing: 1 },
+
   labelNope: {
-    position: 'absolute', top: 40, right: 20,
-    borderWidth: 3, borderColor: '#FF4757', borderRadius: 8,
-    paddingHorizontal: 12, paddingVertical: 6, transform: [{ rotate: '20deg' }],
+    position: 'absolute', top: 36, right: 18,
+    borderWidth: 3, borderColor: C.coral, borderRadius: 10,
+    paddingHorizontal: 14, paddingVertical: 7,
+    transform: [{ rotate: '18deg' }],
+    backgroundColor: C.coralAlpha(0.08),
   },
-  labelNopeText: { color: '#FF4757', fontSize: 22, fontWeight: '800' },
+  labelNopeText: { color: C.coral, fontSize: 22, fontWeight: '800', letterSpacing: 1 },
+
   labelSuper: {
-    position: 'absolute', bottom: 100, alignSelf: 'center',
-    borderWidth: 3, borderColor: '#6C5CE7', borderRadius: 8,
-    paddingHorizontal: 12, paddingVertical: 6,
+    position: 'absolute', bottom: 110, alignSelf: 'center',
+    borderWidth: 3, borderColor: C.navy, borderRadius: 10,
+    paddingHorizontal: 14, paddingVertical: 7,
+    backgroundColor: C.navyAlpha(0.08),
   },
-  labelSuperText: { color: '#6C5CE7', fontSize: 22, fontWeight: '800' },
+  labelSuperText: { color: C.navy, fontSize: 22, fontWeight: '800' },
 });

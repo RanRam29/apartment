@@ -61,7 +61,7 @@ export const authApi = {
 
 // ─── Apartments ───────────────────────────────────────────────────────────────
 export const apartmentsApi = {
-  getFeed: (params?: { city?: string; minPrice?: number; maxPrice?: number; rooms?: number; page?: number }) =>
+  getFeed: (params?: { city?: string; minPrice?: number; maxPrice?: number; rooms?: number; page?: number; limit?: number }) =>
     api.get('/apartments/feed', { params }),
   getById: (id: string) => api.get(`/apartments/${id}`),
   create: (formData: FormData) =>

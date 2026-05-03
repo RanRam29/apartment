@@ -1,58 +1,54 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, SafeAreaView, Image } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { View, StyleSheet, SafeAreaView, KeyboardAvoidingView, Platform } from 'react-native';
 import LoginScreen from './LoginScreen';
 import RegisterScreen from './RegisterScreen';
+import SwipeHouseLogo from '../components/SwipeHouseLogo';
+import { C } from '../theme';
 
 export default function AuthScreen() {
   const [mode, setMode] = useState<'login' | 'register'>('login');
 
   return (
-    <LinearGradient colors={['#1A1A2E', '#16213E', '#0F3460']} style={styles.gradient}>
-      <SafeAreaView style={styles.safe}>
-        <View style={styles.logoContainer}>
-          <View style={styles.logoCircle}>
-            <Image
-              source={require('../../assets/icon.png')}
-              style={styles.logo}
-              resizeMode="contain"
-            />
-          </View>
+    <SafeAreaView style={styles.safe}>
+      <KeyboardAvoidingView
+        style={styles.kav}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        {/* Logo section */}
+        <View style={styles.logoSection}>
+          <SwipeHouseLogo size="lg" showLabel />
         </View>
 
+        {/* Form card */}
         <View style={styles.card}>
           {mode === 'login'
             ? <LoginScreen onSwitch={() => setMode('register')} />
             : <RegisterScreen onSwitch={() => setMode('login')} />
           }
         </View>
-      </SafeAreaView>
-    </LinearGradient>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  gradient: { flex: 1 },
-  safe: { flex: 1 },
-  logoContainer: {
+  safe: { flex: 1, backgroundColor: C.bg },
+  kav:  { flex: 1 },
+  logoSection: {
     alignItems: 'center',
-    paddingTop: 40,
-    paddingBottom: 20,
+    paddingTop: 48,
+    paddingBottom: 28,
   },
-  logoCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#6C5CE7',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  logo: { width: 48, height: 48 },
   card: {
     flex: 1,
-    backgroundColor: '#1A1A2E',
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
+    backgroundColor: C.bgCard,
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
     overflow: 'hidden',
+    shadowColor: C.navy,
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 16,
+    elevation: 8,
   },
 });

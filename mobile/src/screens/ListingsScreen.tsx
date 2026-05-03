@@ -6,13 +6,15 @@ import {
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { landlordApi, apartmentsApi } from '../services/api';
 import type { Apartment, MainStackParamList } from '../types';
 
-type Props = NativeStackScreenProps<MainStackParamList, 'Tabs'>;
+type Nav = NativeStackNavigationProp<MainStackParamList>;
 
-export default function ListingsScreen({ navigation }: Props) {
+export default function ListingsScreen() {
+  const navigation = useNavigation<Nav>();
   const queryClient = useQueryClient();
 
   const { data, isLoading, refetch } = useQuery({

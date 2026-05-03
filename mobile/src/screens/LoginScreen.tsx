@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
-  StyleSheet, ActivityIndicator, KeyboardAvoidingView,
-  Platform, Alert,
+  StyleSheet, ActivityIndicator, ScrollView,
+  Alert,
 } from 'react-native';
 import { useAuthStore } from '../store/useAuthStore';
+import { C } from '../theme';
 
 interface Props {
   onSwitch: () => void;
@@ -12,9 +13,9 @@ interface Props {
 
 export default function LoginScreen({ onSwitch }: Props) {
   const { login } = useAuthStore();
-  const [email, setEmail] = useState('');
+  const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading]   = useState(false);
 
   async function handleLogin() {
     if (!email.trim() || !password) {
@@ -33,17 +34,18 @@ export default function LoginScreen({ onSwitch }: Props) {
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    <ScrollView
+      contentContainerStyle={styles.container}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
     >
-      <Text style={styles.title}>ברוך הבא 👋</Text>
+      <Text style={styles.title}>ברוך הבא</Text>
       <Text style={styles.subtitle}>התחבר לחשבונך</Text>
 
       <TextInput
         style={styles.input}
         placeholder="אימייל"
-        placeholderTextColor="#A0A0B2"
+        placeholderTextColor={C.textMut}
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
@@ -53,7 +55,7 @@ export default function LoginScreen({ onSwitch }: Props) {
       <TextInput
         style={styles.input}
         placeholder="סיסמה"
-        placeholderTextColor="#A0A0B2"
+        placeholderTextColor={C.textMut}
         value={password}
         onChangeText={setPassword}
         secureTextEntry
@@ -64,6 +66,7 @@ export default function LoginScreen({ onSwitch }: Props) {
         style={[styles.button, loading && styles.buttonDisabled]}
         onPress={handleLogin}
         disabled={loading}
+        activeOpacity={0.85}
       >
         {loading
           ? <ActivityIndicator color="#fff" />
@@ -75,34 +78,40 @@ export default function LoginScreen({ onSwitch }: Props) {
         <Text style={styles.switchText}>אין לך חשבון? </Text>
         <Text style={[styles.switchText, styles.switchLink]}>הרשם עכשיו</Text>
       </TouchableOpacity>
-    </KeyboardAvoidingView>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', padding: 24 },
-  title: { fontSize: 28, fontWeight: '700', color: '#fff', textAlign: 'right', marginBottom: 4 },
-  subtitle: { fontSize: 15, color: '#A0A0B2', textAlign: 'right', marginBottom: 32 },
+  container: { flexGrow: 1, justifyContent: 'center', padding: 28 },
+  title:    { fontSize: 26, fontWeight: '700', color: C.text, textAlign: 'right', marginBottom: 4 },
+  subtitle: { fontSize: 14, color: C.textSub, textAlign: 'right', marginBottom: 28 },
   input: {
-    backgroundColor: '#2A2A3E',
-    borderRadius: 12,
+    backgroundColor: C.bg,
+    borderRadius: 14,
     padding: 16,
     fontSize: 15,
-    color: '#fff',
-    marginBottom: 14,
-    borderWidth: 1,
-    borderColor: '#3A3A5E',
+    color: C.text,
+    marginBottom: 12,
+    borderWidth: 1.5,
+    borderColor: C.border,
+    textAlign: 'right',
   },
   button: {
-    backgroundColor: '#6C5CE7',
-    borderRadius: 12,
+    backgroundColor: C.navy,
+    borderRadius: 14,
     padding: 16,
     alignItems: 'center',
     marginTop: 8,
+    shadowColor: C.navy,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
+    elevation: 4,
   },
   buttonDisabled: { opacity: 0.6 },
   buttonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
   switchRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 24 },
-  switchText: { color: '#A0A0B2', fontSize: 14 },
-  switchLink: { color: '#6C5CE7', fontWeight: '600' },
+  switchText: { color: C.textSub, fontSize: 14 },
+  switchLink: { color: C.navy, fontWeight: '700' },
 });
