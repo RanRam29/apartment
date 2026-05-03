@@ -74,13 +74,16 @@ export default function CreateListingScreen({ navigation }: any) {
       form.append('sizeSqm', sizeSqm);
       form.append('amenities', JSON.stringify(amenities));
 
-      images.forEach((img, i) => {
-        form.append('images', {
-          uri: img.uri,
-          name: `photo_${i}.jpg`,
-          type: 'image/jpeg',
-        } as any);
-      });
+      for (let i = 0; i < images.length; i++) {
+        const img = images[i];
+        if (Platform.OS === 'web') {
+          const res = await fetch(img.uri);
+          const blob = await res.blob();
+          form.append('images', new File([blob], `photo_${i}.jpg`, { type: 'image/jpeg' }));
+        } else {
+          form.append('images', { uri: img.uri, name: `photo_${i}.jpg`, type: 'image/jpeg' } as any);
+        }
+      }
 
       await apartmentsApi.create(form);
       await queryClient.invalidateQueries({ queryKey: ['landlord-dashboard'] });
