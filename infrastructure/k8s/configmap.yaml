@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dirapp-config
+  namespace: dirapp
+data:
+  NODE_ENV: "production"
+  PORT: "3000"
+  POSTGRES_HOST: "postgres-service"
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: "apartment_db"
+  REDIS_HOST: "redis-service"
+  REDIS_PORT: "6379"
+  KAFKA_BROKERS: "kafka-service:9092"
+  AI_SERVICE_URL: "http://ai-service:8000"
