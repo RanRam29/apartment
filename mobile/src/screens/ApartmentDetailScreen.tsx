@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { apartmentsApi } from '../services/api';
+import { C } from '../theme';
 import type { MainStackParamList, Amenity } from '../types';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -36,7 +37,7 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
   if (isLoading) {
     return (
       <SafeAreaView style={styles.center}>
-        <ActivityIndicator size="large" color="#6C5CE7" />
+        <ActivityIndicator size="large" color={C.navy} />
       </SafeAreaView>
     );
   }
@@ -80,7 +81,7 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
           </View>
         ) : (
           <View style={styles.noImagePlaceholder}>
-            <Ionicons name="home-outline" size={64} color="#3A3A5E" />
+            <Ionicons name="home-outline" size={64} color={C.border} />
           </View>
         )}
 
@@ -95,14 +96,14 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
             <Text style={styles.price}>₪{apt.price.toLocaleString()}/חודש</Text>
             {apt.landlord?.isVerified && (
               <View style={styles.verifiedBadge}>
-                <Ionicons name="checkmark-circle" size={14} color="#00D2D3" />
+                <Ionicons name="checkmark-circle" size={14} color={C.cyan} />
                 <Text style={styles.verifiedText}>מאומת</Text>
               </View>
             )}
           </View>
           <Text style={styles.title}>{apt.title}</Text>
           <Text style={styles.location}>
-            <Ionicons name="location-outline" size={14} color="#A0A0B2" />
+            <Ionicons name="location-outline" size={14} color={C.textSub} />
             {' '}{apt.city}{apt.neighborhood ? ` · ${apt.neighborhood}` : ''}
           </Text>
 
@@ -145,14 +146,14 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
                   <Image source={{ uri: apt.landlord.avatarUrl }} style={styles.avatar} contentFit="cover" />
                 ) : (
                   <View style={[styles.avatar, styles.avatarFallback]}>
-                    <Ionicons name="person" size={20} color="#A0A0B2" />
+                    <Ionicons name="person" size={20} color={C.textSub} />
                   </View>
                 )}
                 <Text style={styles.landlordName}>
                   {apt.landlord.firstName} {apt.landlord.lastName}
                 </Text>
                 {apt.landlord.isVerified && (
-                  <Ionicons name="checkmark-circle" size={16} color="#00D2D3" style={{ marginLeft: 4 }} />
+                  <Ionicons name="checkmark-circle" size={16} color={C.cyan} style={{ marginLeft: 4 }} />
                 )}
               </View>
             </>
@@ -172,45 +173,55 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
 function Stat({ icon, value }: { icon: keyof typeof Ionicons.glyphMap; value: string }) {
   return (
     <View style={styles.stat}>
-      <Ionicons name={icon} size={16} color="#6C5CE7" />
+      <Ionicons name={icon} size={16} color={C.navy} />
       <Text style={styles.statText}>{value}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1A1A2E' },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#1A1A2E' },
+  container: { flex: 1, backgroundColor: C.bg },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: C.bg },
   carouselImage: { width: SCREEN_WIDTH, height: 280 },
-  noImagePlaceholder: { height: 200, justifyContent: 'center', alignItems: 'center', backgroundColor: '#2A2A3E' },
+  noImagePlaceholder: { height: 200, justifyContent: 'center', alignItems: 'center', backgroundColor: C.bgCard },
   floatingBack: {
     position: 'absolute', top: 16, left: 16,
-    backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 20, padding: 8,
+    backgroundColor: 'rgba(0,0,0,0.4)', borderRadius: 20, padding: 8,
   },
   dotRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 8, gap: 6 },
-  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#3A3A5E' },
-  dotActive: { backgroundColor: '#6C5CE7', width: 16 },
+  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: C.border },
+  dotActive: { backgroundColor: C.navy, width: 16 },
   content: { padding: 20 },
   titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
-  price: { fontSize: 24, fontWeight: '800', color: '#6C5CE7' },
-  verifiedBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(0,210,211,0.12)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
-  verifiedText: { color: '#00D2D3', fontSize: 12, fontWeight: '600' },
-  title: { fontSize: 18, fontWeight: '700', color: '#fff', textAlign: 'right', marginBottom: 6 },
-  location: { fontSize: 14, color: '#A0A0B2', textAlign: 'right', marginBottom: 16 },
-  statsRow: { flexDirection: 'row', gap: 12, marginBottom: 20, flexWrap: 'wrap' },
-  stat: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#2A2A3E', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10 },
-  statText: { color: '#fff', fontSize: 13 },
-  sectionTitle: { fontSize: 15, fontWeight: '700', color: '#fff', textAlign: 'right', marginBottom: 10, marginTop: 4 },
+  price: { fontSize: 24, fontWeight: '800', color: C.navy },
+  verifiedBadge: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    backgroundColor: C.cyanAlpha(0.1), paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8,
+  },
+  verifiedText: { color: C.cyan, fontSize: 12, fontWeight: '600' },
+  title: { fontSize: 18, fontWeight: '700', color: C.text, textAlign: 'right', marginBottom: 6 },
+  location: { fontSize: 14, color: C.textSub, textAlign: 'right', marginBottom: 16 },
+  statsRow: { flexDirection: 'row', gap: 8, marginBottom: 20, flexWrap: 'wrap' },
+  stat: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    backgroundColor: C.bgCard, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10,
+    borderWidth: 1, borderColor: C.border,
+  },
+  statText: { color: C.text, fontSize: 13 },
+  sectionTitle: { fontSize: 15, fontWeight: '700', color: C.text, textAlign: 'right', marginBottom: 10, marginTop: 4 },
   amenitiesWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 },
-  amenityChip: { backgroundColor: 'rgba(108,92,231,0.15)', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 6, borderWidth: 1, borderColor: '#6C5CE7' },
-  amenityText: { color: '#6C5CE7', fontSize: 13 },
-  description: { color: '#C0C0D0', fontSize: 14, lineHeight: 22, textAlign: 'right', marginBottom: 20 },
+  amenityChip: {
+    backgroundColor: C.navyAlpha(0.06), borderRadius: 10,
+    paddingHorizontal: 12, paddingVertical: 6, borderWidth: 1, borderColor: C.navyAlpha(0.15),
+  },
+  amenityText: { color: C.navy, fontSize: 13 },
+  description: { color: C.textSub, fontSize: 14, lineHeight: 22, textAlign: 'right', marginBottom: 20 },
   landlordRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16 },
   avatar: { width: 40, height: 40, borderRadius: 20 },
-  avatarFallback: { backgroundColor: '#2A2A3E', justifyContent: 'center', alignItems: 'center' },
-  landlordName: { color: '#fff', fontSize: 14, fontWeight: '600' },
-  availableFrom: { color: '#A0A0B2', fontSize: 13, textAlign: 'right', marginTop: 4 },
-  errorText: { color: '#FF4757', fontSize: 16, marginBottom: 16 },
-  backBtn: { backgroundColor: '#6C5CE7', paddingHorizontal: 20, paddingVertical: 10, borderRadius: 10 },
+  avatarFallback: { backgroundColor: C.bgCard, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: C.border },
+  landlordName: { color: C.text, fontSize: 14, fontWeight: '600' },
+  availableFrom: { color: C.textSub, fontSize: 13, textAlign: 'right', marginTop: 4 },
+  errorText: { color: C.coral, fontSize: 16, marginBottom: 16 },
+  backBtn: { backgroundColor: C.navy, paddingHorizontal: 20, paddingVertical: 10, borderRadius: 10 },
   backBtnText: { color: '#fff', fontWeight: '700' },
 });

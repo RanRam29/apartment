@@ -20,21 +20,18 @@ export default function SwipeHouseLogo({ size = 'md', showLabel = true }: Props)
     ).start();
   }, []);
 
-  const iconSize = size === 'sm' ? 22 : size === 'lg' ? 40 : 30;
-  const dotSize  = size === 'sm' ? 6  : size === 'lg' ? 10 : 8;
-  const fontSize = size === 'sm' ? 13 : size === 'lg' ? 22 : 17;
+  const iconSize  = size === 'sm' ? 20 : size === 'lg' ? 38 : 28;
+  const arrowSize = size === 'sm' ? 11 : size === 'lg' ? 18 : 14;
+  const fontSize  = size === 'sm' ? 13 : size === 'lg' ? 22 : 17;
 
   return (
     <View style={styles.wrapper}>
-      {/* House icon + animated cyan dot */}
+      {/* House icon + animated cyan arrow (mirrors actual app icon) */}
       <View style={styles.iconRow}>
         <Ionicons name="home-outline" size={iconSize} color={C.navy} />
-        <Animated.View
-          style={[
-            styles.dot,
-            { width: dotSize, height: dotSize, borderRadius: dotSize / 2, opacity: pulse },
-          ]}
-        />
+        <Animated.View style={[styles.arrowWrap, { opacity: pulse }]}>
+          <Ionicons name="arrow-forward" size={arrowSize} color={C.cyan} />
+        </Animated.View>
       </View>
 
       {showLabel && (
@@ -46,15 +43,14 @@ export default function SwipeHouseLogo({ size = 'md', showLabel = true }: Props)
 
 const styles = StyleSheet.create({
   wrapper: { alignItems: 'center' },
-  iconRow: { flexDirection: 'row', alignItems: 'flex-start' },
-  dot: {
-    backgroundColor: C.cyan,
-    marginTop: 2,
-    marginLeft: 2,
+  iconRow: { flexDirection: 'row', alignItems: 'flex-end' },
+  arrowWrap: {
+    marginLeft: 1,
+    marginBottom: 2,
     shadowColor: C.cyan,
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 4,
+    shadowOpacity: 0.9,
+    shadowRadius: 6,
     elevation: 4,
   },
   label: {

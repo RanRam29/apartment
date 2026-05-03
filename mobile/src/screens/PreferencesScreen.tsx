@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { recommendationsApi } from '../services/api';
+import { C } from '../theme';
 import type { Amenity, MainStackParamList } from '../types';
 
 const CITIES = ['תל אביב', 'ירושלים', 'חיפה', 'ראשון לציון', 'פתח תקווה', 'אשדוד', 'נתניה', 'באר שבע', 'בני ברק', 'רמת גן', 'גבעתיים', 'חולון', 'בת ים', 'הרצליה', 'כפר סבא', 'רעננה', 'מודיעין', 'אשקלון', 'רחובות', 'לוד'];
@@ -42,7 +43,6 @@ export default function PreferencesScreen({ navigation }: Props) {
     queryFn: () => recommendationsApi.getPreferences().then((r) => r.data.preferences),
   });
 
-  // Pre-populate form once data arrives
   useEffect(() => {
     if (!data || hydrated) return;
     if (data.budget?.min) setMinBudget(String(data.budget.min));
@@ -104,7 +104,7 @@ export default function PreferencesScreen({ navigation }: Props) {
   if (isLoading && !hydrated) {
     return (
       <SafeAreaView style={styles.container}>
-        <ActivityIndicator style={{ marginTop: 80 }} size="large" color="#6C5CE7" />
+        <ActivityIndicator style={{ marginTop: 80 }} size="large" color={C.navy} />
       </SafeAreaView>
     );
   }
@@ -122,14 +122,14 @@ export default function PreferencesScreen({ navigation }: Props) {
             <Text style={styles.fieldLabel}>מינימום</Text>
             <TextInput
               style={styles.input} value={minBudget} onChangeText={setMinBudget}
-              keyboardType="numeric" placeholder="3000" placeholderTextColor="#A0A0B2" textAlign="right"
+              keyboardType="numeric" placeholder="3000" placeholderTextColor={C.textMut} textAlign="right"
             />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.fieldLabel}>מקסימום</Text>
             <TextInput
               style={styles.input} value={maxBudget} onChangeText={setMaxBudget}
-              keyboardType="numeric" placeholder="9000" placeholderTextColor="#A0A0B2" textAlign="right"
+              keyboardType="numeric" placeholder="9000" placeholderTextColor={C.textMut} textAlign="right"
             />
           </View>
         </View>
@@ -141,14 +141,14 @@ export default function PreferencesScreen({ navigation }: Props) {
             <Text style={styles.fieldLabel}>מינימום</Text>
             <TextInput
               style={styles.input} value={minRooms} onChangeText={setMinRooms}
-              keyboardType="decimal-pad" placeholder="2" placeholderTextColor="#A0A0B2" textAlign="right"
+              keyboardType="decimal-pad" placeholder="2" placeholderTextColor={C.textMut} textAlign="right"
             />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.fieldLabel}>מקסימום</Text>
             <TextInput
               style={styles.input} value={maxRooms} onChangeText={setMaxRooms}
-              keyboardType="decimal-pad" placeholder="5" placeholderTextColor="#A0A0B2" textAlign="right"
+              keyboardType="decimal-pad" placeholder="5" placeholderTextColor={C.textMut} textAlign="right"
             />
           </View>
         </View>
@@ -191,8 +191,8 @@ export default function PreferencesScreen({ navigation }: Props) {
           <Switch
             value={petsAllowed}
             onValueChange={setPetsAllowed}
-            trackColor={{ false: '#3A3A5E', true: 'rgba(108,92,231,0.5)' }}
-            thumbColor={petsAllowed ? '#6C5CE7' : '#A0A0B2'}
+            trackColor={{ false: C.border, true: C.navyAlpha(0.4) }}
+            thumbColor={petsAllowed ? C.navy : C.textMut}
           />
           <Text style={styles.switchLabel}>🐾 מחפש/ת דירה שמאפשרת חיות מחמד</Text>
         </View>
@@ -213,29 +213,32 @@ export default function PreferencesScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1A1A2E' },
+  container: { flex: 1, backgroundColor: C.bg },
   scroll: { padding: 20, paddingBottom: 40 },
-  header: { fontSize: 22, fontWeight: '800', color: '#fff', textAlign: 'right', marginBottom: 4 },
-  subtitle: { color: '#A0A0B2', fontSize: 13, textAlign: 'right', marginBottom: 24 },
-  sectionTitle: { fontSize: 15, fontWeight: '700', color: '#fff', textAlign: 'right', marginBottom: 8, marginTop: 20 },
-  hint: { color: '#A0A0B2', fontSize: 11, textAlign: 'right', marginBottom: 10, marginTop: -4 },
-  fieldLabel: { color: '#A0A0B2', fontSize: 12, fontWeight: '600', textAlign: 'right', marginBottom: 6 },
+  header: { fontSize: 22, fontWeight: '800', color: C.text, textAlign: 'right', marginBottom: 4 },
+  subtitle: { color: C.textSub, fontSize: 13, textAlign: 'right', marginBottom: 24 },
+  sectionTitle: { fontSize: 15, fontWeight: '700', color: C.text, textAlign: 'right', marginBottom: 8, marginTop: 20 },
+  hint: { color: C.textSub, fontSize: 11, textAlign: 'right', marginBottom: 10, marginTop: -4 },
+  fieldLabel: { color: C.textSub, fontSize: 12, fontWeight: '600', textAlign: 'right', marginBottom: 6 },
   row: { flexDirection: 'row' },
   input: {
-    backgroundColor: '#2A2A3E', borderRadius: 12, padding: 14,
-    fontSize: 14, color: '#fff', borderWidth: 1, borderColor: '#3A3A5E',
+    backgroundColor: C.bgCard, borderRadius: 12, padding: 14,
+    fontSize: 14, color: C.text, borderWidth: 1.5, borderColor: C.border,
   },
   chipGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 4 },
   chip: {
     paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10,
-    backgroundColor: '#2A2A3E', borderWidth: 1, borderColor: '#3A3A5E',
+    backgroundColor: C.bgCard, borderWidth: 1.5, borderColor: C.border,
   },
-  chipActive: { backgroundColor: 'rgba(108,92,231,0.2)', borderColor: '#6C5CE7' },
-  chipText: { color: '#A0A0B2', fontSize: 13 },
-  chipTextActive: { color: '#6C5CE7', fontWeight: '600' },
+  chipActive: { backgroundColor: C.navy, borderColor: C.navy },
+  chipText: { color: C.textSub, fontSize: 13 },
+  chipTextActive: { color: '#fff', fontWeight: '600' },
   switchRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 20, marginBottom: 8, justifyContent: 'flex-end' },
-  switchLabel: { color: '#E0E0E0', fontSize: 14 },
-  saveBtn: { backgroundColor: '#6C5CE7', borderRadius: 14, paddingVertical: 16, alignItems: 'center', marginTop: 28 },
+  switchLabel: { color: C.text, fontSize: 14 },
+  saveBtn: {
+    backgroundColor: C.navy, borderRadius: 14, paddingVertical: 16, alignItems: 'center', marginTop: 28,
+    shadowColor: C.navy, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.18, shadowRadius: 8, elevation: 4,
+  },
   saveBtnDisabled: { opacity: 0.6 },
   saveBtnText: { color: '#fff', fontSize: 16, fontWeight: '800' },
 });

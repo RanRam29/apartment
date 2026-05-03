@@ -7,6 +7,7 @@ import { Image } from 'expo-image';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { matchesApi } from '../services/api';
+import { C } from '../theme';
 import type { Match } from '../types';
 
 const STATUS_TABS = ['pending', 'accepted', 'rejected'] as const;
@@ -78,7 +79,7 @@ export default function LeadsScreen() {
       </View>
 
       {isLoading ? (
-        <ActivityIndicator style={{ marginTop: 40 }} color="#6C5CE7" />
+        <ActivityIndicator style={{ marginTop: 40 }} color={C.navy} />
       ) : (
         <FlatList
           data={data ?? []}
@@ -118,7 +119,7 @@ function LeadRow({ match, onAccept, onReject, showActions }: {
           <Image source={{ uri: match.tenant.avatarUrl }} style={styles.avatar} contentFit="cover" />
         ) : (
           <View style={[styles.avatar, styles.avatarPlaceholder]}>
-            <Ionicons name="person" size={20} color="#A0A0B2" />
+            <Ionicons name="person" size={20} color={C.textSub} />
           </View>
         )}
         <View style={styles.leadInfo}>
@@ -137,7 +138,7 @@ function LeadRow({ match, onAccept, onReject, showActions }: {
       {showActions && (
         <View style={styles.actions}>
           <TouchableOpacity style={styles.rejectBtn} onPress={onReject}>
-            <Ionicons name="close" size={18} color="#FF4757" />
+            <Ionicons name="close" size={18} color={C.coral} />
             <Text style={styles.rejectText}>דחה</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.acceptBtn} onPress={onAccept}>
@@ -151,37 +152,44 @@ function LeadRow({ match, onAccept, onReject, showActions }: {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1A1A2E' },
-  header: { fontSize: 22, fontWeight: '800', color: '#fff', padding: 20, paddingBottom: 12, textAlign: 'right' },
+  container: { flex: 1, backgroundColor: C.bg },
+  header: { fontSize: 22, fontWeight: '800', color: C.text, padding: 20, paddingBottom: 12, textAlign: 'right' },
   tabs: { flexDirection: 'row', paddingHorizontal: 16, gap: 8, marginBottom: 8 },
   tab: {
     flex: 1, paddingVertical: 8, borderRadius: 10,
-    backgroundColor: '#2A2A3E', alignItems: 'center',
+    backgroundColor: C.bgCard, alignItems: 'center',
+    borderWidth: 1.5, borderColor: C.border,
   },
-  tabActive: { backgroundColor: '#6C5CE7' },
-  tabText: { color: '#A0A0B2', fontSize: 13, fontWeight: '600' },
+  tabActive: { backgroundColor: C.navy, borderColor: C.navy },
+  tabText: { color: C.textSub, fontSize: 13, fontWeight: '600' },
   tabTextActive: { color: '#fff' },
   list: { padding: 16, gap: 10 },
-  leadCard: { backgroundColor: '#2A2A3E', borderRadius: 16, padding: 14, gap: 12 },
+  leadCard: {
+    backgroundColor: C.bgCard, borderRadius: 16, padding: 14, gap: 12,
+    borderWidth: 1, borderColor: C.border,
+  },
   leadTop: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
   avatar: { width: 48, height: 48, borderRadius: 24 },
-  avatarPlaceholder: { backgroundColor: '#3A3A5E', justifyContent: 'center', alignItems: 'center' },
+  avatarPlaceholder: {
+    backgroundColor: C.navyAlpha(0.06), justifyContent: 'center', alignItems: 'center',
+    borderWidth: 1, borderColor: C.border,
+  },
   leadInfo: { flex: 1 },
-  tenantName: { color: '#fff', fontSize: 15, fontWeight: '700', textAlign: 'right' },
-  aptName: { color: '#A0A0B2', fontSize: 13, textAlign: 'right', marginTop: 2 },
-  aptMeta: { color: '#6C5CE7', fontSize: 12, textAlign: 'right', marginTop: 2 },
+  tenantName: { color: C.text, fontSize: 15, fontWeight: '700', textAlign: 'right' },
+  aptName: { color: C.textSub, fontSize: 13, textAlign: 'right', marginTop: 2 },
+  aptMeta: { color: C.navy, fontSize: 12, textAlign: 'right', marginTop: 2, fontWeight: '600' },
   actions: { flexDirection: 'row', gap: 10 },
   rejectBtn: {
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: 6, paddingVertical: 10, borderRadius: 10,
-    borderWidth: 1, borderColor: '#FF4757',
+    borderWidth: 1.5, borderColor: C.coral,
   },
-  rejectText: { color: '#FF4757', fontWeight: '600' },
+  rejectText: { color: C.coral, fontWeight: '600' },
   acceptBtn: {
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: 6, paddingVertical: 10, borderRadius: 10, backgroundColor: '#6C5CE7',
+    gap: 6, paddingVertical: 10, borderRadius: 10, backgroundColor: C.navy,
   },
   acceptText: { color: '#fff', fontWeight: '600' },
   empty: { alignItems: 'center', paddingTop: 60 },
-  emptyText: { color: '#A0A0B2', fontSize: 14 },
+  emptyText: { color: C.textSub, fontSize: 14 },
 });

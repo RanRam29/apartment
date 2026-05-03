@@ -4,6 +4,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { C } from '../theme';
 
 interface State { hasError: boolean }
 
@@ -23,7 +24,7 @@ export class ErrorBoundary extends React.Component<React.PropsWithChildren, Stat
 
     return (
       <SafeAreaView style={styles.container}>
-        <Ionicons name="warning-outline" size={64} color="#FF4757" />
+        <Ionicons name="warning-outline" size={64} color={C.coral} />
         <Text style={styles.title}>משהו השתבש</Text>
         <Text style={styles.message}>אירעה שגיאה בלתי צפויה. נסה שוב.</Text>
         <TouchableOpacity
@@ -39,13 +40,13 @@ export class ErrorBoundary extends React.Component<React.PropsWithChildren, Stat
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1, backgroundColor: '#1A1A2E',
+    flex: 1, backgroundColor: C.bg,
     justifyContent: 'center', alignItems: 'center', gap: 16, padding: 32,
   },
-  title: { fontSize: 22, fontWeight: '800', color: '#fff' },
-  message: { fontSize: 14, color: '#A0A0B2', textAlign: 'center' },
+  title: { fontSize: 22, fontWeight: '800', color: C.text },
+  message: { fontSize: 14, color: C.textSub, textAlign: 'center' },
   btn: {
-    backgroundColor: '#6C5CE7', borderRadius: 12,
+    backgroundColor: C.navy, borderRadius: 12,
     paddingVertical: 14, paddingHorizontal: 32, marginTop: 8,
   },
   btnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
