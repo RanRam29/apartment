@@ -86,6 +86,7 @@ export const recommendationsApi = {
   nlpSearch: (query: string, overrides?: { city?: string; maxPrice?: number; minRooms?: number; petsAllowed?: boolean }) =>
     api.post('/recommendations/search', { query, ...overrides }),
   personalized: () => api.get('/recommendations/personalized'),
+  getPreferences: () => api.get('/recommendations/preferences'),
   savePreferences: (prefs: object) => api.post('/recommendations/preferences', prefs),
 };
 

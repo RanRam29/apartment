@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  SafeAreaView, ScrollView, Alert, ActivityIndicator, TextInput, Modal,
+  SafeAreaView, ScrollView, Alert, ActivityIndicator, TextInput, Modal, Linking,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
@@ -83,7 +83,7 @@ export default function ProfileScreen() {
       if (url) {
         Alert.alert('שדרוג לפרמיום', 'תועבר לעמוד התשלום', [
           { text: 'ביטול', style: 'cancel' },
-          { text: 'המשך', onPress: () => {} },
+          { text: 'המשך', onPress: () => Linking.openURL(url) },
         ]);
       }
     } catch {
