@@ -1,8 +1,24 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
 const TOKEN_KEY = 'auth_token';
+
+const storage = {
+  getItemAsync: (key: string): Promise<string | null> =>
+    Platform.OS === 'web'
+      ? Promise.resolve(localStorage.getItem(key))
+      : SecureStore.getItemAsync(key),
+  setItemAsync: (key: string, value: string): Promise<void> =>
+    Platform.OS === 'web'
+      ? Promise.resolve(void localStorage.setItem(key, value))
+      : SecureStore.setItemAsync(key, value),
+  deleteItemAsync: (key: string): Promise<void> =>
+    Platform.OS === 'web'
+      ? Promise.resolve(void localStorage.removeItem(key))
+      : SecureStore.deleteItemAsync(key),
+};
 
 const api: AxiosInstance = axios.create({
   baseURL: `${BASE_URL}/api`,
@@ -12,7 +28,7 @@ const api: AxiosInstance = axios.create({
 
 // Attach JWT on every request
 api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
-  const token = await SecureStore.getItemAsync(TOKEN_KEY);
+  const token = await storage.getItemAsync(TOKEN_KEY);
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
@@ -22,7 +38,7 @@ api.interceptors.response.use(
   (res) => res,
   async (error) => {
     if (error.response?.status === 401) {
-      await SecureStore.deleteItemAsync(TOKEN_KEY);
+      await storage.deleteItemAsync(TOKEN_KEY);
     }
     return Promise.reject(error);
   }
@@ -104,9 +120,9 @@ export const paymentApi = {
 
 // ─── Token helpers ────────────────────────────────────────────────────────────
 export const tokenStorage = {
-  save: (token: string) => SecureStore.setItemAsync(TOKEN_KEY, token),
-  get: () => SecureStore.getItemAsync(TOKEN_KEY),
-  clear: () => SecureStore.deleteItemAsync(TOKEN_KEY),
+  save: (token: string) => storage.setItemAsync(TOKEN_KEY, token),
+  get: () => storage.getItemAsync(TOKEN_KEY),
+  clear: () => storage.deleteItemAsync(TOKEN_KEY),
 };
 
 export default api;
