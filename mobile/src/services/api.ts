@@ -56,6 +56,8 @@ export const swipeApi = {
   record: (apartmentId: string, direction: 'like' | 'dislike' | 'superlike', seenDurationMs?: number) =>
     api.post('/swipe', { apartmentId, direction, seenDurationMs }),
   history: () => api.get('/swipe/history'),
+  undo: () => api.delete('/swipe/last'),
+  quota: () => api.get('/swipe/quota'),
 };
 
 // ─── Matches ──────────────────────────────────────────────────────────────────

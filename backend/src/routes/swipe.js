@@ -4,10 +4,34 @@ const { Swipe, Apartment } = require('../models');
 const { UserPreferences } = require('../models');
 const { authenticate, requireRole } = require('../middleware/auth');
 const { handleSwipeMatch } = require('../services/matchingService');
-const { cacheGet, cacheSet } = require('../config/redis');
+const { cacheGet, cacheSet, getRedisClient } = require('../config/redis');
 const logger = require('../utils/logger');
 
 const router = express.Router();
+
+const FREE_DAILY_LIMIT = 20;
+
+function dailyQuotaKey(userId) {
+  const today = new Date().toISOString().slice(0, 10);
+  return `swipes:daily:${userId}:${today}`;
+}
+
+async function getDailyUsed(userId) {
+  const val = await getRedisClient().get(dailyQuotaKey(userId));
+  return parseInt(val || '0');
+}
+
+async function incrementDailyUsed(userId) {
+  const redis = getRedisClient();
+  const key = dailyQuotaKey(userId);
+  const newCount = await redis.incr(key);
+  if (newCount === 1) {
+    const midnight = new Date();
+    midnight.setHours(24, 0, 0, 0);
+    await redis.expireat(key, Math.floor(midnight.getTime() / 1000));
+  }
+  return newCount;
+}
 
 const swipeValidator = [
   body('apartmentId').isUUID().withMessage('Invalid apartment ID'),
@@ -16,6 +40,51 @@ const swipeValidator = [
     .withMessage('Direction must be like, dislike, or superlike'),
   body('seenDurationMs').optional().isInt({ min: 0 }),
 ];
+
+// GET /api/swipe/quota — daily usage for the current tenant
+router.get('/quota', authenticate, requireRole('tenant'), async (req, res, next) => {
+  try {
+    const isPremium = Boolean(req.user.isPremium);
+    const used = await getDailyUsed(req.user.id);
+    res.json({
+      used,
+      limit: isPremium ? null : FREE_DAILY_LIMIT,
+      remaining: isPremium ? null : Math.max(0, FREE_DAILY_LIMIT - used),
+      isPremium,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// DELETE /api/swipe/last — undo the most recent swipe
+router.delete('/last', authenticate, requireRole('tenant'), async (req, res, next) => {
+  try {
+    const lastSwipe = await Swipe.findOne({
+      where: { tenantId: req.user.id },
+      order: [['createdAt', 'DESC']],
+      attributes: ['id', 'apartmentId', 'direction'],
+    });
+    if (!lastSwipe) return res.status(404).json({ error: 'No swipe to undo' });
+
+    if (lastSwipe.direction === 'like' || lastSwipe.direction === 'superlike') {
+      Apartment.decrement('likeCount', { where: { id: lastSwipe.apartmentId } }).catch(() => {});
+    }
+
+    await lastSwipe.destroy();
+
+    if (!req.user.isPremium) {
+      const redis = getRedisClient();
+      const key = dailyQuotaKey(req.user.id);
+      const current = await getDailyUsed(req.user.id);
+      if (current > 0) await redis.decr(key);
+    }
+
+    res.json({ apartmentId: lastSwipe.apartmentId });
+  } catch (err) {
+    next(err);
+  }
+});
 
 // POST /api/swipe — record a swipe (tenants only)
 router.post('/', authenticate, requireRole('tenant'), swipeValidator, async (req, res, next) => {
@@ -27,6 +96,20 @@ router.post('/', authenticate, requireRole('tenant'), swipeValidator, async (req
 
     const { apartmentId, direction, seenDurationMs } = req.body;
     const tenantId = req.user.id;
+    const isPremium = Boolean(req.user.isPremium);
+
+    // Daily quota check for free users
+    if (!isPremium) {
+      const used = await getDailyUsed(tenantId);
+      if (used >= FREE_DAILY_LIMIT) {
+        return res.status(429).json({
+          error: 'Daily swipe limit reached',
+          dailyUsed: used,
+          dailyLimit: FREE_DAILY_LIMIT,
+          quotaExceeded: true,
+        });
+      }
+    }
 
     // Verify apartment exists and is active
     const apartment = await Apartment.findOne({
@@ -37,12 +120,10 @@ router.post('/', authenticate, requireRole('tenant'), swipeValidator, async (req
       return res.status(404).json({ error: 'Apartment not found or inactive' });
     }
 
-    // Prevent swiping on own listing
     if (apartment.landlordId === tenantId) {
       return res.status(400).json({ error: 'Cannot swipe on your own listing' });
     }
 
-    // Upsert — allow changing a dislike to a like
     const [swipe, created] = await Swipe.upsert({
       tenantId,
       apartmentId,
@@ -57,14 +138,13 @@ router.post('/', authenticate, requireRole('tenant'), swipeValidator, async (req
         $push: {
           swipeHistory: {
             $each: [{ apartmentId, direction, seenDurationMs, swipedAt: new Date() }],
-            $slice: -500, // keep last 500 swipes
+            $slice: -500,
           },
         },
       },
       { upsert: true }
     ).catch((err) => logger.warn('Failed to update swipe history in Mongo:', err.message));
 
-    // Increment likeCount on apartment (fire-and-forget)
     if (direction === 'like' || direction === 'superlike') {
       Apartment.increment('likeCount', { where: { id: apartmentId } }).catch(() => {});
     }
@@ -74,9 +154,13 @@ router.post('/', authenticate, requireRole('tenant'), swipeValidator, async (req
       match = await handleSwipeMatch(tenantId, apartmentId);
     }
 
+    const dailyUsed = isPremium ? null : await incrementDailyUsed(tenantId);
+
     res.status(created ? 201 : 200).json({
       swipe: { id: swipe.id, direction, apartmentId },
       match: match ? { id: match.id, status: match.status } : null,
+      dailyUsed,
+      dailyLimit: isPremium ? null : FREE_DAILY_LIMIT,
     });
   } catch (err) {
     next(err);

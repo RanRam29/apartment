@@ -8,10 +8,17 @@ interface SwipeState {
   isLoading: boolean;
   hasMore: boolean;
   lastMatch: { id: string; status: string } | null;
+  lastSwipedApartment: Apartment | null;
+  dailyUsed: number;
+  dailyLimit: number;
+  quotaExceeded: boolean;
 
   loadFeed: (params?: { city?: string; minPrice?: number; maxPrice?: number }) => Promise<void>;
+  loadQuota: () => Promise<void>;
   swipe: (apartment: Apartment, direction: SwipeDirection) => Promise<void>;
+  undo: () => Promise<void>;
   resetMatch: () => void;
+  dismissQuota: () => void;
 }
 
 export const useSwipeStore = create<SwipeState>((set, get) => ({
@@ -20,6 +27,10 @@ export const useSwipeStore = create<SwipeState>((set, get) => ({
   isLoading: false,
   hasMore: true,
   lastMatch: null,
+  lastSwipedApartment: null,
+  dailyUsed: 0,
+  dailyLimit: 20,
+  quotaExceeded: false,
 
   loadFeed: async (params) => {
     set({ isLoading: true });
@@ -35,27 +46,60 @@ export const useSwipeStore = create<SwipeState>((set, get) => ({
     }
   },
 
+  loadQuota: async () => {
+    try {
+      const res = await swipeApi.quota();
+      const { used, limit, isPremium } = res.data;
+      set({
+        dailyUsed: used ?? 0,
+        dailyLimit: limit ?? 20,
+        quotaExceeded: !isPremium && used >= (limit ?? 20),
+      });
+    } catch { /* non-critical */ }
+  },
+
   swipe: async (apartment, direction) => {
-    const { deck, currentIndex } = get();
+    const { currentIndex, dailyUsed, dailyLimit } = get();
+    set({ currentIndex: currentIndex + 1, lastSwipedApartment: apartment });
 
-    // Advance deck immediately for snappy UX
-    set({ currentIndex: currentIndex + 1 });
-
-    // Preload more when 3 cards remain
-    if (deck.length - currentIndex <= 3 && get().hasMore) {
+    if (get().deck.length - get().currentIndex <= 3 && get().hasMore) {
       get().loadFeed();
     }
 
     try {
-      const seenMs = 0; // tracked in SwipeableCard if needed
-      const res = await swipeApi.record(apartment.id, direction, seenMs);
-      if (res.data.match) {
-        set({ lastMatch: res.data.match });
+      const res = await swipeApi.record(apartment.id, direction, 0);
+      const { match, dailyUsed: newUsed, dailyLimit: newLimit } = res.data;
+      if (match) set({ lastMatch: match });
+      if (newUsed !== null && newUsed !== undefined) {
+        set({
+          dailyUsed: newUsed,
+          dailyLimit: newLimit ?? dailyLimit,
+          quotaExceeded: newLimit !== null && newUsed >= newLimit,
+        });
+      } else {
+        set({ dailyUsed: dailyUsed + 1 });
       }
-    } catch {
-      // Swipe failures are non-critical — don't revert the card
+    } catch (err: any) {
+      if (err?.response?.status === 429) {
+        set({ quotaExceeded: true, currentIndex: currentIndex }); // revert
+      }
     }
   },
 
+  undo: async () => {
+    const { lastSwipedApartment, currentIndex, dailyUsed } = get();
+    if (!lastSwipedApartment || currentIndex === 0) return;
+    try {
+      await swipeApi.undo();
+      set({
+        currentIndex: currentIndex - 1,
+        lastSwipedApartment: null,
+        dailyUsed: Math.max(0, dailyUsed - 1),
+        quotaExceeded: false,
+      });
+    } catch { /* undo failed silently */ }
+  },
+
   resetMatch: () => set({ lastMatch: null }),
+  dismissQuota: () => set({ quotaExceeded: false }),
 }));
