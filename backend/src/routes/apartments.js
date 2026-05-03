@@ -177,10 +177,28 @@ router.patch('/:id', authenticate, requireRole('landlord'), async (req, res, nex
     });
     if (!apartment) return res.status(404).json({ error: 'Apartment not found' });
 
-    const allowed = ['title', 'description', 'price', 'isActive', 'availableFrom', 'amenities', 'petsAllowed'];
-    const updates = Object.fromEntries(
+    const allowed = [
+      'title', 'description', 'price', 'rooms', 'floor', 'totalFloors',
+      'sizeSqm', 'city', 'neighborhood', 'address', 'amenities',
+      'petsAllowed', 'availableFrom', 'minLeasePeriod', 'isActive',
+    ];
+    const raw = Object.fromEntries(
       Object.entries(req.body).filter(([k]) => allowed.includes(k))
     );
+
+    // Coerce numeric/boolean strings coming from multipart or JSON
+    const updates = {};
+    for (const [k, v] of Object.entries(raw)) {
+      if (['price', 'floor', 'totalFloors', 'sizeSqm', 'minLeasePeriod'].includes(k)) {
+        updates[k] = v !== '' && v !== null ? parseInt(v, 10) : null;
+      } else if (k === 'rooms') {
+        updates[k] = parseFloat(v);
+      } else if (k === 'petsAllowed' || k === 'isActive') {
+        updates[k] = v === true || v === 'true';
+      } else {
+        updates[k] = v;
+      }
+    }
 
     await apartment.update(updates);
     await cacheDel(`apartment:${apartment.id}`);

@@ -1,0 +1,235 @@
+import React, { useState, useEffect } from 'react';
+import {
+  View, Text, TextInput, TouchableOpacity, ScrollView,
+  StyleSheet, SafeAreaView, Alert, ActivityIndicator,
+  KeyboardAvoidingView, Platform,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { apartmentsApi } from '../services/api';
+import type { Amenity, MainStackParamList } from '../types';
+
+const AMENITY_OPTIONS: { key: Amenity; label: string }[] = [
+  { key: 'parking',      label: '🚗 חניה' },
+  { key: 'balcony',      label: '🌿 מרפסת' },
+  { key: 'elevator',     label: '🛗 מעלית' },
+  { key: 'ac',           label: '❄️ מזגן' },
+  { key: 'storage',      label: '📦 מחסן' },
+  { key: 'furnished',    label: '🛋️ מרוהטת' },
+  { key: 'sun_boiler',   label: '☀️ דוד שמש' },
+  { key: 'pets_allowed', label: '🐾 חיות מותרות' },
+];
+
+type Props = NativeStackScreenProps<MainStackParamList, 'EditListing'>;
+
+export default function EditListingScreen({ route, navigation }: Props) {
+  const { apartmentId } = route.params;
+  const queryClient = useQueryClient();
+
+  const { data: apt, isLoading } = useQuery({
+    queryKey: ['apartment', apartmentId],
+    queryFn: () => apartmentsApi.getById(apartmentId).then((r) => r.data.apartment ?? r.data),
+  });
+
+  const [title, setTitle]               = useState('');
+  const [description, setDescription]   = useState('');
+  const [price, setPrice]               = useState('');
+  const [rooms, setRooms]               = useState('');
+  const [city, setCity]                 = useState('');
+  const [neighborhood, setNeighborhood] = useState('');
+  const [floor, setFloor]               = useState('');
+  const [sizeSqm, setSizeSqm]           = useState('');
+  const [amenities, setAmenities]       = useState<Amenity[]>([]);
+  const [petsAllowed, setPetsAllowed]   = useState(false);
+  const [saving, setSaving]             = useState(false);
+  const [hydrated, setHydrated]         = useState(false);
+
+  useEffect(() => {
+    if (!apt || hydrated) return;
+    setTitle(apt.title ?? '');
+    setDescription(apt.description ?? '');
+    setPrice(apt.price != null ? String(apt.price) : '');
+    setRooms(apt.rooms != null ? String(apt.rooms) : '');
+    setCity(apt.city ?? '');
+    setNeighborhood(apt.neighborhood ?? '');
+    setFloor(apt.floor != null ? String(apt.floor) : '');
+    setSizeSqm(apt.sizeSqm != null ? String(apt.sizeSqm) : '');
+    setAmenities(apt.amenities ?? []);
+    setPetsAllowed(apt.petsAllowed ?? false);
+    setHydrated(true);
+  }, [apt]);
+
+  function toggleAmenity(key: Amenity) {
+    setAmenities((prev) =>
+      prev.includes(key) ? prev.filter((a) => a !== key) : [...prev, key]
+    );
+  }
+
+  async function handleSave() {
+    if (!title.trim() || !price || !rooms || !city.trim()) {
+      Alert.alert('שגיאה', 'נא למלא: כותרת, מחיר, חדרות ועיר');
+      return;
+    }
+    setSaving(true);
+    try {
+      await apartmentsApi.update(apartmentId, {
+        title: title.trim(),
+        description: description.trim() || null,
+        price: parseInt(price, 10),
+        rooms: parseFloat(rooms),
+        city: city.trim(),
+        neighborhood: neighborhood.trim() || null,
+        floor: floor ? parseInt(floor, 10) : null,
+        sizeSqm: sizeSqm ? parseInt(sizeSqm, 10) : null,
+        amenities,
+        petsAllowed,
+      });
+      await queryClient.invalidateQueries({ queryKey: ['apartment', apartmentId] });
+      await queryClient.invalidateQueries({ queryKey: ['landlord-dashboard'] });
+      Alert.alert('נשמר!', 'המודעה עודכנה בהצלחה', [
+        { text: 'אישור', onPress: () => navigation.goBack() },
+      ]);
+    } catch (err: any) {
+      Alert.alert('שגיאה', err?.response?.data?.error || 'עדכון המודעה נכשל');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (isLoading || !hydrated) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <ActivityIndicator style={{ marginTop: 80 }} size="large" color="#6C5CE7" />
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+          <Text style={styles.header}>עריכת מודעה</Text>
+
+          <Field label="כותרת *">
+            <TextInput style={styles.input} value={title} onChangeText={setTitle}
+              placeholder="כותרת המודעה" placeholderTextColor="#A0A0B2" textAlign="right" />
+          </Field>
+
+          <View style={styles.row}>
+            <Field label="מחיר ₪ *" style={{ flex: 1, marginLeft: 8 }}>
+              <TextInput style={styles.input} value={price} onChangeText={setPrice}
+                keyboardType="numeric" placeholder="6500" placeholderTextColor="#A0A0B2" textAlign="right" />
+            </Field>
+            <Field label="חדרות *" style={{ flex: 1 }}>
+              <TextInput style={styles.input} value={rooms} onChangeText={setRooms}
+                keyboardType="decimal-pad" placeholder="3" placeholderTextColor="#A0A0B2" textAlign="right" />
+            </Field>
+          </View>
+
+          <View style={styles.row}>
+            <Field label="עיר *" style={{ flex: 1, marginLeft: 8 }}>
+              <TextInput style={styles.input} value={city} onChangeText={setCity}
+                placeholder="תל אביב" placeholderTextColor="#A0A0B2" textAlign="right" />
+            </Field>
+            <Field label="שכונה" style={{ flex: 1 }}>
+              <TextInput style={styles.input} value={neighborhood} onChangeText={setNeighborhood}
+                placeholder="פלורנטין" placeholderTextColor="#A0A0B2" textAlign="right" />
+            </Field>
+          </View>
+
+          <View style={styles.row}>
+            <Field label="קומה" style={{ flex: 1, marginLeft: 8 }}>
+              <TextInput style={styles.input} value={floor} onChangeText={setFloor}
+                keyboardType="numeric" placeholder="3" placeholderTextColor="#A0A0B2" textAlign="right" />
+            </Field>
+            <Field label='גודל מ"ר' style={{ flex: 1 }}>
+              <TextInput style={styles.input} value={sizeSqm} onChangeText={setSizeSqm}
+                keyboardType="numeric" placeholder="75" placeholderTextColor="#A0A0B2" textAlign="right" />
+            </Field>
+          </View>
+
+          <Field label="תיאור">
+            <TextInput style={[styles.input, styles.textarea]} value={description}
+              onChangeText={setDescription} multiline numberOfLines={4}
+              placeholder="תאר את הדירה..." placeholderTextColor="#A0A0B2" textAlign="right" />
+          </Field>
+
+          <Text style={styles.fieldLabel}>שירותים</Text>
+          <View style={styles.amenitiesGrid}>
+            {AMENITY_OPTIONS.map(({ key, label }) => (
+              <TouchableOpacity
+                key={key}
+                style={[styles.amenityChip, amenities.includes(key) && styles.amenityChipActive]}
+                onPress={() => toggleAmenity(key)}
+              >
+                <Text style={[styles.amenityText, amenities.includes(key) && styles.amenityTextActive]}>
+                  {label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <TouchableOpacity
+            style={[styles.petsRow, petsAllowed && styles.petsRowActive]}
+            onPress={() => setPetsAllowed((v) => !v)}
+          >
+            <Ionicons name={petsAllowed ? 'checkbox' : 'square-outline'} size={22} color={petsAllowed ? '#6C5CE7' : '#A0A0B2'} />
+            <Text style={[styles.petsLabel, petsAllowed && { color: '#6C5CE7' }]}>🐾 דירה מאפשרת חיות מחמד</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.saveBtn, saving && styles.saveBtnDisabled]}
+            onPress={handleSave}
+            disabled={saving}
+          >
+            {saving
+              ? <ActivityIndicator color="#fff" />
+              : <Text style={styles.saveBtnText}>שמור שינויים</Text>
+            }
+          </TouchableOpacity>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+}
+
+function Field({ label, children, style }: { label: string; children: React.ReactNode; style?: any }) {
+  return (
+    <View style={[{ marginBottom: 14 }, style]}>
+      <Text style={styles.fieldLabel}>{label}</Text>
+      {children}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#1A1A2E' },
+  scroll: { padding: 20, paddingBottom: 40 },
+  header: { fontSize: 22, fontWeight: '800', color: '#fff', textAlign: 'right', marginBottom: 20 },
+  row: { flexDirection: 'row', marginBottom: 0 },
+  fieldLabel: { color: '#A0A0B2', fontSize: 12, fontWeight: '600', textAlign: 'right', marginBottom: 6 },
+  input: {
+    backgroundColor: '#2A2A3E', borderRadius: 12, padding: 14,
+    fontSize: 14, color: '#fff', borderWidth: 1, borderColor: '#3A3A5E',
+  },
+  textarea: { height: 100, textAlignVertical: 'top' },
+  amenitiesGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 },
+  amenityChip: {
+    paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10,
+    backgroundColor: '#2A2A3E', borderWidth: 1, borderColor: '#3A3A5E',
+  },
+  amenityChipActive: { backgroundColor: 'rgba(108,92,231,0.2)', borderColor: '#6C5CE7' },
+  amenityText: { color: '#A0A0B2', fontSize: 13 },
+  amenityTextActive: { color: '#6C5CE7', fontWeight: '600' },
+  petsRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 24,
+    backgroundColor: '#2A2A3E', borderRadius: 12, padding: 14,
+    borderWidth: 1, borderColor: '#3A3A5E',
+  },
+  petsRowActive: { borderColor: '#6C5CE7' },
+  petsLabel: { color: '#A0A0B2', fontSize: 14 },
+  saveBtn: { backgroundColor: '#6C5CE7', borderRadius: 14, paddingVertical: 16, alignItems: 'center', marginTop: 8 },
+  saveBtnDisabled: { opacity: 0.6 },
+  saveBtnText: { color: '#fff', fontSize: 16, fontWeight: '800' },
+});

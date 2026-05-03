@@ -50,8 +50,13 @@ export const apartmentsApi = {
   getById: (id: string) => api.get(`/apartments/${id}`),
   create: (formData: FormData) =>
     api.post('/apartments', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
-  update: (id: string, data: Partial<{ title: string; price: number; isActive: boolean; description: string }>) =>
-    api.patch(`/apartments/${id}`, data),
+  update: (id: string, data: Partial<{
+    title: string; description: string; price: number; rooms: number;
+    floor: number | null; totalFloors: number | null; sizeSqm: number | null;
+    city: string; neighborhood: string | null; address: string | null;
+    amenities: string[]; petsAllowed: boolean; availableFrom: string | null;
+    minLeasePeriod: number | null; isActive: boolean;
+  }>) => api.patch(`/apartments/${id}`, data),
   deactivate: (id: string) => api.delete(`/apartments/${id}`),
 };
 

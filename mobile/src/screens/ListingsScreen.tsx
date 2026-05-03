@@ -72,13 +72,18 @@ export default function ListingsScreen({ navigation }: Props) {
             <Text style={styles.statText}>{item.likeCount}</Text>
           </View>
         </View>
-        <TouchableOpacity style={styles.toggleBtn} onPress={() => toggleActive(item)}>
-          <Ionicons
-            name={item.isActive ? 'pause-circle-outline' : 'play-circle-outline'}
-            size={26}
-            color={item.isActive ? '#6C5CE7' : '#A0A0B2'}
-          />
-        </TouchableOpacity>
+        <View style={styles.cardActions}>
+          <TouchableOpacity onPress={() => navigation.navigate('EditListing', { apartmentId: item.id })}>
+            <Ionicons name="create-outline" size={22} color="#6C5CE7" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => toggleActive(item)}>
+            <Ionicons
+              name={item.isActive ? 'pause-circle-outline' : 'play-circle-outline'}
+              size={22}
+              color={item.isActive ? '#6C5CE7' : '#A0A0B2'}
+            />
+          </TouchableOpacity>
+        </View>
       </TouchableOpacity>
     );
   }
@@ -143,6 +148,6 @@ const styles = StyleSheet.create({
   cardPrice: { color: '#6C5CE7', fontWeight: '700', fontSize: 14, textAlign: 'right', marginBottom: 4 },
   statsRow: { flexDirection: 'row', alignItems: 'center' },
   statText: { color: '#A0A0B2', fontSize: 12, marginLeft: 3 },
-  toggleBtn: { paddingRight: 12 },
+  cardActions: { flexDirection: 'column', gap: 10, paddingRight: 12, alignItems: 'center' },
   emptyText: { color: '#A0A0B2', fontSize: 16, textAlign: 'center' },
 });
