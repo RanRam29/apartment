@@ -37,6 +37,10 @@ export const authApi = {
   logout: () => api.post('/auth/logout'),
   me: () => api.get('/auth/me'),
   savePushToken: (pushToken: string) => api.patch('/auth/push-token', { pushToken }),
+  updateProfile: (data: { firstName?: string; lastName?: string; phone?: string }) =>
+    api.patch('/auth/profile', data),
+  uploadAvatar: (formData: FormData) =>
+    api.patch('/auth/avatar', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
 };
 
 // ─── Apartments ───────────────────────────────────────────────────────────────
