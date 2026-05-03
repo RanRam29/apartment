@@ -154,6 +154,54 @@ router.get('/me', require('../middleware/auth').authenticate, async (req, res, n
   }
 });
 
+// PATCH /api/auth/profile — update name and/or phone
+router.patch('/profile', require('../middleware/auth').authenticate, async (req, res, next) => {
+  try {
+    const { firstName, lastName, phone } = req.body;
+    const updates = {};
+    if (firstName && typeof firstName === 'string') updates.firstName = firstName.trim();
+    if (lastName && typeof lastName === 'string') updates.lastName = lastName.trim();
+    if (phone !== undefined) updates.phone = phone ? String(phone).trim() : null;
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(422).json({ error: 'No valid fields to update' });
+    }
+
+    const user = await User.findByPk(req.user.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    await user.update(updates);
+    const { passwordHash: _, ...safeUser } = user.toJSON();
+    res.json({ user: safeUser });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// PATCH /api/auth/avatar — upload profile photo to Cloudinary
+const { upload, uploadMany } = require('../services/uploadService');
+router.patch(
+  '/avatar',
+  require('../middleware/auth').authenticate,
+  upload.single('avatar'),
+  async (req, res, next) => {
+    try {
+      if (!req.file) return res.status(400).json({ error: 'avatar file required' });
+
+      const [uploaded] = await uploadMany([req.file], 'avatars');
+
+      const user = await User.findByPk(req.user.id);
+      if (!user) return res.status(404).json({ error: 'User not found' });
+
+      await user.update({ avatarUrl: uploaded.url });
+      const { passwordHash: _, ...safeUser } = user.toJSON();
+      res.json({ user: safeUser, avatarUrl: uploaded.url });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
 // PATCH /api/auth/push-token — store Expo push token (TTL 30 days in Redis)
 router.patch('/push-token', require('../middleware/auth').authenticate, async (req, res, next) => {
   try {

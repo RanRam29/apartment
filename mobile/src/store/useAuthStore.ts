@@ -21,6 +21,7 @@ interface AuthState {
   logout: () => Promise<void>;
   restoreSession: () => Promise<void>;
   completeOnboarding: () => Promise<void>;
+  updateUser: (updates: Partial<import('../types').User>) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -66,5 +67,9 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   completeOnboarding: async () => {
     set({ needsOnboarding: false });
+  },
+
+  updateUser: (updates) => {
+    set((state) => ({ user: state.user ? { ...state.user, ...updates } : state.user }));
   },
 }));
