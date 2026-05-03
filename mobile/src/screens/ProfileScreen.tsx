@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  SafeAreaView, ScrollView, Alert, ActivityIndicator, TextInput, Modal, Linking,
+  SafeAreaView, ScrollView, Alert, ActivityIndicator, TextInput, Modal, Linking, Platform,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
@@ -92,10 +92,14 @@ export default function ProfileScreen() {
   }
 
   function confirmLogout() {
-    Alert.alert('התנתקות', 'האם אתה בטוח שברצונך להתנתק?', [
-      { text: 'ביטול', style: 'cancel' },
-      { text: 'התנתק', style: 'destructive', onPress: logout },
-    ]);
+    if (Platform.OS === 'web') {
+      if (window.confirm('האם אתה בטוח שברצונך להתנתק?')) logout();
+    } else {
+      Alert.alert('התנתקות', 'האם אתה בטוח שברצונך להתנתק?', [
+        { text: 'ביטול', style: 'cancel' },
+        { text: 'התנתק', style: 'destructive', onPress: logout },
+      ]);
+    }
   }
 
   return (
