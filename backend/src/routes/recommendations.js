@@ -134,6 +134,26 @@ router.get('/personalized', authenticate, requireRole('tenant'), async (req, res
   }
 });
 
+// GET /api/recommendations/preferences — fetch current tenant preferences
+router.get('/preferences', authenticate, requireRole('tenant'), async (req, res, next) => {
+  try {
+    const prefs = await UserPreferences.findOne({ userId: req.user.id }).lean();
+    res.json({
+      preferences: prefs
+        ? {
+            budget: prefs.budget ?? { min: 0, max: 99999 },
+            cities: prefs.cities ?? [],
+            rooms: prefs.rooms ?? { min: 1, max: 10 },
+            requiredAmenities: prefs.requiredAmenities ?? [],
+            petsAllowed: prefs.petsAllowed ?? false,
+          }
+        : null,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // POST /api/recommendations/preferences — save/update tenant preferences
 router.post(
   '/preferences',

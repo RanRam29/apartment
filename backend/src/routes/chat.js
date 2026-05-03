@@ -4,7 +4,8 @@ const { Message } = require('../models');
 const { Match } = require('../models');
 const { authenticate } = require('../middleware/auth');
 const { getIO } = require('../config/socket');
-const { cacheGet, cacheSet, cacheDel } = require('../config/redis');
+const { cacheGet, cacheSet, cacheDel, getRedisClient } = require('../config/redis');
+const { sendPushNotification } = require('../services/pushService');
 
 const router = express.Router();
 
@@ -111,6 +112,17 @@ router.post(
       } catch {
         // Socket.io not available — REST response is sufficient
       }
+
+      // Push notification to the other party (fire-and-forget)
+      const recipientId = req.user.id === match.tenantId ? match.landlordId : match.tenantId;
+      getRedisClient().get(`push:token:${recipientId}`).then((token) => {
+        const preview = content.length > 80 ? content.slice(0, 77) + '...' : content;
+        sendPushNotification(token, {
+          title: 'הודעה חדשה 💬',
+          body: preview,
+          data: { matchId: req.params.matchId },
+        });
+      }).catch(() => {});
 
       res.status(201).json({ message });
     } catch (err) {

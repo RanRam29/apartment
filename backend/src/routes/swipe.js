@@ -5,6 +5,7 @@ const { UserPreferences } = require('../models');
 const { authenticate, requireRole } = require('../middleware/auth');
 const { handleSwipeMatch } = require('../services/matchingService');
 const { cacheGet, cacheSet, getRedisClient } = require('../config/redis');
+const { sendPushNotification } = require('../services/pushService');
 const logger = require('../utils/logger');
 
 const router = express.Router();
@@ -152,6 +153,16 @@ router.post('/', authenticate, requireRole('tenant'), swipeValidator, async (req
     let match = null;
     if (direction === 'like' || direction === 'superlike') {
       match = await handleSwipeMatch(tenantId, apartmentId);
+      if (match) {
+        // Notify the landlord of the new lead (fire-and-forget)
+        getRedisClient().get(`push:token:${apartment.landlordId}`).then((token) => {
+          sendPushNotification(token, {
+            title: 'יש לך התאמה חדשה! 🎉',
+            body: 'מישהו מעוניין בדירה שלך — בדוק את הלידים',
+            data: { matchId: match.id },
+          });
+        }).catch(() => {});
+      }
     }
 
     const dailyUsed = isPremium ? null : await incrementDailyUsed(tenantId);

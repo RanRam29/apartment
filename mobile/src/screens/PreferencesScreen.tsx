@@ -28,23 +28,37 @@ type Props = NativeStackScreenProps<MainStackParamList, 'Preferences'>;
 export default function PreferencesScreen({ navigation }: Props) {
   const queryClient = useQueryClient();
 
-  const { data: existing, isLoading } = useQuery({
+  const [minBudget, setMinBudget]     = useState('');
+  const [maxBudget, setMaxBudget]     = useState('');
+  const [minRooms,  setMinRooms]      = useState('');
+  const [maxRooms,  setMaxRooms]      = useState('');
+  const [cities,    setCities]        = useState<string[]>([]);
+  const [amenities, setAmenities]     = useState<Amenity[]>([]);
+  const [petsAllowed, setPetsAllowed] = useState(false);
+  const [hydrated, setHydrated]       = useState(false);
+
+  const { data, isLoading } = useQuery({
     queryKey: ['preferences'],
-    queryFn: () => recommendationsApi.savePreferences({}).then(() => null).catch(() => null),
-    enabled: false,
+    queryFn: () => recommendationsApi.getPreferences().then((r) => r.data.preferences),
   });
 
-  const [minBudget, setMinBudget]           = useState('');
-  const [maxBudget, setMaxBudget]           = useState('');
-  const [minRooms,  setMinRooms]            = useState('');
-  const [maxRooms,  setMaxRooms]            = useState('');
-  const [cities,    setCities]              = useState<string[]>([]);
-  const [amenities, setAmenities]           = useState<Amenity[]>([]);
-  const [petsAllowed, setPetsAllowed]       = useState(false);
+  // Pre-populate form once data arrives
+  useEffect(() => {
+    if (!data || hydrated) return;
+    if (data.budget?.min) setMinBudget(String(data.budget.min));
+    if (data.budget?.max && data.budget.max < 99999) setMaxBudget(String(data.budget.max));
+    if (data.rooms?.min && data.rooms.min > 1) setMinRooms(String(data.rooms.min));
+    if (data.rooms?.max && data.rooms.max < 10) setMaxRooms(String(data.rooms.max));
+    if (data.cities?.length) setCities(data.cities);
+    if (data.requiredAmenities?.length) setAmenities(data.requiredAmenities);
+    if (data.petsAllowed) setPetsAllowed(true);
+    setHydrated(true);
+  }, [data]);
 
   const saveMutation = useMutation({
     mutationFn: (prefs: object) => recommendationsApi.savePreferences(prefs),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['preferences'] });
       queryClient.invalidateQueries({ queryKey: ['recommendations'] });
       Alert.alert('נשמר!', 'ההעדפות עודכנו בהצלחה', [
         { text: 'אישור', onPress: () => navigation.goBack() },
@@ -85,6 +99,14 @@ export default function PreferencesScreen({ navigation }: Props) {
       requiredAmenities: amenities,
       petsAllowed,
     });
+  }
+
+  if (isLoading && !hydrated) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <ActivityIndicator style={{ marginTop: 80 }} size="large" color="#6C5CE7" />
+      </SafeAreaView>
+    );
   }
 
   return (

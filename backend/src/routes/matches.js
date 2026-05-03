@@ -2,7 +2,8 @@ const express = require('express');
 const { Match, Apartment, User, Message } = require('../models');
 const { authenticate, requireRole } = require('../middleware/auth');
 const { acceptMatch } = require('../services/matchingService');
-const { cacheGet, cacheSet, cacheDel } = require('../config/redis');
+const { cacheGet, cacheSet, cacheDel, getRedisClient } = require('../config/redis');
+const { sendPushNotification } = require('../services/pushService');
 
 const router = express.Router();
 
@@ -88,6 +89,16 @@ router.post('/:id/accept', authenticate, requireRole('landlord'), async (req, re
   try {
     const match = await acceptMatch(req.params.id, req.user.id);
     if (!match) return res.status(404).json({ error: 'Pending match not found' });
+
+    // Notify the tenant their match was accepted (fire-and-forget)
+    getRedisClient().get(`push:token:${match.tenantId}`).then((token) => {
+      sendPushNotification(token, {
+        title: 'ההתאמה שלך אושרה! 🏠',
+        body: 'בעל הדירה מעוניין — ניתן לשלוח הודעה',
+        data: { matchId: match.id },
+      });
+    }).catch(() => {});
+
     res.json({ match });
   } catch (err) {
     next(err);
@@ -104,6 +115,16 @@ router.post('/:id/reject', authenticate, requireRole('landlord'), async (req, re
 
     await match.update({ status: 'rejected' });
     await cacheDel(`matches:landlord:${req.user.id}`);
+
+    // Notify the tenant (fire-and-forget)
+    getRedisClient().get(`push:token:${match.tenantId}`).then((token) => {
+      sendPushNotification(token, {
+        title: 'עדכון על ההתאמה שלך',
+        body: 'בעל הדירה לא מעוניין בהתאמה זו',
+        data: { type: 'match_rejected' },
+      });
+    }).catch(() => {});
+
     res.json({ match });
   } catch (err) {
     next(err);
