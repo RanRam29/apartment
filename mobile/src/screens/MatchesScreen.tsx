@@ -69,6 +69,7 @@ export default function MatchesScreen() {
               <MatchCard
                 match={item}
                 currentUserId={user!.id}
+                unreadCount={item.unreadCount}
                 onPress={() => item.status === 'accepted' ? openChat(item) : null}
               />
             </>

@@ -1,5 +1,5 @@
 const express = require('express');
-const { Match, Apartment, User } = require('../models');
+const { Match, Apartment, User, Message } = require('../models');
 const { authenticate, requireRole } = require('../middleware/auth');
 const { acceptMatch } = require('../services/matchingService');
 const { cacheGet, cacheSet, cacheDel } = require('../config/redis');
@@ -36,8 +36,24 @@ router.get('/', authenticate, async (req, res, next) => {
       order: [['lastMessageAt', 'DESC NULLS LAST'], ['createdAt', 'DESC']],
     });
 
-    await cacheSet(cacheKey, matches, 60);
-    res.json({ matches });
+    // Attach unread counts from MongoDB (graceful fallback if unavailable)
+    let unreadMap = {};
+    try {
+      const matchIds = matches.map((m) => m.id);
+      const unreadAgg = await Message.aggregate([
+        { $match: { matchId: { $in: matchIds }, senderId: { $ne: userId }, isRead: false } },
+        { $group: { _id: '$matchId', count: { $sum: 1 } } },
+      ]);
+      unreadMap = Object.fromEntries(unreadAgg.map((u) => [u._id, u.count]));
+    } catch { /* MongoDB unavailable — unread counts default to 0 */ }
+
+    const matchesWithUnread = matches.map((m) => ({
+      ...m.toJSON(),
+      unreadCount: unreadMap[m.id] ?? 0,
+    }));
+
+    await cacheSet(cacheKey, matchesWithUnread, 60);
+    res.json({ matches: matchesWithUnread });
   } catch (err) {
     next(err);
   }

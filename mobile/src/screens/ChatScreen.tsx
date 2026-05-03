@@ -2,12 +2,13 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
   View, Text, FlatList, TextInput, TouchableOpacity,
   StyleSheet, SafeAreaView, KeyboardAvoidingView, Platform,
-  ActivityIndicator,
+  ActivityIndicator, Animated,
 } from 'react-native';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useChatStore } from '../store/useChatStore';
 import { useAuthStore } from '../store/useAuthStore';
+import { chatApi } from '../services/api';
 import type { Message } from '../types';
 
 type ChatRoute = RouteProp<{ Chat: { matchId: string; title: string } }, 'Chat'>;
@@ -35,6 +36,7 @@ export default function ChatScreen() {
       await connect();
       joinChat(matchId);
       await loadMessages(matchId);
+      chatApi.markRead(matchId).catch(() => {});
       setLoading(false);
     }
     init();
@@ -93,13 +95,7 @@ export default function ChatScreen() {
               <Text style={styles.emptyChatText}>שלח הודעה ראשונה 👋</Text>
             </View>
           }
-          ListFooterComponent={
-            isOtherTyping ? (
-              <View style={styles.typingIndicator}>
-                <Text style={styles.typingText}>מקליד...</Text>
-              </View>
-            ) : null
-          }
+          ListFooterComponent={isOtherTyping ? <TypingDots /> : null}
         />
 
         {/* Input bar */}
@@ -137,9 +133,55 @@ function ChatBubble({ message, isMe }: { message: Message; isMe: boolean }) {
       <Text style={[styles.bubbleText, isMe ? styles.bubbleTextMe : styles.bubbleTextThem]}>
         {message.content}
       </Text>
-      <Text style={styles.bubbleTime}>
-        {new Date(message.createdAt).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
-      </Text>
+      <View style={styles.bubbleMeta}>
+        {isMe && (
+          <Ionicons
+            name={message.isRead ? 'checkmark-done' : 'checkmark'}
+            size={12}
+            color={message.isRead ? '#A78BFA' : 'rgba(255,255,255,0.45)'}
+          />
+        )}
+        <Text style={styles.bubbleTime}>
+          {new Date(message.createdAt).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+function TypingDots() {
+  const dots = [
+    useRef(new Animated.Value(0)).current,
+    useRef(new Animated.Value(0)).current,
+    useRef(new Animated.Value(0)).current,
+  ];
+
+  useEffect(() => {
+    const animations = dots.map((dot, i) =>
+      Animated.loop(
+        Animated.sequence([
+          Animated.delay(i * 160),
+          Animated.timing(dot, { toValue: 1, duration: 280, useNativeDriver: true }),
+          Animated.timing(dot, { toValue: 0, duration: 280, useNativeDriver: true }),
+          Animated.delay((dots.length - 1 - i) * 160),
+        ])
+      )
+    );
+    animations.forEach((a) => a.start());
+    return () => animations.forEach((a) => a.stop());
+  }, []);
+
+  return (
+    <View style={styles.typingBubble}>
+      {dots.map((dot, i) => (
+        <Animated.View
+          key={i}
+          style={[
+            styles.typingDot,
+            { transform: [{ translateY: dot.interpolate({ inputRange: [0, 1], outputRange: [0, -5] }) }] },
+          ]}
+        />
+      ))}
     </View>
   );
 }
@@ -163,9 +205,15 @@ const styles = StyleSheet.create({
   bubbleText: { fontSize: 15, lineHeight: 20 },
   bubbleTextMe: { color: '#fff' },
   bubbleTextThem: { color: '#E0E0E0' },
-  bubbleTime: { fontSize: 10, color: 'rgba(255,255,255,0.5)', marginTop: 3, textAlign: 'right' },
-  typingIndicator: { paddingHorizontal: 16, paddingBottom: 4 },
-  typingText: { color: '#A0A0B2', fontSize: 12, fontStyle: 'italic' },
+  bubbleMeta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 3, marginTop: 3 },
+  bubbleTime: { fontSize: 10, color: 'rgba(255,255,255,0.5)' },
+  typingBubble: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    marginHorizontal: 16, marginBottom: 8,
+    backgroundColor: '#2A2A3E', borderRadius: 16, borderBottomLeftRadius: 4,
+    alignSelf: 'flex-start', paddingHorizontal: 14, paddingVertical: 10,
+  },
+  typingDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#A0A0B2' },
   emptyChat: { flex: 1, alignItems: 'center', paddingTop: 60 },
   emptyChatText: { color: '#A0A0B2', fontSize: 14 },
   inputBar: {

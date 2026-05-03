@@ -63,6 +63,15 @@ export const useChatStore = create<ChatState>((set, get) => ({
       }));
     });
 
+    socket.on('messages_read', ({ matchId }: { matchId: string }) => {
+      set((state) => ({
+        messages: {
+          ...state.messages,
+          [matchId]: (state.messages[matchId] ?? []).map((m) => ({ ...m, isRead: true })),
+        },
+      }));
+    });
+
     set({ socket });
   },
 

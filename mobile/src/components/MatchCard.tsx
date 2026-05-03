@@ -9,10 +9,11 @@ import type { Match } from '../types';
 interface Props {
   match: Match;
   currentUserId: string;
+  unreadCount?: number;
   onPress: () => void;
 }
 
-export default function MatchCard({ match, currentUserId, onPress }: Props) {
+export default function MatchCard({ match, currentUserId, unreadCount, onPress }: Props) {
   const isLandlord = match.landlordId === currentUserId;
   const otherParty = isLandlord ? match.tenant : match.landlord;
   const apartment  = match.apartment;
@@ -62,6 +63,10 @@ export default function MatchCard({ match, currentUserId, onPress }: Props) {
           <View style={styles.pendingBadge}>
             <Text style={styles.pendingText}>ממתין</Text>
           </View>
+        ) : unreadCount && unreadCount > 0 ? (
+          <View style={styles.unreadBadge}>
+            <Text style={styles.unreadText}>{unreadCount > 99 ? '99+' : unreadCount}</Text>
+          </View>
         ) : (
           <Ionicons name="chevron-forward" size={18} color="#A0A0B2" />
         )}
@@ -95,4 +100,10 @@ const styles = StyleSheet.create({
     borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2,
   },
   pendingText: { color: '#6C5CE7', fontSize: 10, fontWeight: '600' },
+  unreadBadge: {
+    backgroundColor: '#6C5CE7', borderRadius: 10,
+    minWidth: 20, height: 20, justifyContent: 'center', alignItems: 'center',
+    paddingHorizontal: 5,
+  },
+  unreadText: { color: '#fff', fontSize: 11, fontWeight: '700' },
 });
