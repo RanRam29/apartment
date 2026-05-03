@@ -14,12 +14,12 @@
       "distribution": "internal",
       "android": { "buildType": "apk" },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://dirapp-backend.onrender.com"
+        "EXPO_PUBLIC_API_URL": "https://apartment-backend-v24y.onrender.com"
       }
     },
     "production": {
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://dirapp-backend.onrender.com"
+        "EXPO_PUBLIC_API_URL": "https://apartment-backend-v24y.onrender.com"
       }
     }
   },
