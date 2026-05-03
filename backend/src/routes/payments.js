@@ -25,13 +25,17 @@ async function createMeshulamTransaction({ amount, description, userId, successU
 router.post(
   '/premium',
   authenticate,
-  [body('successUrl').isURL(), body('failUrl').isURL()],
+  [
+    body('successUrl').optional().isURL(),
+    body('failUrl').optional().isURL(),
+  ],
   async (req, res, next) => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
 
-      const { successUrl, failUrl } = req.body;
+      const successUrl = req.body.successUrl || 'dirapp://payment/success';
+      const failUrl = req.body.failUrl || 'dirapp://payment/fail';
 
       const transaction = await createMeshulamTransaction({
         amount: 2900,          // ₪29/month in agorot
