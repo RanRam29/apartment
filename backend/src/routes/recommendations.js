@@ -21,7 +21,7 @@ router.post(
       const errors = validationResult(req);
       if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
 
-      const { query } = req.body;
+      const { query, city, maxPrice, minRooms, petsAllowed } = req.body;
 
       // Cache parsed filters for identical queries (5 min)
       const filterCacheKey = `nlp:${Buffer.from(query).toString('base64').slice(0, 40)}`;
@@ -32,13 +32,21 @@ router.post(
         await cacheSet(filterCacheKey, filters, 300);
       }
 
+      // Manual overrides take precedence over NLP-parsed values
+      const overrides = {};
+      if (city) overrides.city = city;
+      if (maxPrice) overrides.maxPrice = parseInt(maxPrice);
+      if (minRooms) overrides.minRooms = parseInt(minRooms);
+      if (petsAllowed !== undefined) overrides.petsAllowed = Boolean(petsAllowed);
+      const mergedFilters = { ...filters, ...overrides };
+
       // Save to user's NLP search history (fire-and-forget)
       UserPreferences.updateOne(
         { userId: req.user.id },
         {
           $push: {
             nlpSearchHistory: {
-              $each: [{ query, parsedFilters: filters, searchedAt: new Date() }],
+              $each: [{ query, parsedFilters: mergedFilters, searchedAt: new Date() }],
               $slice: -50,
             },
           },
@@ -46,8 +54,8 @@ router.post(
         { upsert: true }
       ).catch(() => {});
 
-      // Build Sequelize where clause from parsed filters
-      const where = buildWhereFromFilters(filters, req.user.id);
+      // Build Sequelize where clause from merged filters
+      const where = buildWhereFromFilters(mergedFilters, req.user.id);
 
       // Exclude already-swiped apartments
       const swipedIds = await Swipe.findAll({
@@ -69,7 +77,7 @@ router.post(
         limit: 30,
       });
 
-      res.json({ apartments, filters, total: apartments.length });
+      res.json({ apartments, filters: mergedFilters, total: apartments.length });
     } catch (err) {
       next(err);
     }

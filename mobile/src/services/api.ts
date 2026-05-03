@@ -77,7 +77,8 @@ export const chatApi = {
 
 // ─── Recommendations ─────────────────────────────────────────────────────────
 export const recommendationsApi = {
-  nlpSearch: (query: string) => api.post('/recommendations/search', { query }),
+  nlpSearch: (query: string, overrides?: { city?: string; maxPrice?: number; minRooms?: number; petsAllowed?: boolean }) =>
+    api.post('/recommendations/search', { query, ...overrides }),
   personalized: () => api.get('/recommendations/personalized'),
   savePreferences: (prefs: object) => api.post('/recommendations/preferences', prefs),
 };
