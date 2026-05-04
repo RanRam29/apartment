@@ -9,7 +9,7 @@
     "migrate": "sequelize-cli db:migrate",
     "seed": "sequelize-cli db:seed:all",
     "seed:demo": "node src/seeders/demo.js",
-    "test": "jest --runInBand --passWithNoTests --testTimeout=30000 --forceExit"
+    "test": "jest --runInBand --passWithNoTests --testTimeout=30000 --forceExit --verbose"
   },
   "jest": {
     "testEnvironment": "node",
