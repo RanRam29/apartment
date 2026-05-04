@@ -43,16 +43,19 @@ async def parse_query(query: str) -> dict:
         "generationConfig": {"temperature": 0.1, "maxOutputTokens": 256},
     }
 
-    async with httpx.AsyncClient(timeout=10) as client:
-        res = await client.post(
-            f"{GEMINI_URL}?key={settings.gemini_api_key}",
-            json=payload,
-        )
-        res.raise_for_status()
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            res = await client.post(
+                f"{GEMINI_URL}?key={settings.gemini_api_key}",
+                json=payload,
+            )
+            res.raise_for_status()
 
-    raw = res.json()["candidates"][0]["content"]["parts"][0]["text"]
-    cleaned = re.sub(r"```json\n?|\n?```", "", raw).strip()
-    return json.loads(cleaned)
+        raw = res.json()["candidates"][0]["content"]["parts"][0]["text"]
+        cleaned = re.sub(r"```json\n?|\n?```", "", raw).strip()
+        return json.loads(cleaned)
+    except Exception:
+        return {}
 
 
 async def generate_listing_summary(apartment: dict) -> str | None:
