@@ -49,8 +49,7 @@ beforeAll(async () => {
 }, 30_000);
 
 afterAll(async () => {
-  await sequelize.close();
-  getRedisClient().disconnect();
+  // --forceExit in jest handles connection cleanup
 });
 
 describe('GET /api/swipe/quota', () => {
@@ -115,13 +114,13 @@ describe('POST /api/swipe', () => {
   });
 });
 
-describe('POST /api/swipe/undo', () => {
+describe('DELETE /api/swipe/last', () => {
   it('tenant can undo last swipe', async () => {
     const res = await request(app)
-      .post('/api/swipe/undo')
+      .delete('/api/swipe/last')
       .set('Authorization', `Bearer ${tenantToken}`);
 
-    // 200 if there's something to undo, 400 if nothing to undo — both valid
-    expect([200, 400]).toContain(res.status);
+    // 200 if there's something to undo, 404 if nothing to undo — both valid
+    expect([200, 404]).toContain(res.status);
   });
 });

@@ -40,8 +40,7 @@ beforeAll(async () => {
 }, 30_000);
 
 afterAll(async () => {
-  await sequelize.close();
-  getRedisClient().disconnect();
+  // --forceExit in jest handles connection cleanup
 });
 
 describe('POST /api/apartments', () => {
@@ -116,7 +115,7 @@ describe('GET /api/apartments/:id', () => {
       .set('Authorization', `Bearer ${tenantToken}`);
 
     expect(res.status).toBe(200);
-    expect(res.body.id).toBe(apartmentId);
+    expect(res.body.apartment.id).toBe(apartmentId);
   });
 
   it('returns 404 for non-existent apartment', async () => {

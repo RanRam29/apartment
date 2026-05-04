@@ -38,8 +38,7 @@ beforeAll(async () => {
 }, 30_000);
 
 afterAll(async () => {
-  await sequelize.close();
-  getRedisClient().disconnect();
+  // --forceExit in jest handles connection cleanup
 });
 
 describe('GET /api/matches', () => {
