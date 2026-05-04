@@ -4,7 +4,8 @@
  */
 const request = require('supertest');
 const { sequelize } = require('../src/config/database');
-const { initRedis, getRedisClient } = require('../src/config/redis');
+const { initRedis } = require('../src/config/redis');
+const { initMongoDB } = require('../src/config/mongodb');
 const app = require('../src/app');
 
 const LANDLORD = {
@@ -28,7 +29,7 @@ let tenantToken   = '';
 let apartmentId   = '';
 
 beforeAll(async () => {
-  await Promise.all([sequelize.sync({ force: false }), initRedis()]);
+  await Promise.all([sequelize.sync({ force: false }), initRedis(), initMongoDB()]);
 
   const [lr, tr] = await Promise.all([
     request(app).post('/api/auth/register').send(LANDLORD),

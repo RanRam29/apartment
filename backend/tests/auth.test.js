@@ -8,7 +8,8 @@
  */
 const request = require('supertest');
 const { sequelize } = require('../src/config/database');
-const { initRedis, getRedisClient } = require('../src/config/redis');
+const { initRedis } = require('../src/config/redis');
+const { initMongoDB } = require('../src/config/mongodb');
 const app = require('../src/app');
 
 const LANDLORD = {
@@ -25,6 +26,7 @@ beforeAll(async () => {
   await Promise.all([
     sequelize.sync({ force: false }),
     initRedis(),
+    initMongoDB(),
   ]);
 }, 30_000);
 
