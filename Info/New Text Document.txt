@@ -1,0 +1,41 @@
+NODE_ENV=development
+PORT=3000
+
+# PostgreSQL
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+POSTGRES_DB=apartment_db
+POSTGRES_USER=neondb_owner
+POSTGRES_PASSWORD=npg_VQLncz26fWYt
+
+# MongoDB
+MONGO_URI=mongodb://randram_db_user
+:Admin123@mongodb:27017/apartment_preferences?authSource=admin
+
+# Redis — use REDIS_URL for Upstash/hosted Redis, or REDIS_HOST+PORT for local/K8s
+# REDIS_URL=rediss://default:<password>@<host>.upstash.io:6379
+REDIS_HOST=redis
+REDIS_PORT=6379
+REDIS_PASSWORD=gQAAAAAAAb17AAIgcDIyN2MyNTJiNmY2NWI0M2VhOTQwNzIyODU1NWI4YTYzOQ
+
+# JWT
+JWT_SECRET=Daesharon123
+JWT_EXPIRES_IN=7d
+
+# Kafka
+# KAFKA_BROKERS=kafka:9092
+
+# Cloudinary (image uploads)
+CLOUDINARY_CLOUD_NAME=dp0o5l9qr
+CLOUDINARY_UPLOAD_PRESET=ml_default
+
+# Israeli Payment Gateways
+#BIT_API_KEY=dp0o5l9qr
+#PAYBOX_API_KEY=
+#MESHULAM_API_KEY=
+
+# Gemini AI (free tier: https://aistudio.google.com/app/apikey)
+GEMINI_API_KEY=AIzaSyC0epIuUa9Rh8B_efB1NQBrnQj8z6GO9f8
+
+# AI Service
+AI_SERVICE_URL=http://ai-service:8000

@@ -51,7 +51,7 @@ jobs:
         run: npm ci
 
       - name: Run tests
-        run: npm test --if-present
+        run: npm run test:ci
         env:
           NODE_ENV: test
           POSTGRES_HOST: localhost
@@ -63,6 +63,13 @@ jobs:
           REDIS_PORT: 6379
           JWT_SECRET: test_secret_key_for_ci
           MONGO_URI: mongodb://localhost:27017/test_db
+
+      - name: Upload backend coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: backend/coverage
 
   ai-service-test:
     name: AI service lint & test
@@ -85,12 +92,19 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run tests
-        run: python -m pytest tests/ -v --if-no-tests=skip 2>/dev/null || echo "No tests yet"
+        run: python -m pytest tests/ -v
 
       - name: Type check (pyright)
         run: |
           pip install pyright --quiet
-          pyright src/ --pythonversion 3.12 2>/dev/null || echo "Type check skipped"
+          pyright src/ --pythonversion 3.12
+
+      - name: Upload AI coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-coverage
+          path: ai-service/coverage.xml
 
   mobile-typecheck:
     name: Mobile TypeScript check
@@ -113,4 +127,14 @@ jobs:
         run: npm ci --legacy-peer-deps
 
       - name: TypeScript check
-        run: npx tsc --noEmit 2>/dev/null || echo "TSC check completed"
+        run: npx tsc --noEmit
+
+      - name: Run mobile tests with coverage
+        run: npm run test:coverage
+
+      - name: Upload mobile coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-coverage
+          path: mobile/coverage
