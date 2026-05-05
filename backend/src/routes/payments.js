@@ -1,5 +1,6 @@
 const express = require('express');
 const axios = require('axios');
+const crypto = require('crypto');
 const { body, validationResult } = require('express-validator');
 const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
@@ -8,6 +9,35 @@ const router = express.Router();
 
 // ─── Meshulam (Israel) ────────────────────────────────────────────────────────
 const MESHULAM_API = 'https://sandbox.meshulam.co.il/api/v1';
+const MESHULAM_WEBHOOK_KEY_HEADER = 'x-meshulam-webhook-key';
+
+function timingSafeEquals(provided, expected) {
+  if (typeof provided !== 'string' || typeof expected !== 'string') return false;
+
+  const providedBuffer = Buffer.from(provided);
+  const expectedBuffer = Buffer.from(expected);
+  if (providedBuffer.length !== expectedBuffer.length) return false;
+
+  return crypto.timingSafeEqual(providedBuffer, expectedBuffer);
+}
+
+function verifyMeshulamWebhook(req, res) {
+  const expectedWebhookKey = process.env.MESHULAM_WEBHOOK_KEY;
+  if (!expectedWebhookKey) {
+    logger.error('MESHULAM_WEBHOOK_KEY not configured; rejecting payment webhook');
+    res.status(503).json({ error: 'Payment webhook not configured' });
+    return false;
+  }
+
+  const providedWebhookKey = req.body.webhookKey || req.get(MESHULAM_WEBHOOK_KEY_HEADER);
+  if (!timingSafeEquals(providedWebhookKey, expectedWebhookKey)) {
+    logger.warn('Rejected Meshulam webhook with invalid key');
+    res.status(401).json({ error: 'Invalid webhook credentials' });
+    return false;
+  }
+
+  return true;
+}
 
 async function createMeshulamTransaction({ amount, description, userId, successUrl, failUrl }) {
   const apiKey = process.env.MESHULAM_API_KEY;
@@ -56,6 +86,8 @@ router.post(
 // POST /api/payments/webhook — Meshulam payment confirmation
 router.post('/webhook', async (req, res, next) => {
   try {
+    if (!verifyMeshulamWebhook(req, res)) return;
+
     const { transactionId, status, userId } = req.body;
 
     if (status === 'success' && userId) {
