@@ -1,0 +1,7 @@
+appId: com.dirapp.rental
+---
+- runFlow: auth.yaml
+- runFlow: listing.yaml
+- runFlow: swipe_match_chat.yaml
+- runFlow: recommendations.yaml
+- runFlow: payments_and_leads.yaml

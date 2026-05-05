@@ -1,0 +1,13 @@
+appId: com.dirapp.rental
+---
+- launchApp
+- tapOn:
+    id: "email-input"
+- inputText: "qa_tenant@test.com"
+- tapOn:
+    id: "password-input"
+- inputText: "Test1234!"
+- tapOn:
+    id: "login-button"
+- assertVisible:
+    text: "החלק"

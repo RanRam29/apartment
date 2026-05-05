@@ -5,6 +5,9 @@ on:
     branches: [main, "claude/**"]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * *"
 
 jobs:
   backend-lint:
@@ -138,3 +141,85 @@ jobs:
         with:
           name: mobile-coverage
           path: mobile/coverage
+
+  maestro-smoke-pr:
+    name: Maestro smoke (PR)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: mobile/package-lock.json
+
+      - name: Install mobile dependencies
+        working-directory: mobile
+        run: npm ci --legacy-peer-deps
+
+      - name: Install Maestro
+        run: curl -Ls "https://get.maestro.mobile.dev" | bash
+
+      - name: Setup Android emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 33
+          profile: pixel_6
+          arch: x86_64
+          script: |
+            export PATH="$PATH:$HOME/.maestro/bin"
+            cd mobile
+            $HOME/.maestro/bin/maestro test .maestro/smoke.yaml
+
+      - name: Upload Maestro artifacts (PR)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: maestro-pr-artifacts
+          path: |
+            ~/.maestro/tests
+
+  maestro-nightly:
+    name: Maestro smoke (nightly/dispatch)
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: mobile/package-lock.json
+
+      - name: Install mobile dependencies
+        working-directory: mobile
+        run: npm ci --legacy-peer-deps
+
+      - name: Install Maestro
+        run: curl -Ls "https://get.maestro.mobile.dev" | bash
+
+      - name: Setup Android emulator and run full smoke
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 33
+          profile: pixel_6
+          arch: x86_64
+          script: |
+            export PATH="$PATH:$HOME/.maestro/bin"
+            cd mobile
+            $HOME/.maestro/bin/maestro test .maestro/smoke.yaml
+
+      - name: Upload Maestro artifacts (nightly)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: maestro-nightly-artifacts
+          path: |
+            ~/.maestro/tests

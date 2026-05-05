@@ -1,0 +1,15 @@
+appId: com.dirapp.rental
+---
+- launchApp
+- tapOn:
+    id: "profile-tab"
+- tapOn:
+    id: "premium-button"
+- assertVisible:
+    text: "Premium"
+- tapOn:
+    id: "landlord-dashboard-tab"
+- assertVisible:
+    text: "לידים"
+- tapOn:
+    id: "leads-filter-pending"
