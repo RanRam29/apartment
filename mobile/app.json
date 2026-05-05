@@ -16,6 +16,7 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.dirapp.rental",
       "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
         "NSPhotoLibraryUsageDescription": "Allow DirApp to access your photos to upload apartment images.",
         "NSCameraUsageDescription": "Allow DirApp to use your camera to take apartment photos."
       }
