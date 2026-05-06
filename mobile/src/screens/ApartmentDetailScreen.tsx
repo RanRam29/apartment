@@ -33,7 +33,7 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
 
   const { data: apt, isLoading, isError } = useQuery({
     queryKey: ['apartment', apartmentId],
-    queryFn: () => apartmentsApi.getById(apartmentId).then((r) => r.data),
+    queryFn: () => apartmentsApi.getById(apartmentId).then((r) => r.data.apartment ?? r.data),
   });
 
   if (isLoading) {
