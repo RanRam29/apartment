@@ -81,6 +81,22 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
   const sizeSqm = apt.sizeSqm != null ? Number(apt.sizeSqm) : null;
   const viewCount = apt.viewCount != null ? Number(apt.viewCount) : 0;
   const minLease = apt.minLeasePeriod != null ? Number(apt.minLeasePeriod) : null;
+  const hasMultipleImages = images.length > 1;
+
+  function scrollToImage(index: number) {
+    if (!images.length) return;
+    const normalized = ((index % images.length) + images.length) % images.length;
+    carouselRef.current?.scrollTo({ x: normalized * SCREEN_WIDTH, animated: true });
+    setActiveImage(normalized);
+  }
+
+  function nextImage() {
+    scrollToImage(activeImage + 1);
+  }
+
+  function prevImage() {
+    scrollToImage(activeImage - 1);
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -113,7 +129,17 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
                 </View>
               ))}
             </ScrollView>
-            {images.length > 1 && (
+            {hasMultipleImages && (
+              <>
+                <TouchableOpacity style={[styles.carouselArrow, styles.carouselArrowLeft]} onPress={prevImage} activeOpacity={0.85}>
+                  <Ionicons name="chevron-back" size={24} color="#fff" />
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.carouselArrow, styles.carouselArrowRight]} onPress={nextImage} activeOpacity={0.85}>
+                  <Ionicons name="chevron-forward" size={24} color="#fff" />
+                </TouchableOpacity>
+              </>
+            )}
+            {hasMultipleImages && (
               <View style={styles.dotRow}>
                 {images.map((_, i) => (
                   <TouchableOpacity
@@ -251,6 +277,16 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
             <Ionicons name="close" size={28} color="#fff" />
           </TouchableOpacity>
           <Image source={{ uri: images[activeImage] }} style={styles.viewerImage} contentFit="contain" />
+          {hasMultipleImages && (
+            <>
+              <TouchableOpacity style={[styles.viewerArrow, styles.viewerArrowLeft]} onPress={prevImage} activeOpacity={0.85}>
+                <Ionicons name="chevron-back" size={30} color="#fff" />
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.viewerArrow, styles.viewerArrowRight]} onPress={nextImage} activeOpacity={0.85}>
+                <Ionicons name="chevron-forward" size={30} color="#fff" />
+              </TouchableOpacity>
+            </>
+          )}
         </View>
       </Modal>
     </SafeAreaView>
@@ -280,6 +316,19 @@ const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#1A1A2E' },
   carouselSlide: { width: SCREEN_WIDTH, height: 320, backgroundColor: '#111122', justifyContent: 'center', alignItems: 'center' },
   carouselImage: { width: SCREEN_WIDTH, height: 320 },
+  carouselArrow: {
+    position: 'absolute',
+    top: 145,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 2,
+  },
+  carouselArrowLeft: { left: 12 },
+  carouselArrowRight: { right: 12 },
   noImagePlaceholder: { height: 200, justifyContent: 'center', alignItems: 'center', backgroundColor: '#2A2A3E' },
   floatingBack: {
     position: 'absolute', top: 16, left: 16,
@@ -313,6 +362,20 @@ const styles = StyleSheet.create({
   viewerBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.94)', justifyContent: 'center', alignItems: 'center' },
   viewerClose: { position: 'absolute', top: 48, right: 20, zIndex: 10, padding: 8 },
   viewerImage: { width: SCREEN_WIDTH, height: '85%' },
+  viewerArrow: {
+    position: 'absolute',
+    top: '50%',
+    marginTop: -22,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  viewerArrowLeft: { left: 14 },
+  viewerArrowRight: { right: 14 },
   errorText: { color: '#FF4757', fontSize: 16, marginBottom: 16 },
   backBtn: { backgroundColor: '#6C5CE7', paddingHorizontal: 20, paddingVertical: 10, borderRadius: 10 },
   backBtnText: { color: '#fff', fontWeight: '700' },
