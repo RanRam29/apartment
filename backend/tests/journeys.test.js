@@ -21,6 +21,7 @@ jest.mock('../src/middleware/auth', () => ({
       ? next()
       : res.status(403).json({ error: 'Insufficient permissions' })
   ),
+  requireVerified: (_req, _res, next) => next(),
 }));
 
 jest.mock('../src/config/redis', () => {
@@ -66,6 +67,10 @@ jest.mock('../src/services/uploadService', () => ({
   upload: {
     array: () => (req, _res, next) => {
       req.files = [];
+      next();
+    },
+    single: () => (req, _res, next) => {
+      req.file = null;
       next();
     },
   },
@@ -122,22 +127,26 @@ describe('Critical journey routes', () => {
     jest.clearAllMocks();
   });
 
-  it('creates listing, updates listing, and deactivates listing', async () => {
+  it('creates listing, updates listing, freezes/unfreezes listing, and permanently deletes listing', async () => {
     Apartment.create.mockResolvedValue({
       id: 'apt-1',
       city: 'Tel Aviv',
+      isActive: true,
       update: jest.fn(async function apply(updates) {
         Object.assign(this, updates);
         return this;
       }),
+      destroy: jest.fn(async () => undefined),
     });
     Apartment.findOne.mockResolvedValue({
       id: 'apt-1',
       city: 'Tel Aviv',
+      isActive: true,
       update: jest.fn(async function apply(updates) {
         Object.assign(this, updates);
         return this;
       }),
+      destroy: jest.fn(async () => undefined),
     });
 
     const created = await request(app)
@@ -156,12 +165,28 @@ describe('Critical journey routes', () => {
     expect(updated.status).toBe(200);
     expect(updated.body.apartment.title).toBe('Updated title');
 
-    const deactivated = await request(app)
+    const frozen = await request(app)
+      .post('/api/apartments/apt-1/freeze')
+      .set('Authorization', 'Bearer landlord');
+
+    expect(frozen.status).toBe(200);
+    expect(frozen.body.apartment.isActive).toBe(false);
+    expect(frozen.body.message).toBe('Apartment frozen');
+
+    const reactivated = await request(app)
+      .post('/api/apartments/apt-1/freeze')
+      .set('Authorization', 'Bearer landlord');
+
+    expect(reactivated.status).toBe(200);
+    expect(reactivated.body.apartment.isActive).toBe(true);
+    expect(reactivated.body.message).toBe('Apartment reactivated');
+
+    const deleted = await request(app)
       .delete('/api/apartments/apt-1')
       .set('Authorization', 'Bearer landlord');
 
-    expect(deactivated.status).toBe(200);
-    expect(deactivated.body.message).toBe('Apartment deactivated');
+    expect(deleted.status).toBe(200);
+    expect(deleted.body.message).toBe('Apartment permanently deleted');
   });
 
   it('swipe creates/returns pending match and exposes it in matches list', async () => {

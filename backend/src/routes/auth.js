@@ -1,19 +1,23 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const { validationResult } = require('express-validator');
 const { User } = require('../models');
 const { UserPreferences } = require('../models');
 const { registerValidator, loginValidator } = require('../utils/validators');
 const { cacheSet, cacheDel } = require('../config/redis');
+const { getJwtSecret } = require('../config/security');
+const { sendVerificationEmail } = require('../services/emailService');
 const logger = require('../utils/logger');
 
 const router = express.Router();
 
 function signToken(user) {
+  const jwtSecret = getJwtSecret();
   return jwt.sign(
     { id: user.id, role: user.role, email: user.email, isPremium: Boolean(user.isPremium) },
-    process.env.JWT_SECRET,
+    jwtSecret,
     { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
   );
 }
@@ -35,6 +39,7 @@ router.post('/register', registerValidator, async (req, res, next) => {
 
     const passwordHash = await bcrypt.hash(password, 12);
 
+    const verificationToken = crypto.randomBytes(32).toString('hex');
     const user = await User.create({
       email,
       passwordHash,
@@ -42,6 +47,9 @@ router.post('/register', registerValidator, async (req, res, next) => {
       lastName,
       role,
       phone: phone || null,
+      verificationToken,
+      isVerified: false,
+      verifiedAt: null,
     });
 
     // Create empty preferences doc in MongoDB for tenants
@@ -50,6 +58,9 @@ router.post('/register', registerValidator, async (req, res, next) => {
     }
 
     const token = signToken(user);
+    const appBaseUrl = process.env.APP_BASE_URL || process.env.CLIENT_ORIGIN || 'http://localhost:3000';
+    const verificationUrl = `${appBaseUrl.replace(/\/$/, '')}/verify-email?token=${verificationToken}`;
+    await sendVerificationEmail({ to: email, verificationUrl });
 
     logger.info(`New user registered: ${user.id} (${role})`);
 
@@ -129,7 +140,7 @@ router.post('/logout', async (req, res, next) => {
     if (authHeader?.startsWith('Bearer ')) {
       const token = authHeader.slice(7);
       try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, getJwtSecret());
         await cacheDel(`user:${decoded.id}`);
       } catch {
         // token already invalid — fine

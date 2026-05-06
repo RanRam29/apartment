@@ -5,6 +5,7 @@ const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 
 const authRoutes = require('./routes/auth');
+const verifyRoutes = require('./routes/verify');
 const apartmentRoutes = require('./routes/apartments');
 const swipeRoutes = require('./routes/swipe');
 const matchRoutes = require('./routes/matches');
@@ -18,7 +19,7 @@ const app = express();
 
 app.use(helmet());
 app.use(cors({
-  origin: process.env.CLIENT_ORIGIN || '*',
+  origin: process.env.CLIENT_ORIGIN || 'http://localhost:3000',
   credentials: true,
 }));
 app.use(morgan('combined'));
@@ -34,8 +35,8 @@ const globalLimiter = rateLimit({
 
 // Stricter limit for auth endpoints to prevent brute-force
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 20,
+  windowMs: 60 * 1000,
+  max: 10,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many auth attempts, please try again later' },
@@ -55,6 +56,7 @@ app.use(globalLimiter);
 app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
 app.use('/api/auth', authLimiter, authRoutes);
+app.use('/api/auth', authLimiter, verifyRoutes);
 app.use('/api/apartments', apartmentRoutes);
 app.use('/api/swipe', swipeLimiter, swipeRoutes);
 app.use('/api/matches', matchRoutes);

@@ -10,6 +10,7 @@ jest.mock('../src/middleware/auth', () => ({
       ? next()
       : res.status(403).json({ error: 'Insufficient permissions' })
   ),
+  requireVerified: (_req, _res, next) => next(),
 }));
 
 jest.mock('../src/config/redis', () => ({

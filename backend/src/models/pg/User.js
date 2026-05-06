@@ -46,6 +46,15 @@ const User = sequelize.define('User', {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
+  verificationToken: {
+    type: DataTypes.STRING(128),
+    allowNull: true,
+    unique: true,
+  },
+  verifiedAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
   isPremium: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
