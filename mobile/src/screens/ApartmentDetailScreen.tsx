@@ -42,6 +42,7 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
   const [activeImage, setActiveImage] = React.useState(0);
   const [isImageViewerOpen, setImageViewerOpen] = React.useState(false);
   const carouselRef = React.useRef<any>(null);
+  const viewerRef = React.useRef<any>(null);
 
   const { data: rawData, isLoading, isError } = useQuery({
     queryKey: ['apartment', apartmentId],
@@ -87,6 +88,7 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
     if (!images.length) return;
     const normalized = ((index % images.length) + images.length) % images.length;
     carouselRef.current?.scrollTo({ x: normalized * SCREEN_WIDTH, animated: true });
+    viewerRef.current?.scrollTo({ x: normalized * SCREEN_WIDTH, animated: true });
     setActiveImage(normalized);
   }
 
@@ -97,6 +99,14 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
   function prevImage() {
     scrollToImage(activeImage - 1);
   }
+
+  React.useEffect(() => {
+    if (!isImageViewerOpen || !viewerRef.current) return;
+    const t = setTimeout(() => {
+      viewerRef.current?.scrollTo({ x: activeImage * SCREEN_WIDTH, animated: false });
+    }, 0);
+    return () => clearTimeout(t);
+  }, [isImageViewerOpen, activeImage]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -276,7 +286,24 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
           <TouchableOpacity style={styles.viewerClose} onPress={() => setImageViewerOpen(false)}>
             <Ionicons name="close" size={28} color="#fff" />
           </TouchableOpacity>
-          <Image source={{ uri: images[activeImage] }} style={styles.viewerImage} contentFit="contain" />
+          <ScrollView
+            ref={viewerRef}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            style={styles.viewerCarousel}
+            contentOffset={{ x: activeImage * SCREEN_WIDTH, y: 0 }}
+            onMomentumScrollEnd={(e) => {
+              const idx = Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH);
+              setActiveImage(idx);
+            }}
+          >
+            {images.map((uri, i) => (
+              <View key={`viewer-${i}`} style={styles.viewerSlide}>
+                <Image source={{ uri }} style={styles.viewerImage} contentFit="contain" />
+              </View>
+            ))}
+          </ScrollView>
           {hasMultipleImages && (
             <>
               <TouchableOpacity style={[styles.viewerArrow, styles.viewerArrowLeft]} onPress={prevImage} activeOpacity={0.85}>
@@ -361,7 +388,9 @@ const styles = StyleSheet.create({
   detailChipText: { color: '#A0A0B2', fontSize: 12 },
   viewerBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.94)', justifyContent: 'center', alignItems: 'center' },
   viewerClose: { position: 'absolute', top: 48, right: 20, zIndex: 10, padding: 8 },
-  viewerImage: { width: SCREEN_WIDTH, height: '85%' },
+  viewerCarousel: { width: SCREEN_WIDTH, height: '85%' },
+  viewerSlide: { width: SCREEN_WIDTH, height: '100%', justifyContent: 'center', alignItems: 'center' },
+  viewerImage: { width: SCREEN_WIDTH, height: '100%' },
   viewerArrow: {
     position: 'absolute',
     top: '50%',
