@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
-  SafeAreaView, ActivityIndicator, Dimensions,
+  SafeAreaView, ActivityIndicator, Dimensions, Modal,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
@@ -40,6 +40,7 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
   const { apartmentId } = route.params;
 
   const [activeImage, setActiveImage] = React.useState(0);
+  const [isImageViewerOpen, setImageViewerOpen] = React.useState(false);
   const carouselRef = React.useRef<any>(null);
 
   const { data: rawData, isLoading, isError } = useQuery({
@@ -100,7 +101,15 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
             >
               {images.map((uri, i) => (
                 <View key={i} style={styles.carouselSlide}>
-                  <Image source={{ uri }} style={styles.carouselImage} contentFit="contain" />
+                  <TouchableOpacity
+                    activeOpacity={0.95}
+                    onPress={() => {
+                      setActiveImage(i);
+                      setImageViewerOpen(true);
+                    }}
+                  >
+                    <Image source={{ uri }} style={styles.carouselImage} contentFit="contain" />
+                  </TouchableOpacity>
                 </View>
               ))}
             </ScrollView>
@@ -230,6 +239,20 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
           )}
         </View>
       </ScrollView>
+
+      <Modal
+        visible={isImageViewerOpen}
+        animationType="fade"
+        transparent
+        onRequestClose={() => setImageViewerOpen(false)}
+      >
+        <View style={styles.viewerBackdrop}>
+          <TouchableOpacity style={styles.viewerClose} onPress={() => setImageViewerOpen(false)}>
+            <Ionicons name="close" size={28} color="#fff" />
+          </TouchableOpacity>
+          <Image source={{ uri: images[activeImage] }} style={styles.viewerImage} contentFit="contain" />
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -255,8 +278,8 @@ function DetailChip({ icon, label }: { icon: keyof typeof Ionicons.glyphMap; lab
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#1A1A2E' },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#1A1A2E' },
-  carouselSlide: { width: SCREEN_WIDTH, height: 280, backgroundColor: '#111122', justifyContent: 'center', alignItems: 'center' },
-  carouselImage: { width: SCREEN_WIDTH, height: 280 },
+  carouselSlide: { width: SCREEN_WIDTH, height: 320, backgroundColor: '#111122', justifyContent: 'center', alignItems: 'center' },
+  carouselImage: { width: SCREEN_WIDTH, height: 320 },
   noImagePlaceholder: { height: 200, justifyContent: 'center', alignItems: 'center', backgroundColor: '#2A2A3E' },
   floatingBack: {
     position: 'absolute', top: 16, left: 16,
@@ -287,6 +310,9 @@ const styles = StyleSheet.create({
   detailsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 },
   detailChip: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: '#2A2A3E', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10 },
   detailChipText: { color: '#A0A0B2', fontSize: 12 },
+  viewerBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.94)', justifyContent: 'center', alignItems: 'center' },
+  viewerClose: { position: 'absolute', top: 48, right: 20, zIndex: 10, padding: 8 },
+  viewerImage: { width: SCREEN_WIDTH, height: '85%' },
   errorText: { color: '#FF4757', fontSize: 16, marginBottom: 16 },
   backBtn: { backgroundColor: '#6C5CE7', paddingHorizontal: 20, paddingVertical: 10, borderRadius: 10 },
   backBtnText: { color: '#fff', fontWeight: '700' },
