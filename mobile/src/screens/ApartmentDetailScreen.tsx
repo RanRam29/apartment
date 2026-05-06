@@ -40,6 +40,7 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
   const { apartmentId } = route.params;
 
   const [activeImage, setActiveImage] = React.useState(0);
+  const carouselRef = React.useRef<any>(null);
 
   const { data: rawData, isLoading, isError } = useQuery({
     queryKey: ['apartment', apartmentId],
@@ -87,21 +88,34 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
         {images.length > 0 ? (
           <View>
             <ScrollView
+              ref={carouselRef}
               horizontal
               pagingEnabled
               showsHorizontalScrollIndicator={false}
-              onMomentumScrollEnd={(e) =>
-                setActiveImage(Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH))
-              }
+              scrollEventThrottle={16}
+              onMomentumScrollEnd={(e) => {
+                const idx = Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH);
+                setActiveImage(idx);
+              }}
             >
               {images.map((uri, i) => (
-                <Image key={i} source={{ uri }} style={styles.carouselImage} contentFit="cover" />
+                <View key={i} style={styles.carouselSlide}>
+                  <Image source={{ uri }} style={styles.carouselImage} contentFit="contain" />
+                </View>
               ))}
             </ScrollView>
             {images.length > 1 && (
               <View style={styles.dotRow}>
                 {images.map((_, i) => (
-                  <View key={i} style={[styles.dot, i === activeImage && styles.dotActive]} />
+                  <TouchableOpacity
+                    key={i}
+                    style={[styles.dot, i === activeImage && styles.dotActive]}
+                    onPress={() => {
+                      carouselRef.current?.scrollTo({ x: i * SCREEN_WIDTH, animated: true });
+                      setActiveImage(i);
+                    }}
+                    activeOpacity={0.7}
+                  />
                 ))}
               </View>
             )}
@@ -241,15 +255,16 @@ function DetailChip({ icon, label }: { icon: keyof typeof Ionicons.glyphMap; lab
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#1A1A2E' },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#1A1A2E' },
+  carouselSlide: { width: SCREEN_WIDTH, height: 280, backgroundColor: '#111122', justifyContent: 'center', alignItems: 'center' },
   carouselImage: { width: SCREEN_WIDTH, height: 280 },
   noImagePlaceholder: { height: 200, justifyContent: 'center', alignItems: 'center', backgroundColor: '#2A2A3E' },
   floatingBack: {
     position: 'absolute', top: 16, left: 16,
     backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 20, padding: 8,
   },
-  dotRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 8, gap: 6 },
-  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#3A3A5E' },
-  dotActive: { backgroundColor: '#6C5CE7', width: 16 },
+  dotRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 10, marginBottom: 4, gap: 8 },
+  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#3A3A5E' },
+  dotActive: { backgroundColor: '#6C5CE7', width: 20, borderRadius: 4 },
   content: { padding: 20 },
   titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
   price: { fontSize: 24, fontWeight: '800', color: '#6C5CE7' },
