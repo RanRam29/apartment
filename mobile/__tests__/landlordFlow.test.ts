@@ -2,7 +2,7 @@ describe('landlord API flow', () => {
   let landlordApi: any;
   let mockGet: jest.Mock;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     jest.resetModules();
     mockGet = jest.fn();
 
@@ -32,7 +32,7 @@ describe('landlord API flow', () => {
       return { __esModule: true, default: { create }, create };
     });
 
-    ({ landlordApi } = await import('../src/services/api'));
+    ({ landlordApi } = require('../src/services/api'));
   });
 
   it('loads dashboard and paginated leads', async () => {

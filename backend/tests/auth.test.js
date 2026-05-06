@@ -6,14 +6,32 @@
  * landlord registration has no MongoDB dependency, so these tests stay green
  * even without a running MongoDB.
  */
+process.env.POSTGRES_SSL = 'false';
+process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED = 'false';
+process.env.JWT_SECRET = 'test_jwt_secret_for_auth_tests_only';
+
 const request = require('supertest');
 const { sequelize } = require('../src/config/database');
+const mockRedisClient = {
+  disconnect: jest.fn(),
+};
+jest.mock('../src/config/redis', () => ({
+  initRedis: jest.fn(async () => undefined),
+  getRedisClient: jest.fn(() => mockRedisClient),
+  cacheGet: jest.fn(async () => null),
+  cacheSet: jest.fn(async () => undefined),
+  cacheDel: jest.fn(async () => undefined),
+}));
 const { initRedis, getRedisClient } = require('../src/config/redis');
 const app = require('../src/app');
+const TEST_PASSWORD = `T-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+const WRONG_PASSWORD = `W-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+const UNKNOWN_EMAIL = `unknown_${Date.now()}@test.com`;
+const INVALID_EMAIL = `invalid_${Date.now()}@test.com`;
 
 const LANDLORD = {
   email: `landlord_${Date.now()}@test.com`,
-  password: 'Test1234!',
+  password: TEST_PASSWORD,
   firstName: 'Test',
   lastName: 'Landlord',
   role: 'landlord',
@@ -57,7 +75,7 @@ describe('POST /api/auth/register', () => {
   it('rejects missing required fields with 422', async () => {
     const res = await request(app)
       .post('/api/auth/register')
-      .send({ email: 'bad@test.com' });
+      .send({ email: INVALID_EMAIL });
     expect(res.status).toBe(422);
   });
 });
@@ -76,14 +94,14 @@ describe('POST /api/auth/login', () => {
   it('rejects wrong password with 401', async () => {
     const res = await request(app)
       .post('/api/auth/login')
-      .send({ email: LANDLORD.email, password: 'wrongpassword' });
+      .send({ email: LANDLORD.email, password: WRONG_PASSWORD });
     expect(res.status).toBe(401);
   });
 
   it('rejects unknown email with 401', async () => {
     const res = await request(app)
       .post('/api/auth/login')
-      .send({ email: 'nobody@test.com', password: 'anything' });
+      .send({ email: UNKNOWN_EMAIL, password: WRONG_PASSWORD });
     expect(res.status).toBe(401);
   });
 });

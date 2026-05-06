@@ -12,7 +12,11 @@ def _client():
 
 def test_nlp_parse_accepts_valid_query_without_redis(monkeypatch):
     monkeypatch.setattr("src.routes.nlp.get_redis", lambda: None)
-    monkeypatch.setattr("src.routes.nlp.parse_query", lambda query: {"city": "תל אביב", "q": query})
+
+    async def _parse_query(query):
+        return {"city": "תל אביב", "q": query}
+
+    monkeypatch.setattr("src.routes.nlp.parse_query", _parse_query)
 
     client = _client()
     res = client.post("/api/nlp/parse", json={"query": "דירה בתל אביב"})

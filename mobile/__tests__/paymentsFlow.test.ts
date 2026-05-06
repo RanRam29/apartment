@@ -2,7 +2,7 @@ describe('payments API flow', () => {
   let paymentApi: any;
   let mockPost: jest.Mock;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     jest.resetModules();
     mockPost = jest.fn();
 
@@ -32,7 +32,7 @@ describe('payments API flow', () => {
       return { __esModule: true, default: { create }, create };
     });
 
-    ({ paymentApi } = await import('../src/services/api'));
+    ({ paymentApi } = require('../src/services/api'));
   });
 
   it('starts premium payment request', async () => {

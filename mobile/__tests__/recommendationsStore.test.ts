@@ -3,7 +3,7 @@ describe('recommendations API flow', () => {
   let mockGet: jest.Mock;
   let mockPost: jest.Mock;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     jest.resetModules();
     mockGet = jest.fn();
     mockPost = jest.fn();
@@ -34,7 +34,7 @@ describe('recommendations API flow', () => {
       return { __esModule: true, default: { create }, create };
     });
 
-    ({ recommendationsApi } = await import('../src/services/api'));
+    ({ recommendationsApi } = require('../src/services/api'));
   });
 
   it('calls NLP search endpoint with overrides', async () => {

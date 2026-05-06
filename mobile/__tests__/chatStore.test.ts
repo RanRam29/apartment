@@ -1,16 +1,16 @@
 import { useChatStore } from '../src/store/useChatStore';
 import { chatApi, tokenStorage } from '../src/services/api';
 
-const emit = jest.fn();
-const on = jest.fn();
-const disconnect = jest.fn();
+const mockEmit = jest.fn();
+const mockOn = jest.fn();
+const mockDisconnect = jest.fn();
 
 jest.mock('socket.io-client', () => ({
   io: jest.fn(() => ({
     connected: true,
-    emit,
-    on,
-    disconnect,
+    emit: mockEmit,
+    on: mockOn,
+    disconnect: mockDisconnect,
   })),
 }));
 
@@ -36,7 +36,7 @@ describe('useChatStore', () => {
     await useChatStore.getState().connect();
 
     expect(useChatStore.getState().socket).toBeTruthy();
-    expect(on).toHaveBeenCalled();
+    expect(mockOn).toHaveBeenCalled();
   });
 
   it('sendMessage falls back to REST without connected socket', async () => {
