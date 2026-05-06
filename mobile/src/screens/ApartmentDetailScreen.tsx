@@ -25,15 +25,25 @@ const AMENITY_LABELS: Record<Amenity, string> = {
 
 type Props = NativeStackScreenProps<MainStackParamList, 'ApartmentDetail'>;
 
+function normalizeApartment(raw: any): any {
+  // API may return { apartment: {...} } or the flat object directly
+  return raw?.apartment ?? raw;
+}
+
+function getImageUrl(img: unknown): string | null {
+  if (typeof img === 'string') return img;
+  if (img && typeof (img as any).url === 'string') return (img as any).url;
+  return null;
+}
+
 export default function ApartmentDetailScreen({ route, navigation }: Props) {
   const { apartmentId } = route.params;
 
-  // Hook must always be called — never after a conditional return
   const [activeImage, setActiveImage] = React.useState(0);
 
-  const { data: apt, isLoading, isError } = useQuery({
+  const { data: rawData, isLoading, isError } = useQuery({
     queryKey: ['apartment', apartmentId],
-    queryFn: () => apartmentsApi.getById(apartmentId).then((r) => r.data.apartment ?? r.data),
+    queryFn: () => apartmentsApi.getById(apartmentId).then((r) => r.data),
   });
 
   if (isLoading) {
@@ -44,7 +54,7 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
     );
   }
 
-  if (isError || !apt) {
+  if (isError || !rawData) {
     return (
       <SafeAreaView style={styles.center}>
         <Text style={styles.errorText}>לא ניתן לטעון את הדירה</Text>
@@ -55,11 +65,26 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
     );
   }
 
+  // Normalize here (after guard) so hooks are never called conditionally
+  const apt = normalizeApartment(rawData);
+
+  const images: string[] = (apt.images ?? [])
+    .map(getImageUrl)
+    .filter((u: string | null): u is string => u !== null);
+
+  const price = Number(apt.price ?? 0);
+  const rooms = apt.rooms != null ? Number(apt.rooms) : null;
+  const floor = apt.floor != null ? Number(apt.floor) : null;
+  const totalFloors = apt.totalFloors != null ? Number(apt.totalFloors) : null;
+  const sizeSqm = apt.sizeSqm != null ? Number(apt.sizeSqm) : null;
+  const viewCount = apt.viewCount != null ? Number(apt.viewCount) : 0;
+  const minLease = apt.minLeasePeriod != null ? Number(apt.minLeasePeriod) : null;
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Image carousel */}
-        {apt.images?.length > 0 ? (
+        {images.length > 0 ? (
           <View>
             <ScrollView
               horizontal
@@ -69,15 +94,17 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
                 setActiveImage(Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH))
               }
             >
-              {apt.images.map((img: { url: string }, i: number) => (
-                <Image key={i} source={{ uri: img.url }} style={styles.carouselImage} contentFit="cover" />
+              {images.map((uri, i) => (
+                <Image key={i} source={{ uri }} style={styles.carouselImage} contentFit="cover" />
               ))}
             </ScrollView>
-            <View style={styles.dotRow}>
-              {apt.images.map((_: unknown, i: number) => (
-                <View key={i} style={[styles.dot, i === activeImage && styles.dotActive]} />
-              ))}
-            </View>
+            {images.length > 1 && (
+              <View style={styles.dotRow}>
+                {images.map((_, i) => (
+                  <View key={i} style={[styles.dot, i === activeImage && styles.dotActive]} />
+                ))}
+              </View>
+            )}
           </View>
         ) : (
           <View style={styles.noImagePlaceholder}>
@@ -91,9 +118,9 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
         </TouchableOpacity>
 
         <View style={styles.content}>
-          {/* Header */}
+          {/* Price + verified badge */}
           <View style={styles.titleRow}>
-            <Text style={styles.price}>₪{Number(apt.price ?? apt.apartment?.price ?? 0).toLocaleString()}/חודש</Text>
+            <Text style={styles.price}>₪{price.toLocaleString()}/חודש</Text>
             {apt.landlord?.isVerified && (
               <View style={styles.verifiedBadge}>
                 <Ionicons name="checkmark-circle" size={14} color="#00D2D3" />
@@ -101,24 +128,51 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
               </View>
             )}
           </View>
-          <Text style={styles.title}>{apt.title}</Text>
-          <Text style={styles.location}>
-            <Ionicons name="location-outline" size={14} color="#A0A0B2" />
-            {' '}{apt.city}{apt.neighborhood ? ` · ${apt.neighborhood}` : ''}
-          </Text>
+
+          {apt.title ? <Text style={styles.title}>{apt.title}</Text> : null}
+
+          {/* Location */}
+          {(apt.city || apt.neighborhood || apt.address) && (
+            <Text style={styles.location}>
+              <Ionicons name="location-outline" size={14} color="#A0A0B2" />
+              {' '}
+              {[apt.address, apt.neighborhood, apt.city].filter(Boolean).join(', ')}
+            </Text>
+          )}
 
           {/* Stats row */}
           <View style={styles.statsRow}>
-            <Stat icon="bed-outline" value={`${apt.rooms} חד׳`} />
-            {apt.floor !== null && <Stat icon="layers-outline" value={`קומה ${apt.floor}`} />}
-            {apt.sizeSqm && <Stat icon="expand-outline" value={`${apt.sizeSqm} מ"ר`} />}
-            <Stat icon="eye-outline" value={`${apt.viewCount} צפיות`} />
+            {rooms != null && <Stat icon="bed-outline" value={`${rooms % 1 === 0 ? rooms : rooms.toFixed(1)} חד׳`} />}
+            {floor != null && (
+              <Stat
+                icon="layers-outline"
+                value={totalFloors != null ? `קומה ${floor}/${totalFloors}` : `קומה ${floor}`}
+              />
+            )}
+            {sizeSqm != null && <Stat icon="expand-outline" value={`${sizeSqm} מ"ר`} />}
+            <Stat icon="eye-outline" value={`${viewCount} צפיות`} />
+          </View>
+
+          {/* Extra details row */}
+          <View style={styles.detailsWrap}>
+            {apt.availableFrom && (
+              <DetailChip
+                icon="calendar-outline"
+                label={`זמין מ: ${new Date(apt.availableFrom).toLocaleDateString('he-IL')}`}
+              />
+            )}
+            {minLease != null && (
+              <DetailChip icon="time-outline" label={`מינימום ${minLease} חודשים`} />
+            )}
+            {apt.petsAllowed && (
+              <DetailChip icon="paw-outline" label="חיות מחמד מותרות" />
+            )}
           </View>
 
           {/* Amenities */}
           {apt.amenities?.length > 0 && (
             <>
-              <Text style={styles.sectionTitle}>שירותים</Text>
+              <Text style={styles.sectionTitle}>שירותים ומתקנים</Text>
               <View style={styles.amenitiesWrap}>
                 {apt.amenities.map((a: Amenity) => (
                   <View key={a} style={styles.amenityChip}>
@@ -149,20 +203,16 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
                     <Ionicons name="person" size={20} color="#A0A0B2" />
                   </View>
                 )}
-                <Text style={styles.landlordName}>
-                  {apt.landlord.firstName} {apt.landlord.lastName}
-                </Text>
-                {apt.landlord.isVerified && (
-                  <Ionicons name="checkmark-circle" size={16} color="#00D2D3" style={{ marginLeft: 4 }} />
-                )}
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.landlordName}>
+                    {apt.landlord.firstName} {apt.landlord.lastName}
+                  </Text>
+                  {apt.landlord.isVerified && (
+                    <Text style={styles.verifiedText}>✓ משתמש מאומת</Text>
+                  )}
+                </View>
               </View>
             </>
-          )}
-
-          {apt.availableFrom && (
-            <Text style={styles.availableFrom}>
-              זמין מ: {new Date(apt.availableFrom).toLocaleDateString('he-IL')}
-            </Text>
           )}
         </View>
       </ScrollView>
@@ -175,6 +225,15 @@ function Stat({ icon, value }: { icon: keyof typeof Ionicons.glyphMap; value: st
     <View style={styles.stat}>
       <Ionicons name={icon} size={16} color="#6C5CE7" />
       <Text style={styles.statText}>{value}</Text>
+    </View>
+  );
+}
+
+function DetailChip({ icon, label }: { icon: keyof typeof Ionicons.glyphMap; label: string }) {
+  return (
+    <View style={styles.detailChip}>
+      <Ionicons name={icon} size={14} color="#A0A0B2" />
+      <Text style={styles.detailChipText}>{label}</Text>
     </View>
   );
 }
@@ -210,7 +269,9 @@ const styles = StyleSheet.create({
   avatar: { width: 40, height: 40, borderRadius: 20 },
   avatarFallback: { backgroundColor: '#2A2A3E', justifyContent: 'center', alignItems: 'center' },
   landlordName: { color: '#fff', fontSize: 14, fontWeight: '600' },
-  availableFrom: { color: '#A0A0B2', fontSize: 13, textAlign: 'right', marginTop: 4 },
+  detailsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 },
+  detailChip: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: '#2A2A3E', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10 },
+  detailChipText: { color: '#A0A0B2', fontSize: 12 },
   errorText: { color: '#FF4757', fontSize: 16, marginBottom: 16 },
   backBtn: { backgroundColor: '#6C5CE7', paddingHorizontal: 20, paddingVertical: 10, borderRadius: 10 },
   backBtnText: { color: '#fff', fontWeight: '700' },
