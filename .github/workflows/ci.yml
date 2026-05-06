@@ -37,6 +37,15 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
+      mongodb:
+        image: mongo:7
+        ports: ["27017:27017"]
+        options: >-
+          --health-cmd "mongosh --eval 'db.runCommand({ ping: 1 })'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - uses: actions/checkout@v4
 
@@ -50,8 +59,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run tests
-        run: npm test --if-present
+      - name: Run tests with coverage
+        run: npx jest --runInBand --coverage --coverageThreshold='{"global":{"branches":50,"functions":60,"lines":60}}' --passWithNoTests --testTimeout=30000
         env:
           NODE_ENV: test
           POSTGRES_HOST: localhost
@@ -63,6 +72,7 @@ jobs:
           REDIS_PORT: 6379
           JWT_SECRET: test_secret_key_for_ci
           MONGO_URI: mongodb://localhost:27017/test_db
+          POSTGRES_SSL: "false"
 
   ai-service-test:
     name: AI service lint & test
@@ -85,7 +95,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run tests
-        run: python -m pytest tests/ -v --if-no-tests=skip 2>/dev/null || echo "No tests yet"
+        run: python -m pytest tests/ -v
 
       - name: Type check (pyright)
         run: |

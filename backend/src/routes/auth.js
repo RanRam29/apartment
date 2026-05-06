@@ -44,9 +44,11 @@ router.post('/register', registerValidator, async (req, res, next) => {
       phone: phone || null,
     });
 
-    // Create empty preferences doc in MongoDB for tenants
+    // Create empty preferences doc in MongoDB for tenants (fire-and-forget)
     if (role === 'tenant') {
-      await UserPreferences.create({ userId: user.id });
+      UserPreferences.create({ userId: user.id }).catch((err) => {
+        logger.warn('Failed to create UserPreferences doc:', err.message);
+      });
     }
 
     const token = signToken(user);
