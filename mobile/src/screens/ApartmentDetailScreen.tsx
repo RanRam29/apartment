@@ -28,6 +28,9 @@ type Props = NativeStackScreenProps<MainStackParamList, 'ApartmentDetail'>;
 export default function ApartmentDetailScreen({ route, navigation }: Props) {
   const { apartmentId } = route.params;
 
+  // Hook must always be called — never after a conditional return
+  const [activeImage, setActiveImage] = React.useState(0);
+
   const { data: apt, isLoading, isError } = useQuery({
     queryKey: ['apartment', apartmentId],
     queryFn: () => apartmentsApi.getById(apartmentId).then((r) => r.data),
@@ -51,8 +54,6 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
       </SafeAreaView>
     );
   }
-
-  const [activeImage, setActiveImage] = React.useState(0);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -92,7 +93,7 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
         <View style={styles.content}>
           {/* Header */}
           <View style={styles.titleRow}>
-            <Text style={styles.price}>₪{apt.price.toLocaleString()}/חודש</Text>
+            <Text style={styles.price}>₪{Number(apt.price ?? apt.apartment?.price ?? 0).toLocaleString()}/חודש</Text>
             {apt.landlord?.isVerified && (
               <View style={styles.verifiedBadge}>
                 <Ionicons name="checkmark-circle" size={14} color="#00D2D3" />

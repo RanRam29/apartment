@@ -1,8 +1,9 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
+import { getApiBaseUrl } from './apiConfig';
 
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
+const BASE_URL = getApiBaseUrl();
 const TOKEN_KEY = 'auth_token';
 
 const storage = {

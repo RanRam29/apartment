@@ -36,6 +36,10 @@ export default function RegisterScreen({ onSwitch }: Props) {
     try {
       await register({ firstName, lastName, email: email.trim().toLowerCase(), password, role, phone: phone || undefined });
     } catch (err: any) {
+      if (!err?.response) {
+        Alert.alert('שגיאה', 'לא ניתן להתחבר לשרת. בדוק ש-API פעיל ושכתובת השרת נכונה.');
+        return;
+      }
       const errors = err?.response?.data?.errors;
       const msg = errors
         ? errors.map((e: any) => e.msg).join('\n')

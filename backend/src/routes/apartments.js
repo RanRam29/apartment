@@ -65,7 +65,12 @@ router.post(
       });
 
       // Invalidate feed cache for this city
-      await cacheDel(`feed:${city.toLowerCase()}`);
+      const normalizedCity = typeof city === 'string' ? city.toLowerCase() : null;
+      if (normalizedCity) {
+        await cacheDel(`feed:${normalizedCity}`);
+      }
+      // Invalidate landlord dashboard cache so listings appear immediately
+      await cacheDel(`landlord:dashboard:${req.user.id}`);
 
       logger.info(`Apartment created: ${apartment.id} by landlord ${req.user.id}`);
       res.status(201).json({ apartment });
@@ -185,6 +190,7 @@ router.patch('/:id', authenticate, requireRole('landlord'), async (req, res, nex
     await apartment.update(updates);
     await cacheDel(`apartment:${apartment.id}`);
     await cacheDel(`feed:${apartment.city.toLowerCase()}`);
+    await cacheDel(`landlord:dashboard:${req.user.id}`);
 
     res.json({ apartment });
   } catch (err) {
@@ -202,6 +208,7 @@ router.delete('/:id', authenticate, requireRole('landlord'), async (req, res, ne
 
     await apartment.update({ isActive: false });
     await cacheDel(`apartment:${apartment.id}`);
+    await cacheDel(`landlord:dashboard:${req.user.id}`);
 
     res.json({ message: 'Apartment deactivated' });
   } catch (err) {
