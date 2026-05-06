@@ -227,4 +227,26 @@ router.patch('/push-token', require('../middleware/auth').authenticate, async (r
   }
 });
 
+// POST /api/auth/resend-verification
+router.post('/resend-verification', require('../middleware/auth').authenticate, async (req, res, next) => {
+  try {
+    const user = await User.findByPk(req.user.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (user.isVerified) {
+      return res.status(400).json({ error: 'Account already verified' });
+    }
+
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    await user.update({ verificationToken });
+
+    const appBaseUrl = process.env.APP_BASE_URL || process.env.CLIENT_ORIGIN || 'http://localhost:3000';
+    const verificationUrl = `${appBaseUrl.replace(/\/$/, '')}/verify-email?token=${verificationToken}`;
+    await sendVerificationEmail({ to: user.email, verificationUrl });
+
+    res.json({ ok: true, message: 'Verification email sent' });
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;

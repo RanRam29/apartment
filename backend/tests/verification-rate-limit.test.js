@@ -62,6 +62,34 @@ describe('Email verification + auth rate limiting', () => {
     expect(created.verificationToken).toBeNull();
   });
 
+  it('resends verification email for authenticated unverified user', async () => {
+    const user = await User.create({
+      email: `resend_${Date.now()}@test.com`,
+      passwordHash: 'hash',
+      firstName: 'Re',
+      lastName: 'Send',
+      role: 'tenant',
+      isVerified: false,
+      verificationToken: 'old-token',
+    });
+    const token = jwt.sign(
+      { id: user.id, role: 'tenant', email: user.email, isPremium: false },
+      process.env.JWT_SECRET
+    );
+
+    const res = await request(app)
+      .post('/api/auth/resend-verification')
+      .set('Authorization', `Bearer ${token}`)
+      .send({});
+
+    expect(res.status).toBe(200);
+    expect(res.body.ok).toBe(true);
+    await user.reload();
+    expect(user.verificationToken).toBeTruthy();
+    expect(user.verificationToken).not.toBe('old-token');
+    expect(mockSendVerificationEmail).toHaveBeenCalled();
+  });
+
   it('blocks unverified tenants from swiping', async () => {
     const tenant = await User.create({
       email: `tenant_unverified_${Date.now()}@test.com`,

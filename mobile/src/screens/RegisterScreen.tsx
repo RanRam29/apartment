@@ -35,6 +35,7 @@ export default function RegisterScreen({ onSwitch }: Props) {
     setLoading(true);
     try {
       await register({ firstName, lastName, email: email.trim().toLowerCase(), password, role, phone: phone || undefined });
+      Alert.alert('בדוק את המייל', 'שלחנו לך קישור לאימות כתובת האימייל.');
     } catch (err: any) {
       if (!err?.response) {
         Alert.alert('שגיאה', 'לא ניתן להתחבר לשרת. בדוק ש-API פעיל ושכתובת השרת נכונה.');

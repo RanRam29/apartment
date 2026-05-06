@@ -22,6 +22,8 @@ interface AuthState {
   restoreSession: () => Promise<void>;
   completeOnboarding: () => Promise<void>;
   updateUser: (updates: Partial<import('../types').User>) => void;
+  verifyEmail: (token: string) => Promise<void>;
+  resendVerification: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -71,5 +73,14 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   updateUser: (updates) => {
     set((state) => ({ user: state.user ? { ...state.user, ...updates } : state.user }));
+  },
+
+  verifyEmail: async (token) => {
+    await authApi.verifyEmailToken(token);
+    set((state) => ({ user: state.user ? { ...state.user, isVerified: true } : state.user }));
+  },
+
+  resendVerification: async () => {
+    await authApi.resendVerification();
   },
 }));

@@ -58,6 +58,8 @@ export const authApi = {
     api.patch('/auth/profile', data),
   uploadAvatar: (formData: FormData) =>
     api.patch('/auth/avatar', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  verifyEmailToken: (token: string) => api.get(`/auth/verify/${token}`),
+  resendVerification: () => api.post('/auth/resend-verification', {}),
 };
 
 // ─── Apartments ───────────────────────────────────────────────────────────────
@@ -69,7 +71,8 @@ export const apartmentsApi = {
     api.post('/apartments', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
   update: (id: string, data: Partial<{ title: string; price: number; isActive: boolean; description: string }>) =>
     api.patch(`/apartments/${id}`, data),
-  deactivate: (id: string) => api.delete(`/apartments/${id}`),
+  toggleFreeze: (id: string) => api.post(`/apartments/${id}/freeze`),
+  deletePermanently: (id: string) => api.delete(`/apartments/${id}`),
 };
 
 // ─── Swipe ────────────────────────────────────────────────────────────────────
