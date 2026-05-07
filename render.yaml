@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: apartmentapp-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
