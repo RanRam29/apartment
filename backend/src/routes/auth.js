@@ -1,14 +1,24 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 const { User } = require('../models');
 const { UserPreferences } = require('../models');
 const { registerValidator, loginValidator } = require('../utils/validators');
-const { cacheSet, cacheDel } = require('../config/redis');
+const { cacheGet, cacheSet, cacheDel } = require('../config/redis');
+const { sendVerificationEmail } = require('../services/emailService');
 const logger = require('../utils/logger');
 
 const router = express.Router();
+
+async function issueVerificationTokenForUser(user) {
+  const verificationToken = crypto.randomBytes(32).toString('hex');
+  const verificationCacheKey = `email:verify:${verificationToken}`;
+  await cacheSet(verificationCacheKey, { userId: user.id }, 24 * 60 * 60);
+  await sendVerificationEmail(user.email, verificationToken);
+  return verificationToken;
+}
 
 function signToken(user) {
   return jwt.sign(
@@ -52,11 +62,16 @@ router.post('/register', registerValidator, async (req, res, next) => {
     }
 
     const token = signToken(user);
+    const verificationToken = await issueVerificationTokenForUser(user).catch((err) => {
+      logger.warn(`Failed to enqueue verification email for ${user.id}: ${err.message}`);
+      return null;
+    });
 
     logger.info(`New user registered: ${user.id} (${role})`);
 
-    res.status(201).json({
+    const payload = {
       token,
+      verificationRequired: true,
       user: {
         id: user.id,
         email: user.email,
@@ -66,7 +81,10 @@ router.post('/register', registerValidator, async (req, res, next) => {
         isVerified: user.isVerified,
         isPremium: user.isPremium,
       },
-    });
+    };
+    if (process.env.NODE_ENV === 'test' && verificationToken) payload.verificationToken = verificationToken;
+
+    res.status(201).json(payload);
   } catch (err) {
     next(err);
   }
@@ -90,6 +108,15 @@ router.post('/login', loginValidator, async (req, res, next) => {
     const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) {
       return res.status(401).json({ error: 'Invalid credentials' });
+    }
+    if (!user.isVerified) {
+      return res.status(403).json({
+        error: 'Please verify your email before logging in',
+        code: 'EMAIL_NOT_VERIFIED',
+        verificationRequired: true,
+        resendAvailable: true,
+        email: user.email,
+      });
     }
 
     await user.update({ lastActiveAt: new Date() });
@@ -119,6 +146,52 @@ router.post('/login', loginValidator, async (req, res, next) => {
         isPremium: user.isPremium,
       },
     });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /api/auth/verify/:token
+router.get('/verify/:token', async (req, res, next) => {
+  try {
+    const cacheKey = `email:verify:${req.params.token}`;
+    const cached = await cacheGet(cacheKey);
+    if (!cached?.userId) return res.status(400).json({ error: 'Invalid or expired verification token' });
+
+    const user = await User.findByPk(cached.userId);
+    if (!user) return res.status(400).json({ error: 'Invalid verification token' });
+
+    if (!user.isVerified) {
+      await user.update({ isVerified: true });
+    }
+    await cacheDel(cacheKey);
+    res.json({ message: 'Email verified successfully' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /api/auth/verify/resend
+router.post('/verify/resend', async (req, res, next) => {
+  try {
+    const email = String(req.body?.email || '').trim().toLowerCase();
+    if (!email) return res.status(422).json({ error: 'email is required' });
+
+    const user = await User.findOne({ where: { email } });
+    if (user && !user.isVerified) {
+      const verificationToken = await issueVerificationTokenForUser(user).catch((err) => {
+        logger.warn(`Failed to resend verification for ${user.id}: ${err.message}`);
+        return null;
+      });
+
+      const payload = {
+        message: 'If the email exists and is unverified, a verification link has been sent',
+      };
+      if (process.env.NODE_ENV === 'test' && verificationToken) payload.verificationToken = verificationToken;
+      return res.json(payload);
+    }
+
+    res.json({ message: 'If the email exists and is unverified, a verification link has been sent' });
   } catch (err) {
     next(err);
   }

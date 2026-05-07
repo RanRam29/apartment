@@ -3,6 +3,7 @@ import {
   View, Text, FlatList, StyleSheet, SafeAreaView,
   TouchableOpacity, ActivityIndicator, Alert,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { Image } from 'expo-image';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,6 +21,7 @@ const STATUS_LABEL: Record<StatusTab, string> = {
 
 export default function LeadsScreen() {
   const [activeTab, setActiveTab] = useState<StatusTab>('pending');
+  const navigation = useNavigation<any>();
   const queryClient = useQueryClient();
 
   const { data, isLoading, refetch } = useQuery({
@@ -58,6 +60,14 @@ export default function LeadsScreen() {
     );
   }
 
+  function openChat(match: Match) {
+    if (match.status !== 'accepted') return;
+    navigation.navigate('Chat', {
+      matchId: match.id,
+      title: match.apartment?.title ?? 'צ׳אט',
+    });
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.header}>לידים</Text>
@@ -92,6 +102,7 @@ export default function LeadsScreen() {
               onAccept={() => confirmAction(item.id, 'accept')}
               onReject={() => confirmAction(item.id, 'reject')}
               showActions={activeTab === 'pending'}
+              onOpenChat={() => openChat(item)}
             />
           )}
           ListEmptyComponent={
@@ -110,9 +121,17 @@ function LeadRow({ match, onAccept, onReject, showActions }: {
   onAccept: () => void;
   onReject: () => void;
   showActions: boolean;
+  onOpenChat: () => void;
 }) {
+  const isAcceptedChatRow = !showActions && match.status === 'accepted';
+
   return (
-    <View style={styles.leadCard}>
+    <TouchableOpacity
+      style={styles.leadCard}
+      onPress={isAcceptedChatRow ? onOpenChat : undefined}
+      disabled={!isAcceptedChatRow}
+      activeOpacity={isAcceptedChatRow ? 0.85 : 1}
+    >
       <View style={styles.leadTop}>
         {match.tenant?.avatarUrl ? (
           <Image source={{ uri: match.tenant.avatarUrl }} style={styles.avatar} contentFit="cover" />
@@ -146,7 +165,13 @@ function LeadRow({ match, onAccept, onReject, showActions }: {
           </TouchableOpacity>
         </View>
       )}
-    </View>
+      {isAcceptedChatRow && (
+        <TouchableOpacity style={styles.chatBtn} onPress={onOpenChat}>
+          <Ionicons name="chatbubble-ellipses-outline" size={18} color="#fff" />
+          <Text style={styles.chatText}>פתח צ׳אט</Text>
+        </TouchableOpacity>
+      )}
+    </TouchableOpacity>
   );
 }
 
@@ -182,6 +207,16 @@ const styles = StyleSheet.create({
     gap: 6, paddingVertical: 10, borderRadius: 10, backgroundColor: '#6C5CE7',
   },
   acceptText: { color: '#fff', fontWeight: '600' },
+  chatBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    borderRadius: 10,
+    backgroundColor: '#6C5CE7',
+  },
+  chatText: { color: '#fff', fontWeight: '600' },
   empty: { alignItems: 'center', paddingTop: 60 },
   emptyText: { color: '#A0A0B2', fontSize: 14 },
 });

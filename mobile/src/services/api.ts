@@ -1,7 +1,8 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import * as SecureStore from 'expo-secure-store';
+import { getApiBaseUrl } from './apiConfig';
 
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
+const BASE_URL = getApiBaseUrl();
 const TOKEN_KEY = 'auth_token';
 
 const api: AxiosInstance = axios.create({
@@ -34,6 +35,8 @@ export const authApi = {
     api.post('/auth/register', data),
   login: (email: string, password: string) =>
     api.post('/auth/login', { email, password }),
+  verifyEmail: (token: string) => api.get(`/auth/verify/${token}`),
+  resendVerification: (email: string) => api.post('/auth/verify/resend', { email }),
   logout: () => api.post('/auth/logout'),
   me: () => api.get('/auth/me'),
   savePushToken: (pushToken: string) => api.patch('/auth/push-token', { pushToken }),
