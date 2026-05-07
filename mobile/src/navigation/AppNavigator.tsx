@@ -22,6 +22,7 @@ import ApartmentDetailScreen from '../screens/ApartmentDetailScreen';
 import CreateListingScreen from '../screens/CreateListingScreen';
 import PreferencesScreen from '../screens/PreferencesScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
+import HomeScreen from '../screens/HomeScreen';
 
 const RootStack  = createNativeStackNavigator<RootStackParamList>();
 const TenantTab  = createBottomTabNavigator<TenantTabParamList>();
@@ -33,19 +34,29 @@ function TenantTabs() {
     <TenantTab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarActiveTintColor: C.navy,
+        tabBarActiveTintColor: C.cyan,
         tabBarInactiveTintColor: C.textMut,
         tabBarStyle: {
-          height: 62,
-          paddingBottom: 10,
-          paddingTop: 6,
-          backgroundColor: C.bgCard,
-          borderTopColor: C.border,
-          borderTopWidth: 1,
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 80,
+          paddingBottom: 20,
+          paddingTop: 8,
+          backgroundColor: 'rgba(251, 250, 250, 0.88)',
+          borderTopWidth: 0,
+          // Soft Aura Luxury shadow
+          shadowColor: '#162839',
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: 0.08,
+          shadowRadius: 20,
+          elevation: 20,
         },
         tabBarLabelStyle: { fontSize: 10, fontWeight: '600' },
         tabBarIcon: ({ focused, color, size }) => {
           const icons: Record<string, keyof typeof Ionicons.glyphMap> = {
+            Home:    focused ? 'compass'  : 'compass-outline',
             Swipe:   focused ? 'home'   : 'home-outline',
             Matches: focused ? 'heart'  : 'heart-outline',
             Search:  focused ? 'search' : 'search-outline',
@@ -55,6 +66,7 @@ function TenantTabs() {
         },
       })}
     >
+      <TenantTab.Screen name="Home"    component={HomeScreen}    options={{ title: 'Home' }} />
       <TenantTab.Screen name="Swipe"   component={SwipeScreen}   options={{ title: 'דירות' }} />
       <TenantTab.Screen name="Matches" component={MatchesScreen} options={{ title: 'התאמות' }} />
       <TenantTab.Screen name="Search"  component={SearchScreen}  options={{ title: 'חיפוש' }} />
@@ -68,19 +80,29 @@ function LandlordTabs() {
     <LandlordTab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarActiveTintColor: C.navy,
+        tabBarActiveTintColor: C.cyan,
         tabBarInactiveTintColor: C.textMut,
         tabBarStyle: {
-          height: 62,
-          paddingBottom: 10,
-          paddingTop: 6,
-          backgroundColor: C.bgCard,
-          borderTopColor: C.border,
-          borderTopWidth: 1,
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 80,
+          paddingBottom: 20,
+          paddingTop: 8,
+          backgroundColor: 'rgba(251, 250, 250, 0.88)',
+          borderTopWidth: 0,
+          // Soft Aura Luxury shadow
+          shadowColor: '#162839',
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: 0.08,
+          shadowRadius: 20,
+          elevation: 20,
         },
         tabBarLabelStyle: { fontSize: 10, fontWeight: '600' },
         tabBarIcon: ({ focused, color, size }) => {
           const icons: Record<string, keyof typeof Ionicons.glyphMap> = {
+            Home:      focused ? 'compass'       : 'compass-outline',
             Dashboard: focused ? 'stats-chart'   : 'stats-chart-outline',
             Leads:     focused ? 'people'        : 'people-outline',
             Listings:  focused ? 'list'          : 'list-outline',
@@ -90,6 +112,7 @@ function LandlordTabs() {
         },
       })}
     >
+      <LandlordTab.Screen name="Home"      component={HomeScreen}        options={{ title: 'Home' }} />
       <LandlordTab.Screen name="Dashboard" component={LandlordDashboard} options={{ title: 'דשבורד' }} />
       <LandlordTab.Screen name="Leads"     component={LeadsScreen}       options={{ title: 'לידים' }} />
       <LandlordTab.Screen name="Listings"  component={ListingsScreen}    options={{ title: 'מודעות' }} />

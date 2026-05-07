@@ -118,6 +118,7 @@ export type RootStackParamList = {
 };
 
 export type TenantTabParamList = {
+  Home: undefined;
   Swipe: undefined;
   Matches: undefined;
   Search: undefined;
@@ -125,6 +126,7 @@ export type TenantTabParamList = {
 };
 
 export type LandlordTabParamList = {
+  Home: undefined;
   Dashboard: undefined;
   Leads: undefined;
   Listings: undefined;
