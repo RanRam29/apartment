@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="he" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SwipeHouse — Find Your Perfect Home</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700&display=swap" rel="stylesheet" />
+  <style>
+    /* =============================================
+       RESET & BASE
+    ============================================= */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Assistant', sans-serif;
+      background: #FBFAFA;
+      color: #1B1C1D;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    button, a {
+      cursor: pointer;
+    }
+
+    /* =============================================
+       NAVBAR
+    ============================================= */
+    .navbar {
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(calc(100% - 48px), 960px);
+      z-index: 1000;
+
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(32px) saturate(2.2) brightness(1.08);
+      -webkit-backdrop-filter: blur(32px) saturate(2.2) brightness(1.08);
+      border: 1px solid rgba(255, 255, 255, 0.60);
+      border-radius: 100px;
+      box-shadow:
+        0 8px 32px rgba(22, 40, 57, 0.08),
+        0 2px 8px rgba(22, 40, 57, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.80);
+
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+
+      position: fixed;
+      overflow: hidden;
+    }
+
+    .navbar::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 100px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .navbar::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(0, 229, 255, 0.2), rgba(255, 127, 127, 0.15), rgba(22, 40, 57, 0.1));
+      pointer-events: none;
+    }
+
+    .navbar-logo {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: #162839;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+      position: relative;
+      z-index: 1;
+    }
+
+    .navbar-logo span {
+      color: #00E5FF;
+    }
+
+    .navbar-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      list-style: none;
+      position: relative;
+      z-index: 1;
+    }
+
+    .navbar-links a {
+      font-size: 0.9rem;
+      font-weight: 400;
+      color: #43474C;
+      transition: color 200ms ease;
+    }
+
+    .navbar-links a:hover {
+      color: #162839;
+    }
+
+    .navbar-cta {
+      background: #00E5FF;
+      color: #162839;
+      font-family: 'Assistant', sans-serif;
+      font-size: 0.875rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 100px;
+      padding: 8px 20px;
+      white-space: nowrap;
+      position: relative;
+      z-index: 1;
+      transition: transform 200ms ease, box-shadow 200ms ease;
+    }
+
+    .navbar-cta:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(0, 229, 255, 0.35);
+    }
+
+    /* Mobile navbar */
+    @media (max-width: 640px) {
+      .navbar {
+        width: calc(100% - 32px);
+        top: 12px;
+        padding: 8px 16px;
+      }
+
+      .navbar-links {
+        display: none;
+      }
+    }
+
+    /* =============================================
+       HERO SECTION
+    ============================================= */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 120px 24px 80px;
+      text-align: center;
+      position: relative;
+      background:
+        radial-gradient(ellipse 60% 50% at 80% 10%, rgba(0, 229, 255, 0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 20% 90%, rgba(255, 127, 127, 0.04) 0%, transparent 60%),
+        #FBFAFA;
+    }
+
+    .hero-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 16px;
+      border-radius: 100px;
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(16px) saturate(2);
+      -webkit-backdrop-filter: blur(16px) saturate(2);
+      border: 1px solid rgba(255, 255, 255, 0.60);
+      box-shadow:
+        0 4px 16px rgba(22, 40, 57, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.80);
+      font-size: 0.85rem;
+      font-weight: 400;
+      color: #43474C;
+      margin-bottom: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-pill::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 100px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      font-weight: 300;
+      letter-spacing: -0.04em;
+      color: #162839;
+      line-height: 1.1;
+      max-width: 760px;
+      margin-bottom: 20px;
+    }
+
+    .hero-subtitle {
+      font-size: 1.1rem;
+      font-weight: 400;
+      color: #43474C;
+      max-width: 480px;
+      line-height: 1.6;
+      margin-bottom: 36px;
+    }
+
+    .hero-ctas {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 56px;
+    }
+
+    .btn-primary {
+      background: #162839;
+      color: #FBFAFA;
+      font-family: 'Assistant', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 100px;
+      padding: 13px 28px;
+      transition: transform 200ms ease, box-shadow 200ms ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 100px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(22, 40, 57, 0.22);
+    }
+
+    .btn-glass {
+      background: rgba(255, 255, 255, 0.60);
+      color: #162839;
+      font-family: 'Assistant', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      border: 1px solid rgba(255, 255, 255, 0.60);
+      border-radius: 100px;
+      padding: 13px 28px;
+      backdrop-filter: blur(16px) saturate(2);
+      -webkit-backdrop-filter: blur(16px) saturate(2);
+      box-shadow:
+        0 4px 16px rgba(22, 40, 57, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.90);
+      transition: transform 200ms ease, box-shadow 200ms ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-glass::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 100px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .btn-glass:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(22, 40, 57, 0.10);
+    }
+
+    /* =============================================
+       HERO CARD
+    ============================================= */
+    .hero-card {
+      background: rgba(255, 255, 255, 0.60);
+      backdrop-filter: blur(40px) saturate(2);
+      -webkit-backdrop-filter: blur(40px) saturate(2);
+      border: 1px solid rgba(255, 255, 255, 0.70);
+      border-radius: 32px;
+      box-shadow:
+        0 24px 64px rgba(22, 40, 57, 0.10),
+        inset 0 1px 0 rgba(255, 255, 255, 0.90);
+      padding: 32px;
+      max-width: 480px;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 32px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .hero-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(0, 229, 255, 0.2), rgba(255, 127, 127, 0.15), rgba(22, 40, 57, 0.1));
+      pointer-events: none;
+    }
+
+    .apt-image-placeholder {
+      width: 100%;
+      height: 200px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #c9d6df 0%, #e2ebf0 40%, #d5e8d4 100%);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .apt-image-placeholder::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(135deg, rgba(0, 229, 255, 0.15) 0%, transparent 50%),
+        linear-gradient(225deg, rgba(255, 127, 127, 0.10) 0%, transparent 50%);
+    }
+
+    .apt-image-icon {
+      font-size: 3rem;
+      opacity: 0.5;
+      position: relative;
+      z-index: 1;
+    }
+
+    .apt-price {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #162839;
+      letter-spacing: -0.02em;
+      margin-bottom: 4px;
+    }
+
+    .apt-location {
+      font-size: 0.9rem;
+      color: #43474C;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .apt-meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .apt-chip {
+      background: rgba(22, 40, 57, 0.05);
+      border: 1px solid rgba(22, 40, 57, 0.08);
+      border-radius: 100px;
+      padding: 4px 12px;
+      font-size: 0.8rem;
+      font-weight: 400;
+      color: #43474C;
+    }
+
+    .apt-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .apt-btn {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: none;
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 200ms ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .apt-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .apt-btn-reject {
+      background: rgba(255, 127, 127, 0.15);
+      border: 1px solid rgba(255, 127, 127, 0.30);
+    }
+
+    .apt-btn-reject:hover {
+      transform: scale(1.12);
+      box-shadow: 0 8px 24px rgba(255, 127, 127, 0.30);
+      background: rgba(255, 127, 127, 0.25);
+    }
+
+    .apt-btn-like {
+      background: rgba(0, 229, 255, 0.15);
+      border: 1px solid rgba(0, 229, 255, 0.30);
+    }
+
+    .apt-btn-like:hover {
+      transform: scale(1.12);
+      box-shadow: 0 8px 24px rgba(0, 229, 255, 0.30);
+      background: rgba(0, 229, 255, 0.25);
+    }
+
+    /* =============================================
+       FEATURES SECTION
+    ============================================= */
+    .features {
+      padding: 96px 24px;
+      max-width: 1040px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      text-align: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #00E5FF;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: clamp(1.75rem, 3.5vw, 2.75rem);
+      font-weight: 300;
+      letter-spacing: -0.03em;
+      color: #162839;
+      margin-bottom: 48px;
+    }
+
+    .features-row {
+      display: flex;
+      gap: 24px;
+    }
+
+    @media (max-width: 768px) {
+      .features-row {
+        flex-direction: column;
+      }
+    }
+
+    .feature-card {
+      flex: 1;
+      background: rgba(22, 40, 57, 0.04);
+      border: 1px solid rgba(22, 40, 57, 0.08);
+      border-radius: 24px;
+      padding: 32px;
+      transition:
+        border-radius 400ms cubic-bezier(0.34, 1.56, 0.64, 1),
+        transform 300ms ease,
+        box-shadow 300ms ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, transparent 60%);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 300ms ease;
+    }
+
+    .feature-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(0, 229, 255, 0.2), rgba(255, 127, 127, 0.15), rgba(22, 40, 57, 0.1));
+      pointer-events: none;
+    }
+
+    .feature-card:hover {
+      border-radius: 32px;
+      transform: translateY(-4px);
+      box-shadow: 0 20px 48px rgba(22, 40, 57, 0.10);
+    }
+
+    .feature-card:hover::before {
+      opacity: 1;
+    }
+
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: rgba(0, 229, 255, 0.10);
+      border: 1px solid rgba(0, 229, 255, 0.20);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .feature-icon::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .feature-card h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #162839;
+      letter-spacing: -0.02em;
+      margin-bottom: 10px;
+    }
+
+    .feature-card p {
+      font-size: 0.92rem;
+      color: #43474C;
+      line-height: 1.65;
+    }
+
+    /* =============================================
+       DOWNLOAD CTA SECTION
+    ============================================= */
+    .download-cta {
+      background: linear-gradient(135deg, #162839, #2C3E50);
+      padding: 96px 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .download-cta::before {
+      content: '';
+      position: absolute;
+      top: -30%;
+      right: -10%;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 229, 255, 0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .download-cta::after {
+      content: '';
+      position: absolute;
+      bottom: -20%;
+      left: -5%;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 127, 127, 0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .download-cta-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .download-cta h2 {
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      font-weight: 300;
+      letter-spacing: -0.04em;
+      color: #FBFAFA;
+      margin-bottom: 16px;
+    }
+
+    .download-cta-subtitle {
+      font-size: 1.05rem;
+      color: rgba(251, 250, 250, 0.60);
+      margin-bottom: 40px;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .download-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-glass-dark {
+      background: rgba(255, 255, 255, 0.12);
+      color: #FBFAFA;
+      font-family: 'Assistant', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 100px;
+      padding: 13px 28px;
+      backdrop-filter: blur(16px) saturate(1.5);
+      -webkit-backdrop-filter: blur(16px) saturate(1.5);
+      box-shadow:
+        0 4px 16px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.20);
+      transition: transform 200ms ease, box-shadow 200ms ease, background 200ms ease;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-glass-dark::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 100px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.20) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .btn-glass-dark:hover {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.18);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.20);
+    }
+
+    .btn-icon {
+      font-size: 1.1rem;
+    }
+
+    /* =============================================
+       FOOTER
+    ============================================= */
+    .footer {
+      padding: 32px 24px;
+      background: #FBFAFA;
+      border-top: 1px solid rgba(22, 40, 57, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      max-width: 1040px;
+      margin: 0 auto;
+    }
+
+    .footer-logo {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #162839;
+      letter-spacing: -0.02em;
+    }
+
+    .footer-logo span {
+      color: #00E5FF;
+    }
+
+    .footer-copy {
+      font-size: 0.85rem;
+      color: #43474C;
+    }
+
+    .footer-love {
+      font-size: 0.85rem;
+      color: #43474C;
+    }
+
+    .footer-love .heart {
+      color: #FF7F7F;
+    }
+
+    @media (max-width: 480px) {
+      .footer {
+        justify-content: center;
+        text-align: center;
+      }
+    }
+
+    /* =============================================
+       UTILITY / ANIMATIONS
+    ============================================= */
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .hero-card {
+      animation: float 6s ease-in-out infinite;
+    }
+
+    /* Prevent animation jitter on hover */
+    .apt-btn:hover,
+    .btn-primary:hover,
+    .btn-glass:hover {
+      animation-play-state: paused;
+    }
+
+    /* Focus styles for accessibility */
+    button:focus-visible,
+    a:focus-visible {
+      outline: 2px solid #00E5FF;
+      outline-offset: 3px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =============================================
+       NAVBAR
+  ============================================= -->
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="navbar-logo">Swipe<span>House</span></div>
+    <ul class="navbar-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#how-it-works">How it Works</a></li>
+      <li><a href="#download">Download</a></li>
+    </ul>
+    <button class="navbar-cta" aria-label="Get the app">Get the App</button>
+  </nav>
+
+  <!-- =============================================
+       HERO SECTION
+  ============================================= -->
+  <section class="hero" aria-labelledby="hero-heading">
+    <div class="hero-pill" role="note">
+      🏠 The future of apartment search
+    </div>
+
+    <h1 id="hero-heading">
+      Find your perfect home,<br />one swipe at a time.
+    </h1>
+
+    <p class="hero-subtitle">
+      Discover curated apartments matched to your lifestyle. No agents, no fees, just beautiful homes.
+    </p>
+
+    <div class="hero-ctas">
+      <button class="btn-primary" aria-label="Download for iOS">📱 Download for iOS</button>
+      <button class="btn-glass" aria-label="Download for Android">🤖 Download for Android</button>
+    </div>
+
+    <!-- Floating Apartment Card -->
+    <div class="hero-card" role="img" aria-label="Example apartment listing: Tel Aviv Florentin, 8500 NIS per month">
+      <div class="apt-image-placeholder">
+        <span class="apt-image-icon">🏢</span>
+      </div>
+      <div class="apt-price">₪8,500<span style="font-size:1rem;font-weight:300;color:#43474C;">/mo</span></div>
+      <div class="apt-location">
+        <span>📍</span> Tel Aviv &middot; Florentin
+      </div>
+      <div class="apt-meta">
+        <span class="apt-chip">🛏 3 rooms</span>
+        <span class="apt-chip">📐 75m²</span>
+        <span class="apt-chip">✅ Available now</span>
+      </div>
+      <div class="apt-actions">
+        <button class="apt-btn apt-btn-reject" aria-label="Pass on this apartment">✕</button>
+        <button class="apt-btn apt-btn-like" aria-label="Like this apartment">♥</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================
+       FEATURES SECTION
+  ============================================= -->
+  <section class="features" id="features" aria-labelledby="features-heading">
+    <div class="section-label">Why SwipeHouse</div>
+    <h2 class="section-title" id="features-heading">Apartment search, reimagined</h2>
+
+    <div class="features-row" id="how-it-works">
+      <article class="feature-card" aria-labelledby="feature-1-title">
+        <div class="feature-icon" aria-hidden="true">👆</div>
+        <h3 id="feature-1-title">Swipe to Discover</h3>
+        <p>Browse apartments the way you browse dating apps — swipe right on places you love, left on those you don't. Discover your next home in minutes, not hours.</p>
+      </article>
+
+      <article class="feature-card" aria-labelledby="feature-2-title">
+        <div class="feature-icon" aria-hidden="true">✨</div>
+        <h3 id="feature-2-title">Smart Matching</h3>
+        <p>Our AI-powered engine learns your taste from every swipe. The more you use SwipeHouse, the better it gets at surfacing apartments that truly fit your lifestyle.</p>
+      </article>
+
+      <article class="feature-card" aria-labelledby="feature-3-title">
+        <div class="feature-icon" aria-hidden="true">💬</div>
+        <h3 id="feature-3-title">Direct Chat</h3>
+        <p>No middlemen, no callbacks. Message landlords directly inside the app, schedule viewings, and sign your lease — all in one place, all in Hebrew.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- =============================================
+       DOWNLOAD CTA SECTION
+  ============================================= -->
+  <section class="download-cta" id="download" aria-labelledby="download-heading">
+    <div class="download-cta-inner">
+      <h2 id="download-heading">Ready to find your home?</h2>
+      <p class="download-cta-subtitle">
+        Join thousands of Israelis who found their perfect apartment with SwipeHouse.
+      </p>
+      <div class="download-buttons">
+        <button class="btn-glass-dark" aria-label="Download on the App Store">
+          <span class="btn-icon" aria-hidden="true">🍎</span>
+          App Store
+        </button>
+        <button class="btn-glass-dark" aria-label="Get it on Google Play">
+          <span class="btn-icon" aria-hidden="true">▶</span>
+          Google Play
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================
+       FOOTER
+  ============================================= -->
+  <footer>
+    <div class="footer">
+      <div class="footer-logo">Swipe<span>House</span></div>
+      <div class="footer-copy">© 2026 SwipeHouse. All rights reserved.</div>
+      <div class="footer-love">Made with <span class="heart">♥</span> in Tel Aviv</div>
+    </div>
+  </footer>
+
+</body>
+</html>
