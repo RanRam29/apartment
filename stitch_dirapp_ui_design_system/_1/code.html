@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="he"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>גלריית תמונות - שלב 4</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-variant": "#e4e2e3",
+                    "secondary": "#a43a3d",
+                    "on-secondary-fixed-variant": "#842228",
+                    "on-primary-container": "#96a9be",
+                    "on-tertiary-fixed": "#291802",
+                    "error-container": "#ffdad6",
+                    "tertiary": "#362308",
+                    "inverse-on-surface": "#f2f0f2",
+                    "on-secondary-container": "#74161e",
+                    "on-tertiary-fixed-variant": "#5a4225",
+                    "on-error-container": "#93000a",
+                    "inverse-primary": "#b5c8df",
+                    "secondary-container": "#ff7f7f",
+                    "on-error": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "on-surface": "#1b1c1d",
+                    "error": "#ba1a1a",
+                    "on-secondary-fixed": "#410007",
+                    "surface-container-lowest": "#ffffff",
+                    "background": "#fbf9fa",
+                    "outline": "#74777d",
+                    "inverse-surface": "#303032",
+                    "on-background": "#1b1c1d",
+                    "tertiary-container": "#4e381c",
+                    "primary-fixed": "#d1e4fb",
+                    "on-primary-fixed": "#091d2e",
+                    "surface-container-low": "#f5f3f4",
+                    "surface-container-high": "#e9e8e9",
+                    "surface-tint": "#4e6073",
+                    "surface-container": "#efedef",
+                    "on-tertiary-container": "#c1a17d",
+                    "surface": "#fbf9fa",
+                    "secondary-fixed-dim": "#ffb3b1",
+                    "surface-container-highest": "#e4e2e3",
+                    "on-secondary": "#ffffff",
+                    "surface-dim": "#dbd9db",
+                    "secondary-fixed": "#ffdad8",
+                    "primary-fixed-dim": "#b5c8df",
+                    "primary": "#162839",
+                    "on-surface-variant": "#43474c",
+                    "outline-variant": "#c4c6cd",
+                    "tertiary-fixed-dim": "#e3c19b",
+                    "primary-container": "#2c3e50",
+                    "tertiary-fixed": "#ffddb7",
+                    "surface-bright": "#fbf9fa",
+                    "on-primary-fixed-variant": "#36485b"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gutter": "20px",
+                    "thumb-zone-height": "33%",
+                    "margin": "24px",
+                    "section-gap": "48px",
+                    "grid-columns": "4"
+            },
+            "fontFamily": {
+                    "display-lg": [
+                            "Assistant"
+                    ],
+                    "caption": [
+                            "Assistant"
+                    ],
+                    "body-md": [
+                            "Assistant"
+                    ],
+                    "label-bold": [
+                            "Assistant"
+                    ],
+                    "headline-md": [
+                            "Assistant"
+                    ],
+                    "body-lg": [
+                            "Assistant"
+                    ]
+            },
+            "fontSize": {
+                    "display-lg": [
+                            "32px",
+                            {
+                                    "lineHeight": "1.2",
+                                    "letterSpacing": "-0.02em",
+                                    "fontWeight": "300"
+                            }
+                    ],
+                    "caption": [
+                            "12px",
+                            {
+                                    "lineHeight": "1.4",
+                                    "letterSpacing": "0.05em",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "body-md": [
+                            "16px",
+                            {
+                                    "lineHeight": "1.5",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "label-bold": [
+                            "14px",
+                            {
+                                    "lineHeight": "1.2",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "headline-md": [
+                            "24px",
+                            {
+                                    "lineHeight": "1.3",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "body-lg": [
+                            "18px",
+                            {
+                                    "lineHeight": "1.6",
+                                    "fontWeight": "400"
+                            }
+                    ]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+          font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col font-body-md text-body-md antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- Transactional Header (Suppresses standard nav due to transactional nature) -->
+<header class="flex items-center justify-between px-margin py-4 bg-surface sticky top-0 z-40">
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high transition-colors focus:outline-none focus:ring-2 focus:ring-primary">
+<!-- Native right arrow acts as 'back' in RTL -->
+<span class="material-symbols-outlined text-on-surface">arrow_forward</span>
+</button>
+<span class="font-label-bold text-label-bold text-on-surface-variant tracking-wide uppercase">שלב 4 מתוך 5</span>
+<div class="w-10"></div> <!-- Spacer for optical centering -->
+</header>
+<!-- Main Canvas -->
+<main class="flex-1 px-margin pt-6 pb-40 flex flex-col gap-10 max-w-2xl mx-auto w-full">
+<!-- Header Section -->
+<section class="flex flex-col gap-2">
+<h1 class="font-display-lg text-display-lg text-on-surface">גלריית תמונות</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">הוסף תמונות איכותיות. המערכת תסדר אותן אוטומטית בצורה המיטבית ביותר.</p>
+</section>
+<!-- Primary Drop Zone -->
+<section class="border-2 border-dashed border-outline-variant rounded-xl bg-surface-container-low h-56 flex flex-col items-center justify-center gap-4 cursor-pointer hover:bg-surface-container transition-colors group relative overflow-hidden">
+<div class="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="w-16 h-16 rounded-full bg-surface shadow-sm flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-3xl text-primary" style="font-variation-settings: 'FILL' 1;">cloud_upload</span>
+</div>
+<span class="font-label-bold text-label-bold text-primary">לחץ להעלאת תמונות או גרור לכאן</span>
+<span class="font-caption text-caption text-on-surface-variant">עד 20 תמונות, מקסימום 10MB לתמונה</span>
+</section>
+<!-- Image Grid -->
+<section class="grid grid-cols-2 gap-4">
+<!-- Slot 1: Active Cover Image -->
+<div class="relative aspect-square rounded-xl overflow-hidden bg-surface-container group shadow-sm border border-surface-variant">
+<img alt="Cover photo preview" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" data-alt="A stunning, high-resolution interior photograph of a luxurious modern living room, flooded with natural light from floor-to-ceiling windows. The aesthetic is 'Effortless Opulence' with a minimalist arrangement of high-end furniture in neutral tones. The color palette features pristine whites, deep charcoal greys, and subtle warm wood accents, matching a sophisticated light-mode design system. The composition is spacious and airy, highlighting premium materials and architectural elegance." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjsTdBQPPW9PbPOD4EULxc1lIQ8HyPsKNPLSYXe2FyRM7D-n0yG3ij73DFrCWYcbWMZQXgaPrrftca4IAIw46wG6XNriSi-jTRpNaDjCpMVnLl3JpLBsSky6Fq4dpeY0L1_895ztAIr88RqmeoPenqfwS1I5rzwEHHOXqvbSQWh89x_ViQ53n2DINYcYL-vElwci0fZ_Lesv5ghRFUkAYYRtE4auP0Ol8A55DlsQyO75MandPjwbyWet3FJRSiOFoYoHyZNCQ2imwR"/>
+<!-- Dark Overlay for Contrast -->
+<div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+<!-- Badge -->
+<div class="absolute top-3 right-3 bg-secondary text-on-secondary px-3 py-1.5 rounded-full font-label-bold text-label-bold text-[12px] shadow-sm flex items-center gap-1.5 backdrop-blur-md bg-secondary/90 border border-white/10">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                    תמונה ראשית
+                </div>
+<!-- Actions Overlay -->
+<div class="absolute bottom-3 left-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+<button class="w-8 h-8 rounded-full bg-surface/90 backdrop-blur-md flex items-center justify-center text-error hover:bg-error hover:text-on-error transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+<button class="w-8 h-8 rounded-full bg-surface/90 backdrop-blur-md flex items-center justify-center text-primary hover:bg-primary hover:text-on-primary transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+</div>
+</div>
+<!-- Slot 2: Empty Placeholder -->
+<div class="aspect-square rounded-xl border border-dashed border-outline-variant bg-surface-container-lowest flex flex-col gap-2 items-center justify-center text-on-surface-variant cursor-pointer hover:bg-surface-container-low transition-colors group">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center group-hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-2xl">add</span>
+</div>
+</div>
+<!-- Slot 3: Empty Placeholder -->
+<div class="aspect-square rounded-xl border border-dashed border-outline-variant bg-surface-container-lowest flex flex-col gap-2 items-center justify-center text-on-surface-variant cursor-pointer hover:bg-surface-container-low transition-colors group">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center group-hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-2xl">add</span>
+</div>
+</div>
+<!-- Slot 4: Empty Placeholder -->
+<div class="aspect-square rounded-xl border border-dashed border-outline-variant bg-surface-container-lowest flex flex-col gap-2 items-center justify-center text-on-surface-variant cursor-pointer hover:bg-surface-container-low transition-colors group">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center group-hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-2xl">add</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Fixed Bottom Action Area (Thumb Zone Optimized) -->
+<div class="fixed bottom-0 left-0 right-0 bg-surface/80 backdrop-blur-xl border-t border-surface-container-highest p-margin z-50">
+<div class="max-w-2xl mx-auto w-full">
+<button class="w-full bg-primary text-on-primary py-4 rounded-xl font-label-bold text-label-bold shadow-[0_8px_20px_rgba(22,40,57,0.12)] hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-3">
+<span>המשך לתיאור</span>
+<!-- Native left arrow acts as 'next/forward' in RTL -->
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+</div>
+</div>
+</body></html>

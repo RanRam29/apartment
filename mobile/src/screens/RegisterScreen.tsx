@@ -5,6 +5,7 @@ import {
   Platform, Alert, ScrollView,
 } from 'react-native';
 import { useAuthStore } from '../store/useAuthStore';
+import { C } from '../theme';
 
 interface Props {
   onSwitch: () => void;
@@ -15,12 +16,12 @@ type Role = 'tenant' | 'landlord';
 export default function RegisterScreen({ onSwitch }: Props) {
   const { register } = useAuthStore();
   const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName]   = useState('');
-  const [email, setEmail]         = useState('');
-  const [phone, setPhone]         = useState('');
-  const [password, setPassword]   = useState('');
-  const [role, setRole]           = useState<Role>('tenant');
-  const [loading, setLoading]     = useState(false);
+  const [lastName,  setLastName]  = useState('');
+  const [email,     setEmail]     = useState('');
+  const [phone,     setPhone]     = useState('');
+  const [password,  setPassword]  = useState('');
+  const [role,      setRole]      = useState<Role>('tenant');
+  const [loading,   setLoading]   = useState(false);
 
   async function handleRegister() {
     if (!firstName || !lastName || !email || !password) {
@@ -34,7 +35,12 @@ export default function RegisterScreen({ onSwitch }: Props) {
     setLoading(true);
     try {
       await register({ firstName, lastName, email: email.trim().toLowerCase(), password, role, phone: phone || undefined });
+      Alert.alert('בדוק את המייל', 'שלחנו לך קישור לאימות כתובת האימייל.');
     } catch (err: any) {
+      if (!err?.response) {
+        Alert.alert('שגיאה', 'לא ניתן להתחבר לשרת. בדוק ש-API פעיל ושכתובת השרת נכונה.');
+        return;
+      }
       const errors = err?.response?.data?.errors;
       const msg = errors
         ? errors.map((e: any) => e.msg).join('\n')
@@ -61,9 +67,10 @@ export default function RegisterScreen({ onSwitch }: Props) {
               key={r}
               style={[styles.roleBtn, role === r && styles.roleBtnActive]}
               onPress={() => setRole(r)}
+              activeOpacity={0.8}
             >
               <Text style={[styles.roleBtnText, role === r && styles.roleBtnTextActive]}>
-                {r === 'tenant' ? '🔍 שוכר' : '🏠 משכיר'}
+                {r === 'tenant' ? '🔍  שוכר' : '🏠  משכיר'}
               </Text>
             </TouchableOpacity>
           ))}
@@ -73,7 +80,7 @@ export default function RegisterScreen({ onSwitch }: Props) {
           <TextInput
             style={[styles.input, { flex: 1, marginLeft: 8 }]}
             placeholder="שם פרטי"
-            placeholderTextColor="#A0A0B2"
+            placeholderTextColor={C.textMut}
             value={firstName}
             onChangeText={setFirstName}
             textAlign="right"
@@ -81,7 +88,7 @@ export default function RegisterScreen({ onSwitch }: Props) {
           <TextInput
             style={[styles.input, { flex: 1 }]}
             placeholder="שם משפחה"
-            placeholderTextColor="#A0A0B2"
+            placeholderTextColor={C.textMut}
             value={lastName}
             onChangeText={setLastName}
             textAlign="right"
@@ -91,7 +98,7 @@ export default function RegisterScreen({ onSwitch }: Props) {
         <TextInput
           style={styles.input}
           placeholder="אימייל *"
-          placeholderTextColor="#A0A0B2"
+          placeholderTextColor={C.textMut}
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
@@ -101,7 +108,7 @@ export default function RegisterScreen({ onSwitch }: Props) {
         <TextInput
           style={styles.input}
           placeholder="טלפון (050-0000000)"
-          placeholderTextColor="#A0A0B2"
+          placeholderTextColor={C.textMut}
           value={phone}
           onChangeText={setPhone}
           keyboardType="phone-pad"
@@ -110,7 +117,7 @@ export default function RegisterScreen({ onSwitch }: Props) {
         <TextInput
           style={styles.input}
           placeholder="סיסמה (מינימום 8 תווים) *"
-          placeholderTextColor="#A0A0B2"
+          placeholderTextColor={C.textMut}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
@@ -121,6 +128,7 @@ export default function RegisterScreen({ onSwitch }: Props) {
           style={[styles.button, loading && styles.buttonDisabled]}
           onPress={handleRegister}
           disabled={loading}
+          activeOpacity={0.85}
         >
           {loading
             ? <ActivityIndicator color="#fff" />
@@ -138,36 +146,46 @@ export default function RegisterScreen({ onSwitch }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flexGrow: 1, justifyContent: 'center', padding: 24 },
-  title: { fontSize: 28, fontWeight: '700', color: '#fff', textAlign: 'right', marginBottom: 4 },
-  subtitle: { fontSize: 15, color: '#A0A0B2', textAlign: 'right', marginBottom: 24 },
+  container: { flexGrow: 1, justifyContent: 'center', padding: 28 },
+  title:    { fontSize: 26, fontWeight: '700', color: C.text, textAlign: 'right', marginBottom: 4 },
+  subtitle: { fontSize: 14, color: C.textSub, textAlign: 'right', marginBottom: 24 },
+
   roleRow: { flexDirection: 'row', marginBottom: 20, gap: 10 },
   roleBtn: {
-    flex: 1, paddingVertical: 12, borderRadius: 10,
-    backgroundColor: '#2A2A3E', borderWidth: 1, borderColor: '#3A3A5E',
+    flex: 1, paddingVertical: 13, borderRadius: 12,
+    backgroundColor: C.bg, borderWidth: 1.5, borderColor: C.border,
     alignItems: 'center',
   },
-  roleBtnActive: { backgroundColor: '#6C5CE7', borderColor: '#6C5CE7' },
-  roleBtnText: { color: '#A0A0B2', fontWeight: '600', fontSize: 14 },
+  roleBtnActive: { backgroundColor: C.navy, borderColor: C.navy },
+  roleBtnText:       { color: C.textSub, fontWeight: '600', fontSize: 14 },
   roleBtnTextActive: { color: '#fff' },
+
   row: { flexDirection: 'row', marginBottom: 0 },
   input: {
-    backgroundColor: '#2A2A3E',
-    borderRadius: 12,
+    backgroundColor: C.bg,
+    borderRadius: 14,
     padding: 16,
     fontSize: 15,
-    color: '#fff',
-    marginBottom: 14,
-    borderWidth: 1,
-    borderColor: '#3A3A5E',
+    color: C.text,
+    marginBottom: 12,
+    borderWidth: 1.5,
+    borderColor: C.border,
   },
   button: {
-    backgroundColor: '#6C5CE7', borderRadius: 12,
-    padding: 16, alignItems: 'center', marginTop: 8,
+    backgroundColor: C.navy,
+    borderRadius: 14,
+    padding: 16,
+    alignItems: 'center',
+    marginTop: 8,
+    shadowColor: C.navy,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
+    elevation: 4,
   },
   buttonDisabled: { opacity: 0.6 },
   buttonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
   switchRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 24 },
-  switchText: { color: '#A0A0B2', fontSize: 14 },
-  switchLink: { color: '#6C5CE7', fontWeight: '600' },
+  switchText: { color: C.textSub, fontSize: 14 },
+  switchLink: { color: C.navy, fontWeight: '700' },
 });

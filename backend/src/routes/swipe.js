@@ -2,7 +2,7 @@ const express = require('express');
 const { body, validationResult } = require('express-validator');
 const { Swipe, Apartment } = require('../models');
 const { UserPreferences } = require('../models');
-const { authenticate, requireRole } = require('../middleware/auth');
+const { authenticate, requireRole, requireVerified } = require('../middleware/auth');
 const { handleSwipeMatch } = require('../services/matchingService');
 const { cacheGet, cacheSet, getRedisClient } = require('../config/redis');
 const { sendPushNotification } = require('../services/pushService');
@@ -43,7 +43,7 @@ const swipeValidator = [
 ];
 
 // GET /api/swipe/quota — daily usage for the current tenant
-router.get('/quota', authenticate, requireRole('tenant'), async (req, res, next) => {
+router.get('/quota', authenticate, requireRole('tenant'), requireVerified, async (req, res, next) => {
   try {
     const isPremium = Boolean(req.user.isPremium);
     const used = await getDailyUsed(req.user.id);
@@ -59,7 +59,7 @@ router.get('/quota', authenticate, requireRole('tenant'), async (req, res, next)
 });
 
 // DELETE /api/swipe/last — undo the most recent swipe
-router.delete('/last', authenticate, requireRole('tenant'), async (req, res, next) => {
+router.delete('/last', authenticate, requireRole('tenant'), requireVerified, async (req, res, next) => {
   try {
     const lastSwipe = await Swipe.findOne({
       where: { tenantId: req.user.id },
@@ -88,7 +88,7 @@ router.delete('/last', authenticate, requireRole('tenant'), async (req, res, nex
 });
 
 // POST /api/swipe — record a swipe (tenants only)
-router.post('/', authenticate, requireRole('tenant'), swipeValidator, async (req, res, next) => {
+router.post('/', authenticate, requireRole('tenant'), requireVerified, swipeValidator, async (req, res, next) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -179,7 +179,7 @@ router.post('/', authenticate, requireRole('tenant'), swipeValidator, async (req
 });
 
 // GET /api/swipe/history — tenant's swipe history (last 100)
-router.get('/history', authenticate, requireRole('tenant'), async (req, res, next) => {
+router.get('/history', authenticate, requireRole('tenant'), requireVerified, async (req, res, next) => {
   try {
     const cacheKey = `swipe:history:${req.user.id}`;
     const cached = await cacheGet(cacheKey);

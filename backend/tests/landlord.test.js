@@ -2,6 +2,11 @@
  * Landlord dashboard and leads integration tests.
  * Requires real Postgres + Redis.
  */
+process.env.NODE_ENV = 'test';
+process.env.POSTGRES_SSL = 'false';
+process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED = 'false';
+process.env.JWT_SECRET = 'test_jwt_secret_for_verification_tests';
+
 const request = require('supertest');
 const { sequelize } = require('../src/config/database');
 const { initRedis, getRedisClient } = require('../src/config/redis');
@@ -38,6 +43,9 @@ beforeAll(async () => {
   ]);
   landlordToken = llRes.body.token;
   tenantToken = tnRes.body.token;
+  if (tnRes.body.verificationToken) {
+    await request(app).get(`/api/auth/verify/${tnRes.body.verificationToken}`);
+  }
 
   // Create a listing and generate a lead via swipe
   const aptRes = await request(app)

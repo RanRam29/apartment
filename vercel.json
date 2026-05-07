@@ -1,0 +1,9 @@
+{
+  "buildCommand": "cd mobile && npm install && npx expo export --platform web",
+  "outputDirectory": "mobile/dist",
+  "framework": null,
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/.*", "dest": "/index.html" }
+  ]
+}

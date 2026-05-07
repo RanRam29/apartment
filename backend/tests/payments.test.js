@@ -3,6 +3,11 @@
  * Requires real Postgres + Redis. Meshulam calls are expected to fail without a real API key —
  * tests verify auth guards and webhook processing, not the payment gateway itself.
  */
+process.env.NODE_ENV = 'test';
+process.env.POSTGRES_SSL = 'false';
+process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED = 'false';
+process.env.JWT_SECRET = 'test_jwt_secret_for_verification_tests';
+
 const request = require('supertest');
 const { sequelize } = require('../src/config/database');
 const { initRedis, getRedisClient } = require('../src/config/redis');
@@ -29,6 +34,9 @@ beforeAll(async () => {
   const res = await request(app).post('/api/auth/register').send(USER);
   userToken = res.body.token;
   userId = res.body.user?.id;
+  if (res.body.verificationToken) {
+    await request(app).get(`/api/auth/verify/${res.body.verificationToken}`);
+  }
 }, 30_000);
 
 afterAll(async () => {

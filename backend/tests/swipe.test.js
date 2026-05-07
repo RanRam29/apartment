@@ -2,6 +2,11 @@
  * Swipe route integration tests.
  * Requires real Postgres + Redis (available in CI via service containers).
  */
+process.env.NODE_ENV = 'test';
+process.env.POSTGRES_SSL = 'false';
+process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED = 'false';
+process.env.JWT_SECRET = 'test_jwt_secret_for_verification_tests';
+
 const request = require('supertest');
 const { sequelize } = require('../src/config/database');
 const { initRedis, getRedisClient } = require('../src/config/redis');
@@ -40,6 +45,11 @@ beforeAll(async () => {
   ]);
   landlordToken = llRes.body.token;
   tenantToken = tnRes.body.token;
+
+  // Verify tenant email so swipe endpoints are accessible
+  if (tnRes.body.verificationToken) {
+    await request(app).get(`/api/auth/verify/${tnRes.body.verificationToken}`);
+  }
 
   const [apt1Res, apt2Res] = await Promise.all([
     request(app)

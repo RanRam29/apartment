@@ -6,20 +6,48 @@
  * landlord registration has no MongoDB dependency, so these tests stay green
  * even without a running MongoDB.
  */
+process.env.POSTGRES_SSL = 'false';
+process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED = 'false';
+process.env.JWT_SECRET = 'test_jwt_secret_for_verification_tests';
+
+jest.mock('../src/config/redis', () => {
+  const store = new Map();
+  const mockClient = { disconnect: jest.fn() };
+  return {
+    initRedis: jest.fn().mockResolvedValue(undefined),
+    getRedisClient: jest.fn(() => mockClient),
+    cacheGet: jest.fn(async (key) => {
+      const value = store.get(key);
+      return value === undefined ? null : value;
+    }),
+    cacheSet: jest.fn(async (key, value) => {
+      store.set(key, value);
+    }),
+    cacheDel: jest.fn(async (key) => {
+      store.delete(key);
+    }),
+  };
+});
+
 const request = require('supertest');
 const { sequelize } = require('../src/config/database');
 const { initRedis, getRedisClient } = require('../src/config/redis');
 const app = require('../src/app');
+const TEST_PASSWORD = `T-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+const WRONG_PASSWORD = `W-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+const UNKNOWN_EMAIL = `unknown_${Date.now()}@test.com`;
+const INVALID_EMAIL = `invalid_${Date.now()}@test.com`;
 
 const LANDLORD = {
   email: `landlord_${Date.now()}@test.com`,
-  password: 'Test1234!',
+  password: TEST_PASSWORD,
   firstName: 'Test',
   lastName: 'Landlord',
   role: 'landlord',
 };
 
 let authToken = '';
+let verificationToken = '';
 
 beforeAll(async () => {
   await Promise.all([
@@ -44,7 +72,10 @@ describe('POST /api/auth/register', () => {
     expect(res.body.user.email).toBe(LANDLORD.email);
     expect(res.body.user.role).toBe('landlord');
     expect(res.body.user.passwordHash).toBeUndefined();
+    expect(res.body.verificationRequired).toBe(true);
+    expect(typeof res.body.verificationToken).toBe('string');
     authToken = res.body.token;
+    verificationToken = res.body.verificationToken;
   });
 
   it('rejects duplicate email with 409', async () => {
@@ -57,13 +88,79 @@ describe('POST /api/auth/register', () => {
   it('rejects missing required fields with 422', async () => {
     const res = await request(app)
       .post('/api/auth/register')
-      .send({ email: 'bad@test.com' });
+      .send({ email: INVALID_EMAIL });
     expect(res.status).toBe(422);
   });
 });
 
 describe('POST /api/auth/login', () => {
-  it('returns JWT on valid credentials', async () => {
+  it('blocks login for unverified accounts', async () => {
+    const res = await request(app)
+      .post('/api/auth/login')
+      .send({ email: LANDLORD.email, password: LANDLORD.password });
+
+    expect(res.status).toBe(403);
+    expect(res.body.error).toBe('Please verify your email before logging in');
+    expect(res.body.code).toBe('EMAIL_NOT_VERIFIED');
+    expect(res.body.verificationRequired).toBe(true);
+    expect(res.body.resendAvailable).toBe(true);
+    expect(res.body.email).toBe(LANDLORD.email);
+  });
+
+  it('rejects wrong password with 401', async () => {
+    const res = await request(app)
+      .post('/api/auth/login')
+      .send({ email: LANDLORD.email, password: WRONG_PASSWORD });
+    expect(res.status).toBe(401);
+  });
+
+  it('rejects unknown email with 401', async () => {
+    const res = await request(app)
+      .post('/api/auth/login')
+      .send({ email: UNKNOWN_EMAIL, password: WRONG_PASSWORD });
+    expect(res.status).toBe(401);
+  });
+});
+
+describe('GET /api/auth/verify/:token', () => {
+  it('verifies account with valid token', async () => {
+    const res = await request(app).get(`/api/auth/verify/${verificationToken}`);
+    expect(res.status).toBe(200);
+    expect(res.body.message).toBe('Email verified successfully');
+  });
+
+  it('returns 400 for invalid token', async () => {
+    const res = await request(app).get('/api/auth/verify/not-a-real-token');
+    expect(res.status).toBe(400);
+  });
+});
+
+describe('POST /api/auth/verify/resend', () => {
+  it('resends a verification token for an unverified user', async () => {
+    const ts = Date.now();
+    const unverified = {
+      email: `unverified_${ts}@test.com`,
+      password: 'Test1234!',
+      firstName: 'Un',
+      lastName: 'Verified',
+      role: 'tenant',
+    };
+
+    const registerRes = await request(app).post('/api/auth/register').send(unverified);
+    expect(registerRes.status).toBe(201);
+
+    const resendRes = await request(app)
+      .post('/api/auth/verify/resend')
+      .send({ email: unverified.email });
+
+    expect(resendRes.status).toBe(200);
+    expect(resendRes.body.message).toBe('If the email exists and is unverified, a verification link has been sent');
+    expect(typeof resendRes.body.verificationToken).toBe('string');
+  });
+});
+
+describe('POST /api/auth/login after verification', () => {
+  it('returns JWT on valid credentials after email verification', async () => {
     const res = await request(app)
       .post('/api/auth/login')
       .send({ email: LANDLORD.email, password: LANDLORD.password });
@@ -71,20 +168,7 @@ describe('POST /api/auth/login', () => {
     expect(res.status).toBe(200);
     expect(typeof res.body.token).toBe('string');
     expect(res.body.user.role).toBe('landlord');
-  });
-
-  it('rejects wrong password with 401', async () => {
-    const res = await request(app)
-      .post('/api/auth/login')
-      .send({ email: LANDLORD.email, password: 'wrongpassword' });
-    expect(res.status).toBe(401);
-  });
-
-  it('rejects unknown email with 401', async () => {
-    const res = await request(app)
-      .post('/api/auth/login')
-      .send({ email: 'nobody@test.com', password: 'anything' });
-    expect(res.status).toBe(401);
+    expect(res.body.user.isVerified).toBe(true);
   });
 });
 

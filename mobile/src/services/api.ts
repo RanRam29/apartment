@@ -1,8 +1,25 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
+import { getApiBaseUrl } from './apiConfig';
 
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
+const BASE_URL = getApiBaseUrl();
 const TOKEN_KEY = 'auth_token';
+
+const storage = {
+  getItemAsync: (key: string): Promise<string | null> =>
+    Platform.OS === 'web'
+      ? Promise.resolve(localStorage.getItem(key))
+      : SecureStore.getItemAsync(key),
+  setItemAsync: (key: string, value: string): Promise<void> =>
+    Platform.OS === 'web'
+      ? Promise.resolve(void localStorage.setItem(key, value))
+      : SecureStore.setItemAsync(key, value),
+  deleteItemAsync: (key: string): Promise<void> =>
+    Platform.OS === 'web'
+      ? Promise.resolve(void localStorage.removeItem(key))
+      : SecureStore.deleteItemAsync(key),
+};
 
 const api: AxiosInstance = axios.create({
   baseURL: `${BASE_URL}/api`,
@@ -12,7 +29,7 @@ const api: AxiosInstance = axios.create({
 
 // Attach JWT on every request
 api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
-  const token = await SecureStore.getItemAsync(TOKEN_KEY);
+  const token = await storage.getItemAsync(TOKEN_KEY);
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
@@ -22,7 +39,7 @@ api.interceptors.response.use(
   (res) => res,
   async (error) => {
     if (error.response?.status === 401) {
-      await SecureStore.deleteItemAsync(TOKEN_KEY);
+      await storage.deleteItemAsync(TOKEN_KEY);
     }
     return Promise.reject(error);
   }
@@ -34,6 +51,8 @@ export const authApi = {
     api.post('/auth/register', data),
   login: (email: string, password: string) =>
     api.post('/auth/login', { email, password }),
+  verifyEmail: (token: string) => api.get(`/auth/verify/${token}`),
+  resendVerification: (email: string) => api.post('/auth/verify/resend', { email }),
   logout: () => api.post('/auth/logout'),
   me: () => api.get('/auth/me'),
   savePushToken: (pushToken: string) => api.patch('/auth/push-token', { pushToken }),
@@ -45,14 +64,15 @@ export const authApi = {
 
 // ─── Apartments ───────────────────────────────────────────────────────────────
 export const apartmentsApi = {
-  getFeed: (params?: { city?: string; minPrice?: number; maxPrice?: number; rooms?: number; page?: number }) =>
+  getFeed: (params?: { city?: string; minPrice?: number; maxPrice?: number; rooms?: number; page?: number; limit?: number }) =>
     api.get('/apartments/feed', { params }),
   getById: (id: string) => api.get(`/apartments/${id}`),
   create: (formData: FormData) =>
     api.post('/apartments', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
   update: (id: string, data: Partial<{ title: string; price: number; isActive: boolean; description: string }>) =>
     api.patch(`/apartments/${id}`, data),
-  deactivate: (id: string) => api.delete(`/apartments/${id}`),
+  toggleFreeze: (id: string) => api.post(`/apartments/${id}/freeze`),
+  deletePermanently: (id: string) => api.delete(`/apartments/${id}`),
 };
 
 // ─── Swipe ────────────────────────────────────────────────────────────────────
@@ -104,9 +124,9 @@ export const paymentApi = {
 
 // ─── Token helpers ────────────────────────────────────────────────────────────
 export const tokenStorage = {
-  save: (token: string) => SecureStore.setItemAsync(TOKEN_KEY, token),
-  get: () => SecureStore.getItemAsync(TOKEN_KEY),
-  clear: () => SecureStore.deleteItemAsync(TOKEN_KEY),
+  save: (token: string) => storage.setItemAsync(TOKEN_KEY, token),
+  get: () => storage.getItemAsync(TOKEN_KEY),
+  clear: () => storage.deleteItemAsync(TOKEN_KEY),
 };
 
 export default api;

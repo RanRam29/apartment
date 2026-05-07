@@ -37,6 +37,14 @@ export default function CreateListingScreen({ navigation }: any) {
   const [images, setImages]           = useState<{ uri: string }[]>([]);
   const [loading, setLoading]         = useState(false);
 
+  function showMessage(title: string, message: string) {
+    if (Platform.OS === 'web') {
+      window.alert(`${title}\n${message}`);
+    } else {
+      Alert.alert(title, message);
+    }
+  }
+
   function toggleAmenity(key: Amenity) {
     setAmenities((prev) =>
       prev.includes(key) ? prev.filter((a) => a !== key) : [...prev, key]
@@ -57,7 +65,7 @@ export default function CreateListingScreen({ navigation }: any) {
 
   async function handleSubmit() {
     if (!title || !price || !rooms || !city) {
-      Alert.alert('שגיאה', 'נא למלא: כותרת, מחיר, חדרות ועיר');
+      showMessage('שגיאה', 'נא למלא: כותרת, מחיר, חדרות ועיר');
       return;
     }
 
@@ -74,22 +82,30 @@ export default function CreateListingScreen({ navigation }: any) {
       form.append('sizeSqm', sizeSqm);
       form.append('amenities', JSON.stringify(amenities));
 
-      images.forEach((img, i) => {
-        form.append('images', {
-          uri: img.uri,
-          name: `photo_${i}.jpg`,
-          type: 'image/jpeg',
-        } as any);
-      });
+      for (let i = 0; i < images.length; i++) {
+        const img = images[i];
+        if (Platform.OS === 'web') {
+          const res = await fetch(img.uri);
+          const blob = await res.blob();
+          form.append('images', new File([blob], `photo_${i}.jpg`, { type: 'image/jpeg' }));
+        } else {
+          form.append('images', { uri: img.uri, name: `photo_${i}.jpg`, type: 'image/jpeg' } as any);
+        }
+      }
 
       await apartmentsApi.create(form);
       await queryClient.invalidateQueries({ queryKey: ['landlord-dashboard'] });
-      Alert.alert('בוצע!', 'המודעה פורסמה בהצלחה', [
-        { text: 'אישור', onPress: () => navigation.goBack() },
-      ]);
+      if (Platform.OS === 'web') {
+        showMessage('בוצע!', 'המודעה פורסמה בהצלחה');
+        navigation.goBack();
+      } else {
+        Alert.alert('בוצע!', 'המודעה פורסמה בהצלחה', [
+          { text: 'אישור', onPress: () => navigation.goBack() },
+        ]);
+      }
     } catch (err: any) {
       const msg = err?.response?.data?.error || 'שגיאה בפרסום המודעה';
-      Alert.alert('שגיאה', msg);
+      showMessage('שגיאה', msg);
     } finally {
       setLoading(false);
     }

@@ -6,13 +6,15 @@ import {
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { landlordApi, apartmentsApi } from '../services/api';
 import type { Apartment, MainStackParamList } from '../types';
 
-type Props = NativeStackScreenProps<MainStackParamList, 'Tabs'>;
+type Nav = NativeStackNavigationProp<MainStackParamList>;
 
-export default function ListingsScreen({ navigation }: Props) {
+export default function ListingsScreen() {
+  const navigation = useNavigation<Nav>();
   const queryClient = useQueryClient();
 
   const { data, isLoading, refetch } = useQuery({
@@ -21,6 +23,19 @@ export default function ListingsScreen({ navigation }: Props) {
   });
 
   const listings: Apartment[] = data?.listings ?? [];
+
+  function getThumbUrl(item: Apartment): string | undefined {
+    const first: any = (item as any)?.images?.[0];
+    if (!first) return undefined;
+    if (typeof first === 'string') return first;
+    if (typeof first === 'object' && typeof first.url === 'string') return first.url;
+    return undefined;
+  }
+
+  function formatPrice(value: unknown): string {
+    const n = typeof value === 'number' ? value : Number(value);
+    return Number.isFinite(n) ? `₪${n.toLocaleString()}/חודש` : '—';
+  }
 
   async function toggleActive(apt: Apartment) {
     const next = !apt.isActive;
@@ -45,7 +60,7 @@ export default function ListingsScreen({ navigation }: Props) {
   }
 
   function renderItem({ item }: { item: Apartment }) {
-    const thumb = item.images?.[0]?.url;
+    const thumb = getThumbUrl(item);
     return (
       <TouchableOpacity
         style={styles.card}
@@ -64,12 +79,12 @@ export default function ListingsScreen({ navigation }: Props) {
           <Text style={styles.cardSub}>
             {item.city}{item.neighborhood ? ` · ${item.neighborhood}` : ''} · {item.rooms} חד׳
           </Text>
-          <Text style={styles.cardPrice}>₪{item.price.toLocaleString()}/חודש</Text>
+          <Text style={styles.cardPrice}>{formatPrice((item as any).price)}</Text>
           <View style={styles.statsRow}>
             <Ionicons name="eye-outline" size={13} color="#A0A0B2" />
-            <Text style={styles.statText}>{item.viewCount}</Text>
+            <Text style={styles.statText}>{item.viewCount ?? 0}</Text>
             <Ionicons name="heart-outline" size={13} color="#A0A0B2" style={{ marginLeft: 8 }} />
-            <Text style={styles.statText}>{item.likeCount}</Text>
+            <Text style={styles.statText}>{item.likeCount ?? 0}</Text>
           </View>
         </View>
         <TouchableOpacity style={styles.toggleBtn} onPress={() => toggleActive(item)}>

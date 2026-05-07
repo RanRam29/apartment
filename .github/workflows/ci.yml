@@ -5,6 +5,9 @@ on:
     branches: [main, "claude/**"]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * *"
 
 jobs:
   backend-lint:
@@ -60,7 +63,7 @@ jobs:
         run: npm ci
 
       - name: Run tests with coverage
-        run: npx jest --runInBand --coverage --coverageThreshold='{"global":{"branches":50,"functions":60,"lines":60}}' --passWithNoTests --testTimeout=30000
+        run: npm run test:ci
         env:
           NODE_ENV: test
           POSTGRES_HOST: localhost
@@ -73,6 +76,13 @@ jobs:
           JWT_SECRET: test_secret_key_for_ci
           MONGO_URI: mongodb://localhost:27017/test_db
           POSTGRES_SSL: "false"
+
+      - name: Upload backend coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: backend/coverage
 
   ai-service-test:
     name: AI service lint & test
@@ -100,7 +110,14 @@ jobs:
       - name: Type check (pyright)
         run: |
           pip install pyright --quiet
-          pyright src/ --pythonversion 3.12 2>/dev/null || echo "Type check skipped"
+          pyright src/ --pythonversion 3.12
+
+      - name: Upload AI coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-coverage
+          path: ai-service/coverage.xml
 
   mobile-typecheck:
     name: Mobile TypeScript check
@@ -123,4 +140,96 @@ jobs:
         run: npm ci --legacy-peer-deps
 
       - name: TypeScript check
-        run: npx tsc --noEmit 2>/dev/null || echo "TSC check completed"
+        run: npx tsc --noEmit
+
+      - name: Run mobile tests with coverage
+        run: npm run test:coverage
+
+      - name: Upload mobile coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-coverage
+          path: mobile/coverage
+
+  maestro-smoke-pr:
+    name: Maestro smoke (PR)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: mobile/package-lock.json
+
+      - name: Install mobile dependencies
+        working-directory: mobile
+        run: npm ci --legacy-peer-deps
+
+      - name: Install Maestro
+        run: curl -Ls "https://get.maestro.mobile.dev" | bash
+
+      - name: Setup Android emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 33
+          profile: pixel_6
+          arch: x86_64
+          script: |
+            export PATH="$PATH:$HOME/.maestro/bin"
+            cd mobile
+            $HOME/.maestro/bin/maestro test .maestro/smoke.yaml
+
+      - name: Upload Maestro artifacts (PR)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: maestro-pr-artifacts
+          path: |
+            ~/.maestro/tests
+
+  maestro-nightly:
+    name: Maestro smoke (nightly/dispatch)
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: mobile/package-lock.json
+
+      - name: Install mobile dependencies
+        working-directory: mobile
+        run: npm ci --legacy-peer-deps
+
+      - name: Install Maestro
+        run: curl -Ls "https://get.maestro.mobile.dev" | bash
+
+      - name: Setup Android emulator and run full smoke
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 33
+          profile: pixel_6
+          arch: x86_64
+          script: |
+            export PATH="$PATH:$HOME/.maestro/bin"
+            cd mobile
+            $HOME/.maestro/bin/maestro test .maestro/smoke.yaml
+
+      - name: Upload Maestro artifacts (nightly)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: maestro-nightly-artifacts
+          path: |
+            ~/.maestro/tests

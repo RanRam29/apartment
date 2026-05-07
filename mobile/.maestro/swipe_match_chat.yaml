@@ -1,0 +1,18 @@
+appId: com.dirapp.rental
+---
+- launchApp
+- assertVisible:
+    text: "החלק"
+- tapOn:
+    id: "swipe-like-button"
+- tapOn:
+    id: "matches-tab"
+- assertVisible:
+    text: "התאמות"
+- tapOn:
+    id: "first-match-card"
+- tapOn:
+    id: "chat-input"
+- inputText: "בדיקת אוטומציה"
+- tapOn:
+    id: "send-message-button"

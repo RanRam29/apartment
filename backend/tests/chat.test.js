@@ -3,6 +3,11 @@
  * Requires Postgres + Redis. MongoDB is used for messages — tests degrade gracefully
  * when MongoDB is unavailable (auth and access control tests still run).
  */
+process.env.NODE_ENV = 'test';
+process.env.POSTGRES_SSL = 'false';
+process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED = 'false';
+process.env.JWT_SECRET = 'test_jwt_secret_for_verification_tests';
+
 const request = require('supertest');
 const { sequelize } = require('../src/config/database');
 const { initRedis, getRedisClient } = require('../src/config/redis');
@@ -52,6 +57,9 @@ beforeAll(async () => {
   ]);
   landlordToken = llRes.body.token;
   tenantToken = tnRes.body.token;
+  if (tnRes.body.verificationToken) {
+    await request(app).get(`/api/auth/verify/${tnRes.body.verificationToken}`);
+  }
 
   // Build: apartment → swipe → pending match → accept match (chat requires accepted match)
   const aptRes = await request(app)

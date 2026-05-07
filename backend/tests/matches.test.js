@@ -2,10 +2,16 @@
  * Matches route integration tests.
  * Requires real Postgres + Redis. MongoDB unread counts degrade gracefully if unavailable.
  */
+process.env.NODE_ENV = 'test';
+process.env.POSTGRES_SSL = 'false';
+process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED = 'false';
+process.env.JWT_SECRET = 'test_jwt_secret_for_verification_tests';
+
 const request = require('supertest');
 const { sequelize } = require('../src/config/database');
 const { initRedis, getRedisClient } = require('../src/config/redis');
 const app = require('../src/app');
+jest.setTimeout(30_000);
 
 const ts = Date.now();
 const LANDLORD = {
@@ -39,6 +45,9 @@ beforeAll(async () => {
   ]);
   landlordToken = llRes.body.token;
   tenantToken = tnRes.body.token;
+  if (tnRes.body.verificationToken) {
+    await request(app).get(`/api/auth/verify/${tnRes.body.verificationToken}`);
+  }
 
   // Create an apartment, then swipe like to generate a pending match
   const aptRes = await request(app)

@@ -3,6 +3,7 @@
     "name": "DirApp",
     "slug": "dirapp",
     "version": "1.0.0",
+    "platforms": ["ios", "android", "web"],
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
@@ -15,6 +16,7 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.dirapp.rental",
       "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
         "NSPhotoLibraryUsageDescription": "Allow DirApp to access your photos to upload apartment images.",
         "NSCameraUsageDescription": "Allow DirApp to use your camera to take apartment photos."
       }
@@ -55,7 +57,7 @@
     "scheme": "dirapp",
     "extra": {
       "eas": {
-        "projectId": "dirapp-rental"
+        "projectId": "3573e171-6f0f-4a4a-9d02-e75e65602f33"
       }
     }
   }

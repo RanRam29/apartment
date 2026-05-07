@@ -1,0 +1,16 @@
+appId: com.dirapp.rental
+---
+- launchApp
+- tapOn:
+    id: "search-tab"
+- tapOn:
+    id: "nlp-search-input"
+- inputText: "דירה בתל אביב עד 7000 עם מרפסת"
+- tapOn:
+    id: "nlp-search-submit"
+- assertVisible:
+    text: "תוצאות"
+- tapOn:
+    id: "preferences-button"
+- tapOn:
+    id: "save-preferences-button"

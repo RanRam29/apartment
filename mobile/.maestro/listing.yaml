@@ -1,0 +1,23 @@
+appId: com.dirapp.rental
+---
+- launchApp
+- tapOn:
+    id: "nav-profile"
+- tapOn:
+    id: "new-listing-button"
+- assertVisible:
+    text: "פרסם מודעה חדשה"
+- tapOn:
+    id: "listing-title-input"
+- inputText: "דירת בדיקות אוטומציה"
+- tapOn:
+    id: "listing-price-input"
+- inputText: "6500"
+- tapOn:
+    id: "listing-rooms-input"
+- inputText: "3"
+- tapOn:
+    id: "listing-city-input"
+- inputText: "תל אביב"
+- tapOn:
+    id: "publish-listing-button"
