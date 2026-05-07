@@ -1,24 +1,48 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
-import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 import { getApiBaseUrl } from './apiConfig';
 
 const BASE_URL = getApiBaseUrl();
 const TOKEN_KEY = 'auth_token';
+const hasWebStorage = typeof globalThis !== 'undefined' && 'localStorage' in globalThis;
+const SecureStore = Platform.OS === 'web' ? null : require('expo-secure-store');
 
 const storage = {
-  getItemAsync: (key: string): Promise<string | null> =>
-    Platform.OS === 'web'
-      ? Promise.resolve(localStorage.getItem(key))
-      : SecureStore.getItemAsync(key),
-  setItemAsync: (key: string, value: string): Promise<void> =>
-    Platform.OS === 'web'
-      ? Promise.resolve(void localStorage.setItem(key, value))
-      : SecureStore.setItemAsync(key, value),
-  deleteItemAsync: (key: string): Promise<void> =>
-    Platform.OS === 'web'
-      ? Promise.resolve(void localStorage.removeItem(key))
-      : SecureStore.deleteItemAsync(key),
+  getItemAsync: async (key: string): Promise<string | null> => {
+    if (Platform.OS === 'web') {
+      if (!hasWebStorage) return null;
+      try {
+        return globalThis.localStorage.getItem(key);
+      } catch {
+        return null;
+      }
+    }
+    return SecureStore.getItemAsync(key);
+  },
+  setItemAsync: async (key: string, value: string): Promise<void> => {
+    if (Platform.OS === 'web') {
+      if (!hasWebStorage) return;
+      try {
+        globalThis.localStorage.setItem(key, value);
+      } catch {
+        // Ignore storage errors on web (private mode/quota).
+      }
+      return;
+    }
+    return SecureStore.setItemAsync(key, value);
+  },
+  deleteItemAsync: async (key: string): Promise<void> => {
+    if (Platform.OS === 'web') {
+      if (!hasWebStorage) return;
+      try {
+        globalThis.localStorage.removeItem(key);
+      } catch {
+        // Ignore storage errors on web (private mode/quota).
+      }
+      return;
+    }
+    return SecureStore.deleteItemAsync(key);
+  },
 };
 
 const api: AxiosInstance = axios.create({
