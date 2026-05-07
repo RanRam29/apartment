@@ -1,43 +1,49 @@
-const axios = require('axios');
 const logger = require('../utils/logger');
 
-const senderEmail = process.env.SENDGRID_FROM_EMAIL || process.env.EMAIL_FROM;
-const sendgridApiKey = process.env.SENDGRID_API_KEY;
+function buildTransport() {
+  const host = process.env.SMTP_HOST;
+  const port = parseInt(process.env.SMTP_PORT || '587', 10);
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
+
+  if (!host || !user || !pass) return null;
+
+  let nodemailer;
+  try {
+    nodemailer = require('nodemailer');
+  } catch {
+    logger.warn('nodemailer is not installed; falling back to logged verification links');
+    return null;
+  }
+
+  return nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465,
+    auth: { user, pass },
+  });
+}
 
 async function sendVerificationEmail({ to, verificationUrl }) {
   if (!to || !verificationUrl) {
     throw new Error('sendVerificationEmail requires "to" and "verificationUrl"');
   }
 
-  // Keep local/dev setup non-blocking when SendGrid is not configured yet.
-  if (!sendgridApiKey || !senderEmail) {
-    logger.warn(`Verification email not sent (SendGrid not configured). Link for ${to}: ${verificationUrl}`);
-    return { sent: false, reason: 'sendgrid_not_configured' };
+  const from = process.env.SMTP_FROM || 'no-reply@dirapp.local';
+  const transport = buildTransport();
+
+  if (transport) {
+    await transport.sendMail({
+      from,
+      to,
+      subject: 'Verify your DirApp email',
+      text: `Verify your email by opening: ${verificationUrl}`,
+      html: `<p>Welcome to DirApp.</p><p>Verify your email: <a href="${verificationUrl}">${verificationUrl}</a></p>`,
+    });
+    return;
   }
 
-  await axios.post('https://api.sendgrid.com/v3/mail/send', {
-    personalizations: [{ to: [{ email: to }] }],
-    from: { email: senderEmail },
-    subject: 'Verify your DirApp account',
-    content: [
-      { type: 'text/plain', value: `Welcome to DirApp. Verify your account by opening: ${verificationUrl}` },
-      {
-        type: 'text/html',
-        value: `
-          <p>Welcome to <strong>DirApp</strong>.</p>
-          <p>Please verify your account by clicking the link below:</p>
-          <p><a href="${verificationUrl}">${verificationUrl}</a></p>
-        `,
-      },
-    ],
-  }, {
-    headers: {
-      Authorization: `Bearer ${sendgridApiKey}`,
-      'Content-Type': 'application/json',
-    },
-  });
-
-  return { sent: true };
+  logger.info(`SMTP not configured. Verification link for ${to}: ${verificationUrl}`);
 }
 
 module.exports = { sendVerificationEmail };

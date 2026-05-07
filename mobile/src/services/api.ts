@@ -51,6 +51,8 @@ export const authApi = {
     api.post('/auth/register', data),
   login: (email: string, password: string) =>
     api.post('/auth/login', { email, password }),
+  verifyEmail: (token: string) => api.get(`/auth/verify/${token}`),
+  resendVerification: (email: string) => api.post('/auth/verify/resend', { email }),
   logout: () => api.post('/auth/logout'),
   me: () => api.get('/auth/me'),
   savePushToken: (pushToken: string) => api.patch('/auth/push-token', { pushToken }),
@@ -58,8 +60,6 @@ export const authApi = {
     api.patch('/auth/profile', data),
   uploadAvatar: (formData: FormData) =>
     api.patch('/auth/avatar', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
-  verifyEmailToken: (token: string) => api.get(`/auth/verify/${token}`),
-  resendVerification: () => api.post('/auth/resend-verification', {}),
 };
 
 // ─── Apartments ───────────────────────────────────────────────────────────────

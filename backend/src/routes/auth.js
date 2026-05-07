@@ -6,12 +6,28 @@ const { validationResult } = require('express-validator');
 const { User } = require('../models');
 const { UserPreferences } = require('../models');
 const { registerValidator, loginValidator } = require('../utils/validators');
-const { cacheSet, cacheDel } = require('../config/redis');
+const { cacheGet, cacheSet, cacheDel } = require('../config/redis');
 const { getJwtSecret } = require('../config/security');
 const { sendVerificationEmail } = require('../services/emailService');
 const logger = require('../utils/logger');
 
 const router = express.Router();
+
+async function issueVerificationTokenForUser(user) {
+  const verificationToken = crypto.randomBytes(32).toString('hex');
+  const verificationCacheKey = `email:verify:${verificationToken}`;
+  await cacheSet(verificationCacheKey, { userId: user.id }, 24 * 60 * 60);
+
+  const appBaseUrl =
+    process.env.APP_BASE_URL ||
+    process.env.CLIENT_ORIGIN ||
+    'http://localhost:3000';
+  const cleanBase = String(appBaseUrl).replace(/\/$/, '');
+  const verificationUrl = `${cleanBase}/verify-email?token=${verificationToken}`;
+
+  await sendVerificationEmail({ to: user.email, verificationUrl });
+  return verificationToken;
+}
 
 function signToken(user) {
   const jwtSecret = getJwtSecret();
@@ -39,7 +55,6 @@ router.post('/register', registerValidator, async (req, res, next) => {
 
     const passwordHash = await bcrypt.hash(password, 12);
 
-    const verificationToken = crypto.randomBytes(32).toString('hex');
     const user = await User.create({
       email,
       passwordHash,
@@ -47,25 +62,29 @@ router.post('/register', registerValidator, async (req, res, next) => {
       lastName,
       role,
       phone: phone || null,
-      verificationToken,
-      isVerified: false,
-      verifiedAt: null,
     });
 
-    // Create empty preferences doc in MongoDB for tenants
+    // Create empty preferences doc in MongoDB for tenants (fire-and-forget)
     if (role === 'tenant') {
-      await UserPreferences.create({ userId: user.id });
+      UserPreferences.create({ userId: user.id }).catch((err) => {
+        logger.warn('Failed to create UserPreferences doc:', err.message);
+      });
     }
 
     const token = signToken(user);
-    const appBaseUrl = process.env.APP_BASE_URL || process.env.CLIENT_ORIGIN || 'http://localhost:3000';
-    const verificationUrl = `${appBaseUrl.replace(/\/$/, '')}/verify-email?token=${verificationToken}`;
-    await sendVerificationEmail({ to: email, verificationUrl });
+    const verificationToken = await issueVerificationTokenForUser(user).catch((err) => {
+      logger.warn(`Failed to enqueue verification email for ${user.id}: ${err.message}`);
+      return null;
+    });
+    if (verificationToken) {
+      await user.update({ verificationToken, verifiedAt: null });
+    }
 
     logger.info(`New user registered: ${user.id} (${role})`);
 
-    res.status(201).json({
+    const payload = {
       token,
+      verificationRequired: true,
       user: {
         id: user.id,
         email: user.email,
@@ -75,7 +94,10 @@ router.post('/register', registerValidator, async (req, res, next) => {
         isVerified: user.isVerified,
         isPremium: user.isPremium,
       },
-    });
+    };
+    if (process.env.NODE_ENV === 'test' && verificationToken) payload.verificationToken = verificationToken;
+
+    res.status(201).json(payload);
   } catch (err) {
     next(err);
   }
@@ -99,6 +121,15 @@ router.post('/login', loginValidator, async (req, res, next) => {
     const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) {
       return res.status(401).json({ error: 'Invalid credentials' });
+    }
+    if (!user.isVerified) {
+      return res.status(403).json({
+        error: 'Please verify your email before logging in',
+        code: 'EMAIL_NOT_VERIFIED',
+        verificationRequired: true,
+        resendAvailable: true,
+        email: user.email,
+      });
     }
 
     await user.update({ lastActiveAt: new Date() });
@@ -128,6 +159,85 @@ router.post('/login', loginValidator, async (req, res, next) => {
         isPremium: user.isPremium,
       },
     });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /api/auth/verify/:token
+router.get('/verify/:token', async (req, res, next) => {
+  try {
+    const token = req.params.token;
+    if (!token || token.length < 20) return res.status(400).json({ error: 'Invalid or expired verification token' });
+
+    // Prefer DB token (used by some tests and production flows)
+    const userByToken = await User.findOne({ where: { verificationToken: token } });
+    if (userByToken) {
+      await userByToken.update({
+        isVerified: true,
+        verifiedAt: new Date(),
+        verificationToken: null,
+      });
+      await cacheDel(`email:verify:${token}`).catch(() => {});
+      return res.json({ message: 'Email verified successfully' });
+    }
+
+    // Fallback to Redis token
+    const cacheKey = `email:verify:${token}`;
+    const cached = await cacheGet(cacheKey);
+    if (!cached?.userId) return res.status(400).json({ error: 'Invalid or expired verification token' });
+
+    const user = await User.findByPk(cached.userId);
+    if (!user) return res.status(400).json({ error: 'Invalid verification token' });
+
+    await user.update({ isVerified: true, verifiedAt: new Date() });
+    await cacheDel(cacheKey);
+    res.json({ message: 'Email verified successfully' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /api/auth/verify/resend
+router.post('/verify/resend', async (req, res, next) => {
+  try {
+    const email = String(req.body?.email || '').trim().toLowerCase();
+    if (!email) return res.status(422).json({ error: 'email is required' });
+
+    const user = await User.findOne({ where: { email } });
+    if (user && !user.isVerified) {
+      const verificationToken = await issueVerificationTokenForUser(user).catch((err) => {
+        logger.warn(`Failed to resend verification for ${user.id}: ${err.message}`);
+        return null;
+      });
+      if (verificationToken) {
+        user.update({ verificationToken, verifiedAt: null }).catch(() => {});
+      }
+
+      const payload = {
+        message: 'If the email exists and is unverified, a verification link has been sent',
+      };
+      if (process.env.NODE_ENV === 'test' && verificationToken) payload.verificationToken = verificationToken;
+      return res.json(payload);
+    }
+
+    res.json({ message: 'If the email exists and is unverified, a verification link has been sent' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /api/auth/resend-verification (authenticated)
+router.post('/resend-verification', require('../middleware/auth').authenticate, async (req, res, next) => {
+  try {
+    const user = await User.findByPk(req.user.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (user.isVerified) return res.status(400).json({ error: 'Account already verified' });
+
+    const verificationToken = await issueVerificationTokenForUser(user);
+    await user.update({ verificationToken, verifiedAt: null });
+
+    res.json({ ok: true, message: 'Verification email sent' });
   } catch (err) {
     next(err);
   }
@@ -228,25 +338,4 @@ router.patch('/push-token', require('../middleware/auth').authenticate, async (r
 });
 
 // POST /api/auth/resend-verification
-router.post('/resend-verification', require('../middleware/auth').authenticate, async (req, res, next) => {
-  try {
-    const user = await User.findByPk(req.user.id);
-    if (!user) return res.status(404).json({ error: 'User not found' });
-    if (user.isVerified) {
-      return res.status(400).json({ error: 'Account already verified' });
-    }
-
-    const verificationToken = crypto.randomBytes(32).toString('hex');
-    await user.update({ verificationToken });
-
-    const appBaseUrl = process.env.APP_BASE_URL || process.env.CLIENT_ORIGIN || 'http://localhost:3000';
-    const verificationUrl = `${appBaseUrl.replace(/\/$/, '')}/verify-email?token=${verificationToken}`;
-    await sendVerificationEmail({ to: user.email, verificationUrl });
-
-    res.json({ ok: true, message: 'Verification email sent' });
-  } catch (err) {
-    next(err);
-  }
-});
-
 module.exports = router;

@@ -76,11 +76,13 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   verifyEmail: async (token) => {
-    await authApi.verifyEmailToken(token);
+    await authApi.verifyEmail(token);
     set((state) => ({ user: state.user ? { ...state.user, isVerified: true } : state.user }));
   },
 
   resendVerification: async () => {
-    await authApi.resendVerification();
+    const email = useAuthStore.getState().user?.email;
+    if (!email) return;
+    await authApi.resendVerification(email);
   },
 }));

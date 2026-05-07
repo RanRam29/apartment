@@ -7,7 +7,7 @@ jest.mock('../src/services/api', () => ({
     register: jest.fn(),
     logout: jest.fn(),
     me: jest.fn(),
-    verifyEmailToken: jest.fn(),
+    verifyEmail: jest.fn(),
     resendVerification: jest.fn(),
   },
   tokenStorage: {
@@ -51,7 +51,7 @@ describe('useAuthStore', () => {
   });
 
   it('verifyEmail marks current user as verified', async () => {
-    (authApi.verifyEmailToken as jest.Mock).mockResolvedValue({ data: { ok: true } });
+    (authApi.verifyEmail as jest.Mock).mockResolvedValue({ data: { ok: true } });
     useAuthStore.setState({
       user: { id: 'u1', email: 'u@test.com', role: 'tenant', isVerified: false } as any,
       token: 'token-1',
@@ -62,15 +62,22 @@ describe('useAuthStore', () => {
 
     await useAuthStore.getState().verifyEmail('token-verify');
 
-    expect(authApi.verifyEmailToken).toHaveBeenCalledWith('token-verify');
+    expect(authApi.verifyEmail).toHaveBeenCalledWith('token-verify');
     expect(useAuthStore.getState().user?.isVerified).toBe(true);
   });
 
   it('resendVerification delegates to auth API', async () => {
     (authApi.resendVerification as jest.Mock).mockResolvedValue({ data: { ok: true } });
+    useAuthStore.setState({
+      user: { id: 'u1', email: 'u@test.com', role: 'tenant', isVerified: false } as any,
+      token: 'token-1',
+      isLoading: false,
+      isAuthenticated: true,
+      needsOnboarding: false,
+    });
 
     await useAuthStore.getState().resendVerification();
 
-    expect(authApi.resendVerification).toHaveBeenCalled();
+    expect(authApi.resendVerification).toHaveBeenCalledWith('u@test.com');
   });
 });

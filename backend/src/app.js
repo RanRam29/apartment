@@ -40,6 +40,10 @@ const authLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many auth attempts, please try again later' },
+  keyGenerator: (req) => {
+    const email = typeof req.body?.email === 'string' ? req.body.email : '';
+    return `${req.ip}:${req.path}:${email}`;
+  },
 });
 
 // Swipe endpoint gets its own budget to prevent abuse

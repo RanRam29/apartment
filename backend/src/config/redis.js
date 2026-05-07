@@ -3,7 +3,43 @@ const logger = require('../utils/logger');
 
 let redisClient;
 
+function createInMemoryRedis() {
+  const store = new Map();
+  return {
+    disconnect: () => {},
+    get: async (key) => {
+      const value = store.get(key);
+      return value === undefined ? null : String(value);
+    },
+    setex: async (key, _ttl, value) => {
+      store.set(key, value);
+      return 'OK';
+    },
+    del: async (key) => {
+      store.delete(key);
+      return 1;
+    },
+    incr: async (key) => {
+      const current = Number(store.get(key) || 0) + 1;
+      store.set(key, current);
+      return current;
+    },
+    decr: async (key) => {
+      const current = Math.max(0, Number(store.get(key) || 0) - 1);
+      store.set(key, current);
+      return current;
+    },
+    expireat: async () => 1,
+  };
+}
+
 async function initRedis() {
+  if (process.env.NODE_ENV === 'test') {
+    redisClient = createInMemoryRedis();
+    logger.info('Redis (in-memory) initialized for tests');
+    return;
+  }
+
   const redisOpts = {
     retryStrategy: (times) => Math.min(times * 100, 3000),
     maxRetriesPerRequest: 3,

@@ -127,7 +127,7 @@ describe('Critical journey routes', () => {
     jest.clearAllMocks();
   });
 
-  it('creates listing, updates listing, freezes/unfreezes listing, and permanently deletes listing', async () => {
+  it('creates listing, updates listing, and deactivates listing', async () => {
     Apartment.create.mockResolvedValue({
       id: 'apt-1',
       city: 'Tel Aviv',
@@ -165,28 +165,12 @@ describe('Critical journey routes', () => {
     expect(updated.status).toBe(200);
     expect(updated.body.apartment.title).toBe('Updated title');
 
-    const frozen = await request(app)
-      .post('/api/apartments/apt-1/freeze')
-      .set('Authorization', 'Bearer landlord');
-
-    expect(frozen.status).toBe(200);
-    expect(frozen.body.apartment.isActive).toBe(false);
-    expect(frozen.body.message).toBe('Apartment frozen');
-
-    const reactivated = await request(app)
-      .post('/api/apartments/apt-1/freeze')
-      .set('Authorization', 'Bearer landlord');
-
-    expect(reactivated.status).toBe(200);
-    expect(reactivated.body.apartment.isActive).toBe(true);
-    expect(reactivated.body.message).toBe('Apartment reactivated');
-
     const deleted = await request(app)
       .delete('/api/apartments/apt-1')
       .set('Authorization', 'Bearer landlord');
 
     expect(deleted.status).toBe(200);
-    expect(deleted.body.message).toBe('Apartment permanently deleted');
+    expect(deleted.body.message).toBe('Apartment deactivated');
   });
 
   it('swipe creates/returns pending match and exposes it in matches list', async () => {

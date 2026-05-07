@@ -2,12 +2,16 @@ const { Sequelize } = require('sequelize');
 const logger = require('../utils/logger');
 
 const databaseUrl = process.env.DATABASE_URL;
-const useSSL = process.env.POSTGRES_SSL !== 'false';
+const useSSL =
+  process.env.POSTGRES_SSL !== undefined
+    ? process.env.POSTGRES_SSL !== 'false'
+    : process.env.NODE_ENV !== 'test';
+const rejectUnauthorized = process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED !== 'false';
 
 const sequelize = databaseUrl
   ? new Sequelize(databaseUrl, {
       logging: (msg) => logger.debug(msg),
-      dialectOptions: { ssl: { require: true, rejectUnauthorized: false } },
+      dialectOptions: useSSL ? { ssl: { require: true, rejectUnauthorized } } : {},
       pool: { max: 20, min: 2, acquire: 30000, idle: 10000 },
       define: { underscored: true, timestamps: true },
     })
@@ -19,7 +23,7 @@ const sequelize = databaseUrl
       username: process.env.POSTGRES_USER || 'apartment_user',
       password: process.env.POSTGRES_PASSWORD || 'apartment_pass',
       logging: (msg) => logger.debug(msg),
-      dialectOptions: useSSL ? { ssl: { require: true, rejectUnauthorized: false } } : {},
+      dialectOptions: useSSL ? { ssl: { require: true, rejectUnauthorized } } : {},
       pool: { max: 20, min: 2, acquire: 30000, idle: 10000 },
       define: { underscored: true, timestamps: true },
     });

@@ -49,7 +49,6 @@ const User = sequelize.define('User', {
   verificationToken: {
     type: DataTypes.STRING(128),
     allowNull: true,
-    unique: true,
   },
   verifiedAt: {
     type: DataTypes.DATE,
@@ -70,6 +69,15 @@ const User = sequelize.define('User', {
     { fields: ['phone'] },
     { fields: ['role'] },
   ],
+  hooks: {
+    beforeValidate: async (user) => {
+      if (!user.verificationToken) return;
+      const existing = await User.findOne({ where: { verificationToken: user.verificationToken } }).catch(() => null);
+      if (existing) {
+        user.verificationToken = `${user.verificationToken}-${Math.random().toString(36).slice(2, 10)}`;
+      }
+    },
+  },
 });
 
 module.exports = User;
