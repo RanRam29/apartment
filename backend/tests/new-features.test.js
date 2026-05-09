@@ -714,6 +714,54 @@ describe('F15 — IoT routes', () => {
     expect(res.status).toBe(422);
   });
 
+  it('POST /api/iot/devices — rejects tenant that does not match lease', async () => {
+    CommercialLease.findById.mockReturnValue(q({ ...mockLease, tenantId: 'user-tenant' }));
+    const res = await request(app)
+      .post('/api/iot/devices')
+      .set('Authorization', 'Bearer landlord')
+      .send({
+        leaseId: 'cl-1',
+        tenantId: 'other-tenant',
+        deviceId: 'dev-002',
+        name: 'כניסה אחורית',
+        type: 'access_control',
+      });
+    expect(res.status).toBe(400);
+    expect(IoTDevice.create).not.toHaveBeenCalled();
+  });
+
+  it('POST /api/iot/devices — stores tenant and landlord from lease', async () => {
+    CommercialLease.findById.mockReturnValue(q({ ...mockLease, tenantId: 'user-tenant' }));
+    IoTDevice.create.mockResolvedValueOnce(mockDevice);
+    const res = await request(app)
+      .post('/api/iot/devices')
+      .set('Authorization', 'Bearer landlord')
+      .send({
+        leaseId: 'cl-1',
+        tenantId: 'user-tenant',
+        deviceId: 'dev-001',
+        name: 'כניסה ראשית',
+        type: 'access_control',
+      });
+    expect(res.status).toBe(201);
+    expect(IoTDevice.create).toHaveBeenCalledWith(expect.objectContaining({
+      leaseId: 'cl-1',
+      landlordId: 'user-landlord',
+      tenantId: 'user-tenant',
+    }));
+  });
+
+  it('GET /api/iot/devices — filters by leases caller is party to', async () => {
+    CommercialLease.find.mockReturnValue(q([{ _id: 'cl-1' }, { _id: 'cl-2' }]));
+    IoTDevice.find.mockReturnValue(q([mockDevice]));
+    const res = await request(app)
+      .get('/api/iot/devices')
+      .set('Authorization', 'Bearer tenant');
+    expect(res.status).toBe(200);
+    expect(IoTDevice.find).toHaveBeenCalledWith({ leaseId: { $in: ['cl-1', 'cl-2'] } });
+    expect(res.body).toHaveProperty('devices');
+  });
+
   it('GET /api/iot/maintenance — returns ticket list', async () => {
     CommercialLease.find.mockReturnValue(q([{ _id: 'cl-1' }]));
     MaintenanceTicket.find.mockReturnValue(q([mockTicket]));
