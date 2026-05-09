@@ -205,6 +205,17 @@ export const gamificationApi = {
   leaderboard: ()                    => api.get('/gamification/leaderboard'),
 };
 
+// ─── Services Marketplace (F14) ──────────────────────────────────────────────
+export const servicesApi = {
+  list: (params?: { category?: string; city?: string; page?: number }) =>
+    api.get('/services', { params }),
+  create: (data: object) => api.post('/services', data),
+  getById: (id: string) => api.get(`/services/${id}`),
+  update: (id: string, data: object) => api.patch(`/services/${id}`, data),
+  review: (id: string, rating: number, comment: string) =>
+    api.post(`/services/${id}/review`, { rating, comment }),
+};
+
 // ─── Token helpers ────────────────────────────────────────────────────────────
 export const tokenStorage = {
   save: (token: string) => storage.setItemAsync(TOKEN_KEY, token),
