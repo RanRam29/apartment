@@ -122,6 +122,7 @@ export type TenantTabParamList = {
   Swipe: undefined;
   Matches: undefined;
   Search: undefined;
+  Map: undefined;
   Profile: undefined;
 };
 

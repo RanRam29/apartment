@@ -5,7 +5,7 @@ Use this file to track roadmap delivery. Update each row only after evidence exi
 Status flow:
 - `planned` -> `in_progress` -> `merged` -> `approved`
 
-Last updated: 2026-05-09 (F7 style variants implemented)
+Last updated: 2026-05-09 (F6 Smart Map + TAMA 38 layer implemented)
 
 | ID | Phase | Feature | Owner | PR/Link | Status | Merged Date | Approved Date | Notes |
 |---|---|---|---|---|---|---|---|---|
@@ -14,7 +14,7 @@ Last updated: 2026-05-09 (F7 style variants implemented)
 | F3 | Phase 1 (Months 1-4) | Property Upload Engine | backend-team | - | in_progress | - | - | CreateListingScreen + apartments.js + Cloudinary uploadService |
 | F4 | Phase 1 (Months 1-4) | True Monthly Cost Calculator | mobile-team | - | in_progress | - | - | Rent + Arnona estimate + building fee; costBreakdown field on GET /api/apartments/:id |
 | F5 | Phase 2 (Months 5-8) | AI Lead Qualification Bot | ai-team | - | in_progress | - | - | lead_scoring.py + LeadsScreen + landlord leads endpoint |
-| F6 | Phase 2 (Months 5-8) | Smart Map + Urban Renewal Layer | TBD | - | planned | - | - | TAMA 38 / urban renewal overlays |
+| F6 | Phase 2 (Months 5-8) | Smart Map + Urban Renewal Layer | mobile-team | - | in_progress | - | - | MapScreen: WebView+Leaflet, apartment price-label markers, TAMA 38 GeoJSON toggle (data.gov.il); Map tab in TenantTabs |
 | F7 | Phase 2 (Months 5-8) | GenAI Marketing Copy Generator | ai-team | #38 | in_progress | - | - | generateMarketingCopy with professional/friendly/luxury styles; POST /api/apartments/:id/marketing-copy; sparkle modal in ListingsScreen |
 | F8 | Phase 2 (Months 5-8) | Roommate Compatibility Score | mobile-team | #39 | in_progress | - | - | Lifestyle questionnaire (sleep/cleanliness/noise/guests/smoking/pets/WFH); weighted score 0-100; RoommateScreen accessible from Profile |
 | F9 | Phase 3 (Months 9-12) | Screening & Verification (BDI/Gov) | backend-team | #41 | in_progress | - | - | IdentityVerification model; POST /api/screening/identity (SHA-256 hashed ID); GET status + landlord-view; VerifyIdentityScreen in mobile |
