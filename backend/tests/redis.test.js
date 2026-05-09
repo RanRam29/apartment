@@ -20,6 +20,7 @@ describe('Redis fallback', () => {
   });
 
   afterEach(() => {
+    jest.useRealTimers();
     process.env.NODE_ENV = originalNodeEnv;
     if (originalRedisUrl === undefined) delete process.env.REDIS_URL;
     else process.env.REDIS_URL = originalRedisUrl;
@@ -144,6 +145,57 @@ describe('Redis fallback', () => {
     await cacheSet('feed:test', { ok: true });
     await expect(cacheGet('feed:test')).resolves.toEqual({ ok: true });
     await expect(liveClient.incr('swipes:daily:user-1:2026-05-09')).resolves.toBe(1);
+  });
+
+  it('honors TTL and expireat after falling back to in-memory storage', async () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2026-05-09T12:00:00Z'));
+
+    const EventEmitter = require('events');
+    const clients = [];
+
+    jest.doMock('ioredis', () =>
+      jest.fn(() => {
+        const client = new EventEmitter();
+        const unavailable = Object.assign(
+          new Error('Reached the max retries per request limit'),
+          { name: 'MaxRetriesPerRequestError' }
+        );
+        client.disconnect = jest.fn();
+        client.get = jest.fn(async () => {
+          throw unavailable;
+        });
+        clients.push(client);
+        return client;
+      })
+    );
+    jest.doMock('../src/utils/logger', () => ({
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+    }));
+
+    const { initRedis, getRedisClient, cacheGet, cacheSet } = require('../src/config/redis');
+    const initPromise = initRedis();
+
+    clients[0].emit('ready');
+    await initPromise;
+
+    await expect(cacheGet('trigger:fallback')).resolves.toBeNull();
+
+    await cacheSet('feed:test', { ok: true }, 5);
+    await expect(cacheGet('feed:test')).resolves.toEqual({ ok: true });
+
+    jest.advanceTimersByTime(5001);
+    await expect(cacheGet('feed:test')).resolves.toBeNull();
+
+    const redis = getRedisClient();
+    await expect(redis.incr('swipes:daily:user-1:2026-05-09')).resolves.toBe(1);
+    await expect(redis.expireat('swipes:daily:user-1:2026-05-09', Math.floor((Date.now() + 2000) / 1000))).resolves.toBe(1);
+    await expect(redis.get('swipes:daily:user-1:2026-05-09')).resolves.toBe('1');
+
+    jest.advanceTimersByTime(2500);
+    await expect(redis.get('swipes:daily:user-1:2026-05-09')).resolves.toBeNull();
   });
 
   it('does not hide non-availability Redis command errors', async () => {
