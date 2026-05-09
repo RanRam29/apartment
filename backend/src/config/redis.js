@@ -55,25 +55,50 @@ async function initRedis() {
         ...redisOpts,
       });
 
-  await new Promise((resolve) => {
-    const timeout = setTimeout(() => {
-      logger.warn('Redis unavailable — falling back to in-memory store');
-      redisClient.disconnect();
-      redisClient = createInMemoryRedis();
-      resolve();
-    }, 4000);
+  const redisConnection = redisClient;
 
-    redisClient.on('ready', () => {
+  await new Promise((resolve) => {
+    let initialized = false;
+    let fellBack = false;
+    let timeout;
+
+    const cleanup = () => {
+      clearTimeout(timeout);
+      redisConnection.off('ready', onReady);
+      redisConnection.off('error', onError);
+    };
+
+    const fallbackToMemory = (message, err) => {
+      if (fellBack) return;
+      fellBack = true;
+      cleanup();
+      redisConnection.disconnect();
+      redisClient = createInMemoryRedis();
+      logger.warn(message, err?.message);
+      if (!initialized) {
+        initialized = true;
+        resolve();
+      }
+    };
+
+    const onReady = () => {
+      if (initialized) return;
+      initialized = true;
       clearTimeout(timeout);
       logger.info('Redis connected');
       resolve();
-    });
-    redisClient.on('error', (err) => {
-      clearTimeout(timeout);
-      logger.warn('Redis connection error — falling back to in-memory store:', err.message);
-      redisClient = createInMemoryRedis();
-      resolve();
-    });
+    };
+
+    const onError = (err) => {
+      fallbackToMemory('Redis connection error — falling back to in-memory store:', err);
+    };
+
+    timeout = setTimeout(() => {
+      fallbackToMemory('Redis unavailable — falling back to in-memory store');
+    }, 4000);
+
+    redisConnection.on('ready', onReady);
+    redisConnection.on('error', onError);
   });
 }
 
