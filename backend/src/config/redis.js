@@ -33,6 +33,40 @@ function createInMemoryRedis() {
   };
 }
 
+function isRedisAvailabilityError(err) {
+  const text = `${err?.name || ''} ${err?.code || ''} ${err?.message || ''}`;
+  return /ECONNREFUSED|ECONNRESET|ETIMEDOUT|EPIPE|ENOTFOUND|MaxRetriesPerRequest|Connection is closed|Connection is not writable|Stream isn't writeable|Reached the max retries/i.test(text);
+}
+
+function createResilientRedis(redisConnection) {
+  const resilientClient = {};
+
+  const runCommand = async (method, args) => {
+    try {
+      return await redisConnection[method](...args);
+    } catch (err) {
+      if (!isRedisAvailabilityError(err)) {
+        throw err;
+      }
+
+      if (redisClient === resilientClient) {
+        redisConnection.disconnect();
+        redisClient = createInMemoryRedis();
+        logger.warn('Redis command failed — falling back to in-memory store:', err?.message);
+      }
+
+      return getRedisClient()[method](...args);
+    }
+  };
+
+  for (const method of ['get', 'setex', 'del', 'incr', 'decr', 'expireat']) {
+    resilientClient[method] = (...args) => runCommand(method, args);
+  }
+  resilientClient.disconnect = () => redisConnection.disconnect();
+
+  return resilientClient;
+}
+
 async function initRedis() {
   if (process.env.NODE_ENV === 'test') {
     redisClient = createInMemoryRedis();
@@ -46,7 +80,7 @@ async function initRedis() {
   };
 
   // Upstash (and other hosted Redis) provide a full URL; fall back to host/port for local/K8s
-  redisClient = process.env.REDIS_URL
+  const redisConnection = process.env.REDIS_URL
     ? new Redis(process.env.REDIS_URL, redisOpts)
     : new Redis({
         host: process.env.REDIS_HOST || 'localhost',
@@ -54,8 +88,7 @@ async function initRedis() {
         password: process.env.REDIS_PASSWORD || undefined,
         ...redisOpts,
       });
-
-  const redisConnection = redisClient;
+  redisClient = createResilientRedis(redisConnection);
 
   await new Promise((resolve) => {
     let initialized = false;
