@@ -3,7 +3,7 @@ services:
     name: apartmentapp-backend
     runtime: node
     rootDir: backend
-    buildCommand: npm ci --omit=dev && npx sequelize-cli db:migrate
+    buildCommand: npm ci --omit=dev
     startCommand: npm start
     envVars:
       - key: NODE_ENV
