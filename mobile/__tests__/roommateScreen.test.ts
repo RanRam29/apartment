@@ -1,0 +1,89 @@
+import React from 'react';
+import { Alert, Switch } from 'react-native';
+import { fireEvent, render, waitFor } from '@testing-library/react-native';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import RoommateScreen from '../src/screens/RoommateScreen';
+import { roommateApi } from '../src/services/api';
+
+jest.mock('@react-navigation/native', () => ({
+  useNavigation: () => ({ goBack: jest.fn() }),
+}));
+
+jest.mock('../src/services/api', () => ({
+  roommateApi: {
+    getProfile: jest.fn(),
+    saveProfile: jest.fn(),
+    getMatches: jest.fn(),
+  },
+}));
+
+const savedProfile = {
+  userId: 'user-1',
+  lookingForRoommate: true,
+  sleepSchedule: 'night_owl',
+  cleanlinessLevel: 5,
+  noiseLevel: 'lively',
+  guestsFrequency: 'often',
+  smokingAllowed: true,
+  petsAllowed: true,
+  workFromHome: true,
+  cities: ['Tel Aviv'],
+  firstName: 'Saved',
+  lastName: 'Tenant',
+  avatarUrl: null,
+};
+
+function renderWithClient() {
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
+
+  return render(
+    React.createElement(
+      QueryClientProvider,
+      { client },
+      React.createElement(RoommateScreen)
+    )
+  );
+}
+
+describe('RoommateScreen', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.spyOn(Alert, 'alert').mockImplementation(jest.fn());
+    (roommateApi.getProfile as jest.Mock).mockResolvedValue({ data: { profile: savedProfile } });
+    (roommateApi.saveProfile as jest.Mock).mockResolvedValue({ data: { profile: savedProfile } });
+    (roommateApi.getMatches as jest.Mock).mockResolvedValue({ data: { matches: [] } });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('saves the hydrated server profile instead of overwriting it with defaults', async () => {
+    const screen = renderWithClient();
+
+    const saveButton = await screen.findByText('שמור פרופיל');
+    await waitFor(() => {
+      expect(screen.UNSAFE_getAllByType(Switch).every((node) => node.props.value === true)).toBe(true);
+    });
+
+    fireEvent.press(saveButton);
+
+    await waitFor(() => {
+      expect(roommateApi.saveProfile).toHaveBeenCalledWith(
+        expect.objectContaining({
+          lookingForRoommate: true,
+          sleepSchedule: 'night_owl',
+          cleanlinessLevel: 5,
+          noiseLevel: 'lively',
+          guestsFrequency: 'often',
+          smokingAllowed: true,
+          petsAllowed: true,
+          workFromHome: true,
+          cities: ['Tel Aviv'],
+        })
+      );
+    });
+  });
+});

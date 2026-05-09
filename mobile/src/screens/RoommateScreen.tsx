@@ -105,14 +105,18 @@ export default function RoommateScreen() {
 
   const [tab, setTab] = React.useState<'profile' | 'matches'>('profile');
   const [form, setForm] = React.useState<Omit<RoommateProfile, 'userId'>>(DEFAULT_PROFILE);
+  const [hydrated, setHydrated] = React.useState(false);
 
-  const { data: profileData, isLoading: profileLoading } = useQuery({
+  const { data: profileData, isLoading: profileLoading, isSuccess: profileLoaded } = useQuery({
     queryKey: ['roommate-profile'],
     queryFn: () => roommateApi.getProfile().then((r) => r.data),
-    onSuccess: (data: any) => {
-      if (data.profile) setForm({ ...DEFAULT_PROFILE, ...data.profile });
-    },
-  } as any);
+  });
+
+  React.useEffect(() => {
+    if (!profileLoaded || hydrated) return;
+    if (profileData?.profile) setForm({ ...DEFAULT_PROFILE, ...profileData.profile });
+    setHydrated(true);
+  }, [profileLoaded, profileData, hydrated]);
 
   const { data: matchesData, isLoading: matchesLoading, refetch: refetchMatches } = useQuery({
     queryKey: ['roommate-matches'],
