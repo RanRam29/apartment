@@ -6,6 +6,7 @@ const { initMongoDB } = require('./config/mongodb');
 const { initRedis } = require('./config/redis');
 const { initKafka } = require('./config/kafka');
 const { initSocket } = require('./config/socket');
+const { autoSeed } = require('./seeders/demo');
 const logger = require('./utils/logger');
 
 const PORT = process.env.PORT || 3000;
@@ -13,6 +14,7 @@ const PORT = process.env.PORT || 3000;
 async function startServer() {
   try {
     await initPostgres();
+    await autoSeed();
     // MongoDB and Redis are soft dependencies — server starts even if unavailable
     await initMongoDB().catch((err) =>
       logger.warn('MongoDB unavailable, document-store features disabled:', err.message)
