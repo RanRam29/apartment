@@ -23,8 +23,22 @@ interface AptMarker {
   city: string;
 }
 
-function buildHtml(markers: AptMarker[], tama38Url: string): string {
-  const markersJson = JSON.stringify(markers);
+function jsonForInlineScript(value: unknown): string {
+  return JSON.stringify(value).replace(/[<>&\u2028\u2029]/g, (char) => {
+    switch (char) {
+      case '<': return '\\u003c';
+      case '>': return '\\u003e';
+      case '&': return '\\u0026';
+      case '\u2028': return '\\u2028';
+      case '\u2029': return '\\u2029';
+      default: return char;
+    }
+  });
+}
+
+export function buildHtml(markers: AptMarker[], tama38Url: string): string {
+  const markersJson = jsonForInlineScript(markers);
+  const tama38UrlJson = jsonForInlineScript(tama38Url);
   return `<!DOCTYPE html>
 <html lang="he">
 <head>
@@ -46,7 +60,7 @@ function buildHtml(markers: AptMarker[], tama38Url: string): string {
 <div id="map"></div>
 <script>
   var markers = ${markersJson};
-  var tama38Url = "${tama38Url}";
+  var tama38Url = ${tama38UrlJson};
   var tamaLayer = null;
   var tamaVisible = false;
 
