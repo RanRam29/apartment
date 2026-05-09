@@ -9,6 +9,44 @@ const logger = require('../utils/logger');
 
 const router = express.Router();
 
+// ─── F4: True Monthly Cost Calculator ────────────────────────────────────────
+// Monthly arnona rate in ₪/m² by city (approximate municipal tax).
+const ARNONA_RATE_BY_CITY = {
+  'תל אביב': 8, 'tel aviv': 8, 'תל אביב-יפו': 8,
+  'ירושלים': 6, 'jerusalem': 6,
+  'חיפה': 5, 'haifa': 5,
+  'רמת גן': 6, 'ramat gan': 6,
+  'בני ברק': 5, 'bnei brak': 5,
+  'פתח תקווה': 4.5, 'petah tikva': 4.5,
+  'נתניה': 4.5, 'netanya': 4.5,
+  'ראשון לציון': 4.5, 'rishon lezion': 4.5,
+  'אשדוד': 4, 'ashdod': 4,
+  'באר שבע': 3.5, 'beer sheva': 3.5,
+};
+const DEFAULT_ARNONA_RATE = 4.5; // ₪/m²/month
+
+function computeCostBreakdown(apartment) {
+  const rent = Number(apartment.price) || 0;
+  const cityKey = (apartment.city || '').toLowerCase().trim();
+  const arnonaRate = ARNONA_RATE_BY_CITY[apartment.city] ?? ARNONA_RATE_BY_CITY[cityKey] ?? DEFAULT_ARNONA_RATE;
+
+  // Use sizeSqm if available; otherwise estimate from room count (avg 30 m²/room)
+  const sqm = apartment.sizeSqm ? Number(apartment.sizeSqm) : Math.round((Number(apartment.rooms) || 3) * 30);
+  const arnonaEstimate = Math.round(arnonaRate * sqm);
+
+  // Building (va'ad bayit) fee by size
+  const rooms = Number(apartment.rooms) || 3;
+  const buildingFeeEstimate = rooms <= 2 ? 150 : rooms <= 3.5 ? 250 : 400;
+
+  return {
+    rent,
+    arnonaEstimate,
+    buildingFeeEstimate,
+    total: rent + arnonaEstimate + buildingFeeEstimate,
+    note: 'ארנונה ודמי ועד בית הינם הערכה בלבד',
+  };
+}
+
 // ─── Validators ───────────────────────────────────────────────────────────────
 const createApartmentValidator = [
   body('title').trim().isLength({ min: 2, max: 200 }).withMessage('Title must be 2-200 chars'),
@@ -167,8 +205,9 @@ router.get('/:id', authenticate, async (req, res, next) => {
     // Increment view count (fire-and-forget)
     apartment.increment('viewCount').catch(() => {});
 
-    await cacheSet(cacheKey, apartment, 600);
-    res.json({ apartment });
+    const payload = { ...apartment.toJSON(), costBreakdown: computeCostBreakdown(apartment) };
+    await cacheSet(cacheKey, payload, 600);
+    res.json({ apartment: payload });
   } catch (err) {
     next(err);
   }

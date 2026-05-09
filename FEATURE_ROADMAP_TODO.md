@@ -5,21 +5,21 @@ Use this file to track roadmap delivery. Update each row only after evidence exi
 Status flow:
 - `planned` -> `in_progress` -> `merged` -> `approved`
 
-Last updated: 2026-05-05
+Last updated: 2026-05-09
 
 | ID | Phase | Feature | Owner | PR/Link | Status | Merged Date | Approved Date | Notes |
 |---|---|---|---|---|---|---|---|---|
-| F1 | Phase 1 (Months 1-4) | Discovery Engine (swipe + signal capture) | TBD | - | planned | - | - | Track dwell time, gallery open, save/share |
-| F2 | Phase 1 (Months 1-4) | Digital Storefront (broker landing pages) | TBD | - | planned | - | - | Inventory, reviews, contact actions |
-| F3 | Phase 1 (Months 1-4) | Property Upload Engine | TBD | - | planned | - | - | Upload images, specs, descriptions |
-| F4 | Phase 1 (Months 1-4) | True Monthly Cost Calculator | TBD | - | planned | - | - | Rent + Arnona + estimated building fee |
-| F5 | Phase 2 (Months 5-8) | AI Lead Qualification Bot | TBD | - | planned | - | - | Budget/pets/move-in triage + scoring |
+| F1 | Phase 1 (Months 1-4) | Discovery Engine (swipe + signal capture) | mobile-team | - | in_progress | - | - | SwipeScreen + swipe.js: daily quota, superlike, dwell-time signal; matchingService wired |
+| F2 | Phase 1 (Months 1-4) | Digital Storefront (broker landing pages) | backend-team | - | in_progress | - | - | LandlordDashboard + ListingsScreen + landlord.js analytics route |
+| F3 | Phase 1 (Months 1-4) | Property Upload Engine | backend-team | - | in_progress | - | - | CreateListingScreen + apartments.js + Cloudinary uploadService |
+| F4 | Phase 1 (Months 1-4) | True Monthly Cost Calculator | mobile-team | - | in_progress | - | - | Rent + Arnona estimate + building fee; costBreakdown field on GET /api/apartments/:id |
+| F5 | Phase 2 (Months 5-8) | AI Lead Qualification Bot | ai-team | - | in_progress | - | - | lead_scoring.py + LeadsScreen + landlord leads endpoint |
 | F6 | Phase 2 (Months 5-8) | Smart Map + Urban Renewal Layer | TBD | - | planned | - | - | TAMA 38 / urban renewal overlays |
-| F7 | Phase 2 (Months 5-8) | GenAI Marketing Copy Generator | TBD | - | planned | - | - | Professional/friendly/luxury styles |
+| F7 | Phase 2 (Months 5-8) | GenAI Marketing Copy Generator | ai-team | - | in_progress | - | - | generateListingSummary in geminiService.js; style variants (professional/friendly/luxury) pending |
 | F8 | Phase 2 (Months 5-8) | Roommate Compatibility Score | TBD | - | planned | - | - | Lifestyle questionnaire matching |
-| F9 | Phase 3 (Months 9-12) | Screening & Verification (BDI/Gov) | TBD | - | planned | - | - | Fraud prevention, identity checks |
+| F9 | Phase 3 (Months 9-12) | Screening & Verification (BDI/Gov) | TBD | - | planned | - | - | Only email verify exists; BDI/gov identity check not started |
 | F10 | Phase 3 (Months 9-12) | Digital Contracts + Deposit Management | TBD | - | planned | - | - | Standard contracts + e-sign |
-| F11 | Phase 3 (Months 9-12) | Payments (Bit/PayBox automation) | TBD | - | planned | - | - | Rent collection + related fees |
+| F11 | Phase 3 (Months 9-12) | Payments (Bit/PayBox automation) | backend-team | #34 | in_progress | - | - | Meshulam premium upgrade done; webhook secured in PR #34; rent collection not started |
 | F12 | Phase 3 (Months 9-12) | Commercial Real Estate Module | TBD | - | planned | - | - | CAM and critical date alerts |
 | F13 | Phase 4 (Year 2+) | Gamification Layer | TBD | - | planned | - | - | Points, trust badges, visit rewards |
 | F14 | Phase 4 (Year 2+) | Services Marketplace | TBD | - | planned | - | - | Movers/cleaning/painting integrations |

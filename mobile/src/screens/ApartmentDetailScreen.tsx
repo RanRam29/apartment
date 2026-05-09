@@ -228,6 +228,21 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
             )}
           </View>
 
+          {/* Monthly cost breakdown (F4) */}
+          {apt.costBreakdown && (
+            <>
+              <Text style={styles.sectionTitle}>עלות חודשית משוערת</Text>
+              <View style={styles.costCard}>
+                <CostRow label="שכר דירה" amount={apt.costBreakdown.rent} />
+                <CostRow label="ארנונה (הערכה)" amount={apt.costBreakdown.arnonaEstimate} />
+                <CostRow label="ועד בית (הערכה)" amount={apt.costBreakdown.buildingFeeEstimate} />
+                <View style={styles.costDivider} />
+                <CostRow label="סה״כ משוער" amount={apt.costBreakdown.total} bold />
+                <Text style={styles.costNote}>{apt.costBreakdown.note}</Text>
+              </View>
+            </>
+          )}
+
           {/* Amenities */}
           {apt.amenities?.length > 0 && (
             <>
@@ -338,6 +353,15 @@ function DetailChip({ icon, label }: { icon: keyof typeof Ionicons.glyphMap; lab
   );
 }
 
+function CostRow({ label, amount, bold }: { label: string; amount: number; bold?: boolean }) {
+  return (
+    <View style={styles.costRow}>
+      <Text style={[styles.costAmount, bold && styles.costAmountBold]}>₪{amount.toLocaleString()}</Text>
+      <Text style={[styles.costLabel, bold && styles.costLabelBold]}>{label}</Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#1A1A2E' },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#1A1A2E' },
@@ -408,4 +432,12 @@ const styles = StyleSheet.create({
   errorText: { color: '#FF4757', fontSize: 16, marginBottom: 16 },
   backBtn: { backgroundColor: '#6C5CE7', paddingHorizontal: 20, paddingVertical: 10, borderRadius: 10 },
   backBtnText: { color: '#fff', fontWeight: '700' },
+  costCard: { backgroundColor: '#2A2A3E', borderRadius: 14, padding: 16, marginBottom: 20 },
+  costRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 6 },
+  costLabel: { color: '#A0A0B2', fontSize: 14, textAlign: 'right' },
+  costLabelBold: { color: '#fff', fontWeight: '700', fontSize: 15 },
+  costAmount: { color: '#C0C0D0', fontSize: 14 },
+  costAmountBold: { color: '#6C5CE7', fontWeight: '800', fontSize: 16 },
+  costDivider: { height: 1, backgroundColor: '#3A3A5E', marginVertical: 8 },
+  costNote: { color: '#6A6A7E', fontSize: 11, textAlign: 'right', marginTop: 8 },
 });
