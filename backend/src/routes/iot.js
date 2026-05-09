@@ -37,11 +37,17 @@ router.post(
 
       const lease = await isPartyToLease(req.user.id, req.body.leaseId);
       if (!lease) return res.status(404).json({ error: 'Lease not found or access denied' });
+      if (String(lease.landlordId) !== String(req.user.id)) {
+        return res.status(403).json({ error: 'Only the lease landlord can register devices' });
+      }
+      if (String(lease.tenantId) !== String(req.body.tenantId)) {
+        return res.status(400).json({ error: 'Tenant does not match lease' });
+      }
 
       const device = await IoTDevice.create({
         leaseId:    req.body.leaseId,
-        landlordId: req.user.id,
-        tenantId:   req.body.tenantId,
+        landlordId: String(lease.landlordId),
+        tenantId:   String(lease.tenantId),
         deviceId:   req.body.deviceId,
         name:       req.body.name,
         type:       req.body.type,
@@ -60,11 +66,16 @@ router.post(
 // ─── GET /api/iot/devices — list devices for leases caller is party to ────────
 router.get('/devices', authenticate, async (req, res, next) => {
   try {
-    const filter = req.user.role === 'landlord'
+    const leaseFilter = req.user.role === 'landlord'
       ? { landlordId: req.user.id }
       : { tenantId:   req.user.id };
-    if (req.query.leaseId) filter.leaseId = req.query.leaseId;
+    if (req.query.leaseId) leaseFilter._id = req.query.leaseId;
 
+    const leases = await CommercialLease.find(leaseFilter).select('_id').lean();
+    const leaseIds = leases.map((l) => String(l._id));
+    if (leaseIds.length === 0) return res.json({ devices: [] });
+
+    const filter = { leaseId: { $in: leaseIds } };
     const devices = await IoTDevice.find(filter).sort({ createdAt: -1 }).limit(100);
     res.json({ devices });
   } catch (err) {
