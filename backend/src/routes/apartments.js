@@ -5,6 +5,7 @@ const { Apartment, User, Swipe } = require('../models');
 const { authenticate, requireRole } = require('../middleware/auth');
 const { upload, uploadMany } = require('../services/uploadService');
 const { cacheGet, cacheSet, cacheDel } = require('../config/redis');
+const { generateMarketingCopy, COPY_STYLE_INSTRUCTIONS } = require('../services/geminiService');
 const logger = require('../utils/logger');
 
 const router = express.Router();
@@ -254,5 +255,39 @@ router.delete('/:id', authenticate, requireRole('landlord'), async (req, res, ne
     next(err);
   }
 });
+
+// ─── F7: GenAI Marketing Copy Generator ──────────────────────────────────────
+// POST /api/apartments/:id/marketing-copy — generate style-variant copy (landlord owner only)
+router.post(
+  '/:id/marketing-copy',
+  authenticate,
+  requireRole('landlord'),
+  [body('style').optional().isIn(['professional', 'friendly', 'luxury'])],
+  async (req, res, next) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
+
+      const style = req.body.style || 'professional';
+
+      const apartment = await Apartment.findOne({
+        where: { id: req.params.id, landlordId: req.user.id },
+      });
+      if (!apartment) return res.status(404).json({ error: 'Apartment not found' });
+
+      const cacheKey = `marketing-copy:${apartment.id}:${style}`;
+      const cached = await cacheGet(cacheKey);
+      if (cached) return res.json({ copy: cached, style, fromCache: true });
+
+      const copy = await generateMarketingCopy(apartment, style);
+      if (!copy) return res.status(503).json({ error: 'AI service unavailable — set GEMINI_API_KEY' });
+
+      await cacheSet(cacheKey, copy, 600);
+      res.json({ copy, style });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
 
 module.exports = router;

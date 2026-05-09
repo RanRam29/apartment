@@ -5,7 +5,7 @@ Use this file to track roadmap delivery. Update each row only after evidence exi
 Status flow:
 - `planned` -> `in_progress` -> `merged` -> `approved`
 
-Last updated: 2026-05-09
+Last updated: 2026-05-09 (F7 style variants implemented)
 
 | ID | Phase | Feature | Owner | PR/Link | Status | Merged Date | Approved Date | Notes |
 |---|---|---|---|---|---|---|---|---|
@@ -15,7 +15,7 @@ Last updated: 2026-05-09
 | F4 | Phase 1 (Months 1-4) | True Monthly Cost Calculator | mobile-team | - | in_progress | - | - | Rent + Arnona estimate + building fee; costBreakdown field on GET /api/apartments/:id |
 | F5 | Phase 2 (Months 5-8) | AI Lead Qualification Bot | ai-team | - | in_progress | - | - | lead_scoring.py + LeadsScreen + landlord leads endpoint |
 | F6 | Phase 2 (Months 5-8) | Smart Map + Urban Renewal Layer | TBD | - | planned | - | - | TAMA 38 / urban renewal overlays |
-| F7 | Phase 2 (Months 5-8) | GenAI Marketing Copy Generator | ai-team | - | in_progress | - | - | generateListingSummary in geminiService.js; style variants (professional/friendly/luxury) pending |
+| F7 | Phase 2 (Months 5-8) | GenAI Marketing Copy Generator | ai-team | #38 | in_progress | - | - | generateMarketingCopy with professional/friendly/luxury styles; POST /api/apartments/:id/marketing-copy; sparkle modal in ListingsScreen |
 | F8 | Phase 2 (Months 5-8) | Roommate Compatibility Score | TBD | - | planned | - | - | Lifestyle questionnaire matching |
 | F9 | Phase 3 (Months 9-12) | Screening & Verification (BDI/Gov) | TBD | - | planned | - | - | Only email verify exists; BDI/gov identity check not started |
 | F10 | Phase 3 (Months 9-12) | Digital Contracts + Deposit Management | TBD | - | planned | - | - | Standard contracts + e-sign |

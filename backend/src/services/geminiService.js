@@ -67,36 +67,59 @@ async function parseSearchQuery(query) {
   }
 }
 
+const COPY_STYLE_INSTRUCTIONS = {
+  professional: 'Write in a professional, authoritative tone. Emphasise specifications, location advantages, and investment value. Use formal Hebrew.',
+  friendly:     'Write in a warm, conversational tone. Emphasise lifestyle, comfort, and community feel. Use friendly, everyday Hebrew.',
+  luxury:       'Write in a sophisticated, aspirational tone. Use premium descriptive language. Highlight exclusive features and prestige. Use elegant Hebrew.',
+};
+
 /**
  * Generates a short AI summary for a landlord's listing to improve engagement.
  * @param {object} apartment - Apartment data
  * @returns {string} Short marketing description
  */
 async function generateListingSummary(apartment) {
+  return generateMarketingCopy(apartment, 'professional');
+}
+
+/**
+ * Generates style-variant marketing copy for a listing.
+ * @param {object} apartment - Apartment data
+ * @param {'professional'|'friendly'|'luxury'} style
+ * @returns {string|null} Generated copy or null on failure
+ */
+async function generateMarketingCopy(apartment, style = 'professional') {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return null;
 
-  const prompt = `Write a short, engaging 2-sentence apartment listing description in Hebrew for:
-City: ${apartment.city}, Neighborhood: ${apartment.neighborhood || 'N/A'}
-Rooms: ${apartment.rooms}, Price: ₪${apartment.price}/month
+  const styleInstruction = COPY_STYLE_INSTRUCTIONS[style] || COPY_STYLE_INSTRUCTIONS.professional;
+
+  const prompt = `${styleInstruction}
+
+Write a compelling 2–3 sentence Hebrew apartment listing description for:
+City: ${apartment.city}${apartment.neighborhood ? `, ${apartment.neighborhood}` : ''}
+Rooms: ${apartment.rooms}, Size: ${apartment.sizeSqm ? `${apartment.sizeSqm} m²` : 'N/A'}, Floor: ${apartment.floor ?? 'N/A'}
+Price: ₪${apartment.price}/month
 Amenities: ${(apartment.amenities || []).join(', ') || 'None listed'}
-Keep it factual and appealing. Output only the description text.`;
+Pets allowed: ${apartment.petsAllowed ? 'Yes' : 'No'}
+
+Output only the description text, no labels or formatting.`;
 
   try {
     const response = await axios.post(
       `${GEMINI_API_URL}?key=${apiKey}`,
       {
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.7, maxOutputTokens: 128 },
+        generationConfig: { temperature: 0.75, maxOutputTokens: 160 },
       },
       { timeout: 10000 }
     );
 
     return response.data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
   } catch (err) {
-    logger.error('Gemini summary error:', err.message);
+    logger.error('Gemini marketing copy error:', err.message);
     return null;
   }
 }
 
-module.exports = { parseSearchQuery, generateListingSummary };
+module.exports = { parseSearchQuery, generateListingSummary, generateMarketingCopy, COPY_STYLE_INSTRUCTIONS };
