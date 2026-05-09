@@ -13,7 +13,10 @@ const PORT = process.env.PORT || 3000;
 async function startServer() {
   try {
     await initPostgres();
-    await initMongoDB();
+    // MongoDB and Redis are soft dependencies — server starts even if unavailable
+    await initMongoDB().catch((err) =>
+      logger.warn('MongoDB unavailable, document-store features disabled:', err.message)
+    );
     await initRedis();
     // Kafka is optional — not available in free-tier deployments (Render, etc.)
     await initKafka().catch((err) =>
