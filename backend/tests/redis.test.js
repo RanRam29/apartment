@@ -64,4 +64,42 @@ describe('Redis fallback', () => {
     expect(clients[0].listenerCount('error')).toBe(0);
     await expect(cacheGet('swipes:daily:user-1:2026-05-09')).resolves.toEqual({ count: 1 });
   });
+
+  it('keeps the connected Redis client after a transient runtime error', async () => {
+    const EventEmitter = require('events');
+    const clients = [];
+
+    jest.doMock('ioredis', () =>
+      jest.fn(() => {
+        const store = new Map();
+        const client = new EventEmitter();
+        client.disconnect = jest.fn();
+        client.get = jest.fn(async (key) => store.get(key) ?? null);
+        client.setex = jest.fn(async (key, _ttl, value) => {
+          store.set(key, value);
+          return 'OK';
+        });
+        clients.push(client);
+        return client;
+      })
+    );
+    jest.doMock('../src/utils/logger', () => ({
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+    }));
+
+    const { initRedis, cacheGet, cacheSet } = require('../src/config/redis');
+    const initPromise = initRedis();
+
+    clients[0].emit('ready');
+    await initPromise;
+
+    clients[0].emit('error', new Error('ECONNRESET'));
+    await cacheSet('feed:test', { ok: true });
+
+    expect(clients[0].disconnect).not.toHaveBeenCalled();
+    expect(clients[0].setex).toHaveBeenCalledWith('feed:test', 300, JSON.stringify({ ok: true }));
+    await expect(cacheGet('feed:test')).resolves.toEqual({ ok: true });
+  });
 });
