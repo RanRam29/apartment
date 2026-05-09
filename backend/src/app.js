@@ -26,7 +26,18 @@ const app = express();
 
 app.use(helmet());
 app.use(cors({
-  origin: process.env.CLIENT_ORIGIN || 'http://localhost:3000',
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (
+      origin.startsWith('http://localhost') ||
+      origin.startsWith('http://127.0.0.1') ||
+      origin.endsWith('.vercel.app') ||
+      origin === process.env.CLIENT_ORIGIN
+    ) {
+      return callback(null, true);
+    }
+    return callback(null, false);
+  },
   credentials: true,
 }));
 app.use(morgan('combined'));
