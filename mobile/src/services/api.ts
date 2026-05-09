@@ -198,6 +198,13 @@ export const roommateApi = {
   getMatches: () => api.get('/roommates/matches'),
 };
 
+// ─── Gamification (F13) ───────────────────────────────────────────────────────
+export const gamificationApi = {
+  getMe:       ()                    => api.get('/gamification/me'),
+  awardPoints: (action: string)      => api.post('/gamification/award', { action }),
+  leaderboard: ()                    => api.get('/gamification/leaderboard'),
+};
+
 // ─── Token helpers ────────────────────────────────────────────────────────────
 export const tokenStorage = {
   save: (token: string) => storage.setItemAsync(TOKEN_KEY, token),

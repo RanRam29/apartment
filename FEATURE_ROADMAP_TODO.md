@@ -20,7 +20,7 @@ Last updated: 2026-05-09 (F11 rent collection implemented; all Phase 1-3 feature
 | F9 | Phase 3 (Months 9-12) | Screening & Verification (BDI/Gov) | backend-team | #41 | in_progress | - | - | IdentityVerification model; POST /api/screening/identity (SHA-256 hashed ID); GET status + landlord-view; VerifyIdentityScreen in mobile |
 | F10 | Phase 3 (Months 9-12) | Digital Contracts + Deposit Management | backend-team | #42 | in_progress | - | - | RentalContract model; CRUD + e-sign + deposit lifecycle; ContractsScreen with full-text view, sign button, deposit actions |
 | F11 | Phase 3 (Months 9-12) | Payments (Bit/PayBox automation) | backend-team | #34 | in_progress | - | - | Meshulam premium upgrade done; webhook secured in PR #34; RentPayment model + /api/payments/rent CRUD; Bit/PayBox deep links; RentPaymentsScreen in mobile |
-| F12 | Phase 3 (Months 9-12) | Commercial Real Estate Module | TBD | - | planned | - | - | CAM and critical date alerts |
+| F12 | Phase 3 (Months 9-12) | Commercial Real Estate Module | backend-team | - | in_progress | - | - | CommercialLease model; /api/commercial CRUD + CAM reconciliation + critical date alerts; CommercialScreen in mobile |
 | F13 | Phase 4 (Year 2+) | Gamification Layer | TBD | - | planned | - | - | Points, trust badges, visit rewards |
 | F14 | Phase 4 (Year 2+) | Services Marketplace | TBD | - | planned | - | - | Movers/cleaning/painting integrations |
 | F15 | Phase 4 (Year 2+) | IoT for Commercial Tenants | TBD | - | planned | - | - | Smart access + maintenance reporting |
