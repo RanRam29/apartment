@@ -491,6 +491,17 @@ describe('F11 — Rent payments routes', () => {
     delete process.env.WEBHOOK_SECRET;
     expect(res.status).toBe(401);
   });
+
+  it('POST /api/payments/webhook — rejects non-JSON signed payloads without throwing', async () => {
+    process.env.WEBHOOK_SECRET = 'test-secret';
+    const res = await request(app)
+      .post('/api/payments/webhook')
+      .set('Content-Type', 'text/plain')
+      .set('x-webhook-signature', 'bad')
+      .send('not json');
+    delete process.env.WEBHOOK_SECRET;
+    expect(res.status).toBe(401);
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
