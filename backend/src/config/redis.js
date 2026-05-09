@@ -55,12 +55,25 @@ async function initRedis() {
         ...redisOpts,
       });
 
-  await new Promise((resolve, reject) => {
+  await new Promise((resolve) => {
+    const timeout = setTimeout(() => {
+      logger.warn('Redis unavailable — falling back to in-memory store');
+      redisClient.disconnect();
+      redisClient = createInMemoryRedis();
+      resolve();
+    }, 4000);
+
     redisClient.on('ready', () => {
+      clearTimeout(timeout);
       logger.info('Redis connected');
       resolve();
     });
-    redisClient.on('error', reject);
+    redisClient.on('error', (err) => {
+      clearTimeout(timeout);
+      logger.warn('Redis connection error — falling back to in-memory store:', err.message);
+      redisClient = createInMemoryRedis();
+      resolve();
+    });
   });
 }
 
