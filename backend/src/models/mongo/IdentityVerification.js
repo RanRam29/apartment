@@ -7,10 +7,11 @@ const identityVerificationSchema = new mongoose.Schema({
     unique: true,
     index: true,
   },
-  // SHA-256 of the raw ID number — never store plain-text gov ID
+  // Keyed HMAC of the raw ID number; never store plain-text gov ID.
   idNumberHash: {
     type: String,
     required: true,
+    unique: true,
   },
   // Last 4 digits only, for display/support purposes
   idNumberLast4: {

@@ -2,14 +2,46 @@ const express = require('express');
 const crypto = require('crypto');
 const { body, validationResult } = require('express-validator');
 const { authenticate, requireRole } = require('../middleware/auth');
+const { getJwtSecret } = require('../config/security');
 const { Match } = require('../models');
 const IdentityVerification = require('../models/mongo/IdentityVerification');
 const logger = require('../utils/logger');
 
 const router = express.Router();
 
+function getIdentityHashSecret() {
+  const secret = process.env.IDENTITY_HASH_SECRET?.trim();
+  if (secret) {
+    if (secret.length < 20) {
+      throw new Error('IDENTITY_HASH_SECRET must be at least 20 characters');
+    }
+    return secret;
+  }
+  return getJwtSecret();
+}
+
 function hashId(idNumber) {
+  return crypto
+    .createHmac('sha256', getIdentityHashSecret())
+    .update(idNumber.trim())
+    .digest('hex');
+}
+
+function legacyHashId(idNumber) {
   return crypto.createHash('sha256').update(idNumber.trim()).digest('hex');
+}
+
+function idHashLookupValues(idNumber) {
+  return [...new Set([hashId(idNumber), legacyHashId(idNumber)])];
+}
+
+function isDuplicateIdentityClaimError(err) {
+  return err?.code === 11000 && (
+    err?.keyPattern?.idNumberHash ||
+    err?.keyValue?.idNumberHash ||
+    err?.keyPattern?.userId ||
+    err?.keyValue?.userId
+  );
 }
 
 // ─── POST /api/screening/identity — tenant submits verification request ────────
@@ -37,6 +69,7 @@ router.post(
       if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
 
       const { idNumber, fullName, phone } = req.body;
+      const normalizedIdNumber = idNumber.trim();
 
       // Prevent re-submission if already verified
       const existing = await IdentityVerification.findOne({ userId: req.user.id });
@@ -44,13 +77,12 @@ router.post(
         return res.status(409).json({ error: 'Identity already verified', status: 'verified' });
       }
 
-      const idHash = hashId(idNumber);
+      const idHash = hashId(normalizedIdNumber);
 
       // Check if this ID number is already claimed by another user
       const claimed = await IdentityVerification.findOne({
-        idNumberHash: idHash,
+        idNumberHash: { $in: idHashLookupValues(normalizedIdNumber) },
         userId: { $ne: req.user.id },
-        status: { $ne: 'rejected' },
       });
       if (claimed) {
         return res.status(409).json({ error: 'מספר תעודת הזהות כבר רשום במערכת' });
@@ -61,7 +93,7 @@ router.post(
         {
           $set: {
             idNumberHash: idHash,
-            idNumberLast4: idNumber.slice(-4),
+            idNumberLast4: normalizedIdNumber.slice(-4),
             fullName: fullName.trim(),
             phone: phone.trim(),
             status: 'pending',
@@ -92,6 +124,9 @@ router.post(
         idNumberLast4: record.idNumberLast4,
       });
     } catch (err) {
+      if (isDuplicateIdentityClaimError(err)) {
+        return res.status(409).json({ error: 'מספר תעודת הזהות כבר רשום במערכת' });
+      }
       next(err);
     }
   }
