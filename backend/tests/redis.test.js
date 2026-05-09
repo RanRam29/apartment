@@ -102,4 +102,78 @@ describe('Redis fallback', () => {
     expect(clients[0].setex).toHaveBeenCalledWith('feed:test', 300, JSON.stringify({ ok: true }));
     await expect(cacheGet('feed:test')).resolves.toEqual({ ok: true });
   });
+
+  it('falls back to in-memory storage when ready Redis commands lose the connection', async () => {
+    const EventEmitter = require('events');
+    const clients = [];
+
+    jest.doMock('ioredis', () =>
+      jest.fn(() => {
+        const client = new EventEmitter();
+        const unavailable = Object.assign(
+          new Error('Reached the max retries per request limit'),
+          { name: 'MaxRetriesPerRequestError' }
+        );
+        client.disconnect = jest.fn();
+        client.get = jest.fn(async () => {
+          throw unavailable;
+        });
+        client.incr = jest.fn(async () => {
+          throw unavailable;
+        });
+        clients.push(client);
+        return client;
+      })
+    );
+    jest.doMock('../src/utils/logger', () => ({
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+    }));
+
+    const { initRedis, getRedisClient, cacheGet, cacheSet } = require('../src/config/redis');
+    const initPromise = initRedis();
+
+    clients[0].emit('ready');
+    await initPromise;
+
+    const liveClient = getRedisClient();
+    await expect(cacheGet('feed:test')).resolves.toBeNull();
+    expect(clients[0].disconnect).toHaveBeenCalledTimes(1);
+
+    await cacheSet('feed:test', { ok: true });
+    await expect(cacheGet('feed:test')).resolves.toEqual({ ok: true });
+    await expect(liveClient.incr('swipes:daily:user-1:2026-05-09')).resolves.toBe(1);
+  });
+
+  it('does not hide non-availability Redis command errors', async () => {
+    const EventEmitter = require('events');
+    const clients = [];
+
+    jest.doMock('ioredis', () =>
+      jest.fn(() => {
+        const client = new EventEmitter();
+        client.disconnect = jest.fn();
+        client.get = jest.fn(async () => {
+          throw new Error('WRONGTYPE Operation against a key holding the wrong kind of value');
+        });
+        clients.push(client);
+        return client;
+      })
+    );
+    jest.doMock('../src/utils/logger', () => ({
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+    }));
+
+    const { initRedis, cacheGet } = require('../src/config/redis');
+    const initPromise = initRedis();
+
+    clients[0].emit('ready');
+    await initPromise;
+
+    await expect(cacheGet('feed:test')).rejects.toThrow('WRONGTYPE');
+    expect(clients[0].disconnect).not.toHaveBeenCalled();
+  });
 });
