@@ -62,16 +62,20 @@ async function initRedis() {
     let fellBack = false;
     let timeout;
 
-    const cleanup = () => {
+    const cleanupStartupListeners = () => {
       clearTimeout(timeout);
       redisConnection.off('ready', onReady);
       redisConnection.off('error', onError);
     };
 
+    const onRuntimeError = (err) => {
+      logger.warn('Redis runtime error:', err?.message);
+    };
+
     const fallbackToMemory = (message, err) => {
       if (fellBack) return;
       fellBack = true;
-      cleanup();
+      cleanupStartupListeners();
       redisConnection.disconnect();
       redisClient = createInMemoryRedis();
       logger.warn(message, err?.message);
@@ -84,7 +88,8 @@ async function initRedis() {
     const onReady = () => {
       if (initialized) return;
       initialized = true;
-      clearTimeout(timeout);
+      cleanupStartupListeners();
+      redisConnection.on('error', onRuntimeError);
       logger.info('Redis connected');
       resolve();
     };
