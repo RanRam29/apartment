@@ -180,15 +180,12 @@ async function seed() {
 }
 
 /**
- * Auto-seed: called at server startup. Only seeds if the users table is empty,
- * so it's safe to call on every boot without blowing away existing data.
+ * Auto-seed: called at server startup. Always ensures admin accounts exist,
+ * and seeds demo data only on a fresh (empty) database.
  */
 async function autoSeed(queryInterface) {
   try {
-    const count = await User.count();
-    if (count > 0) return;
-    console.log('Empty database detected — running initial seed…');
-    // Remove the process.exit call for embedded usage
+    // Always ensure admin accounts exist (upsert regardless of DB state)
     const adminHash = await bcrypt.hash('Admin1234!', 12);
     for (const a of ADMIN_ACCOUNTS) {
       await User.findOrCreate({
@@ -196,6 +193,10 @@ async function autoSeed(queryInterface) {
         defaults: { email: a.email, passwordHash: adminHash, firstName: a.firstName, lastName: a.lastName, role: a.role, isVerified: true },
       });
     }
+
+    const count = await User.count();
+    if (count > ADMIN_ACCOUNTS.length) return;
+    console.log('Empty database detected — running initial seed…');
     const demoHash = await bcrypt.hash('Demo1234!', 12);
     const landlordIds = [];
     for (const l of LANDLORDS) {
