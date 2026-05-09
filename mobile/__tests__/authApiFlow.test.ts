@@ -39,13 +39,13 @@ describe('auth API verification flow', () => {
 
   it('calls verify-email token endpoint', async () => {
     mockGet.mockResolvedValue({ data: { ok: true } });
-    await authApi.verifyEmailToken('tok-1');
+    await authApi.verifyEmail('tok-1');
     expect(mockGet).toHaveBeenCalledWith('/auth/verify/tok-1');
   });
 
   it('calls resend-verification endpoint', async () => {
     mockPost.mockResolvedValue({ data: { ok: true } });
-    await authApi.resendVerification();
-    expect(mockPost).toHaveBeenCalledWith('/auth/resend-verification', {});
+    await authApi.resendVerification('user@example.com');
+    expect(mockPost).toHaveBeenCalledWith('/auth/verify/resend', { email: 'user@example.com' });
   });
 });

@@ -146,4 +146,8 @@ export type MainStackParamList = {
   Contracts: undefined;
   ContractDetail: { contractId: string };
   RentPayments: undefined;
+  Commercial: undefined;
+  Gamification: undefined;
+  Services: undefined;
+  IoT: undefined;
 };

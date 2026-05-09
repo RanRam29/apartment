@@ -198,6 +198,42 @@ export const roommateApi = {
   getMatches: () => api.get('/roommates/matches'),
 };
 
+// ─── Gamification (F13) ───────────────────────────────────────────────────────
+export const gamificationApi = {
+  getMe:       ()                    => api.get('/gamification/me'),
+  awardPoints: (action: string)      => api.post('/gamification/award', { action }),
+  leaderboard: ()                    => api.get('/gamification/leaderboard'),
+};
+
+// ─── Services Marketplace (F14) ──────────────────────────────────────────────
+export const servicesApi = {
+  list: (params?: { category?: string; city?: string; page?: number }) =>
+    api.get('/services', { params }),
+  create: (data: object) => api.post('/services', data),
+  getById: (id: string) => api.get(`/services/${id}`),
+  update: (id: string, data: object) => api.patch(`/services/${id}`, data),
+  review: (id: string, rating: number, comment: string) =>
+    api.post(`/services/${id}/review`, { rating, comment }),
+};
+
+// ─── IoT / Commercial Tenants (F15) ──────────────────────────────────────────
+export const iotApi = {
+  listDevices: (leaseId?: string) =>
+    api.get('/iot/devices', { params: leaseId ? { leaseId } : {} }),
+  registerDevice: (data: object) =>
+    api.post('/iot/devices', data),
+  updateDeviceStatus: (deviceId: string, status: string) =>
+    api.patch(`/iot/devices/${deviceId}/status`, { status }),
+  simulateAccess: (deviceId: string, action: string) =>
+    api.post('/iot/access', { deviceId, action }),
+  listTickets: (params?: { leaseId?: string; status?: string }) =>
+    api.get('/iot/maintenance', { params }),
+  createTicket: (data: object) =>
+    api.post('/iot/maintenance', data),
+  updateTicket: (id: string, data: object) =>
+    api.patch(`/iot/maintenance/${id}`, data),
+};
+
 // ─── Token helpers ────────────────────────────────────────────────────────────
 export const tokenStorage = {
   save: (token: string) => storage.setItemAsync(TOKEN_KEY, token),

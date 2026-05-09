@@ -16,6 +16,10 @@ const paymentRoutes = require('./routes/payments');
 const roommateRoutes = require('./routes/roommates');
 const screeningRoutes  = require('./routes/screening');
 const contractRoutes   = require('./routes/contracts');
+const commercialRoutes = require('./routes/commercial');
+const gamificationRoutes = require('./routes/gamification');
+const servicesRoutes   = require('./routes/services');
+const iotRoutes        = require('./routes/iot');
 const { errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
@@ -74,6 +78,10 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/roommates', roommateRoutes);
 app.use('/api/screening', screeningRoutes);
 app.use('/api/contracts', contractRoutes);
+app.use('/api/commercial', commercialRoutes);
+app.use('/api/gamification', gamificationRoutes);
+app.use('/api/services', servicesRoutes);
+app.use('/api/iot', iotRoutes);
 
 app.use(errorHandler);
 

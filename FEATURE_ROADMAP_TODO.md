@@ -5,7 +5,7 @@ Use this file to track roadmap delivery. Update each row only after evidence exi
 Status flow:
 - `planned` -> `in_progress` -> `merged` -> `approved`
 
-Last updated: 2026-05-09 (F11 rent collection implemented; all Phase 1-3 features in_progress)
+Last updated: 2026-05-09 (F12-F15 implemented; ALL 15 features now in_progress)
 
 | ID | Phase | Feature | Owner | PR/Link | Status | Merged Date | Approved Date | Notes |
 |---|---|---|---|---|---|---|---|---|
@@ -20,10 +20,10 @@ Last updated: 2026-05-09 (F11 rent collection implemented; all Phase 1-3 feature
 | F9 | Phase 3 (Months 9-12) | Screening & Verification (BDI/Gov) | backend-team | #41 | in_progress | - | - | IdentityVerification model; POST /api/screening/identity (SHA-256 hashed ID); GET status + landlord-view; VerifyIdentityScreen in mobile |
 | F10 | Phase 3 (Months 9-12) | Digital Contracts + Deposit Management | backend-team | #42 | in_progress | - | - | RentalContract model; CRUD + e-sign + deposit lifecycle; ContractsScreen with full-text view, sign button, deposit actions |
 | F11 | Phase 3 (Months 9-12) | Payments (Bit/PayBox automation) | backend-team | #34 | in_progress | - | - | Meshulam premium upgrade done; webhook secured in PR #34; RentPayment model + /api/payments/rent CRUD; Bit/PayBox deep links; RentPaymentsScreen in mobile |
-| F12 | Phase 3 (Months 9-12) | Commercial Real Estate Module | TBD | - | planned | - | - | CAM and critical date alerts |
-| F13 | Phase 4 (Year 2+) | Gamification Layer | TBD | - | planned | - | - | Points, trust badges, visit rewards |
-| F14 | Phase 4 (Year 2+) | Services Marketplace | TBD | - | planned | - | - | Movers/cleaning/painting integrations |
-| F15 | Phase 4 (Year 2+) | IoT for Commercial Tenants | TBD | - | planned | - | - | Smart access + maintenance reporting |
+| F12 | Phase 3 (Months 9-12) | Commercial Real Estate Module | backend-team | - | in_progress | - | - | CommercialLease model; /api/commercial CRUD + CAM reconciliation + critical date alerts; CommercialScreen in mobile |
+| F13 | Phase 4 (Year 2+) | Gamification Layer | mobile-team | - | in_progress | - | - | UserPoints model; /api/gamification (award/me/leaderboard); auto-badges; GamificationScreen with progress bar + leaderboard |
+| F14 | Phase 4 (Year 2+) | Services Marketplace | backend-team | - | in_progress | - | - | ServiceListing + ServiceReview models; /api/services CRUD + review + avg-rating; ServicesScreen with category filters + phone-to-call + star picker |
+| F15 | Phase 4 (Year 2+) | IoT for Commercial Tenants | backend-team | - | in_progress | - | - | IoTDevice + MaintenanceTicket models; /api/iot devices + access + tickets; IoTScreen tabbed UI |
 
 ## Update Rules
 
