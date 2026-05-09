@@ -1,5 +1,4 @@
 import React from 'react';
-import { Text } from 'react-native';
 import { render, waitFor } from '@testing-library/react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import ApartmentDetailScreen from '../src/screens/ApartmentDetailScreen';
@@ -15,9 +14,14 @@ jest.mock('expo-image', () => ({
   Image: 'Image',
 }));
 
-jest.mock('@expo/vector-icons', () => ({
-  Ionicons: ({ name }: { name: string }) => React.createElement(Text, null, name),
-}));
+jest.mock('@expo/vector-icons', () => {
+  const React = require('react');
+  const { Text } = require('react-native');
+
+  return {
+    Ionicons: ({ name }: { name: string }) => React.createElement(Text, null, name),
+  };
+});
 
 const apartment = {
   id: 'apt-1',
