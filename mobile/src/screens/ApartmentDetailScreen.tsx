@@ -49,6 +49,14 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
     queryFn: () => apartmentsApi.getById(apartmentId).then((r) => r.data),
   });
 
+  React.useEffect(() => {
+    if (!isImageViewerOpen || !viewerRef.current) return;
+    const t = setTimeout(() => {
+      viewerRef.current?.scrollTo({ x: activeImage * SCREEN_WIDTH, animated: false });
+    }, 0);
+    return () => clearTimeout(t);
+  }, [isImageViewerOpen, activeImage]);
+
   if (isLoading) {
     return (
       <SafeAreaView style={styles.center}>
@@ -99,14 +107,6 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
   function prevImage() {
     scrollToImage(activeImage - 1);
   }
-
-  React.useEffect(() => {
-    if (!isImageViewerOpen || !viewerRef.current) return;
-    const t = setTimeout(() => {
-      viewerRef.current?.scrollTo({ x: activeImage * SCREEN_WIDTH, animated: false });
-    }, 0);
-    return () => clearTimeout(t);
-  }, [isImageViewerOpen, activeImage]);
 
   return (
     <SafeAreaView style={styles.container}>
