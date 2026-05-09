@@ -62,6 +62,15 @@ function buildHtml(markers: AptMarker[], tama38Url: string): string {
   }).addTo(map);
 
   // Custom apartment icon
+  function escapeHtml(value) {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   function makeIcon(price) {
     var label = '₪' + (price >= 1000 ? Math.round(price/1000) + 'K' : price);
     var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="28">'
@@ -84,9 +93,9 @@ function buildHtml(markers: AptMarker[], tama38Url: string): string {
     var m = L.marker([apt.lat, apt.lng], { icon: makeIcon(apt.price) });
     m.bindPopup(
       '<div class="apt-popup">'
-      + '<div class="title">' + apt.title + '<\/div>'
+      + '<div class="title">' + escapeHtml(apt.title) + '<\/div>'
       + '<div class="price">₪' + apt.price.toLocaleString() + '/חודש<\/div>'
-      + '<div class="meta">' + apt.rooms + ' חדרים · ' + apt.city + '<\/div>'
+      + '<div class="meta">' + escapeHtml(apt.rooms) + ' חדרים · ' + escapeHtml(apt.city) + '<\/div>'
       + '<\/div>'
     );
     markerGroup.addLayer(m);
@@ -118,7 +127,7 @@ function buildHtml(markers: AptMarker[], tama38Url: string): string {
             style: function(){ return { className: 'tama-layer' }; },
             onEachFeature: function(feature, layer){
               var p = feature.properties || {};
-              layer.bindPopup('<b>TAMA 38</b><br/>' + (p.address || p.street || ''));
+              layer.bindPopup('<b>TAMA 38</b><br/>' + escapeHtml(p.address || p.street || ''));
             }
           }).addTo(map);
           window.ReactNativeWebView && window.ReactNativeWebView.postMessage(JSON.stringify({type:'tama_loaded', count: features.length}));

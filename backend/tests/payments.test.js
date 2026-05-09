@@ -7,6 +7,7 @@ process.env.NODE_ENV = 'test';
 process.env.POSTGRES_SSL = 'false';
 process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED = 'false';
 process.env.JWT_SECRET = 'test_jwt_secret_for_verification_tests';
+process.env.PAYMENT_WEBHOOK_SECRET = 'test_payment_webhook_secret';
 
 const request = require('supertest');
 const { sequelize } = require('../src/config/database');
@@ -93,6 +94,7 @@ describe('POST /api/payments/webhook', () => {
     if (!userId) return;
     const res = await request(app)
       .post('/api/payments/webhook')
+      .set('x-payment-webhook-secret', process.env.PAYMENT_WEBHOOK_SECRET)
       .send({ transactionId: 'txn_test_123', status: 'success', userId });
     expect(res.status).toBe(200);
     expect(res.body.received).toBe(true);
@@ -108,6 +110,7 @@ describe('POST /api/payments/webhook', () => {
   it('handles failed webhook without crashing', async () => {
     const res = await request(app)
       .post('/api/payments/webhook')
+      .set('x-payment-webhook-secret', process.env.PAYMENT_WEBHOOK_SECRET)
       .send({ transactionId: 'txn_fail_456', status: 'failed', userId: 'unknown-user' });
     expect(res.status).toBe(200);
     expect(res.body.received).toBe(true);
@@ -116,6 +119,7 @@ describe('POST /api/payments/webhook', () => {
   it('handles missing body gracefully', async () => {
     const res = await request(app)
       .post('/api/payments/webhook')
+      .set('x-payment-webhook-secret', process.env.PAYMENT_WEBHOOK_SECRET)
       .send({});
     expect(res.status).toBe(200);
     expect(res.body.received).toBe(true);

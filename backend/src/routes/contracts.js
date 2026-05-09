@@ -35,6 +35,27 @@ ${contract.customClauses ? `סעיפים נוספים:\n${contract.customClauses
 `;
 }
 
+function signedContractStatusExpression() {
+  return {
+    $cond: [
+      {
+        $and: [
+          { $ne: ['$tenantSignedAt', null] },
+          { $ne: ['$landlordSignedAt', null] },
+        ],
+      },
+      'active',
+      {
+        $cond: [
+          { $ne: ['$tenantSignedAt', null] },
+          'pending_landlord',
+          'pending_tenant',
+        ],
+      },
+    ],
+  };
+}
+
 // ─── POST /api/contracts — landlord creates a contract for an accepted match ──
 router.post(
   '/',
@@ -146,16 +167,27 @@ router.post('/:id/sign', authenticate, async (req, res, next) => {
     if (isTenant && contract.tenantSignedAt) return res.status(409).json({ error: 'Already signed' });
     if (isLandlord && contract.landlordSignedAt) return res.status(409).json({ error: 'Already signed' });
 
-    const update = {};
-    if (isTenant) {
-      update.tenantSignedAt = new Date();
-      update.status = contract.landlordSignedAt ? 'active' : 'pending_landlord';
-    } else {
-      update.landlordSignedAt = new Date();
-      update.status = contract.tenantSignedAt ? 'active' : 'pending_tenant';
-    }
+    const signedAt = new Date();
+    const signedField = isTenant ? 'tenantSignedAt' : 'landlordSignedAt';
+    const partyField = isTenant ? 'tenantId' : 'landlordId';
+    const updateFilter = {
+      _id: req.params.id,
+      [partyField]: req.user.id,
+      [signedField]: null,
+      status: { $nin: ['active', 'terminated'] },
+    };
 
-    const updated = await RentalContract.findByIdAndUpdate(req.params.id, { $set: update }, { new: true });
+    const updated = await RentalContract.findOneAndUpdate(
+      updateFilter,
+      [
+        { $set: { [signedField]: signedAt } },
+        { $set: { status: signedContractStatusExpression() } },
+      ],
+      { new: true }
+    );
+    if (!updated) {
+      return res.status(409).json({ error: 'Contract signature state changed, please retry' });
+    }
     logger.info(`Contract signed contractId=${contract._id} by ${req.user.role} userId=${req.user.id}`);
     res.json({ contract: updated, contractText: buildContractText(updated) });
   } catch (err) {

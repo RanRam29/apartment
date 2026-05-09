@@ -1,11 +1,31 @@
 const express = require('express');
 const axios = require('axios');
+const crypto = require('crypto');
 const { body, validationResult } = require('express-validator');
 const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const RentPayment = require('../models/mongo/RentPayment');
 
 const router = express.Router();
+
+function getWebhookSecret() {
+  return process.env.PAYMENT_WEBHOOK_SECRET || process.env.MESHULAM_WEBHOOK_SECRET;
+}
+
+function hasValidWebhookSecret(req) {
+  const expected = getWebhookSecret();
+  if (!expected) return false;
+
+  const provided = req.get('x-payment-webhook-secret');
+  if (!provided) return false;
+
+  const expectedBuffer = Buffer.from(expected);
+  const providedBuffer = Buffer.from(provided);
+  return (
+    expectedBuffer.length === providedBuffer.length &&
+    crypto.timingSafeEqual(expectedBuffer, providedBuffer)
+  );
+}
 
 // ─── Meshulam (Israel) ────────────────────────────────────────────────────────
 const MESHULAM_API = 'https://sandbox.meshulam.co.il/api/v1';
@@ -57,17 +77,31 @@ router.post(
 // POST /api/payments/webhook — Meshulam / Bit / PayBox payment confirmation
 router.post('/webhook', async (req, res, next) => {
   try {
+    if (!getWebhookSecret()) {
+      logger.error('Payment webhook rejected: PAYMENT_WEBHOOK_SECRET is not configured');
+      return res.status(503).json({ error: 'Payment webhook is not configured' });
+    }
+    if (!hasValidWebhookSecret(req)) {
+      return res.status(401).json({ error: 'Invalid webhook credentials' });
+    }
+
     const { transactionId, status, userId, rentPaymentId } = req.body;
 
     if (status === 'success') {
       if (rentPaymentId) {
         // Rent payment webhook
-        const payment = await RentPayment.findById(rentPaymentId);
-        if (payment && payment.status !== 'paid') {
-          payment.status = 'paid';
-          payment.paidAt = new Date();
-          payment.externalTransactionId = transactionId;
-          await payment.save();
+        const payment = await RentPayment.findOneAndUpdate(
+          { _id: rentPaymentId, status: { $ne: 'paid' } },
+          {
+            $set: {
+              status: 'paid',
+              paidAt: new Date(),
+              externalTransactionId: transactionId,
+            },
+          },
+          { new: true }
+        );
+        if (payment) {
           logger.info(`Rent payment ${rentPaymentId} marked paid via webhook ${transactionId}`);
         }
       } else if (userId) {
