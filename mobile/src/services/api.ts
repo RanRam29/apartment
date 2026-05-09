@@ -148,6 +148,14 @@ export const paymentApi = {
   startPremium: () => api.post('/payments/premium', {}),
 };
 
+// ─── Screening / Identity Verification (F9) ──────────────────────────────────
+export const screeningApi = {
+  submitIdentity: (data: { idNumber: string; fullName: string; phone: string }) =>
+    api.post('/screening/identity', data),
+  getStatus: () => api.get('/screening/status'),
+  getTenantStatus: (userId: string) => api.get(`/screening/tenant/${userId}`),
+};
+
 // ─── Roommates (F8) ───────────────────────────────────────────────────────────
 export const roommateApi = {
   getProfile: () => api.get('/roommates/profile'),
