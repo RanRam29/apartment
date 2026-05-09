@@ -479,6 +479,16 @@ describe('F11 — Rent payments routes', () => {
     delete process.env.WEBHOOK_SECRET;
     expect(res.status).toBe(401);
   });
+
+  it('POST /api/payments/webhook — rejects malformed signatures without throwing', async () => {
+    process.env.WEBHOOK_SECRET = 'test-secret';
+    const res = await request(app)
+      .post('/api/payments/webhook')
+      .set('x-webhook-signature', 'bad')
+      .send({ transactionId: 'tx-bad', status: 'success', rentPaymentId: 'rp-pay-1' });
+    delete process.env.WEBHOOK_SECRET;
+    expect(res.status).toBe(401);
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
