@@ -8,6 +8,11 @@ const bcrypt = require('bcryptjs');
 const { initPostgres } = require('../config/database');
 const { User, Apartment } = require('../models');
 
+const ADMIN_ACCOUNTS = [
+  { email: 'admin1@dirapp.com', firstName: 'Admin', lastName: 'One', password: 'Admin1234!', role: 'landlord' },
+  { email: 'admin2@dirapp.com', firstName: 'Admin', lastName: 'Two', password: 'Admin1234!', role: 'tenant' },
+];
+
 const LANDLORDS = [
   { email: 'demo.landlord1@dirapp.test', firstName: 'יוסי', lastName: 'כהן', password: 'Demo1234!' },
   { email: 'demo.landlord2@dirapp.test', firstName: 'רחל', lastName: 'לוי', password: 'Demo1234!' },
@@ -123,6 +128,16 @@ async function seed() {
   await initPostgres();
   console.log('✅ Connected to PostgreSQL');
 
+  // Create admin accounts (always, idempotent)
+  for (const a of ADMIN_ACCOUNTS) {
+    const adminHash = await bcrypt.hash(a.password, 12);
+    const [, created] = await User.findOrCreate({
+      where: { email: a.email },
+      defaults: { email: a.email, passwordHash: adminHash, firstName: a.firstName, lastName: a.lastName, role: a.role, isVerified: true },
+    });
+    console.log(`${created ? '➕' : '⏩'} Admin: ${a.email}`);
+  }
+
   const hash = await bcrypt.hash('Demo1234!', 12);
 
   // Create landlords
@@ -137,7 +152,7 @@ async function seed() {
   }
 
   // Create demo tenant
-  const [tenant, tenantCreated] = await User.findOrCreate({
+  const [, tenantCreated] = await User.findOrCreate({
     where: { email: TENANT.email },
     defaults: { email: TENANT.email, passwordHash: hash, firstName: TENANT.firstName, lastName: TENANT.lastName, role: 'tenant' },
   });
@@ -155,14 +170,63 @@ async function seed() {
   }
 
   console.log(`\n🏠 ${created} apartments created (${APARTMENTS.length - created} already existed)`);
-  console.log('\n📋 Demo accounts:');
-  console.log('  Landlord 1:', LANDLORDS[0].email, '/ Demo1234!');
-  console.log('  Landlord 2:', LANDLORDS[1].email, '/ Demo1234!');
-  console.log('  Tenant:    ', TENANT.email, '/ Demo1234!');
+  console.log('\n📋 Admin accounts (password: Admin1234!):');
+  ADMIN_ACCOUNTS.forEach((a) => console.log(`  ${a.role === 'landlord' ? 'Landlord' : 'Tenant '}: ${a.email}`));
+  console.log('\n📋 Demo accounts (password: Demo1234!):');
+  console.log('  Landlord 1:', LANDLORDS[0].email);
+  console.log('  Landlord 2:', LANDLORDS[1].email);
+  console.log('  Tenant:    ', TENANT.email);
   process.exit(0);
 }
 
-seed().catch((err) => {
-  console.error('Seed failed:', err);
-  process.exit(1);
-});
+/**
+ * Auto-seed: called at server startup. Only seeds if the users table is empty,
+ * so it's safe to call on every boot without blowing away existing data.
+ */
+async function autoSeed(queryInterface) {
+  try {
+    const count = await User.count();
+    if (count > 0) return;
+    console.log('Empty database detected — running initial seed…');
+    // Remove the process.exit call for embedded usage
+    const adminHash = await bcrypt.hash('Admin1234!', 12);
+    for (const a of ADMIN_ACCOUNTS) {
+      await User.findOrCreate({
+        where: { email: a.email },
+        defaults: { email: a.email, passwordHash: adminHash, firstName: a.firstName, lastName: a.lastName, role: a.role, isVerified: true },
+      });
+    }
+    const demoHash = await bcrypt.hash('Demo1234!', 12);
+    const landlordIds = [];
+    for (const l of LANDLORDS) {
+      const [user] = await User.findOrCreate({
+        where: { email: l.email },
+        defaults: { email: l.email, passwordHash: demoHash, firstName: l.firstName, lastName: l.lastName, role: 'landlord', isVerified: true },
+      });
+      landlordIds.push(user.id);
+    }
+    await User.findOrCreate({
+      where: { email: TENANT.email },
+      defaults: { email: TENANT.email, passwordHash: demoHash, firstName: TENANT.firstName, lastName: TENANT.lastName, role: 'tenant' },
+    });
+    for (const apt of APARTMENTS) {
+      const { landlordIndex, ...fields } = apt;
+      await Apartment.findOrCreate({
+        where: { title: fields.title, landlordId: landlordIds[landlordIndex] },
+        defaults: { ...fields, landlordId: landlordIds[landlordIndex], isActive: true, images: [] },
+      });
+    }
+    console.log('Initial seed complete. admin1@dirapp.com / Admin1234!');
+  } catch (err) {
+    console.warn('Auto-seed skipped:', err.message);
+  }
+}
+
+module.exports = { autoSeed };
+
+if (require.main === module) {
+  seed().catch((err) => {
+    console.error('Seed failed:', err);
+    process.exit(1);
+  });
+}
