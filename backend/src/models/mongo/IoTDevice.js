@@ -4,7 +4,7 @@ const IoTDeviceSchema = new mongoose.Schema({
   leaseId:    { type: String, required: true },
   landlordId: { type: String, required: true },
   tenantId:   { type: String, required: true },
-  deviceId:   { type: String, required: true, unique: true },
+  deviceId:   { type: String, required: true },
   name:       { type: String, required: true },
   type: {
     type: String,
