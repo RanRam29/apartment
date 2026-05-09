@@ -23,8 +23,11 @@ import CreateListingScreen from '../screens/CreateListingScreen';
 import PreferencesScreen from '../screens/PreferencesScreen';
 import RoommateScreen from '../screens/RoommateScreen';
 import VerifyIdentityScreen from '../screens/VerifyIdentityScreen';
+import ContractsScreen from '../screens/ContractsScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import HomeScreen from '../screens/HomeScreen';
+import MapScreen from '../screens/MapScreen';
+import RentPaymentsScreen from '../screens/RentPaymentsScreen';
 
 const RootStack  = createNativeStackNavigator<RootStackParamList>();
 const TenantTab  = createBottomTabNavigator<TenantTabParamList>();
@@ -62,6 +65,7 @@ function TenantTabs() {
             Swipe:   focused ? 'home'   : 'home-outline',
             Matches: focused ? 'heart'  : 'heart-outline',
             Search:  focused ? 'search' : 'search-outline',
+            Map:     focused ? 'map'    : 'map-outline',
             Profile: focused ? 'person' : 'person-outline',
           };
           return <Ionicons name={icons[route.name]} size={size} color={color} />;
@@ -72,6 +76,7 @@ function TenantTabs() {
       <TenantTab.Screen name="Swipe"   component={SwipeScreen}   options={{ title: 'דירות' }} />
       <TenantTab.Screen name="Matches" component={MatchesScreen} options={{ title: 'התאמות' }} />
       <TenantTab.Screen name="Search"  component={SearchScreen}  options={{ title: 'חיפוש' }} />
+      <TenantTab.Screen name="Map"     component={MapScreen}     options={{ title: 'מפה' }} />
       <TenantTab.Screen name="Profile" component={ProfileScreen} options={{ title: 'פרופיל' }} />
     </TenantTab.Navigator>
   );
@@ -181,6 +186,16 @@ function MainNavigator() {
       <MainStack.Screen
         name="VerifyIdentity"
         component={VerifyIdentityScreen}
+        options={{ headerShown: false }}
+      />
+      <MainStack.Screen
+        name="Contracts"
+        component={ContractsScreen}
+        options={{ headerShown: false }}
+      />
+      <MainStack.Screen
+        name="RentPayments"
+        component={RentPaymentsScreen}
         options={{ headerShown: false }}
       />
     </MainStack.Navigator>

@@ -172,6 +172,8 @@ export default function ProfileScreen() {
           {isTenant && (
             <MenuItem icon="shield-checkmark-outline" label="אימות זהות" onPress={() => navigation.navigate('VerifyIdentity')} />
           )}
+          <MenuItem icon="document-text-outline" label="החוזים שלי" onPress={() => navigation.navigate('Contracts')} />
+          <MenuItem icon="cash-outline" label="תשלומי שכירות" onPress={() => navigation.navigate('RentPayments')} />
           <MenuItem icon="notifications-outline" label="התראות"
             onPress={() => Platform.OS === 'web' ? window.alert('בקרוב\nהגדרות התראות יתווספו בקרוב') : Alert.alert('בקרוב', 'הגדרות התראות יתווספו בקרוב')} />
           <MenuItem icon="shield-checkmark-outline" label="פרטיות ואבטחה"

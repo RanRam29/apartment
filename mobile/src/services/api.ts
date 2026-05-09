@@ -146,6 +146,31 @@ export const landlordApi = {
 // ─── Payments ─────────────────────────────────────────────────────────────────
 export const paymentApi = {
   startPremium: () => api.post('/payments/premium', {}),
+  // Rent collection (F11)
+  createRentRequest: (contractId: string, month: string) =>
+    api.post('/payments/rent', { contractId, month }),
+  listRentPayments: () => api.get('/payments/rent'),
+  initiatePayment: (id: string, method: 'bit' | 'paybox') =>
+    api.post(`/payments/rent/${id}/pay`, { method }),
+  markPaid: (id: string, method?: 'bank_transfer' | 'manual') =>
+    api.post(`/payments/rent/${id}/mark-paid`, { method }),
+};
+
+// ─── Contracts / Digital Agreements (F10) ────────────────────────────────────
+export const contractsApi = {
+  create: (data: {
+    matchId: string;
+    monthlyRent: number;
+    depositMonths?: number;
+    startDate: string;
+    endDate: string;
+    customClauses?: string;
+  }) => api.post('/contracts', data),
+  list: () => api.get('/contracts'),
+  getById: (id: string) => api.get(`/contracts/${id}`),
+  sign: (id: string) => api.post(`/contracts/${id}/sign`),
+  updateDeposit: (id: string, action: 'mark_paid' | 'release' | 'forfeit') =>
+    api.post(`/contracts/${id}/deposit`, { action }),
 };
 
 // ─── Screening / Identity Verification (F9) ──────────────────────────────────

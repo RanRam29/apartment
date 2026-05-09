@@ -14,7 +14,8 @@ const recommendationRoutes = require('./routes/recommendations');
 const landlordRoutes = require('./routes/landlord');
 const paymentRoutes = require('./routes/payments');
 const roommateRoutes = require('./routes/roommates');
-const screeningRoutes = require('./routes/screening');
+const screeningRoutes  = require('./routes/screening');
+const contractRoutes   = require('./routes/contracts');
 const { errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
@@ -72,6 +73,7 @@ app.use('/api/landlord', landlordRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/roommates', roommateRoutes);
 app.use('/api/screening', screeningRoutes);
+app.use('/api/contracts', contractRoutes);
 
 app.use(errorHandler);
 

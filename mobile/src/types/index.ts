@@ -122,6 +122,7 @@ export type TenantTabParamList = {
   Swipe: undefined;
   Matches: undefined;
   Search: undefined;
+  Map: undefined;
   Profile: undefined;
 };
 
@@ -142,4 +143,7 @@ export type MainStackParamList = {
   Preferences: undefined;
   Roommate: undefined;
   VerifyIdentity: undefined;
+  Contracts: undefined;
+  ContractDetail: { contractId: string };
+  RentPayments: undefined;
 };
