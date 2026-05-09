@@ -15,6 +15,7 @@ function verifyWebhookSignature(req) {
   const signature = Array.isArray(signatureHeader) ? signatureHeader[0] : signatureHeader;
   if (!signature) return false;
   const payload = JSON.stringify(req.body);
+  if (typeof payload !== 'string') return false;
   const expected = crypto.createHmac('sha256', secret).update(payload).digest('hex');
   const signatureBuffer = Buffer.from(signature);
   const expectedBuffer = Buffer.from(expected);
