@@ -1,6 +1,6 @@
 import React from 'react';
 import { Alert, Switch } from 'react-native';
-import { fireEvent, render, waitFor } from '@testing-library/react-native';
+import { cleanup, fireEvent, render, waitFor } from '@testing-library/react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import RoommateScreen from '../src/screens/RoommateScreen';
 import { roommateApi } from '../src/services/api';
@@ -41,15 +41,17 @@ const savedProfile = {
   avatarUrl: null,
 };
 
+let queryClient: QueryClient | null = null;
+
 function renderWithClient() {
-  const client = new QueryClient({
-    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false, gcTime: 0 }, mutations: { retry: false } },
   });
 
   return render(
     React.createElement(
       QueryClientProvider,
-      { client },
+      { client: queryClient },
       React.createElement(RoommateScreen)
     )
   );
@@ -65,6 +67,9 @@ describe('RoommateScreen', () => {
   });
 
   afterEach(() => {
+    cleanup();
+    queryClient?.clear();
+    queryClient = null;
     jest.restoreAllMocks();
   });
 
