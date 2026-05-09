@@ -148,6 +148,23 @@ export const paymentApi = {
   startPremium: () => api.post('/payments/premium', {}),
 };
 
+// ─── Contracts / Digital Agreements (F10) ────────────────────────────────────
+export const contractsApi = {
+  create: (data: {
+    matchId: string;
+    monthlyRent: number;
+    depositMonths?: number;
+    startDate: string;
+    endDate: string;
+    customClauses?: string;
+  }) => api.post('/contracts', data),
+  list: () => api.get('/contracts'),
+  getById: (id: string) => api.get(`/contracts/${id}`),
+  sign: (id: string) => api.post(`/contracts/${id}/sign`),
+  updateDeposit: (id: string, action: 'mark_paid' | 'release' | 'forfeit') =>
+    api.post(`/contracts/${id}/deposit`, { action }),
+};
+
 // ─── Screening / Identity Verification (F9) ──────────────────────────────────
 export const screeningApi = {
   submitIdentity: (data: { idNumber: string; fullName: string; phone: string }) =>

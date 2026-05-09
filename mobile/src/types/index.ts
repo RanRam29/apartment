@@ -142,4 +142,6 @@ export type MainStackParamList = {
   Preferences: undefined;
   Roommate: undefined;
   VerifyIdentity: undefined;
+  Contracts: undefined;
+  ContractDetail: { contractId: string };
 };

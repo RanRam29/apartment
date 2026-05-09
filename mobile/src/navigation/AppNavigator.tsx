@@ -23,6 +23,7 @@ import CreateListingScreen from '../screens/CreateListingScreen';
 import PreferencesScreen from '../screens/PreferencesScreen';
 import RoommateScreen from '../screens/RoommateScreen';
 import VerifyIdentityScreen from '../screens/VerifyIdentityScreen';
+import ContractsScreen from '../screens/ContractsScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import HomeScreen from '../screens/HomeScreen';
 
@@ -181,6 +182,11 @@ function MainNavigator() {
       <MainStack.Screen
         name="VerifyIdentity"
         component={VerifyIdentityScreen}
+        options={{ headerShown: false }}
+      />
+      <MainStack.Screen
+        name="Contracts"
+        component={ContractsScreen}
         options={{ headerShown: false }}
       />
     </MainStack.Navigator>
