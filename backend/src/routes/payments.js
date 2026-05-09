@@ -1,5 +1,6 @@
 const express = require('express');
 const axios = require('axios');
+const crypto = require('crypto');
 const { body, validationResult } = require('express-validator');
 const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
@@ -20,6 +21,28 @@ async function createMeshulamTransaction({ amount, description, userId, successU
     { timeout: 10000 }
   );
   return res.data;
+}
+
+function timingSafeEquals(expected, actual) {
+  const expectedBuffer = Buffer.from(expected);
+  const actualBuffer = Buffer.from(actual || '');
+  return expectedBuffer.length === actualBuffer.length &&
+    crypto.timingSafeEqual(expectedBuffer, actualBuffer);
+}
+
+function verifyPaymentWebhook(req, res, next) {
+  const secret = process.env.PAYMENT_WEBHOOK_SECRET || process.env.MESHULAM_WEBHOOK_SECRET;
+  if (!secret) {
+    logger.error('PAYMENT_WEBHOOK_SECRET not configured; rejecting payment webhook');
+    return res.status(503).json({ error: 'Payment webhook not configured' });
+  }
+
+  const providedSecret = req.get('x-payment-webhook-secret') || req.get('x-webhook-secret');
+  if (!providedSecret || !timingSafeEquals(secret, providedSecret)) {
+    return res.status(401).json({ error: 'Invalid webhook secret' });
+  }
+
+  next();
 }
 
 // POST /api/payments/premium — upgrade user to premium
@@ -55,7 +78,7 @@ router.post(
 );
 
 // POST /api/payments/webhook — Meshulam / Bit / PayBox payment confirmation
-router.post('/webhook', async (req, res, next) => {
+router.post('/webhook', verifyPaymentWebhook, async (req, res, next) => {
   try {
     const { transactionId, status, userId, rentPaymentId } = req.body;
 

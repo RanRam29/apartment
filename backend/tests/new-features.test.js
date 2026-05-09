@@ -4,6 +4,7 @@
  * Uses in-memory mocks — no live DB required.
  */
 const request = require('supertest');
+process.env.PAYMENT_WEBHOOK_SECRET = 'test_payment_webhook_secret';
 
 // ─── Auth mock ────────────────────────────────────────────────────────────────
 jest.mock('../src/middleware/auth', () => ({
@@ -466,9 +467,18 @@ describe('F11 — Rent payments routes', () => {
     });
     const res = await request(app)
       .post('/api/payments/webhook')
+      .set('x-payment-webhook-secret', 'test_payment_webhook_secret')
       .send({ transactionId: 'tx-1', status: 'success', rentPaymentId: 'rp-pay-1' });
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty('received', true);
+  });
+
+  it('POST /api/payments/webhook — rejects missing shared secret', async () => {
+    const res = await request(app)
+      .post('/api/payments/webhook')
+      .send({ transactionId: 'tx-1', status: 'success', rentPaymentId: 'rp-pay-1' });
+    expect(res.status).toBe(401);
+    expect(RentPayment.findById).not.toHaveBeenCalled();
   });
 });
 
@@ -693,6 +703,22 @@ describe('F15 — IoT routes', () => {
       .set('Authorization', 'Bearer landlord')
       .send({ leaseId: 'cl-1' });
     expect(res.status).toBe(422);
+  });
+
+  it('POST /api/iot/devices — rejects tenantId that is not on the lease', async () => {
+    CommercialLease.findById.mockReturnValue(q(mockLease));
+    const res = await request(app)
+      .post('/api/iot/devices')
+      .set('Authorization', 'Bearer landlord')
+      .send({
+        leaseId: 'cl-1',
+        tenantId: 'other-tenant',
+        deviceId: 'dev-002',
+        name: 'Back door',
+        type: 'access_control',
+      });
+    expect(res.status).toBe(403);
+    expect(IoTDevice.create).not.toHaveBeenCalled();
   });
 
   it('GET /api/iot/maintenance — returns ticket list', async () => {

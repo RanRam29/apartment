@@ -37,11 +37,15 @@ router.post(
 
       const lease = await isPartyToLease(req.user.id, req.body.leaseId);
       if (!lease) return res.status(404).json({ error: 'Lease not found or access denied' });
+      if (String(lease.landlordId) !== String(req.user.id))
+        return res.status(403).json({ error: 'Landlords only' });
+      if (String(req.body.tenantId) !== String(lease.tenantId))
+        return res.status(403).json({ error: 'Tenant does not belong to this lease' });
 
       const device = await IoTDevice.create({
         leaseId:    req.body.leaseId,
         landlordId: req.user.id,
-        tenantId:   req.body.tenantId,
+        tenantId:   lease.tenantId,
         deviceId:   req.body.deviceId,
         name:       req.body.name,
         type:       req.body.type,
