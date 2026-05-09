@@ -27,6 +27,7 @@ import ContractsScreen from '../screens/ContractsScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import HomeScreen from '../screens/HomeScreen';
 import MapScreen from '../screens/MapScreen';
+import RentPaymentsScreen from '../screens/RentPaymentsScreen';
 
 const RootStack  = createNativeStackNavigator<RootStackParamList>();
 const TenantTab  = createBottomTabNavigator<TenantTabParamList>();
@@ -190,6 +191,11 @@ function MainNavigator() {
       <MainStack.Screen
         name="Contracts"
         component={ContractsScreen}
+        options={{ headerShown: false }}
+      />
+      <MainStack.Screen
+        name="RentPayments"
+        component={RentPaymentsScreen}
         options={{ headerShown: false }}
       />
     </MainStack.Navigator>

@@ -146,6 +146,14 @@ export const landlordApi = {
 // ─── Payments ─────────────────────────────────────────────────────────────────
 export const paymentApi = {
   startPremium: () => api.post('/payments/premium', {}),
+  // Rent collection (F11)
+  createRentRequest: (contractId: string, month: string) =>
+    api.post('/payments/rent', { contractId, month }),
+  listRentPayments: () => api.get('/payments/rent'),
+  initiatePayment: (id: string, method: 'bit' | 'paybox') =>
+    api.post(`/payments/rent/${id}/pay`, { method }),
+  markPaid: (id: string, method?: 'bank_transfer' | 'manual') =>
+    api.post(`/payments/rent/${id}/mark-paid`, { method }),
 };
 
 // ─── Contracts / Digital Agreements (F10) ────────────────────────────────────

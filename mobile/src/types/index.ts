@@ -145,4 +145,5 @@ export type MainStackParamList = {
   VerifyIdentity: undefined;
   Contracts: undefined;
   ContractDetail: { contractId: string };
+  RentPayments: undefined;
 };
