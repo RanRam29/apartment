@@ -11,11 +11,15 @@ const router = express.Router();
 function verifyWebhookSignature(req) {
   const secret = process.env.WEBHOOK_SECRET;
   if (!secret) return true; // not configured — open in dev
-  const signature = req.headers['x-webhook-signature'] || req.headers['x-meshulam-signature'];
-  if (!signature) return false;
+  const signatureHeader = req.headers['x-webhook-signature'] || req.headers['x-meshulam-signature'];
+  const signature = Array.isArray(signatureHeader) ? signatureHeader[0] : signatureHeader;
+  if (typeof signature !== 'string') return false;
   const payload = JSON.stringify(req.body);
   const expected = crypto.createHmac('sha256', secret).update(payload).digest('hex');
-  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
+  const signatureBuffer = Buffer.from(signature, 'utf8');
+  const expectedBuffer = Buffer.from(expected, 'utf8');
+  if (signatureBuffer.length !== expectedBuffer.length) return false;
+  return crypto.timingSafeEqual(signatureBuffer, expectedBuffer);
 }
 
 // ─── Meshulam (Israel) ────────────────────────────────────────────────────────

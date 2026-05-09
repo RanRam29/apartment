@@ -472,12 +472,35 @@ describe('F11 — Rent payments routes', () => {
   });
 
   it('POST /api/payments/webhook — rejects invalid signature when WEBHOOK_SECRET set', async () => {
+    const oldSecret = process.env.WEBHOOK_SECRET;
     process.env.WEBHOOK_SECRET = 'test-secret';
-    const res = await request(app)
-      .post('/api/payments/webhook')
-      .send({ transactionId: 'tx-bad', status: 'success', rentPaymentId: 'rp-pay-1' });
-    delete process.env.WEBHOOK_SECRET;
+    let res;
+    try {
+      res = await request(app)
+        .post('/api/payments/webhook')
+        .send({ transactionId: 'tx-bad', status: 'success', rentPaymentId: 'rp-pay-1' });
+    } finally {
+      if (oldSecret === undefined) delete process.env.WEBHOOK_SECRET;
+      else process.env.WEBHOOK_SECRET = oldSecret;
+    }
     expect(res.status).toBe(401);
+  });
+
+  it('POST /api/payments/webhook — rejects malformed signature without crashing', async () => {
+    const oldSecret = process.env.WEBHOOK_SECRET;
+    process.env.WEBHOOK_SECRET = 'test-secret';
+    let res;
+    try {
+      res = await request(app)
+        .post('/api/payments/webhook')
+        .set('x-webhook-signature', 'short')
+        .send({ transactionId: 'tx-bad', status: 'success', rentPaymentId: 'rp-pay-1' });
+    } finally {
+      if (oldSecret === undefined) delete process.env.WEBHOOK_SECRET;
+      else process.env.WEBHOOK_SECRET = oldSecret;
+    }
+    expect(res.status).toBe(401);
+    expect(RentPayment.findById).not.toHaveBeenCalled();
   });
 });
 
