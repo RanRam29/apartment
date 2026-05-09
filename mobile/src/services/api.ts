@@ -97,6 +97,8 @@ export const apartmentsApi = {
     api.patch(`/apartments/${id}`, data),
   toggleFreeze: (id: string) => api.post(`/apartments/${id}/freeze`),
   deletePermanently: (id: string) => api.delete(`/apartments/${id}`),
+  generateMarketingCopy: (id: string, style: 'professional' | 'friendly' | 'luxury') =>
+    api.post(`/apartments/${id}/marketing-copy`, { style }),
 };
 
 // ─── Swipe ────────────────────────────────────────────────────────────────────
