@@ -31,6 +31,7 @@ import RentPaymentsScreen from '../screens/RentPaymentsScreen';
 import CommercialScreen from '../screens/CommercialScreen';
 import GamificationScreen from '../screens/GamificationScreen';
 import ServicesScreen from '../screens/ServicesScreen';
+import IoTScreen from '../screens/IoTScreen';
 
 const RootStack  = createNativeStackNavigator<RootStackParamList>();
 const TenantTab  = createBottomTabNavigator<TenantTabParamList>();
@@ -214,6 +215,11 @@ function MainNavigator() {
       <MainStack.Screen
         name="Services"
         component={ServicesScreen}
+        options={{ headerShown: false }}
+      />
+      <MainStack.Screen
+        name="IoT"
+        component={IoTScreen}
         options={{ headerShown: false }}
       />
     </MainStack.Navigator>
