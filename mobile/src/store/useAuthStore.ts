@@ -23,7 +23,7 @@ interface AuthState {
   completeOnboarding: () => Promise<void>;
   updateUser: (updates: Partial<import('../types').User>) => void;
   verifyEmail: (token: string) => Promise<void>;
-  resendVerification: () => Promise<void>;
+  resendVerification: (email?: string) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -80,9 +80,9 @@ export const useAuthStore = create<AuthState>((set) => ({
     set((state) => ({ user: state.user ? { ...state.user, isVerified: true } : state.user }));
   },
 
-  resendVerification: async () => {
-    const email = useAuthStore.getState().user?.email;
-    if (!email) return;
-    await authApi.resendVerification(email);
+  resendVerification: async (email?: string) => {
+    const target = email ?? useAuthStore.getState().user?.email;
+    if (!target) return;
+    await authApi.resendVerification(target);
   },
 }));
