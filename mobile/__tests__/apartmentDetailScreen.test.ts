@@ -61,11 +61,12 @@ function renderScreen() {
     defaultOptions: {
       queries: {
         retry: false,
+        gcTime: Infinity,
       },
     },
   });
 
-  return render(
+  const screen = render(
     React.createElement(
       QueryClientProvider,
       { client: queryClient },
@@ -75,6 +76,8 @@ function renderScreen() {
       } as any)
     )
   );
+
+  return { ...screen, queryClient };
 }
 
 describe('ApartmentDetailScreen', () => {
@@ -91,5 +94,6 @@ describe('ApartmentDetailScreen', () => {
       expect(screen.getByText('Test apartment')).toBeTruthy();
     });
     expect(screen.getByText('עלות חודשית משוערת')).toBeTruthy();
+    screen.queryClient.clear();
   });
 });
