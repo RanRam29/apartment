@@ -141,4 +141,5 @@ export type MainStackParamList = {
   CreateListing: undefined;
   Preferences: undefined;
   Roommate: undefined;
+  VerifyIdentity: undefined;
 };

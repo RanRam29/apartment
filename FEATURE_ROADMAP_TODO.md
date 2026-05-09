@@ -17,7 +17,7 @@ Last updated: 2026-05-09 (F7 style variants implemented)
 | F6 | Phase 2 (Months 5-8) | Smart Map + Urban Renewal Layer | TBD | - | planned | - | - | TAMA 38 / urban renewal overlays |
 | F7 | Phase 2 (Months 5-8) | GenAI Marketing Copy Generator | ai-team | #38 | in_progress | - | - | generateMarketingCopy with professional/friendly/luxury styles; POST /api/apartments/:id/marketing-copy; sparkle modal in ListingsScreen |
 | F8 | Phase 2 (Months 5-8) | Roommate Compatibility Score | mobile-team | #39 | in_progress | - | - | Lifestyle questionnaire (sleep/cleanliness/noise/guests/smoking/pets/WFH); weighted score 0-100; RoommateScreen accessible from Profile |
-| F9 | Phase 3 (Months 9-12) | Screening & Verification (BDI/Gov) | TBD | - | planned | - | - | Only email verify exists; BDI/gov identity check not started |
+| F9 | Phase 3 (Months 9-12) | Screening & Verification (BDI/Gov) | backend-team | #41 | in_progress | - | - | IdentityVerification model; POST /api/screening/identity (SHA-256 hashed ID); GET status + landlord-view; VerifyIdentityScreen in mobile |
 | F10 | Phase 3 (Months 9-12) | Digital Contracts + Deposit Management | TBD | - | planned | - | - | Standard contracts + e-sign |
 | F11 | Phase 3 (Months 9-12) | Payments (Bit/PayBox automation) | backend-team | #34 | in_progress | - | - | Meshulam premium upgrade done; webhook secured in PR #34; rent collection not started |
 | F12 | Phase 3 (Months 9-12) | Commercial Real Estate Module | TBD | - | planned | - | - | CAM and critical date alerts |
