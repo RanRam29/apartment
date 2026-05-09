@@ -9,6 +9,14 @@ jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({ goBack: jest.fn() }),
 }));
 
+jest.mock('@expo/vector-icons', () => {
+  const React = require('react');
+  const { Text } = require('react-native');
+  return {
+    Ionicons: ({ name }: { name: string }) => React.createElement(Text, null, name),
+  };
+});
+
 jest.mock('../src/services/api', () => ({
   roommateApi: {
     getProfile: jest.fn(),
