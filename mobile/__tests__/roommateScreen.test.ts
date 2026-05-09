@@ -45,7 +45,10 @@ let queryClient: QueryClient | null = null;
 
 function renderWithClient() {
   queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false, gcTime: 0 }, mutations: { retry: false } },
+    defaultOptions: {
+      queries: { retry: false, gcTime: Infinity },
+      mutations: { retry: false, gcTime: Infinity },
+    },
   });
 
   return render(
