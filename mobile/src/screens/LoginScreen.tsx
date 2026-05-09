@@ -5,6 +5,7 @@ import {
   Alert,
 } from 'react-native';
 import { useAuthStore } from '../store/useAuthStore';
+import { getVerificationPromptEmail } from '../services/verificationUx';
 import { C } from '../theme';
 
 interface Props {
@@ -12,7 +13,7 @@ interface Props {
 }
 
 export default function LoginScreen({ onSwitch }: Props) {
-  const { login } = useAuthStore();
+  const { login, resendVerification } = useAuthStore();
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading]   = useState(false);
@@ -26,8 +27,20 @@ export default function LoginScreen({ onSwitch }: Props) {
     try {
       await login(email.trim().toLowerCase(), password);
     } catch (err: any) {
-      const msg = err?.response?.data?.error || 'שגיאה בכניסה, נסה שנית';
-      Alert.alert('שגיאה', msg);
+      const unverifiedEmail = getVerificationPromptEmail(err);
+      if (unverifiedEmail) {
+        Alert.alert(
+          'האימייל לא אומת',
+          'שלחנו לך מייל אימות. בדוק את תיבת הדואר שלך ואשר את הכתובת.',
+          [
+            { text: 'שלח שוב', onPress: () => resendVerification(unverifiedEmail) },
+            { text: 'סגור', style: 'cancel' },
+          ],
+        );
+      } else {
+        const msg = err?.response?.data?.error || 'שגיאה בכניסה, נסה שנית';
+        Alert.alert('שגיאה', msg);
+      }
     } finally {
       setLoading(false);
     }

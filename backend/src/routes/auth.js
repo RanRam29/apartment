@@ -136,15 +136,15 @@ router.post('/login', loginValidator, async (req, res, next) => {
 
     const token = signToken(user);
 
-    // Cache basic user profile for fast lookups
-    await cacheSet(`user:${user.id}`, {
+    // Cache basic user profile for fast lookups (non-critical)
+    cacheSet(`user:${user.id}`, {
       id: user.id,
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
       role: user.role,
       avatarUrl: user.avatarUrl,
-    }, 3600);
+    }, 3600).catch((e) => logger.warn('Cache set failed on login:', e.message));
 
     res.json({
       token,

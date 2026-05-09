@@ -130,4 +130,11 @@ describe('useAuthStore', () => {
     await useAuthStore.getState().resendVerification();
     expect(authApi.resendVerification).toHaveBeenCalledWith('u@test.com');
   });
+
+  it('resendVerification uses explicit email override (pre-login 403 flow)', async () => {
+    (authApi.resendVerification as jest.Mock).mockResolvedValue({ data: { ok: true } });
+    useAuthStore.setState({ user: null, token: null, isLoading: false, isAuthenticated: false, needsOnboarding: false });
+    await useAuthStore.getState().resendVerification('other@test.com');
+    expect(authApi.resendVerification).toHaveBeenCalledWith('other@test.com');
+  });
 });
