@@ -13,6 +13,7 @@ const chatRoutes = require('./routes/chat');
 const recommendationRoutes = require('./routes/recommendations');
 const landlordRoutes = require('./routes/landlord');
 const paymentRoutes = require('./routes/payments');
+const roommateRoutes = require('./routes/roommates');
 const { errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
@@ -68,6 +69,7 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/recommendations', recommendationRoutes);
 app.use('/api/landlord', landlordRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/roommates', roommateRoutes);
 
 app.use(errorHandler);
 
