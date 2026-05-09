@@ -470,6 +470,15 @@ describe('F11 — Rent payments routes', () => {
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty('received', true);
   });
+
+  it('POST /api/payments/webhook — rejects invalid signature when WEBHOOK_SECRET set', async () => {
+    process.env.WEBHOOK_SECRET = 'test-secret';
+    const res = await request(app)
+      .post('/api/payments/webhook')
+      .send({ transactionId: 'tx-bad', status: 'success', rentPaymentId: 'rp-pay-1' });
+    delete process.env.WEBHOOK_SECRET;
+    expect(res.status).toBe(401);
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════

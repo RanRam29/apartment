@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const express = require('express');
 const axios = require('axios');
 const { body, validationResult } = require('express-validator');
@@ -6,6 +7,16 @@ const logger = require('../utils/logger');
 const RentPayment = require('../models/mongo/RentPayment');
 
 const router = express.Router();
+
+function verifyWebhookSignature(req) {
+  const secret = process.env.WEBHOOK_SECRET;
+  if (!secret) return true; // not configured — open in dev
+  const signature = req.headers['x-webhook-signature'] || req.headers['x-meshulam-signature'];
+  if (!signature) return false;
+  const payload = JSON.stringify(req.body);
+  const expected = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
+}
 
 // ─── Meshulam (Israel) ────────────────────────────────────────────────────────
 const MESHULAM_API = 'https://sandbox.meshulam.co.il/api/v1';
@@ -56,6 +67,9 @@ router.post(
 
 // POST /api/payments/webhook — Meshulam / Bit / PayBox payment confirmation
 router.post('/webhook', async (req, res, next) => {
+  if (!verifyWebhookSignature(req)) {
+    return res.status(401).json({ error: 'Invalid webhook signature' });
+  }
   try {
     const { transactionId, status, userId, rentPaymentId } = req.body;
 
