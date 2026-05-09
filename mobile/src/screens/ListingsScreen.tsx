@@ -129,6 +129,9 @@ export default function ListingsScreen() {
           <TouchableOpacity style={styles.actionBtn} onPress={() => openCopyModal(item)}>
             <Ionicons name="sparkles-outline" size={22} color="#F39C12" />
           </TouchableOpacity>
+          <TouchableOpacity style={styles.actionBtn} onPress={() => navigation.navigate('EditListing', { apartmentId: item.id })}>
+            <Ionicons name="create-outline" size={22} color="#6C5CE7" />
+          </TouchableOpacity>
           <TouchableOpacity style={styles.actionBtn} onPress={() => toggleActive(item)}>
             <Ionicons
               name={item.isActive ? 'pause-circle-outline' : 'play-circle-outline'}

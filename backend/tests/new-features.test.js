@@ -3,6 +3,8 @@
  * F11 Rent Payments, F12 Commercial, F13 Gamification, F14 Services, F15 IoT
  * Uses in-memory mocks — no live DB required.
  */
+process.env.NODE_ENV = 'test';
+process.env.JWT_SECRET = 'test_jwt_secret_for_new_features_suite';
 const request = require('supertest');
 
 // ─── Auth mock ────────────────────────────────────────────────────────────────
@@ -328,7 +330,7 @@ describe('F9 — Screening routes', () => {
   });
 
   it('POST /api/screening/identity — 409 on duplicate submission', async () => {
-    IdentityVerification.findOne.mockResolvedValue(mockVerification);
+    IdentityVerification.findOne.mockResolvedValue({ ...mockVerification, status: 'verified' });
     const res = await request(app)
       .post('/api/screening/identity')
       .set('Authorization', 'Bearer tenant')

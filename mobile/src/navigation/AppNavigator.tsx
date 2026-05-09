@@ -20,6 +20,7 @@ import ListingsScreen from '../screens/ListingsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import ApartmentDetailScreen from '../screens/ApartmentDetailScreen';
 import CreateListingScreen from '../screens/CreateListingScreen';
+import EditListingScreen from '../screens/EditListingScreen';
 import PreferencesScreen from '../screens/PreferencesScreen';
 import RoommateScreen from '../screens/RoommateScreen';
 import VerifyIdentityScreen from '../screens/VerifyIdentityScreen';
@@ -167,6 +168,16 @@ function MainNavigator() {
         component={CreateListingScreen}
         options={{
           headerShown: true, headerTitle: 'פרסם מודעה',
+          headerStyle: { backgroundColor: C.bgCard },
+          headerTintColor: C.navy,
+          headerShadowVisible: false,
+        }}
+      />
+      <MainStack.Screen
+        name="EditListing"
+        component={EditListingScreen}
+        options={{
+          headerShown: true, headerTitle: 'עריכת מודעה',
           headerStyle: { backgroundColor: C.bgCard },
           headerTintColor: C.navy,
           headerShadowVisible: false,

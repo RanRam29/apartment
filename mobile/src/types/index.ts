@@ -140,6 +140,7 @@ export type MainStackParamList = {
   Chat: { matchId: string; title: string };
   ApartmentDetail: { apartmentId: string };
   CreateListing: undefined;
+  EditListing: { apartmentId: string };
   Preferences: undefined;
   Roommate: undefined;
   VerifyIdentity: undefined;
