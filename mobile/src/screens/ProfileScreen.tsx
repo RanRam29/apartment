@@ -166,6 +166,9 @@ export default function ProfileScreen() {
           {isTenant && (
             <MenuItem icon="options-outline" label="העדפות חיפוש" onPress={() => navigation.navigate('Preferences')} />
           )}
+          {isTenant && (
+            <MenuItem icon="people-outline" label="מציאת שותפ/ה לדירה" onPress={() => navigation.navigate('Roommate')} />
+          )}
           <MenuItem icon="notifications-outline" label="התראות"
             onPress={() => Platform.OS === 'web' ? window.alert('בקרוב\nהגדרות התראות יתווספו בקרוב') : Alert.alert('בקרוב', 'הגדרות התראות יתווספו בקרוב')} />
           <MenuItem icon="shield-checkmark-outline" label="פרטיות ואבטחה"

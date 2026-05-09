@@ -148,6 +148,23 @@ export const paymentApi = {
   startPremium: () => api.post('/payments/premium', {}),
 };
 
+// ─── Roommates (F8) ───────────────────────────────────────────────────────────
+export const roommateApi = {
+  getProfile: () => api.get('/roommates/profile'),
+  saveProfile: (data: {
+    lookingForRoommate?: boolean;
+    sleepSchedule?: 'early_bird' | 'night_owl' | 'flexible';
+    cleanlinessLevel?: number;
+    noiseLevel?: 'quiet' | 'moderate' | 'lively';
+    guestsFrequency?: 'never' | 'rarely' | 'sometimes' | 'often';
+    smokingAllowed?: boolean;
+    petsAllowed?: boolean;
+    workFromHome?: boolean;
+    cities?: string[];
+  }) => api.post('/roommates/profile', data),
+  getMatches: () => api.get('/roommates/matches'),
+};
+
 // ─── Token helpers ────────────────────────────────────────────────────────────
 export const tokenStorage = {
   save: (token: string) => storage.setItemAsync(TOKEN_KEY, token),

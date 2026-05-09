@@ -140,4 +140,5 @@ export type MainStackParamList = {
   ApartmentDetail: { apartmentId: string };
   CreateListing: undefined;
   Preferences: undefined;
+  Roommate: undefined;
 };

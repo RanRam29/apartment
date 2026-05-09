@@ -21,6 +21,7 @@ import ProfileScreen from '../screens/ProfileScreen';
 import ApartmentDetailScreen from '../screens/ApartmentDetailScreen';
 import CreateListingScreen from '../screens/CreateListingScreen';
 import PreferencesScreen from '../screens/PreferencesScreen';
+import RoommateScreen from '../screens/RoommateScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import HomeScreen from '../screens/HomeScreen';
 
@@ -170,6 +171,11 @@ function MainNavigator() {
           headerTintColor: C.navy,
           headerShadowVisible: false,
         }}
+      />
+      <MainStack.Screen
+        name="Roommate"
+        component={RoommateScreen}
+        options={{ headerShown: false }}
       />
     </MainStack.Navigator>
   );
