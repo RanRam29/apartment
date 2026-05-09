@@ -216,6 +216,24 @@ export const servicesApi = {
     api.post(`/services/${id}/review`, { rating, comment }),
 };
 
+// ─── IoT / Commercial Tenants (F15) ──────────────────────────────────────────
+export const iotApi = {
+  listDevices: (leaseId?: string) =>
+    api.get('/iot/devices', { params: leaseId ? { leaseId } : {} }),
+  registerDevice: (data: object) =>
+    api.post('/iot/devices', data),
+  updateDeviceStatus: (deviceId: string, status: string) =>
+    api.patch(`/iot/devices/${deviceId}/status`, { status }),
+  simulateAccess: (deviceId: string, action: string) =>
+    api.post('/iot/access', { deviceId, action }),
+  listTickets: (params?: { leaseId?: string; status?: string }) =>
+    api.get('/iot/maintenance', { params }),
+  createTicket: (data: object) =>
+    api.post('/iot/maintenance', data),
+  updateTicket: (id: string, data: object) =>
+    api.patch(`/iot/maintenance/${id}`, data),
+};
+
 // ─── Token helpers ────────────────────────────────────────────────────────────
 export const tokenStorage = {
   save: (token: string) => storage.setItemAsync(TOKEN_KEY, token),

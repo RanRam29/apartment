@@ -30,6 +30,7 @@ import MapScreen from '../screens/MapScreen';
 import RentPaymentsScreen from '../screens/RentPaymentsScreen';
 import CommercialScreen from '../screens/CommercialScreen';
 import GamificationScreen from '../screens/GamificationScreen';
+import ServicesScreen from '../screens/ServicesScreen';
 
 const RootStack  = createNativeStackNavigator<RootStackParamList>();
 const TenantTab  = createBottomTabNavigator<TenantTabParamList>();
@@ -208,6 +209,11 @@ function MainNavigator() {
       <MainStack.Screen
         name="Gamification"
         component={GamificationScreen}
+        options={{ headerShown: false }}
+      />
+      <MainStack.Screen
+        name="Services"
+        component={ServicesScreen}
         options={{ headerShown: false }}
       />
     </MainStack.Navigator>

@@ -176,6 +176,7 @@ export default function ProfileScreen() {
           <MenuItem icon="cash-outline" label="תשלומי שכירות" onPress={() => navigation.navigate('RentPayments')} />
           <MenuItem icon="business-outline" label='נדל"ן מסחרי' onPress={() => navigation.navigate('Commercial')} />
           <MenuItem icon="trophy-outline" label="הישגים ונקודות" onPress={() => navigation.navigate('Gamification')} />
+          <MenuItem icon="construct-outline" label="שירותים לדירה" onPress={() => navigation.navigate('Services')} />
           <MenuItem icon="notifications-outline" label="התראות"
             onPress={() => Platform.OS === 'web' ? window.alert('בקרוב\nהגדרות התראות יתווספו בקרוב') : Alert.alert('בקרוב', 'הגדרות התראות יתווספו בקרוב')} />
           <MenuItem icon="shield-checkmark-outline" label="פרטיות ואבטחה"

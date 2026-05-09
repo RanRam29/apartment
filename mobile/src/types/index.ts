@@ -148,4 +148,6 @@ export type MainStackParamList = {
   RentPayments: undefined;
   Commercial: undefined;
   Gamification: undefined;
+  Services: undefined;
+  IoT: undefined;
 };
