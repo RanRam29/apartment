@@ -1,13 +1,14 @@
 import React from 'react';
 import {
-  View, Text, FlatList, TouchableOpacity, StyleSheet,
-  SafeAreaView, ActivityIndicator, Alert, Modal, Share, ScrollView,
+  View, Text, FlatList, TouchableOpacity, Pressable, StyleSheet,
+  SafeAreaView, ActivityIndicator, Alert, Modal,   Share, ScrollView,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import axios from 'axios';
 import { landlordApi, apartmentsApi } from '../services/api';
 import type { Apartment, MainStackParamList } from '../types';
 import { C, Dark } from '../theme';
@@ -99,6 +100,26 @@ export default function ListingsScreen() {
   }
 
   function confirmDelete(apt: Apartment) {
+    const runDelete = () => {
+      void (async () => {
+        try {
+          await apartmentsApi.deletePermanently(apt.id);
+          await queryClient.invalidateQueries({ queryKey: ['landlord-dashboard'] });
+          await queryClient.refetchQueries({ queryKey: ['landlord-dashboard'] });
+        } catch (e: unknown) {
+          let detail = 'לא ניתן למחוק את המודעה.';
+          if (axios.isAxiosError(e)) {
+            const server = (e.response?.data as { error?: string })?.error;
+            const st = e.response?.status;
+            if (server) detail = server;
+            else if (st === 404) detail = 'המודעה לא נמצאה.';
+            else if (st === 401 || st === 403) detail = 'אין הרשאה למחוק.';
+          }
+          Alert.alert('שגיאה', detail);
+        }
+      })();
+    };
+
     Alert.alert(
       'מחיקת מודעה',
       `למחוק לצמיתות את "${apt.title}"? פעולה זו אינה הפיכה.`,
@@ -107,16 +128,10 @@ export default function ListingsScreen() {
         {
           text: 'מחק',
           style: 'destructive',
-          onPress: async () => {
-            try {
-              await apartmentsApi.deletePermanently(apt.id);
-              await queryClient.invalidateQueries({ queryKey: ['landlord-dashboard'] });
-            } catch {
-              Alert.alert('שגיאה', 'לא ניתן למחוק את המודעה');
-            }
-          },
+          onPress: runDelete,
         },
-      ]
+      ],
+      { cancelable: true }
     );
   }
 
@@ -164,13 +179,14 @@ export default function ListingsScreen() {
               color={item.isActive ? C.cyan : C.textMut}
             />
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.actionBtn}
+          <Pressable
+            style={({ pressed }) => [styles.actionBtn, pressed && styles.actionBtnPressed]}
             onPress={() => confirmDelete(item)}
             accessibilityLabel="מחק מודעה"
+            hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}
           >
             <Ionicons name="trash-outline" size={22} color="#FF7675" />
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </View>
     );
@@ -212,6 +228,7 @@ export default function ListingsScreen() {
           contentContainerStyle={styles.list}
           onRefresh={refetch}
           refreshing={isLoading}
+          keyboardShouldPersistTaps="handled"
         />
       )}
 
@@ -309,8 +326,20 @@ const styles = StyleSheet.create({
   cardPrice: { color: C.cyan, fontWeight: '700', fontSize: 14, textAlign: 'right', marginBottom: 4 },
   statsRow: { flexDirection: 'row', alignItems: 'center' },
   statText: { color: C.textMut, fontSize: 12, marginLeft: 3 },
-  cardActions: { flexDirection: 'column', paddingRight: 10, gap: 6, alignItems: 'center' },
-  actionBtn: { padding: 4 },
+  cardActions: {
+    flexDirection: 'column',
+    paddingRight: 8,
+    paddingLeft: 4,
+    paddingVertical: 8,
+    gap: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
+    elevation: 10,
+    backgroundColor: Dark.surface,
+  },
+  actionBtn: { padding: 6 },
+  actionBtnPressed: { opacity: 0.7 },
   emptyText: { color: C.textMut, fontSize: 16, textAlign: 'center' },
   // Modal
   modalBackdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.6)' },

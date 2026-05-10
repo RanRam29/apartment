@@ -1,7 +1,8 @@
 const express = require('express');
 const { Op } = require('sequelize');
 const { body, query, validationResult } = require('express-validator');
-const { Apartment, User, Swipe } = require('../models');
+const { sequelize } = require('../config/database');
+const { Apartment, User, Swipe, Match } = require('../models');
 const { authenticate, requireRole } = require('../middleware/auth');
 const { geminiMarketingLimiter } = require('../middleware/geminiRateLimit');
 const { upload, uploadMany } = require('../services/uploadService');
@@ -282,7 +283,13 @@ router.delete('/:id', authenticate, requireRole('landlord'), async (req, res, ne
 
     const normalizedCity = typeof apartment.city === 'string' ? apartment.city.toLowerCase() : null;
     const aid = apartment.id;
-    await apartment.destroy();
+
+    await sequelize.transaction(async (t) => {
+      await Swipe.destroy({ where: { apartmentId: aid }, transaction: t });
+      await Match.destroy({ where: { apartmentId: aid }, transaction: t });
+      await apartment.destroy({ transaction: t });
+    });
+
     await cacheDel(`apartment:${aid}`);
     await cacheDel(`landlord:dashboard:${req.user.id}`);
     if (normalizedCity) {
