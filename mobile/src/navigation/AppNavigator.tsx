@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { ActivityIndicator, View } from 'react-native';
+import ApartmentSearchChatbot from '../components/ApartmentSearchChatbot';
 import { Ionicons } from '@expo/vector-icons';
 
 import { useAuthStore } from '../store/useAuthStore';
@@ -42,6 +43,7 @@ const MainStack  = createNativeStackNavigator<MainStackParamList>();
 
 function TenantTabs() {
   return (
+    <View style={{ flex: 1 }}>
     <TenantTab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
@@ -85,6 +87,8 @@ function TenantTabs() {
       <TenantTab.Screen name="Map"     component={MapScreen}     options={{ title: 'מפה' }} />
       <TenantTab.Screen name="Profile" component={ProfileScreen} options={{ title: 'פרופיל' }} />
     </TenantTab.Navigator>
+    <ApartmentSearchChatbot />
+    </View>
   );
 }
 
