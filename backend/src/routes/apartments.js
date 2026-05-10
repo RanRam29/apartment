@@ -3,6 +3,7 @@ const { Op } = require('sequelize');
 const { body, query, validationResult } = require('express-validator');
 const { Apartment, User, Swipe } = require('../models');
 const { authenticate, requireRole } = require('../middleware/auth');
+const { geminiMarketingLimiter } = require('../middleware/geminiRateLimit');
 const { upload, uploadMany } = require('../services/uploadService');
 const { cacheGet, cacheSet, cacheDel } = require('../config/redis');
 const { generateMarketingCopy, COPY_STYLE_INSTRUCTIONS } = require('../services/geminiService');
@@ -290,6 +291,7 @@ router.post(
   '/:id/marketing-copy',
   authenticate,
   requireRole('landlord'),
+  geminiMarketingLimiter,
   [body('style').optional().isIn(['professional', 'friendly', 'luxury'])],
   async (req, res, next) => {
     try {

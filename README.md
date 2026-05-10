@@ -9,14 +9,15 @@ A Tinder-style apartment rental platform for Israel. Swipe on apartments, get ma
 ```
 Mobile (React Native / Expo)
          ↓ REST + WebSocket
-Backend (Node.js / Express)  ←→  Redis (cache)
+Backend (Node.js / Express)  ←→  Gemini API (NLP + marketing copy)
          ↓              ↓
    PostgreSQL        MongoDB
-         ↓
-   AI Service (Python / FastAPI)  ←→  Gemini API
-         ↓
+  Redis (cache)
+Optional: AI Service (Python / FastAPI) — scoring / duplicate NLP
    Cloudinary (images)  +  Meshulam (payments)
 ```
+
+See [`Info/AI_Capabilities_Current_State.md`](Info/AI_Capabilities_Current_State.md) and [`Info/ADR_AI_Service_Strategy.md`](Info/ADR_AI_Service_Strategy.md).
 
 ---
 
@@ -28,8 +29,8 @@ Backend (Node.js / Express)  ←→  Redis (cache)
 | Backend | Node.js, Express, Sequelize, Mongoose, Socket.io |
 | Databases | PostgreSQL (users/apartments/matches), MongoDB (chat/preferences) |
 | Cache | Redis (feed cache, session, NLP query cache) |
-| AI | Python FastAPI, Gemini 1.5 Flash (free tier), scikit-learn |
-| Messaging | Apache Kafka |
+| AI | **Gemini 1.5 Flash** via Node (`geminiService`); optional Python `ai-service` (NLP/scoring) |
+| Messaging | Apache Kafka (optional in dev/small deploys) |
 | Images | Cloudinary (unsigned upload) |
 | Payments | Meshulam (Israeli payment gateway) |
 | Infrastructure | Docker Compose (dev), Kubernetes (prod) |

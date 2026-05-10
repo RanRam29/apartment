@@ -21,6 +21,61 @@ Output ONLY valid JSON with these optional fields:
 
 Only include fields that are clearly mentioned. Do not guess. Output nothing but the JSON object.`;
 
+const ALLOWED_AMENITIES = new Set([
+  'parking', 'balcony', 'elevator', 'ac', 'storage', 'pets_allowed', 'furnished', 'sun_boiler',
+]);
+
+/**
+ * Pull JSON object from Gemini output (handles markdown fences and trailing prose).
+ * @param {string} text
+ * @returns {object|null}
+ */
+function extractJsonObject(text) {
+  if (typeof text !== 'string') return null;
+  const cleaned = text.replace(/```json\n?|\n?```/g, '').trim();
+  try {
+    return JSON.parse(cleaned);
+  } catch {
+    const match = cleaned.match(/\{[\s\S]*\}/);
+    if (!match) return null;
+    try {
+      return JSON.parse(match[0]);
+    } catch {
+      return null;
+    }
+  }
+}
+
+/**
+ * Keep only known filter keys and safe types (defense-in-depth after LLM output).
+ * @param {unknown} raw
+ * @returns {Record<string, unknown>}
+ */
+function sanitizeParsedFilters(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {};
+  const out = {};
+  if (typeof raw.city === 'string' && raw.city.trim()) out.city = raw.city.trim();
+  if (typeof raw.neighborhood === 'string' && raw.neighborhood.trim()) {
+    out.neighborhood = raw.neighborhood.trim();
+  }
+  for (const key of ['minPrice', 'maxPrice', 'minRooms', 'maxRooms']) {
+    const n = Number(raw[key]);
+    if (Number.isFinite(n)) out[key] = n;
+  }
+  if (Array.isArray(raw.amenities)) {
+    const list = raw.amenities
+      .filter((x) => typeof x === 'string')
+      .map((x) => x.trim())
+      .filter((x) => ALLOWED_AMENITIES.has(x));
+    if (list.length) out.amenities = list;
+  }
+  if (typeof raw.petsAllowed === 'boolean') out.petsAllowed = raw.petsAllowed;
+  if (typeof raw.availableFrom === 'string' && raw.availableFrom.trim()) {
+    out.availableFrom = raw.availableFrom.trim();
+  }
+  return out;
+}
+
 /**
  * Parses a free-text apartment search query into structured filters using Gemini.
  * @param {string} query - User's natural language query (Hebrew or English)
@@ -33,6 +88,7 @@ async function parseSearchQuery(query) {
     return {};
   }
 
+  const t0 = Date.now();
   try {
     const response = await axios.post(
       `${GEMINI_API_URL}?key=${apiKey}`,
@@ -53,16 +109,18 @@ async function parseSearchQuery(query) {
       { timeout: 10000 }
     );
 
-    const raw = response.data?.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+    const rawText = response.data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+    const parsed = extractJsonObject(rawText);
+    if (!parsed) {
+      logger.warn(`Gemini nlp_parse invalid_json ms=${Date.now() - t0}`);
+      return {};
+    }
 
-    // Strip markdown code fences if Gemini wraps output
-    const cleaned = raw.replace(/```json\n?|\n?```/g, '').trim();
-    const filters = JSON.parse(cleaned);
-
-    logger.info(`Gemini parsed query "${query}" →`, filters);
+    const filters = sanitizeParsedFilters(parsed);
+    logger.info(`Gemini nlp_parse ok ms=${Date.now() - t0} keys=${Object.keys(filters).length}`);
     return filters;
   } catch (err) {
-    logger.error('Gemini parse error:', err.message);
+    logger.error(`Gemini nlp_parse error ms=${Date.now() - t0}: ${err.message}`);
     return {};
   }
 }
@@ -105,6 +163,7 @@ Pets allowed: ${apartment.petsAllowed ? 'Yes' : 'No'}
 
 Output only the description text, no labels or formatting.`;
 
+  const t0 = Date.now();
   try {
     const response = await axios.post(
       `${GEMINI_API_URL}?key=${apiKey}`,
@@ -115,11 +174,20 @@ Output only the description text, no labels or formatting.`;
       { timeout: 10000 }
     );
 
-    return response.data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
+    const text = response.data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
+    logger.info(`Gemini marketing_copy ok ms=${Date.now() - t0} style=${style}`);
+    return text;
   } catch (err) {
-    logger.error('Gemini marketing copy error:', err.message);
+    logger.error(`Gemini marketing_copy error ms=${Date.now() - t0} style=${style}: ${err.message}`);
     return null;
   }
 }
 
-module.exports = { parseSearchQuery, generateListingSummary, generateMarketingCopy, COPY_STYLE_INSTRUCTIONS };
+module.exports = {
+  parseSearchQuery,
+  generateListingSummary,
+  generateMarketingCopy,
+  COPY_STYLE_INSTRUCTIONS,
+  sanitizeParsedFilters,
+  extractJsonObject,
+};
