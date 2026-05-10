@@ -1,4 +1,24 @@
 require('dotenv').config();
+
+const { getJwtSecret } = require('./config/security');
+const logger = require('./utils/logger');
+
+const requireJwtAtBoot =
+  process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
+
+if (requireJwtAtBoot) {
+  try {
+    getJwtSecret();
+  } catch (err) {
+    logger.error('FATAL: Cannot start API — JWT_SECRET is missing or invalid.');
+    logger.error(err.message);
+    logger.error(
+      'Fix: Render → Web Service → Environment → add JWT_SECRET (≥20 chars). Blueprint uses generateValue; manual services must set it. Example: openssl rand -base64 32'
+    );
+    process.exit(1);
+  }
+}
+
 const app = require('./app');
 const { initPostgres } = require('./config/database');
 const { initMongoDB } = require('./config/mongodb');
@@ -6,7 +26,6 @@ const { initRedis } = require('./config/redis');
 const { initKafka } = require('./config/kafka');
 const { initSocket } = require('./config/socket');
 const { autoSeed } = require('./seeders/demo');
-const logger = require('./utils/logger');
 
 const PORT = process.env.PORT || 3000;
 
