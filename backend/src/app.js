@@ -21,25 +21,49 @@ const gamificationRoutes = require('./routes/gamification');
 const servicesRoutes   = require('./routes/services');
 const iotRoutes        = require('./routes/iot');
 const { errorHandler } = require('./middleware/errorHandler');
+const logger = require('./utils/logger');
 
 const app = express();
 
-app.use(helmet());
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    if (
-      origin.startsWith('http://localhost') ||
-      origin.startsWith('http://127.0.0.1') ||
-      origin.endsWith('.vercel.app') ||
-      origin === process.env.CLIENT_ORIGIN
-    ) {
-      return callback(null, true);
+function parseCorsOrigins() {
+  const raw = process.env.CLIENT_ORIGIN || process.env.CLIENT_ORIGINS || 'http://localhost:3000';
+  const list = String(raw)
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return list.length ? list : ['http://localhost:3000'];
+}
+
+function isAllowedCorsOrigin(origin) {
+  if (!origin) return true;
+  const allowed = parseCorsOrigins();
+  if (allowed.includes(origin)) return true;
+  if (process.env.CORS_ALLOW_VERCEL_PREVIEWS === 'true') {
+    try {
+      const { hostname } = new URL(origin);
+      if (hostname === 'vercel.app' || hostname.endsWith('.vercel.app')) return true;
+    } catch {
+      /* ignore */
     }
-    return callback(null, false);
-  },
-  credentials: true,
-}));
+  }
+  return false;
+}
+
+app.use(helmet());
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (isAllowedCorsOrigin(origin)) {
+        return callback(null, true);
+      }
+      if (origin && process.env.NODE_ENV !== 'production') {
+        logger.warn(`CORS rejected origin: ${origin}`);
+      }
+      callback(null, false);
+    },
+    credentials: true,
+  })
+);
 app.use(morgan('combined'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
