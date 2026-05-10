@@ -4,7 +4,7 @@ import {
   StyleSheet, ActivityIndicator, ScrollView,
 } from 'react-native';
 import { useAuthStore } from '../store/useAuthStore';
-import { getVerificationPromptEmail } from '../services/verificationUx';
+import { getVerificationPromptEmail, type MaybeAuthError } from '../services/verificationUx';
 import { formatLoginError } from '../utils/authErrors';
 import { C } from '../theme';
 
@@ -31,7 +31,7 @@ export default function LoginScreen({ onSwitch }: Props) {
     try {
       await login(email.trim().toLowerCase(), password);
     } catch (err: unknown) {
-      const unverifiedEmail = getVerificationPromptEmail(err);
+      const unverifiedEmail = getVerificationPromptEmail(err as MaybeAuthError);
       if (unverifiedEmail) {
         setInfo('האימייל לא אומת. שלחנו לך מייל אימות — בדוק את תיבת הדואר.');
         resendVerification(unverifiedEmail).catch(() => {});

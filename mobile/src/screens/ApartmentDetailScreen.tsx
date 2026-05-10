@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { apartmentsApi } from '../services/api';
 import type { MainStackParamList, Amenity } from '../types';
+import { C, Dark } from '../theme';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -60,7 +61,7 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
   if (isLoading) {
     return (
       <SafeAreaView style={styles.center}>
-        <ActivityIndicator size="large" color="#6C5CE7" />
+        <ActivityIndicator size="large" color={C.cyan} />
       </SafeAreaView>
     );
   }
@@ -167,7 +168,7 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
           </View>
         ) : (
           <View style={styles.noImagePlaceholder}>
-            <Ionicons name="home-outline" size={64} color="#3A3A5E" />
+            <Ionicons name="home-outline" size={64} color={C.textMut} />
           </View>
         )}
 
@@ -193,7 +194,7 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
           {/* Location */}
           {(apt.city || apt.neighborhood || apt.address) && (
             <Text style={styles.location}>
-              <Ionicons name="location-outline" size={14} color="#A0A0B2" />
+              <Ionicons name="location-outline" size={14} color={C.textMut} />
               {' '}
               {[apt.address, apt.neighborhood, apt.city].filter(Boolean).join(', ')}
             </Text>
@@ -274,7 +275,7 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
                   <Image source={{ uri: apt.landlord.avatarUrl }} style={styles.avatar} contentFit="cover" />
                 ) : (
                   <View style={[styles.avatar, styles.avatarFallback]}>
-                    <Ionicons name="person" size={20} color="#A0A0B2" />
+                    <Ionicons name="person" size={20} color={C.textMut} />
                   </View>
                 )}
                 <View style={{ flex: 1 }}>
@@ -338,7 +339,7 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
 function Stat({ icon, value }: { icon: keyof typeof Ionicons.glyphMap; value: string }) {
   return (
     <View style={styles.stat}>
-      <Ionicons name={icon} size={16} color="#6C5CE7" />
+      <Ionicons name={icon} size={16} color={C.cyan} />
       <Text style={styles.statText}>{value}</Text>
     </View>
   );
@@ -347,7 +348,7 @@ function Stat({ icon, value }: { icon: keyof typeof Ionicons.glyphMap; value: st
 function DetailChip({ icon, label }: { icon: keyof typeof Ionicons.glyphMap; label: string }) {
   return (
     <View style={styles.detailChip}>
-      <Ionicons name={icon} size={14} color="#A0A0B2" />
+      <Ionicons name={icon} size={14} color={C.textMut} />
       <Text style={styles.detailChipText}>{label}</Text>
     </View>
   );
@@ -363,8 +364,8 @@ function CostRow({ label, amount, bold }: { label: string; amount: number; bold?
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1A1A2E' },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#1A1A2E' },
+  container: { flex: 1, backgroundColor: Dark.bg },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Dark.bg },
   carouselSlide: { width: SCREEN_WIDTH, height: 320, backgroundColor: '#111122', justifyContent: 'center', alignItems: 'center' },
   carouselImage: { width: SCREEN_WIDTH, height: 320 },
   carouselArrow: {
@@ -380,36 +381,36 @@ const styles = StyleSheet.create({
   },
   carouselArrowLeft: { left: 12 },
   carouselArrowRight: { right: 12 },
-  noImagePlaceholder: { height: 200, justifyContent: 'center', alignItems: 'center', backgroundColor: '#2A2A3E' },
+  noImagePlaceholder: { height: 200, justifyContent: 'center', alignItems: 'center', backgroundColor: Dark.surface },
   floatingBack: {
     position: 'absolute', top: 16, left: 16,
     backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 20, padding: 8,
   },
   dotRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 10, marginBottom: 4, gap: 8 },
-  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#3A3A5E' },
-  dotActive: { backgroundColor: '#6C5CE7', width: 20, borderRadius: 4 },
+  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: C.navyMidAlpha(0.5) },
+  dotActive: { backgroundColor: C.cyan, width: 20, borderRadius: 4 },
   content: { padding: 20 },
   titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
-  price: { fontSize: 24, fontWeight: '800', color: '#6C5CE7' },
-  verifiedBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(0,210,211,0.12)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
-  verifiedText: { color: '#00D2D3', fontSize: 12, fontWeight: '600' },
+  price: { fontSize: 24, fontWeight: '800', color: C.cyan },
+  verifiedBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: C.cyanAlpha(0.12), paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
+  verifiedText: { color: C.cyan, fontSize: 12, fontWeight: '600' },
   title: { fontSize: 18, fontWeight: '700', color: '#fff', textAlign: 'right', marginBottom: 6 },
-  location: { fontSize: 14, color: '#A0A0B2', textAlign: 'right', marginBottom: 16 },
+  location: { fontSize: 14, color: C.textMut, textAlign: 'right', marginBottom: 16 },
   statsRow: { flexDirection: 'row', gap: 12, marginBottom: 20, flexWrap: 'wrap' },
-  stat: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#2A2A3E', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10 },
+  stat: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: Dark.surface, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10, borderWidth: 1, borderColor: Dark.border },
   statText: { color: '#fff', fontSize: 13 },
   sectionTitle: { fontSize: 15, fontWeight: '700', color: '#fff', textAlign: 'right', marginBottom: 10, marginTop: 4 },
   amenitiesWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 },
-  amenityChip: { backgroundColor: 'rgba(108,92,231,0.15)', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 6, borderWidth: 1, borderColor: '#6C5CE7' },
-  amenityText: { color: '#6C5CE7', fontSize: 13 },
+  amenityChip: { backgroundColor: C.cyanAlpha(0.12), borderRadius: 10, paddingHorizontal: 12, paddingVertical: 6, borderWidth: 1, borderColor: C.cyan },
+  amenityText: { color: C.cyan, fontSize: 13 },
   description: { color: '#C0C0D0', fontSize: 14, lineHeight: 22, textAlign: 'right', marginBottom: 20 },
   landlordRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16 },
   avatar: { width: 40, height: 40, borderRadius: 20 },
-  avatarFallback: { backgroundColor: '#2A2A3E', justifyContent: 'center', alignItems: 'center' },
+  avatarFallback: { backgroundColor: Dark.surface, justifyContent: 'center', alignItems: 'center' },
   landlordName: { color: '#fff', fontSize: 14, fontWeight: '600' },
   detailsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 },
-  detailChip: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: '#2A2A3E', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10 },
-  detailChipText: { color: '#A0A0B2', fontSize: 12 },
+  detailChip: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: Dark.surface, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10, borderWidth: 1, borderColor: Dark.border },
+  detailChipText: { color: C.textMut, fontSize: 12 },
   viewerBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.94)', justifyContent: 'center', alignItems: 'center' },
   viewerClose: { position: 'absolute', top: 48, right: 20, zIndex: 10, padding: 8 },
   viewerCarousel: { width: SCREEN_WIDTH, height: '85%' },
@@ -429,15 +430,15 @@ const styles = StyleSheet.create({
   },
   viewerArrowLeft: { left: 14 },
   viewerArrowRight: { right: 14 },
-  errorText: { color: '#FF4757', fontSize: 16, marginBottom: 16 },
-  backBtn: { backgroundColor: '#6C5CE7', paddingHorizontal: 20, paddingVertical: 10, borderRadius: 10 },
-  backBtnText: { color: '#fff', fontWeight: '700' },
-  costCard: { backgroundColor: '#2A2A3E', borderRadius: 14, padding: 16, marginBottom: 20 },
+  errorText: { color: C.danger, fontSize: 16, marginBottom: 16 },
+  backBtn: { backgroundColor: C.cyan, paddingHorizontal: 20, paddingVertical: 10, borderRadius: 10 },
+  backBtnText: { color: C.navy, fontWeight: '700' },
+  costCard: { backgroundColor: Dark.surface, borderRadius: 14, padding: 16, marginBottom: 20, borderWidth: 1, borderColor: Dark.border },
   costRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 6 },
-  costLabel: { color: '#A0A0B2', fontSize: 14, textAlign: 'right' },
+  costLabel: { color: C.textMut, fontSize: 14, textAlign: 'right' },
   costLabelBold: { color: '#fff', fontWeight: '700', fontSize: 15 },
   costAmount: { color: '#C0C0D0', fontSize: 14 },
-  costAmountBold: { color: '#6C5CE7', fontWeight: '800', fontSize: 16 },
-  costDivider: { height: 1, backgroundColor: '#3A3A5E', marginVertical: 8 },
-  costNote: { color: '#6A6A7E', fontSize: 11, textAlign: 'right', marginTop: 8 },
+  costAmountBold: { color: C.cyan, fontWeight: '800', fontSize: 16 },
+  costDivider: { height: 1, backgroundColor: Dark.border, marginVertical: 8 },
+  costNote: { color: C.textMut, fontSize: 11, textAlign: 'right', marginTop: 8 },
 });

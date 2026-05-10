@@ -7,6 +7,7 @@ import { WebView } from 'react-native-webview';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { apartmentsApi } from '../services/api';
+import { C, Dark } from '../theme';
 
 // TAMA 38 resource IDs from data.gov.il (urban renewal zones)
 const TAMA38_URL =
@@ -48,9 +49,9 @@ export function buildHtml(markers: AptMarker[], tama38Url: string): string {
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><\/script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body, #map { width: 100%; height: 100%; background: #1A1A2E; }
+    html, body, #map { width: 100%; height: 100%; background: #162839; }
     .apt-popup { font-family: sans-serif; text-align: right; direction: rtl; min-width: 140px; }
-    .apt-popup .price { color: #6C5CE7; font-weight: 700; font-size: 15px; }
+    .apt-popup .price { color: #00E5FF; font-weight: 700; font-size: 15px; }
     .apt-popup .meta  { color: #555; font-size: 12px; margin-top: 2px; }
     .apt-popup .title { font-weight: 600; font-size: 13px; margin-bottom: 4px; }
     .tama-layer { fill: #F39C12; fill-opacity: 0.18; stroke: #F39C12; stroke-width: 1.5; }
@@ -88,9 +89,9 @@ export function buildHtml(markers: AptMarker[], tama38Url: string): string {
   function makeIcon(price) {
     var label = '₪' + (price >= 1000 ? Math.round(price/1000) + 'K' : price);
     var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="28">'
-      + '<rect rx="8" ry="8" width="64" height="24" fill="#6C5CE7"/>'
+      + '<rect rx="8" ry="8" width="64" height="24" fill="#00E5FF"/>'
       + '<text x="32" y="16" font-size="11" font-family="sans-serif" font-weight="700" '
-      + 'fill="#fff" text-anchor="middle">' + label + '<\/text><\/svg>';
+      + 'fill="#162839" text-anchor="middle">' + label + '<\/text><\/svg>';
     return L.divIcon({
       html: svg,
       className: '',
@@ -261,7 +262,7 @@ export default function MapScreen() {
           <Switch
             value={tamaOn}
             onValueChange={handleTamaToggle}
-            trackColor={{ false: '#3A3A5E', true: '#F39C12' }}
+            trackColor={{ false: Dark.switchTrackOff, true: C.gold }}
             thumbColor="#fff"
             style={{ transform: [{ scaleX: 0.85 }, { scaleY: 0.85 }] }}
           />
@@ -270,7 +271,7 @@ export default function MapScreen() {
 
       {isLoading ? (
         <View style={styles.loadingWrap}>
-          <ActivityIndicator size="large" color="#6C5CE7" />
+          <ActivityIndicator size="large" color={C.cyan} />
           <Text style={styles.loadingText}>טוען דירות…</Text>
         </View>
       ) : Platform.OS === 'web' ? (
@@ -309,25 +310,25 @@ export default function MapScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1A1A2E' },
+  container: { flex: 1, backgroundColor: Dark.bg },
   toolbar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 10,
-    backgroundColor: '#22223A',
+    backgroundColor: Dark.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#2A2A3E',
+    borderBottomColor: Dark.border,
   },
   toolbarLeft:  { flexDirection: 'row', alignItems: 'center', gap: 8 },
   toolbarTitle: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  countBadge:   { backgroundColor: '#6C5CE7', borderRadius: 10, paddingHorizontal: 7, paddingVertical: 2 },
-  countText:    { color: '#fff', fontSize: 11, fontWeight: '700' },
+  countBadge:   { backgroundColor: C.cyan, borderRadius: 10, paddingHorizontal: 7, paddingVertical: 2 },
+  countText:    { color: C.navy, fontSize: 11, fontWeight: '700' },
   toolbarRight: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  tamaLabel:    { color: '#F39C12', fontSize: 12, fontWeight: '700' },
-  tamaHint:     { color: '#A0A0B2', fontSize: 10, maxWidth: 100, textAlign: 'right' },
+  tamaLabel:    { color: C.gold, fontSize: 12, fontWeight: '700' },
+  tamaHint:     { color: C.textMut, fontSize: 10, maxWidth: 100, textAlign: 'right' },
   map:          { flex: 1 },
   loadingWrap:  { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 16 },
-  loadingText:  { color: '#A0A0B2', fontSize: 14 },
+  loadingText:  { color: C.textMut, fontSize: 14 },
 });

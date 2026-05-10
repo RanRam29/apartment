@@ -69,7 +69,7 @@ export default function EditListingScreen({ route, navigation }: Props) {
 
   async function handleSave() {
     if (!title.trim() || !price || !rooms || !city.trim()) {
-      Alert.alert('שגיאה', 'נא למלא: כותרת, מחיר, חדרות ועיר');
+      Alert.alert('שגיאה', 'נא למלא: כותרת, מחיר, חדרים ועיר');
       return;
     }
     setSaving(true);
@@ -122,7 +122,7 @@ export default function EditListingScreen({ route, navigation }: Props) {
               <TextInput style={styles.input} value={price} onChangeText={setPrice}
                 keyboardType="numeric" placeholder="6500" placeholderTextColor={C.textMut} textAlign="right" />
             </Field>
-            <Field label="חדרות *" style={{ flex: 1 }}>
+            <Field label="חדרים *" style={{ flex: 1 }}>
               <TextInput style={styles.input} value={rooms} onChangeText={setRooms}
                 keyboardType="decimal-pad" placeholder="3" placeholderTextColor={C.textMut} textAlign="right" />
             </Field>

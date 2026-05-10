@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Platform } from 'react-native';
 import { authApi } from '../services/api';
+import { C } from '../theme';
 
 export function usePushNotifications() {
   useEffect(() => {
@@ -43,7 +44,7 @@ async function registerNativePush() {
       name: 'Match Notifications',
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#6C5CE7',
+      lightColor: C.cyan,
     }).catch(() => {});
   }
 }

@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { paymentApi, contractsApi } from '../services/api';
 import { useAuthStore } from '../store/useAuthStore';
+import { C, Dark } from '../theme';
 
 type PaymentStatus = 'pending' | 'initiated' | 'paid' | 'overdue' | 'cancelled';
 
@@ -31,10 +32,10 @@ interface Contract {
 
 const STATUS_CONFIG: Record<PaymentStatus, { label: string; color: string; icon: keyof typeof Ionicons.glyphMap }> = {
   pending:   { label: 'ממתין',    color: '#F39C12', icon: 'time-outline' },
-  initiated: { label: 'בתהליך',   color: '#6C5CE7', icon: 'hourglass-outline' },
+  initiated: { label: 'בתהליך',   color: C.cyan, icon: 'hourglass-outline' },
   paid:      { label: 'שולם',     color: '#00C9A7', icon: 'checkmark-circle-outline' },
   overdue:   { label: 'באיחור',   color: '#FF7675', icon: 'alert-circle-outline' },
-  cancelled: { label: 'בוטל',     color: '#A0A0B2', icon: 'close-circle-outline' },
+  cancelled: { label: 'בוטל',     color: C.textMut, icon: 'close-circle-outline' },
 };
 
 const MONTH_HE = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
@@ -212,11 +213,11 @@ export default function RentPaymentsScreen({ navigation }: any) {
 
       {isLoading ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color="#6C5CE7" />
+          <ActivityIndicator size="large" color={C.cyan} />
         </View>
       ) : payments.length === 0 ? (
         <View style={styles.center}>
-          <Ionicons name="cash-outline" size={48} color="#3A3A5E" />
+          <Ionicons name="cash-outline" size={48} color={C.textMut} />
           <Text style={styles.emptyTitle}>אין תשלומים עדיין</Text>
           <Text style={styles.emptyHint}>
             {isLandlord ? 'לחץ + כדי לשלוח בקשת תשלום לשוכר' : 'תשלומי שכירות יופיעו כאן'}
@@ -285,7 +286,7 @@ export default function RentPaymentsScreen({ navigation }: any) {
                 disabled={!selectedContract || createMutation.isPending}
               >
                 {createMutation.isPending
-                  ? <ActivityIndicator size="small" color="#fff" />
+                  ? <ActivityIndicator size="small" color={C.navy} />
                   : <Text style={styles.sendBtnText}>שלח בקשה</Text>}
               </TouchableOpacity>
             </View>
@@ -297,33 +298,35 @@ export default function RentPaymentsScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container:  { flex: 1, backgroundColor: '#1A1A2E' },
+  container:  { flex: 1, backgroundColor: Dark.bg },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 16, paddingVertical: 14,
-    backgroundColor: '#22223A', borderBottomWidth: 1, borderBottomColor: '#2A2A3E',
+    backgroundColor: Dark.surface, borderBottomWidth: 1, borderBottomColor: Dark.border,
   },
   backBtn:     { padding: 4 },
   headerTitle: { color: '#fff', fontSize: 17, fontWeight: '700' },
-  addBtn:      { backgroundColor: '#6C5CE7', borderRadius: 20, padding: 6 },
+  addBtn:      { backgroundColor: C.cyan, borderRadius: 20, padding: 6 },
 
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 },
   emptyTitle: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  emptyHint:  { color: '#A0A0B2', fontSize: 13, textAlign: 'center', paddingHorizontal: 40 },
+  emptyHint:  { color: C.textMut, fontSize: 13, textAlign: 'center', paddingHorizontal: 40 },
 
   list: { padding: 16, gap: 12 },
 
   card: {
-    backgroundColor: '#22223A', borderRadius: 14,
+    backgroundColor: Dark.surface, borderRadius: 14,
     padding: 16, gap: 8,
+    borderWidth: 1,
+    borderColor: Dark.border,
   },
   cardTop:   { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   cardLeft:  { flex: 1, gap: 2 },
   cardRight: { alignItems: 'flex-end', gap: 6 },
   monthLabel: { color: '#fff', fontSize: 15, fontWeight: '700' },
-  aptTitle:   { color: '#A0A0B2', fontSize: 12 },
-  amount:     { color: '#6C5CE7', fontSize: 18, fontWeight: '800' },
-  paidAt:     { color: '#A0A0B2', fontSize: 11 },
+  aptTitle:   { color: C.textMut, fontSize: 12 },
+  amount:     { color: C.cyan, fontSize: 18, fontWeight: '800' },
+  paidAt:     { color: C.textMut, fontSize: 11 },
 
   badge: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 20 },
   badgeText: { fontSize: 11, fontWeight: '700' },
@@ -331,38 +334,38 @@ const styles = StyleSheet.create({
   actions:    { flexDirection: 'row', gap: 8, marginTop: 4 },
   actionBtn:  { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20 },
   actionBtnText: { color: '#fff', fontSize: 13, fontWeight: '700' },
-  bitBtn:     { backgroundColor: '#6C5CE7' },
-  confirmBtn: { backgroundColor: '#00C9A7' },
+  bitBtn:     { backgroundColor: C.cyan },
+  confirmBtn: { backgroundColor: C.success },
 
   // Modal
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
   modalBox: {
-    backgroundColor: '#22223A', borderTopLeftRadius: 24, borderTopRightRadius: 24,
+    backgroundColor: Dark.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24,
     padding: 24, gap: 8,
   },
   modalTitle:   { color: '#fff', fontSize: 18, fontWeight: '800', marginBottom: 8, textAlign: 'right' },
-  fieldLabel:   { color: '#A0A0B2', fontSize: 12, fontWeight: '700', textAlign: 'right' },
-  noContracts:  { color: '#FF7675', fontSize: 13, textAlign: 'right' },
+  fieldLabel:   { color: C.textMut, fontSize: 12, fontWeight: '700', textAlign: 'right' },
+  noContracts:  { color: C.coral, fontSize: 13, textAlign: 'right' },
   contractRow: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    backgroundColor: '#2A2A4A', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 10,
+    backgroundColor: C.navyMidAlpha(0.35), borderRadius: 10, paddingHorizontal: 14, paddingVertical: 10,
     borderWidth: 1.5, borderColor: 'transparent', marginTop: 6,
   },
-  contractRowSel:  { borderColor: '#6C5CE7' },
+  contractRowSel:  { borderColor: C.cyan },
   contractRowText: { color: '#fff', fontSize: 14, flex: 1 },
-  contractRowRent: { color: '#6C5CE7', fontSize: 14, fontWeight: '700' },
+  contractRowRent: { color: C.cyan, fontSize: 14, fontWeight: '700' },
   monthRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 6 },
   monthChip: {
     paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20,
-    backgroundColor: '#2A2A4A', borderWidth: 1.5, borderColor: 'transparent',
+    backgroundColor: C.navyMidAlpha(0.35), borderWidth: 1.5, borderColor: 'transparent',
   },
-  monthChipSel:     { borderColor: '#6C5CE7' },
-  monthChipText:    { color: '#A0A0B2', fontSize: 12 },
-  monthChipTextSel: { color: '#6C5CE7', fontWeight: '700' },
+  monthChipSel:     { borderColor: C.cyan },
+  monthChipText:    { color: C.textMut, fontSize: 12 },
+  monthChipTextSel: { color: C.cyan, fontWeight: '700' },
   modalActions: { flexDirection: 'row', gap: 12, marginTop: 16 },
-  cancelBtn:    { flex: 1, padding: 14, borderRadius: 12, backgroundColor: '#2A2A4A', alignItems: 'center' },
-  cancelBtnText: { color: '#A0A0B2', fontWeight: '700' },
-  sendBtn:        { flex: 2, padding: 14, borderRadius: 12, backgroundColor: '#6C5CE7', alignItems: 'center' },
+  cancelBtn:    { flex: 1, padding: 14, borderRadius: 12, backgroundColor: C.navyMidAlpha(0.35), alignItems: 'center' },
+  cancelBtnText: { color: C.textMut, fontWeight: '700' },
+  sendBtn:        { flex: 2, padding: 14, borderRadius: 12, backgroundColor: C.cyan, alignItems: 'center' },
   sendBtnDisabled: { opacity: 0.4 },
-  sendBtnText:     { color: '#fff', fontWeight: '800', fontSize: 15 },
+  sendBtnText:     { color: C.navy, fontWeight: '800', fontSize: 15 },
 });

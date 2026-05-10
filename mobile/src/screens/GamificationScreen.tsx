@@ -6,14 +6,15 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { gamificationApi } from '../services/api';
+import { C, Dark } from '../theme';
 
 // ─── Theme constants ──────────────────────────────────────────────────────────
-const BG       = '#1A1A2E';
-const CARD     = '#22223A';
-const ACCENT   = '#6C5CE7';
+const BG       = Dark.bg;
+const CARD     = C.navyMid;
+const ACCENT   = C.cyan;
 const TEXT     = '#FFFFFF';
-const TEXT_SUB = '#A0A0B2';
-const BORDER   = '#2A2A3E';
+const TEXT_SUB = C.textMut;
+const BORDER   = C.cyanAlpha(0.12);
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Badge {
@@ -49,10 +50,10 @@ const LEVEL_LABELS: Record<number, string> = {
 };
 
 const LEVEL_COLORS: Record<number, string> = {
-  1: '#A0A0B2',
+  1: C.textMut,
   2: '#00B894',
   3: '#0984E3',
-  4: '#F39C12',
+  4: C.gold,
 };
 
 type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
@@ -76,7 +77,7 @@ function fmtDate(d: string) {
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
 function LevelChip({ level }: { level: number }) {
-  const color = LEVEL_COLORS[level] ?? '#A0A0B2';
+  const color = LEVEL_COLORS[level] ?? C.textMut;
   const label = LEVEL_LABELS[level] ?? String(level);
   return (
     <View style={[styles.levelChip, { borderColor: color }]}>
@@ -100,7 +101,7 @@ function BadgeCard({ badge }: { badge: Badge }) {
 
 function LeaderRow({ entry }: { entry: LeaderboardEntry }) {
   const isTop3 = entry.rank <= 3;
-  const rankColors = ['#F39C12', '#A0A0B2', '#CD7F32'];
+  const rankColors = [C.gold, C.textMut, '#CD7F32'];
   const rankColor = isTop3 ? rankColors[entry.rank - 1] : TEXT_SUB;
   return (
     <View style={styles.leaderRow}>
@@ -165,7 +166,7 @@ export default function GamificationScreen({ navigation }: any) {
         <Text style={styles.sectionTitle}>התגים שלי</Text>
         {meLoading ? null : me.badges.length === 0 ? (
           <View style={styles.emptyBadges}>
-            <Ionicons name="ribbon-outline" size={36} color={BORDER} />
+            <Ionicons name="ribbon-outline" size={36} color={C.textMut} />
             <Text style={styles.emptyText}>צבור נקודות כדי לקבל תגים</Text>
           </View>
         ) : (
@@ -343,7 +344,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: `${ACCENT}22`,
+    backgroundColor: C.cyanAlpha(0.14),
     justifyContent: 'center',
     alignItems: 'center',
   },

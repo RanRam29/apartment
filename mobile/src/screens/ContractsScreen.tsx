@@ -14,6 +14,7 @@ import { contractsApi, matchesApi } from '../services/api';
 import { getApiBaseUrl } from '../services/apiConfig';
 import { useAuthStore } from '../store/useAuthStore';
 import type { MainStackParamList, Match } from '../types';
+import { C, Dark } from '../theme';
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
 
@@ -46,7 +47,7 @@ interface Contract {
 }
 
 const STATUS_META: Record<ContractStatus, { label: string; color: string; icon: string }> = {
-  draft:             { label: 'טיוטה',          color: '#A0A0B2', icon: '📝' },
+  draft:             { label: 'טיוטה',          color: C.textMut, icon: '📝' },
   pending_tenant:    { label: 'ממתין לחתימת שוכר', color: '#F39C12', icon: '⏳' },
   pending_landlord:  { label: 'ממתין לחתימת משכיר', color: '#F39C12', icon: '⏳' },
   active:            { label: 'פעיל',            color: '#00C9A7', icon: '✅' },
@@ -54,8 +55,8 @@ const STATUS_META: Record<ContractStatus, { label: string; color: string; icon: 
 };
 
 const DEPOSIT_META: Record<DepositStatus, { label: string; color: string }> = {
-  pending:   { label: 'פיקדון: טרם שולם', color: '#A0A0B2' },
-  held:      { label: 'פיקדון: נמצא בנאמנות', color: '#6C5CE7' },
+  pending:   { label: 'פיקדון: טרם שולם', color: C.textMut },
+  held:      { label: 'פיקדון: נמצא בנאמנות', color: C.cyan },
   released:  { label: 'פיקדון: הוחזר', color: '#00C9A7' },
   forfeited: { label: 'פיקדון: חולט', color: '#FF7675' },
 };
@@ -70,7 +71,7 @@ function ContractCard({ contract, onPress }: { contract: Contract; onPress: () =
         <View style={styles.cardBadges}>
           {contract.hasUploadedDocument && (
             <View style={styles.fileBadge}>
-              <Ionicons name="attach" size={11} color="#6C5CE7" />
+              <Ionicons name="attach" size={11} color={C.cyan} />
               <Text style={styles.fileBadgeText}>קובץ</Text>
             </View>
           )}
@@ -206,7 +207,7 @@ function ContractDetailModal({
               >
                 {signing
                   ? <ActivityIndicator color="#fff" />
-                  : <><Ionicons name="pencil" size={16} color="#fff" /><Text style={styles.signBtnText}>חתום על החוזה</Text></>
+                  : <><Ionicons name="pencil" size={16} color={C.navy} /><Text style={styles.signBtnText}>חתום על החוזה</Text></>
                 }
               </TouchableOpacity>
             )}
@@ -269,7 +270,7 @@ function ContractDetailModal({
             Platform.OS === 'web' ? (
               webDocLoading ? (
                 <View style={styles.webViewCenter}>
-                  <ActivityIndicator size="large" color="#6C5CE7" />
+                  <ActivityIndicator size="large" color={C.cyan} />
                   <Text style={styles.docViewerFallback}>טוען מסמך…</Text>
                 </View>
               ) : webBlobUrl ? (
@@ -434,7 +435,7 @@ function AddContractUploadModal({
           </Text>
 
           {matchesLoading ? (
-            <ActivityIndicator color="#6C5CE7" style={{ marginVertical: 24 }} />
+            <ActivityIndicator color={C.cyan} style={{ marginVertical: 24 }} />
           ) : accepted.length === 0 ? (
             <Text style={styles.fieldHint}>אין לידים מאושרים — אשר ליד תחילה מדף הלידים.</Text>
           ) : (
@@ -585,10 +586,10 @@ export default function ContractsScreen() {
       </View>
 
       {isLoading ? (
-        <ActivityIndicator color="#6C5CE7" style={{ marginTop: 40 }} />
+        <ActivityIndicator color={C.cyan} style={{ marginTop: 40 }} />
       ) : contracts.length === 0 ? (
         <View style={styles.empty}>
-          <Ionicons name="document-text-outline" size={56} color="#3A3A5E" />
+          <Ionicons name="document-text-outline" size={56} color={C.textMut} />
           <Text style={styles.emptyText}>אין חוזים עדיין</Text>
           {isLandlord ? (
             <>
@@ -643,80 +644,80 @@ export default function ContractsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1A1A2E' },
+  container: { flex: 1, backgroundColor: Dark.bg },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14 },
-  backBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: '#2A2A3E', justifyContent: 'center', alignItems: 'center' },
-  addHeaderBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: '#6C5CE7', justifyContent: 'center', alignItems: 'center' },
+  backBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: Dark.surface, justifyContent: 'center', alignItems: 'center' },
+  addHeaderBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: C.cyan, justifyContent: 'center', alignItems: 'center' },
   headerTitle: { color: '#fff', fontSize: 18, fontWeight: '800' },
   list: { padding: 16, paddingBottom: 32 },
-  card: { backgroundColor: '#2A2A3E', borderRadius: 14, padding: 16, marginBottom: 12 },
+  card: { backgroundColor: Dark.surface, borderRadius: 14, padding: 16, marginBottom: 12 },
   cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 },
   cardBadges: { flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 0 },
   cardTitle: { color: '#fff', fontWeight: '700', fontSize: 15, flex: 1, textAlign: 'right', marginLeft: 8 },
-  fileBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 6, paddingVertical: 3, borderRadius: 6, backgroundColor: '#6C5CE722' },
-  fileBadgeText: { color: '#6C5CE7', fontSize: 10, fontWeight: '700' },
+  fileBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 6, paddingVertical: 3, borderRadius: 6, backgroundColor: C.cyanAlpha(0.14) },
+  fileBadgeText: { color: C.cyan, fontSize: 10, fontWeight: '700' },
   statusBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
   statusText: { fontSize: 11, fontWeight: '700' },
-  cardSub: { color: '#A0A0B2', fontSize: 12, textAlign: 'right', marginBottom: 4 },
-  cardRent: { color: '#6C5CE7', fontWeight: '800', fontSize: 15, textAlign: 'right', marginBottom: 8 },
+  cardSub: { color: C.textMut, fontSize: 12, textAlign: 'right', marginBottom: 4 },
+  cardRent: { color: C.cyan, fontWeight: '800', fontSize: 15, textAlign: 'right', marginBottom: 8 },
   cardBottom: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   depositText: { fontSize: 11, fontWeight: '600' },
-  cardDate: { color: '#6A6A7E', fontSize: 11 },
+  cardDate: { color: C.textMut, fontSize: 11 },
   empty: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 },
-  emptyText: { color: '#A0A0B2', fontSize: 16, fontWeight: '600' },
-  emptyHint: { color: '#6A6A7E', fontSize: 13, textAlign: 'center', paddingHorizontal: 32 },
+  emptyText: { color: C.textMut, fontSize: 16, fontWeight: '600' },
+  emptyHint: { color: C.textMut, fontSize: 13, textAlign: 'center', paddingHorizontal: 32 },
   emptyAddBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
-    marginTop: 8, paddingHorizontal: 20, paddingVertical: 12, borderRadius: 12, backgroundColor: '#6C5CE7',
+    marginTop: 8, paddingHorizontal: 20, paddingVertical: 12, borderRadius: 12, backgroundColor: C.cyan,
   },
   emptyAddBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
   // Modal
-  modalContainer: { flex: 1, backgroundColor: '#1A1A2E' },
-  modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#2A2A3E' },
-  closeBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: '#2A2A3E', justifyContent: 'center', alignItems: 'center' },
+  modalContainer: { flex: 1, backgroundColor: Dark.bg },
+  modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: Dark.border },
+  closeBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: Dark.surface, justifyContent: 'center', alignItems: 'center' },
   modalTitle: { color: '#fff', fontSize: 17, fontWeight: '800' },
   contractScroll: { flex: 1 },
   openDocBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: '#3A3A5E', paddingVertical: 12, paddingHorizontal: 14, borderRadius: 12, marginBottom: 16,
+    backgroundColor: Dark.surface, paddingVertical: 12, paddingHorizontal: 14, borderRadius: 12, marginBottom: 16,
   },
   openDocBtnText: { color: '#fff', fontWeight: '700', fontSize: 14, textAlign: 'center', flex: 1 },
   contractText: { color: '#C0C0D0', fontSize: 13, lineHeight: 22, fontFamily: 'monospace', textAlign: 'right' },
-  modalActions: { padding: 16, borderTopWidth: 1, borderTopColor: '#2A2A3E', gap: 10 },
-  signBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#6C5CE7', paddingVertical: 14, borderRadius: 14 },
-  signBtnText: { color: '#fff', fontWeight: '800', fontSize: 15 },
+  modalActions: { padding: 16, borderTopWidth: 1, borderTopColor: Dark.border, gap: 10 },
+  signBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: C.cyan, paddingVertical: 14, borderRadius: 14 },
+  signBtnText: { color: C.navy, fontWeight: '800', fontSize: 15 },
   signedNote: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
   signedNoteText: { color: '#00C9A7', fontWeight: '700', fontSize: 14 },
   depositRow: { flexDirection: 'row', gap: 8 },
   depositBtn: { flex: 1, paddingVertical: 12, borderRadius: 12, alignItems: 'center' },
-  depositBtnHold:    { backgroundColor: '#6C5CE7' },
+  depositBtnHold:    { backgroundColor: C.cyan },
   depositBtnRelease: { backgroundColor: '#00C9A7' },
   depositBtnForfeit: { backgroundColor: '#FF7675' },
   depositBtnText: { color: '#fff', fontWeight: '700', fontSize: 13 },
   btnDisabled: { opacity: 0.6 },
-  docViewerWrap: { flex: 1, backgroundColor: '#1A1A2E' },
-  webView: { flex: 1, backgroundColor: '#2A2A3E' },
+  docViewerWrap: { flex: 1, backgroundColor: Dark.bg },
+  webView: { flex: 1, backgroundColor: Dark.surface },
   webViewCenter: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 },
-  docViewerFallback: { color: '#A0A0B2', padding: 24, textAlign: 'center' },
+  docViewerFallback: { color: C.textMut, padding: 24, textAlign: 'center' },
   addScroll: { flex: 1 },
   addScrollInner: { padding: 16, paddingBottom: 40 },
-  fieldHint: { color: '#6A6A7E', fontSize: 13, textAlign: 'right', marginBottom: 16, lineHeight: 20 },
-  fieldLabel: { color: '#A0A0B2', fontSize: 12, fontWeight: '600', textAlign: 'right', marginBottom: 6 },
+  fieldHint: { color: C.textMut, fontSize: 13, textAlign: 'right', marginBottom: 16, lineHeight: 20 },
+  fieldLabel: { color: C.textMut, fontSize: 12, fontWeight: '600', textAlign: 'right', marginBottom: 6 },
   fieldInput: {
-    backgroundColor: '#2A2A3E', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12,
+    backgroundColor: Dark.surface, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12,
     color: '#fff', fontSize: 15, marginBottom: 14, textAlign: 'right',
   },
   matchPick: { gap: 8, marginBottom: 8 },
-  matchChip: { backgroundColor: '#2A2A3E', borderRadius: 12, padding: 12, borderWidth: 2, borderColor: 'transparent' },
-  matchChipSel: { borderColor: '#6C5CE7' },
+  matchChip: { backgroundColor: Dark.surface, borderRadius: 12, padding: 12, borderWidth: 2, borderColor: 'transparent' },
+  matchChipSel: { borderColor: C.cyan },
   matchChipText: { color: '#fff', fontSize: 14, textAlign: 'right' },
   pickFileBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: '#3A3A5E', paddingVertical: 14, borderRadius: 12, marginTop: 8, marginBottom: 16,
+    backgroundColor: Dark.surface, paddingVertical: 14, borderRadius: 12, marginTop: 8, marginBottom: 16,
   },
   pickFileBtnText: { color: '#fff', fontWeight: '600', fontSize: 14, flex: 1, textAlign: 'center' },
   submitUploadBtn: {
-    backgroundColor: '#6C5CE7', paddingVertical: 14, borderRadius: 14, alignItems: 'center',
+    backgroundColor: C.cyan, paddingVertical: 14, borderRadius: 14, alignItems: 'center',
   },
   submitUploadBtnText: { color: '#fff', fontWeight: '800', fontSize: 16 },
 });

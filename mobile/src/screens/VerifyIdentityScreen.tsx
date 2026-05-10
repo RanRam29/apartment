@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useNavigation } from '@react-navigation/native';
 import { screeningApi } from '../services/api';
+import { C, Dark } from '../theme';
 
 type VerifStatus = 'pending' | 'verified' | 'rejected' | null;
 
@@ -90,7 +91,7 @@ export default function VerifyIdentityScreen() {
 
         {/* Current status */}
         {statusLoading ? (
-          <ActivityIndicator color="#6C5CE7" style={{ marginVertical: 20 }} />
+          <ActivityIndicator color={C.cyan} style={{ marginVertical: 20 }} />
         ) : (
           <>
             {currentStatus && (
@@ -180,27 +181,27 @@ export default function VerifyIdentityScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1A1A2E' },
+  container: { flex: 1, backgroundColor: Dark.bg },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14 },
-  backBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: '#2A2A3E', justifyContent: 'center', alignItems: 'center' },
+  backBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: Dark.surface, justifyContent: 'center', alignItems: 'center' },
   headerTitle: { color: '#fff', fontSize: 18, fontWeight: '800' },
   scroll: { flex: 1 },
   content: { padding: 16, paddingBottom: 48 },
-  infoCard: { backgroundColor: '#2A2A3E', borderRadius: 16, padding: 20, alignItems: 'center', marginBottom: 20 },
+  infoCard: { backgroundColor: Dark.surface, borderRadius: 16, padding: 20, alignItems: 'center', marginBottom: 20, borderWidth: 1, borderColor: Dark.border },
   infoTitle: { color: '#fff', fontSize: 17, fontWeight: '800', marginBottom: 8 },
-  infoText: { color: '#A0A0B2', fontSize: 13, lineHeight: 20, textAlign: 'center' },
+  infoText: { color: C.textMut, fontSize: 13, lineHeight: 20, textAlign: 'center' },
   statusRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 10, marginBottom: 6 },
-  statusRowLabel: { color: '#A0A0B2', fontSize: 14 },
+  statusRowLabel: { color: C.textMut, fontSize: 14 },
   badge: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
   badgeIcon: { fontSize: 14 },
   badgeLabel: { fontWeight: '700', fontSize: 14 },
-  verifiedAt: { color: '#6A6A7E', fontSize: 12, textAlign: 'right', marginBottom: 2 },
-  idHint: { color: '#6A6A7E', fontSize: 12, textAlign: 'right', marginBottom: 16 },
+  verifiedAt: { color: C.textMut, fontSize: 12, textAlign: 'right', marginBottom: 2 },
+  idHint: { color: C.textMut, fontSize: 12, textAlign: 'right', marginBottom: 16 },
   form: { marginTop: 8 },
   sectionTitle: { color: '#fff', fontSize: 16, fontWeight: '700', textAlign: 'right', marginBottom: 14 },
-  label: { color: '#A0A0B2', fontSize: 13, fontWeight: '600', textAlign: 'right', marginBottom: 6 },
-  input: { backgroundColor: '#2A2A3E', borderRadius: 12, padding: 14, color: '#fff', fontSize: 15, marginBottom: 14, borderWidth: 1, borderColor: '#3A3A5E' },
-  disclaimer: { color: '#6A6A7E', fontSize: 11, textAlign: 'right', lineHeight: 16, marginBottom: 20 },
+  label: { color: C.textMut, fontSize: 13, fontWeight: '600', textAlign: 'right', marginBottom: 6 },
+  input: { backgroundColor: Dark.surface, borderRadius: 12, padding: 14, color: '#fff', fontSize: 15, marginBottom: 14, borderWidth: 1, borderColor: Dark.border },
+  disclaimer: { color: C.textMut, fontSize: 11, textAlign: 'right', lineHeight: 16, marginBottom: 20 },
   submitBtn: { backgroundColor: '#00C9A7', paddingVertical: 14, borderRadius: 14, alignItems: 'center' },
   submitBtnDisabled: { opacity: 0.6 },
   submitInner: { flexDirection: 'row', alignItems: 'center', gap: 8 },

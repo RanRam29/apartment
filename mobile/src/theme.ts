@@ -74,3 +74,18 @@ export const C = {
   cyanAlpha:  (opacity: number) => `rgba(0,229,255,${opacity})`,
   coralAlpha: (opacity: number) => `rgba(255,127,127,${opacity})`,
 } as const;
+
+/**
+ * Dark screens (navy + cyan). Replaces legacy purple (#6C5CE7) + violet-gray surfaces.
+ */
+export const Dark = {
+  bg: C.navy,
+  surface: C.navyMid,
+  inset: C.navy,
+  border: C.cyanAlpha(0.14),
+  borderStrong: C.cyanAlpha(0.22),
+  chipActive: C.cyanAlpha(0.18),
+  periodActive: C.cyanAlpha(0.28),
+  switchTrackOff: C.navyMidAlpha(0.95),
+  switchTrackOn: C.cyanAlpha(0.5),
+} as const;

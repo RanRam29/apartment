@@ -1,5 +1,5 @@
 type MaybeUser = { isVerified?: boolean } | null | undefined;
-type MaybeAuthError = {
+export type MaybeAuthError = {
   response?: {
     status?: number;
     data?: {

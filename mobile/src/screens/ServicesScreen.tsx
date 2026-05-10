@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../store/useAuthStore';
 import { servicesApi } from '../services/api';
+import { C, Dark } from '../theme';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -183,7 +184,7 @@ function DetailModal({
             {/* Category chip */}
             <View style={styles.chipRow}>
               <View style={styles.chip}>
-                <Ionicons name={catInfo?.icon ?? 'construct-outline'} size={12} color="#6C5CE7" />
+                <Ionicons name={catInfo?.icon ?? 'construct-outline'} size={12} color={C.cyan} />
                 <Text style={styles.chipText}>{CATEGORY_LABELS[service.category]}</Text>
               </View>
               {service.rating != null && (
@@ -203,7 +204,7 @@ function DetailModal({
             {/* Cities */}
             {service.cities && service.cities.length > 0 && (
               <View style={styles.citiesRow}>
-                <Ionicons name="location-outline" size={14} color="#A0A0B2" />
+                <Ionicons name="location-outline" size={14} color={C.textMut} />
                 <Text style={styles.citiesText}>{service.cities.join(', ')}</Text>
               </View>
             )}
@@ -222,7 +223,7 @@ function DetailModal({
                 style={styles.phoneBtn}
                 onPress={() => Linking.openURL(`tel:${service.phone}`)}
               >
-                <Ionicons name="call-outline" size={18} color="#6C5CE7" />
+                <Ionicons name="call-outline" size={18} color={C.cyan} />
                 <Text style={styles.phoneBtnText}>{service.phone}</Text>
               </TouchableOpacity>
             ) : null}
@@ -231,7 +232,7 @@ function DetailModal({
             <View style={styles.reviewsHeader}>
               <Text style={styles.sectionTitle}>ביקורות</Text>
               <TouchableOpacity style={styles.writeReviewBtn} onPress={onReview}>
-                <Ionicons name="create-outline" size={14} color="#6C5CE7" />
+                <Ionicons name="create-outline" size={14} color={C.cyan} />
                 <Text style={styles.writeReviewText}>כתוב ביקורת</Text>
               </TouchableOpacity>
             </View>
@@ -384,7 +385,7 @@ function ServiceCard({ service, onPress }: { service: ServiceListing; onPress: (
           <Text style={styles.cardProvider} numberOfLines={1}>{service.providerName ?? 'ספק'}</Text>
         </View>
         <View style={styles.cardChip}>
-          <Ionicons name={catInfo?.icon ?? 'construct-outline'} size={11} color="#6C5CE7" />
+          <Ionicons name={catInfo?.icon ?? 'construct-outline'} size={11} color={C.cyan} />
           <Text style={styles.cardChipText}>{CATEGORY_LABELS[service.category]}</Text>
         </View>
       </View>
@@ -393,7 +394,7 @@ function ServiceCard({ service, onPress }: { service: ServiceListing; onPress: (
         <Text style={styles.cardPrice}>{formatPrice(service)}</Text>
         {service.cities && service.cities.length > 0 && (
           <View style={styles.cardCities}>
-            <Ionicons name="location-outline" size={11} color="#A0A0B2" />
+            <Ionicons name="location-outline" size={11} color={C.textMut} />
             <Text style={styles.cardCitiesText} numberOfLines={1}>{service.cities.join(', ')}</Text>
           </View>
         )}
@@ -493,7 +494,7 @@ export default function ServicesScreen({ navigation }: any) {
             <Ionicons
               name={c.icon}
               size={13}
-              color={activeCategory === c.key ? '#fff' : '#A0A0B2'}
+              color={activeCategory === c.key ? '#fff' : C.textMut}
             />
             <Text style={[styles.filterChipText, activeCategory === c.key && styles.filterChipTextActive]}>
               {c.label}
@@ -504,11 +505,11 @@ export default function ServicesScreen({ navigation }: any) {
 
       {isLoading ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color="#6C5CE7" />
+          <ActivityIndicator size="large" color={C.cyan} />
         </View>
       ) : services.length === 0 ? (
         <View style={styles.center}>
-          <Ionicons name="construct-outline" size={48} color="#3A3A5E" />
+          <Ionicons name="construct-outline" size={48} color={C.textMut} />
           <Text style={styles.emptyTitle}>אין שירותים בקטגוריה זו</Text>
           <Text style={styles.emptyHint}>לחץ + כדי להוסיף שירות חדש</Text>
         </View>
@@ -560,66 +561,66 @@ export default function ServicesScreen({ navigation }: any) {
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1A1A2E' },
+  container: { flex: 1, backgroundColor: Dark.bg },
 
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 16, paddingVertical: 14,
-    backgroundColor: '#22223A', borderBottomWidth: 1, borderBottomColor: '#2A2A3E',
+    backgroundColor: Dark.surface, borderBottomWidth: 1, borderBottomColor: Dark.border,
   },
   backBtn:     { padding: 4 },
   headerTitle: { color: '#fff', fontSize: 17, fontWeight: '700' },
 
-  filtersBar:     { maxHeight: 54, backgroundColor: '#22223A' },
+  filtersBar:     { maxHeight: 54, backgroundColor: Dark.surface },
   filtersContent: { paddingHorizontal: 12, paddingVertical: 10, gap: 8, alignItems: 'center' },
   filterChip: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
     paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20,
-    backgroundColor: '#2A2A4A', borderWidth: 1, borderColor: '#3A3A5E',
+    backgroundColor: Dark.surface, borderWidth: 1, borderColor: Dark.borderStrong,
   },
-  filterChipActive:     { backgroundColor: '#6C5CE7', borderColor: '#6C5CE7' },
-  filterChipText:       { color: '#A0A0B2', fontSize: 12, fontWeight: '600' },
+  filterChipActive:     { backgroundColor: C.cyan, borderColor: C.cyan },
+  filterChipText:       { color: C.textMut, fontSize: 12, fontWeight: '600' },
   filterChipTextActive: { color: '#fff' },
 
   center:     { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 },
   emptyTitle: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  emptyHint:  { color: '#A0A0B2', fontSize: 13, textAlign: 'center', paddingHorizontal: 40 },
+  emptyHint:  { color: C.textMut, fontSize: 13, textAlign: 'center', paddingHorizontal: 40 },
 
   list: { padding: 16, gap: 12, paddingBottom: 100 },
 
-  card: { backgroundColor: '#22223A', borderRadius: 14, padding: 16, gap: 10 },
+  card: { backgroundColor: Dark.surface, borderRadius: 14, padding: 16, gap: 10 },
   cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   cardLeft: { flex: 1, gap: 3 },
   cardTitle:    { color: '#fff', fontSize: 15, fontWeight: '700' },
-  cardProvider: { color: '#A0A0B2', fontSize: 12 },
+  cardProvider: { color: C.textMut, fontSize: 12 },
   cardChip: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: 'rgba(108,92,231,0.15)', paddingHorizontal: 8, paddingVertical: 4,
-    borderRadius: 10, borderWidth: 1, borderColor: 'rgba(108,92,231,0.3)',
+    backgroundColor: C.cyanAlpha(0.15), paddingHorizontal: 8, paddingVertical: 4,
+    borderRadius: 10, borderWidth: 1, borderColor: C.cyanAlpha(0.3),
   },
-  cardChipText: { color: '#6C5CE7', fontSize: 11, fontWeight: '600' },
+  cardChipText: { color: C.cyan, fontSize: 11, fontWeight: '600' },
 
   cardBottom:      { flexDirection: 'row', alignItems: 'center', gap: 10, flexWrap: 'wrap' },
-  cardPrice:       { color: '#6C5CE7', fontSize: 14, fontWeight: '800' },
+  cardPrice:       { color: C.cyan, fontSize: 14, fontWeight: '800' },
   cardCities:      { flexDirection: 'row', alignItems: 'center', gap: 3, flex: 1 },
-  cardCitiesText:  { color: '#A0A0B2', fontSize: 11 },
+  cardCitiesText:  { color: C.textMut, fontSize: 11 },
   cardRating:      { flexDirection: 'row', alignItems: 'center', gap: 4 },
   cardRatingText:  { color: '#F39C12', fontSize: 11, fontWeight: '700' },
 
   fab: {
     position: 'absolute', bottom: 28, right: 20,
     width: 56, height: 56, borderRadius: 28,
-    backgroundColor: '#6C5CE7', justifyContent: 'center', alignItems: 'center',
-    shadowColor: '#6C5CE7', shadowOffset: { width: 0, height: 4 },
+    backgroundColor: C.cyan, justifyContent: 'center', alignItems: 'center',
+    shadowColor: C.cyan, shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.5, shadowRadius: 12, elevation: 8,
   },
 
   // Detail modal
   overlay:   { flex: 1, backgroundColor: 'rgba(0,0,0,0.65)', justifyContent: 'flex-end' },
-  detailBox: { backgroundColor: '#1A1A2E', borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '88%' },
+  detailBox: { backgroundColor: Dark.bg, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '88%' },
   detailHeader: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    padding: 20, borderBottomWidth: 1, borderBottomColor: '#2A2A3E',
+    padding: 20, borderBottomWidth: 1, borderBottomColor: Dark.border,
   },
   detailTitle:  { color: '#fff', fontSize: 17, fontWeight: '700', flex: 1, textAlign: 'right', marginRight: 12 },
   detailScroll: { padding: 20, gap: 8, paddingBottom: 40 },
@@ -627,84 +628,84 @@ const styles = StyleSheet.create({
   chipRow:   { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
   chip: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: 'rgba(108,92,231,0.15)', paddingHorizontal: 10, paddingVertical: 5,
-    borderRadius: 12, borderWidth: 1, borderColor: 'rgba(108,92,231,0.3)',
+    backgroundColor: C.cyanAlpha(0.15), paddingHorizontal: 10, paddingVertical: 5,
+    borderRadius: 12, borderWidth: 1, borderColor: C.cyanAlpha(0.3),
   },
-  chipText:   { color: '#6C5CE7', fontSize: 12, fontWeight: '600' },
+  chipText:   { color: C.cyan, fontSize: 12, fontWeight: '600' },
   ratingRow:  { flexDirection: 'row', alignItems: 'center', gap: 6 },
   ratingText: { color: '#F39C12', fontSize: 12, fontWeight: '700' },
 
   providerName: { color: '#fff', fontSize: 16, fontWeight: '700', textAlign: 'right' },
-  priceDetail:  { color: '#6C5CE7', fontSize: 22, fontWeight: '800', textAlign: 'right' },
+  priceDetail:  { color: C.cyan, fontSize: 22, fontWeight: '800', textAlign: 'right' },
   citiesRow:    { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  citiesText:   { color: '#A0A0B2', fontSize: 13 },
+  citiesText:   { color: C.textMut, fontSize: 13 },
 
-  sectionTitle: { color: '#A0A0B2', fontSize: 12, fontWeight: '700', marginTop: 12, marginBottom: 4, textAlign: 'right' },
-  descText:     { color: '#D0D0E8', fontSize: 14, lineHeight: 22, textAlign: 'right' },
+  sectionTitle: { color: C.textMut, fontSize: 12, fontWeight: '700', marginTop: 12, marginBottom: 4, textAlign: 'right' },
+  descText:     { color: 'rgba(255,255,255,0.85)', fontSize: 14, lineHeight: 22, textAlign: 'right' },
 
   phoneBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
-    backgroundColor: 'rgba(108,92,231,0.12)', borderRadius: 12,
+    backgroundColor: C.cyanAlpha(0.12), borderRadius: 12,
     paddingVertical: 12, paddingHorizontal: 16, marginTop: 8,
-    borderWidth: 1, borderColor: 'rgba(108,92,231,0.3)',
+    borderWidth: 1, borderColor: C.cyanAlpha(0.3),
   },
-  phoneBtnText: { color: '#6C5CE7', fontWeight: '700', fontSize: 15 },
+  phoneBtnText: { color: C.cyan, fontWeight: '700', fontSize: 15 },
 
   reviewsHeader:   { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 },
   writeReviewBtn:  { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  writeReviewText: { color: '#6C5CE7', fontSize: 12, fontWeight: '600' },
-  noReviews:       { color: '#A0A0B2', fontSize: 13, textAlign: 'center', paddingVertical: 12 },
+  writeReviewText: { color: C.cyan, fontSize: 12, fontWeight: '600' },
+  noReviews:       { color: C.textMut, fontSize: 13, textAlign: 'center', paddingVertical: 12 },
 
-  reviewCard: { backgroundColor: '#22223A', borderRadius: 12, padding: 12, gap: 4, marginTop: 6 },
+  reviewCard: { backgroundColor: Dark.surface, borderRadius: 12, padding: 12, gap: 4, marginTop: 6 },
   reviewCardTop:   { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   reviewerName:    { color: '#fff', fontSize: 13, fontWeight: '600' },
-  reviewComment:   { color: '#A0A0B2', fontSize: 13, textAlign: 'right' },
+  reviewComment:   { color: C.textMut, fontSize: 13, textAlign: 'right' },
 
   // Review modal
   reviewBox: {
-    backgroundColor: '#22223A', borderTopLeftRadius: 24, borderTopRightRadius: 24,
+    backgroundColor: Dark.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24,
     padding: 24, gap: 14,
   },
   reviewTitle: { color: '#fff', fontSize: 18, fontWeight: '800', textAlign: 'right' },
   starsRow:    { flexDirection: 'row', justifyContent: 'center', gap: 8 },
   reviewInput: {
-    backgroundColor: '#2A2A4A', borderRadius: 12,
+    backgroundColor: Dark.surface, borderRadius: 12,
     paddingHorizontal: 14, paddingVertical: 10, color: '#fff', fontSize: 14,
     minHeight: 72,
   },
   reviewActions: { flexDirection: 'row', gap: 12 },
-  cancelBtn:     { flex: 1, padding: 13, borderRadius: 12, backgroundColor: '#2A2A4A', alignItems: 'center' },
-  cancelBtnText: { color: '#A0A0B2', fontWeight: '700' },
-  submitBtn:     { flex: 2, padding: 13, borderRadius: 12, backgroundColor: '#6C5CE7', alignItems: 'center' },
+  cancelBtn:     { flex: 1, padding: 13, borderRadius: 12, backgroundColor: Dark.surface, alignItems: 'center' },
+  cancelBtnText: { color: C.textMut, fontWeight: '700' },
+  submitBtn:     { flex: 2, padding: 13, borderRadius: 12, backgroundColor: C.cyan, alignItems: 'center' },
   submitBtnText: { color: '#fff', fontWeight: '800', fontSize: 15 },
 
   // Create modal
   createBox: {
-    backgroundColor: '#22223A', borderTopLeftRadius: 24, borderTopRightRadius: 24,
+    backgroundColor: Dark.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24,
     padding: 24, maxHeight: '90%', gap: 10,
   },
   createTitle: { color: '#fff', fontSize: 18, fontWeight: '800', textAlign: 'right', marginBottom: 4 },
-  fieldLabel:  { color: '#A0A0B2', fontSize: 11, marginBottom: 4, textAlign: 'right' },
+  fieldLabel:  { color: C.textMut, fontSize: 11, marginBottom: 4, textAlign: 'right' },
   fieldInput:  {
-    backgroundColor: '#2A2A4A', borderRadius: 10,
+    backgroundColor: Dark.surface, borderRadius: 10,
     paddingHorizontal: 12, paddingVertical: 10, color: '#fff', fontSize: 14, marginBottom: 10,
   },
   selectChip: {
     paddingHorizontal: 12, paddingVertical: 6, borderRadius: 18,
-    backgroundColor: '#2A2A4A', borderWidth: 1, borderColor: '#3A3A5E', marginRight: 6,
+    backgroundColor: Dark.surface, borderWidth: 1, borderColor: Dark.borderStrong, marginRight: 6,
   },
-  selectChipActive:     { backgroundColor: '#6C5CE7', borderColor: '#6C5CE7' },
-  selectChipText:       { color: '#A0A0B2', fontSize: 12 },
+  selectChipActive:     { backgroundColor: C.cyan, borderColor: C.cyan },
+  selectChipText:       { color: C.textMut, fontSize: 12 },
   selectChipTextActive: { color: '#fff', fontWeight: '700' },
   priceTypeRow:      { flexDirection: 'row', gap: 8, marginBottom: 10 },
   priceChip: {
     flex: 1, paddingVertical: 8, borderRadius: 10, alignItems: 'center',
-    backgroundColor: '#2A2A4A', borderWidth: 1, borderColor: '#3A3A5E',
+    backgroundColor: Dark.surface, borderWidth: 1, borderColor: Dark.borderStrong,
   },
-  priceChipActive:     { backgroundColor: '#6C5CE7', borderColor: '#6C5CE7' },
-  priceChipText:       { color: '#A0A0B2', fontSize: 12 },
+  priceChipActive:     { backgroundColor: C.cyan, borderColor: C.cyan },
+  priceChipText:       { color: C.textMut, fontSize: 12 },
   priceChipTextActive: { color: '#fff', fontWeight: '700' },
   createActions: { flexDirection: 'row', gap: 12, marginTop: 8 },
-  createBtn:     { flex: 2, padding: 14, borderRadius: 12, backgroundColor: '#6C5CE7', alignItems: 'center' },
+  createBtn:     { flex: 2, padding: 14, borderRadius: 12, backgroundColor: C.cyan, alignItems: 'center' },
   createBtnText: { color: '#fff', fontWeight: '800', fontSize: 15 },
 });

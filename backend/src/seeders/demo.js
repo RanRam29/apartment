@@ -33,7 +33,7 @@ const TENANT = {
 
 const APARTMENTS = [
   {
-    title: 'דירת 3 חדרות מרוהטת בלב תל אביב',
+    title: 'דירת 3 חדרים מרוהטת בלב תל אביב',
     description: 'דירה מעוצבת ומרוהטת ברמה גבוהה בשכונת פלורנטין. קרובה לתחבורה ציבורית, מסעדות וברים. קומה 4 עם מעלית.',
     price: 7500, rooms: 3, floor: 4, totalFloors: 6, sizeSqm: 72,
     city: 'תל אביב', neighborhood: 'פלורנטין',
@@ -49,7 +49,7 @@ const APARTMENTS = [
     landlordIndex: 0,
   },
   {
-    title: '4 חדרות שקטה בצפון תל אביב',
+    title: 'דירת 4 חדרים שקטה בצפון תל אביב',
     description: 'דירה מרווחת ומאירה בשכונת רמת אביב. קרובה לאוניברסיטה, פארקים ומרכז מסחרי.',
     price: 10500, rooms: 4, floor: 3, totalFloors: 8, sizeSqm: 105,
     city: 'תל אביב', neighborhood: 'רמת אביב',
@@ -57,7 +57,7 @@ const APARTMENTS = [
     landlordIndex: 1,
   },
   {
-    title: 'דירת 2 חדרות בירושלים — הר חומה',
+    title: 'דירת 2 חדרים בירושלים — הר חומה',
     description: 'דירה חדשה עם גישה נוחה לירושלים ולצירים מרכזיים. חניה פרטית כולל.',
     price: 5200, rooms: 2, floor: 1, totalFloors: 5, sizeSqm: 60,
     city: 'ירושלים', neighborhood: 'הר חומה',
@@ -65,7 +65,7 @@ const APARTMENTS = [
     landlordIndex: 1,
   },
   {
-    title: 'דירת גן 3.5 חדרות ברחובות',
+    title: 'דירת גן 3.5 חדרים ברחובות',
     description: 'דירת גן עם חצר פרטית של 40 מ"ר. מתאימה למשפחות עם ילדים וחיות מחמד.',
     price: 5800, rooms: 3.5, floor: 0, totalFloors: 3, sizeSqm: 85,
     city: 'רחובות', neighborhood: 'נווה ים',
@@ -73,7 +73,7 @@ const APARTMENTS = [
     landlordIndex: 0,
   },
   {
-    title: 'פנטהאוז 5 חדרות עם נוף לים — הרצליה',
+    title: 'פנטהאוז 5 חדרים עם נוף לים — הרצליה',
     description: 'דירת יוקרה בפנטהאוז עם טרסה ענקית ונוף פנורמי לים התיכון. חניה כפולה ומחסן.',
     price: 18000, rooms: 5, floor: 12, totalFloors: 12, sizeSqm: 180,
     city: 'הרצליה', neighborhood: 'הרצליה פיתוח',
@@ -81,7 +81,7 @@ const APARTMENTS = [
     landlordIndex: 1,
   },
   {
-    title: 'דירת 2 חדרות חדשה בבאר שבע — הנגב',
+    title: 'דירת 2 חדרים חדשה בבאר שבע — הנגב',
     description: 'דירה חדשה בבניין יוקרה ליד אוניברסיטת בן גוריון. מתאימה לסטודנטים וזוגות.',
     price: 3400, rooms: 2, floor: 5, totalFloors: 10, sizeSqm: 55,
     city: 'באר שבע', neighborhood: 'גילה',
@@ -89,7 +89,7 @@ const APARTMENTS = [
     landlordIndex: 0,
   },
   {
-    title: '3 חדרות מרווחת בחיפה — הכרמל',
+    title: 'דירת 3 חדרים מרווחת בחיפה — הכרמל',
     description: 'דירה מוארת בשכונת הדר הכרמל עם נוף עצום לנמל ולים. קרובה לתחנות מטרונית.',
     price: 4200, rooms: 3, floor: 6, totalFloors: 9, sizeSqm: 78,
     city: 'חיפה', neighborhood: 'הכרמל',
@@ -97,7 +97,7 @@ const APARTMENTS = [
     landlordIndex: 1,
   },
   {
-    title: 'דירת 1.5 חדרות בנתניה קרוב לים',
+    title: 'דירת 1.5 חדרים בנתניה קרוב לים',
     description: 'דירה קסומה 200 מטר מהחוף. מושלמת לזוג או יחיד. מרפסת עם רוח ים.',
     price: 4600, rooms: 1.5, floor: 3, totalFloors: 5, sizeSqm: 45,
     city: 'נתניה', neighborhood: 'העיר הלבנה',
@@ -105,7 +105,7 @@ const APARTMENTS = [
     landlordIndex: 0,
   },
   {
-    title: '4 חדרות עם חניה בפתח תקווה',
+    title: 'דירת 4 חדרים עם חניה בפתח תקווה',
     description: 'דירה גדולה ומרווחת עם חניה מקורה ומחסן. שכונה שקטה קרוב לכל השירותים.',
     price: 6200, rooms: 4, floor: 2, totalFloors: 6, sizeSqm: 95,
     city: 'פתח תקווה', neighborhood: 'כפר גנים',
@@ -121,7 +121,7 @@ const APARTMENTS = [
     landlordIndex: 0,
   },
   {
-    title: '3.5 חדרות ברמת גן — מרכז',
+    title: 'דירת 3.5 חדרים ברמת גן — מרכז',
     description: 'דירה מטופחת ואוורירית ליד בורסת היהלומים. 5 דקות הליכה לתחנת הרכבת.',
     price: 7200, rooms: 3.5, floor: 7, totalFloors: 15, sizeSqm: 82,
     city: 'רמת גן', neighborhood: 'בורסה',

@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigation } from '@react-navigation/native';
 import { roommateApi } from '../services/api';
+import { C, Dark } from '../theme';
 
 type SleepSchedule   = 'early_bird' | 'night_owl' | 'flexible';
 type NoiseLevel      = 'quiet' | 'moderate' | 'lively';
@@ -169,7 +170,7 @@ export default function RoommateScreen() {
       {tab === 'profile' ? (
         <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
           {profileLoading ? (
-            <ActivityIndicator color="#6C5CE7" style={{ marginTop: 40 }} />
+            <ActivityIndicator color={C.cyan} style={{ marginTop: 40 }} />
           ) : (
             <View style={styles.formWrap}>
               {/* Looking for roommate toggle */}
@@ -178,7 +179,7 @@ export default function RoommateScreen() {
                 <Switch
                   value={form.lookingForRoommate}
                   onValueChange={(v) => setField('lookingForRoommate', v)}
-                  trackColor={{ false: '#3A3A5E', true: '#6C5CE7' }}
+                  trackColor={{ false: Dark.switchTrackOff, true: C.cyan }}
                   thumbColor="#fff"
                 />
               </View>
@@ -225,7 +226,7 @@ export default function RoommateScreen() {
                   <Switch
                     value={form.smokingAllowed}
                     onValueChange={(v) => setField('smokingAllowed', v)}
-                    trackColor={{ false: '#3A3A5E', true: '#6C5CE7' }}
+                    trackColor={{ false: Dark.switchTrackOff, true: C.cyan }}
                     thumbColor="#fff"
                   />
                 </View>
@@ -234,7 +235,7 @@ export default function RoommateScreen() {
                   <Switch
                     value={form.petsAllowed}
                     onValueChange={(v) => setField('petsAllowed', v)}
-                    trackColor={{ false: '#3A3A5E', true: '#6C5CE7' }}
+                    trackColor={{ false: Dark.switchTrackOff, true: C.cyan }}
                     thumbColor="#fff"
                   />
                 </View>
@@ -243,7 +244,7 @@ export default function RoommateScreen() {
                   <Switch
                     value={form.workFromHome}
                     onValueChange={(v) => setField('workFromHome', v)}
-                    trackColor={{ false: '#3A3A5E', true: '#6C5CE7' }}
+                    trackColor={{ false: Dark.switchTrackOff, true: C.cyan }}
                     thumbColor="#fff"
                   />
                 </View>
@@ -265,10 +266,10 @@ export default function RoommateScreen() {
       ) : (
         <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
           {matchesLoading ? (
-            <ActivityIndicator color="#6C5CE7" style={{ marginTop: 40 }} />
+            <ActivityIndicator color={C.cyan} style={{ marginTop: 40 }} />
           ) : matches.length === 0 ? (
             <View style={styles.emptyWrap}>
-              <Ionicons name="people-outline" size={56} color="#3A3A5E" />
+              <Ionicons name="people-outline" size={56} color={C.textMut} />
               <Text style={styles.emptyText}>לא נמצאו התאמות כרגע</Text>
               <Text style={styles.emptyHint}>ודא שהפרופיל שלך מלא ו"מחפש שותף" מופעל</Text>
             </View>
@@ -280,7 +281,7 @@ export default function RoommateScreen() {
                     <Image source={{ uri: m.avatarUrl }} style={styles.avatar} contentFit="cover" />
                   ) : (
                     <View style={[styles.avatar, styles.avatarFallback]}>
-                      <Ionicons name="person" size={22} color="#A0A0B2" />
+                      <Ionicons name="person" size={22} color={C.textMut} />
                     </View>
                   )}
                   <View style={styles.matchInfo}>
@@ -304,43 +305,43 @@ export default function RoommateScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1A1A2E' },
+  container: { flex: 1, backgroundColor: Dark.bg },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14 },
-  backBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: '#2A2A3E', justifyContent: 'center', alignItems: 'center' },
+  backBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: Dark.surface, justifyContent: 'center', alignItems: 'center' },
   headerTitle: { color: '#fff', fontSize: 18, fontWeight: '800' },
-  tabs: { flexDirection: 'row', marginHorizontal: 16, backgroundColor: '#2A2A3E', borderRadius: 12, padding: 4, marginBottom: 8 },
+  tabs: { flexDirection: 'row', marginHorizontal: 16, backgroundColor: Dark.surface, borderRadius: 12, padding: 4, marginBottom: 8 },
   tab: { flex: 1, paddingVertical: 9, alignItems: 'center', borderRadius: 10 },
-  tabActive: { backgroundColor: '#6C5CE7' },
-  tabText: { color: '#A0A0B2', fontWeight: '600', fontSize: 14 },
-  tabTextActive: { color: '#fff' },
+  tabActive: { backgroundColor: C.cyan },
+  tabText: { color: C.textMut, fontWeight: '600', fontSize: 14 },
+  tabTextActive: { color: C.navy },
   scroll: { flex: 1 },
   formWrap: { padding: 16, paddingBottom: 40 },
-  toggleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#2A2A3E', padding: 16, borderRadius: 14, marginBottom: 12 },
+  toggleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: Dark.surface, padding: 16, borderRadius: 14, marginBottom: 12, borderWidth: 1, borderColor: Dark.border },
   toggleLabel: { color: '#fff', fontSize: 15, fontWeight: '600' },
-  optionBlock: { backgroundColor: '#2A2A3E', borderRadius: 14, padding: 14, marginBottom: 12 },
-  optionLabel: { color: '#A0A0B2', fontSize: 13, fontWeight: '600', textAlign: 'right', marginBottom: 10 },
+  optionBlock: { backgroundColor: Dark.surface, borderRadius: 14, padding: 14, marginBottom: 12, borderWidth: 1, borderColor: Dark.border },
+  optionLabel: { color: C.textMut, fontSize: 13, fontWeight: '600', textAlign: 'right', marginBottom: 10 },
   optionRow: { flexDirection: 'row', gap: 6, flexWrap: 'wrap' },
-  optionBtn: { flex: 1, minWidth: 60, paddingVertical: 8, paddingHorizontal: 4, borderRadius: 10, backgroundColor: '#1A1A2E', alignItems: 'center', borderWidth: 1, borderColor: '#3A3A5E' },
-  optionBtnActive: { backgroundColor: '#6C5CE7', borderColor: '#6C5CE7' },
-  optionBtnText: { color: '#A0A0B2', fontSize: 11, fontWeight: '600', textAlign: 'center' },
-  optionBtnTextActive: { color: '#fff' },
+  optionBtn: { flex: 1, minWidth: 60, paddingVertical: 8, paddingHorizontal: 4, borderRadius: 10, backgroundColor: Dark.inset, alignItems: 'center', borderWidth: 1, borderColor: Dark.border },
+  optionBtnActive: { backgroundColor: C.cyan, borderColor: C.cyan },
+  optionBtnText: { color: C.textMut, fontSize: 11, fontWeight: '600', textAlign: 'center' },
+  optionBtnTextActive: { color: C.navy },
   boolRow: { flexDirection: 'row', gap: 8, marginBottom: 20 },
-  boolItem: { flex: 1, backgroundColor: '#2A2A3E', borderRadius: 14, padding: 12, alignItems: 'center', gap: 8 },
-  boolLabel: { color: '#A0A0B2', fontSize: 12, fontWeight: '600', textAlign: 'center' },
-  saveBtn: { backgroundColor: '#6C5CE7', paddingVertical: 14, borderRadius: 14, alignItems: 'center' },
+  boolItem: { flex: 1, backgroundColor: Dark.surface, borderRadius: 14, padding: 12, alignItems: 'center', gap: 8, borderWidth: 1, borderColor: Dark.border },
+  boolLabel: { color: C.textMut, fontSize: 12, fontWeight: '600', textAlign: 'center' },
+  saveBtn: { backgroundColor: C.cyan, paddingVertical: 14, borderRadius: 14, alignItems: 'center' },
   saveBtnDisabled: { opacity: 0.6 },
-  saveBtnText: { color: '#fff', fontWeight: '800', fontSize: 15 },
+  saveBtnText: { color: C.navy, fontWeight: '800', fontSize: 15 },
   emptyWrap: { alignItems: 'center', paddingTop: 60, gap: 12 },
-  emptyText: { color: '#A0A0B2', fontSize: 16, fontWeight: '600' },
-  emptyHint: { color: '#6A6A7E', fontSize: 13, textAlign: 'center', paddingHorizontal: 32 },
+  emptyText: { color: C.textMut, fontSize: 16, fontWeight: '600' },
+  emptyHint: { color: C.textMut, fontSize: 13, textAlign: 'center', paddingHorizontal: 32 },
   matchList: { padding: 16, gap: 12 },
-  matchCard: { flexDirection: 'row', backgroundColor: '#2A2A3E', borderRadius: 14, padding: 14, gap: 12, alignItems: 'center' },
+  matchCard: { flexDirection: 'row', backgroundColor: Dark.surface, borderRadius: 14, padding: 14, gap: 12, alignItems: 'center', borderWidth: 1, borderColor: Dark.border },
   avatar: { width: 52, height: 52, borderRadius: 26 },
-  avatarFallback: { backgroundColor: '#1A1A2E', justifyContent: 'center', alignItems: 'center' },
+  avatarFallback: { backgroundColor: Dark.inset, justifyContent: 'center', alignItems: 'center' },
   matchInfo: { flex: 1 },
   matchName: { color: '#fff', fontWeight: '700', fontSize: 15, textAlign: 'right', marginBottom: 4 },
-  matchMeta: { color: '#A0A0B2', fontSize: 12, textAlign: 'right', marginBottom: 8 },
-  scoreBarWrap: { height: 8, backgroundColor: '#1A1A2E', borderRadius: 4, flexDirection: 'row', alignItems: 'center', overflow: 'visible' },
+  matchMeta: { color: C.textMut, fontSize: 12, textAlign: 'right', marginBottom: 8 },
+  scoreBarWrap: { height: 8, backgroundColor: Dark.inset, borderRadius: 4, flexDirection: 'row', alignItems: 'center', overflow: 'visible' },
   scoreBarFill: { height: 8, borderRadius: 4 },
   scoreLabel: { fontSize: 11, fontWeight: '700', marginLeft: 6 },
 });

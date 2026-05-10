@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../store/useAuthStore';
 import { iotApi } from '../services/api';
+import { C, Dark } from '../theme';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -63,7 +64,7 @@ const TYPE_LABELS: Record<DeviceType, string> = {
 const PRIORITY_COLORS: Record<TicketPriority, string> = {
   critical: '#FF7675',
   high:     '#F39C12',
-  medium:   '#6C5CE7',
+  medium:   C.cyan,
   low:      '#00C9A7',
 };
 
@@ -91,13 +92,13 @@ function fmtDate(d?: string) {
 function DeviceCard({ device, onPress }: { device: IoTDevice; onPress: () => void }) {
   const dotColor =
     device.status === 'online'      ? '#00C9A7' :
-    device.status === 'maintenance' ? '#F39C12' : '#A0A0B2';
+    device.status === 'maintenance' ? '#F39C12' : C.textMut;
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.85}>
       <View style={styles.cardRow}>
         <View style={styles.cardIconWrap}>
-          <Ionicons name={TYPE_ICONS[device.type]} size={22} color="#6C5CE7" />
+          <Ionicons name={TYPE_ICONS[device.type]} size={22} color={C.cyan} />
         </View>
         <View style={styles.cardBody}>
           <Text style={styles.cardTitle} numberOfLines={1}>{device.name}</Text>
@@ -121,7 +122,7 @@ function TicketCard({ ticket, onPress }: { ticket: MaintenanceTicket; onPress: (
   const prioColor = PRIORITY_COLORS[ticket.priority];
   const statusColor =
     ticket.status === 'resolved' || ticket.status === 'closed' ? '#00C9A7' :
-    ticket.status === 'in_progress' ? '#F39C12' : '#A0A0B2';
+    ticket.status === 'in_progress' ? '#F39C12' : C.textMut;
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.85}>
@@ -208,7 +209,7 @@ function RegisterDeviceModal({ visible, onClose, onCreate }: {
                   style={[styles.typeBtn, type === t && styles.typeBtnActive]}
                   onPress={() => setType(t)}
                 >
-                  <Ionicons name={TYPE_ICONS[t]} size={16} color={type === t ? '#fff' : '#A0A0B2'} />
+                  <Ionicons name={TYPE_ICONS[t]} size={16} color={type === t ? '#fff' : C.textMut} />
                   <Text style={[styles.typeBtnText, type === t && { color: '#fff' }]}>
                     {TYPE_LABELS[t]}
                   </Text>
@@ -517,12 +518,12 @@ export default function IoTScreen({ navigation }: any) {
       {/* Content */}
       {isLoading ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color="#6C5CE7" />
+          <ActivityIndicator size="large" color={C.cyan} />
         </View>
       ) : activeTab === 'devices' ? (
         devices.length === 0 ? (
           <View style={styles.center}>
-            <Ionicons name="hardware-chip-outline" size={48} color="#3A3A5E" />
+            <Ionicons name="hardware-chip-outline" size={48} color={C.textMut} />
             <Text style={styles.emptyTitle}>אין מכשירים רשומים</Text>
             <Text style={styles.emptyHint}>
               {isLandlord ? 'לחץ + כדי להוסיף מכשיר IoT' : 'מכשירים יופיעו כאן'}
@@ -541,7 +542,7 @@ export default function IoTScreen({ navigation }: any) {
       ) : (
         tickets.length === 0 ? (
           <View style={styles.center}>
-            <Ionicons name="construct-outline" size={48} color="#3A3A5E" />
+            <Ionicons name="construct-outline" size={48} color={C.textMut} />
             <Text style={styles.emptyTitle}>אין תקלות פתוחות</Text>
             <Text style={styles.emptyHint}>לחץ + כדי לדווח על תקלה</Text>
           </View>
@@ -589,44 +590,44 @@ export default function IoTScreen({ navigation }: any) {
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1A1A2E' },
+  container: { flex: 1, backgroundColor: Dark.bg },
 
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 16, paddingVertical: 14,
-    backgroundColor: '#22223A', borderBottomWidth: 1, borderBottomColor: '#2A2A3E',
+    backgroundColor: Dark.surface, borderBottomWidth: 1, borderBottomColor: Dark.border,
   },
   backBtn:     { padding: 4 },
   headerTitle: { color: '#fff', fontSize: 17, fontWeight: '700', flex: 1, textAlign: 'center' },
-  addBtn:      { backgroundColor: '#6C5CE7', borderRadius: 20, padding: 6 },
+  addBtn:      { backgroundColor: C.cyan, borderRadius: 20, padding: 6 },
 
   tabBar: {
-    flexDirection: 'row', backgroundColor: '#22223A',
-    borderBottomWidth: 1, borderBottomColor: '#2A2A3E',
+    flexDirection: 'row', backgroundColor: Dark.surface,
+    borderBottomWidth: 1, borderBottomColor: Dark.border,
   },
   tab: {
     flex: 1, paddingVertical: 12, alignItems: 'center',
     borderBottomWidth: 2, borderBottomColor: 'transparent',
   },
-  tabActive:     { borderBottomColor: '#6C5CE7' },
-  tabText:       { color: '#A0A0B2', fontWeight: '600', fontSize: 14 },
+  tabActive:     { borderBottomColor: C.cyan },
+  tabText:       { color: C.textMut, fontWeight: '600', fontSize: 14 },
   tabTextActive: { color: '#fff' },
 
   center:     { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 },
   emptyTitle: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  emptyHint:  { color: '#A0A0B2', fontSize: 13, textAlign: 'center', paddingHorizontal: 40 },
+  emptyHint:  { color: C.textMut, fontSize: 13, textAlign: 'center', paddingHorizontal: 40 },
 
   list: { padding: 16, gap: 12 },
 
-  card: { backgroundColor: '#22223A', borderRadius: 14, padding: 16 },
+  card: { backgroundColor: Dark.surface, borderRadius: 14, padding: 16 },
   cardRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   cardIconWrap: {
     width: 44, height: 44, borderRadius: 12,
-    backgroundColor: '#6C5CE722', justifyContent: 'center', alignItems: 'center',
+    backgroundColor: C.cyanAlpha(0.14), justifyContent: 'center', alignItems: 'center',
   },
   cardBody:  { flex: 1, gap: 2 },
   cardTitle: { color: '#fff', fontSize: 15, fontWeight: '700' },
-  cardSub:   { color: '#A0A0B2', fontSize: 12 },
+  cardSub:   { color: C.textMut, fontSize: 12 },
   cardMeta:  { color: '#555577', fontSize: 11, marginTop: 2 },
   statusDot: { width: 10, height: 10, borderRadius: 5, alignSelf: 'flex-start', marginTop: 4 },
 
@@ -641,30 +642,30 @@ const styles = StyleSheet.create({
   // Modals
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.65)', justifyContent: 'flex-end' },
   modalBox: {
-    backgroundColor: '#22223A', borderTopLeftRadius: 24, borderTopRightRadius: 24,
+    backgroundColor: Dark.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24,
     padding: 24, maxHeight: '90%',
   },
   modalTitle: { color: '#fff', fontSize: 18, fontWeight: '800', marginBottom: 16, textAlign: 'right' },
 
   fieldWrap:  { marginBottom: 12 },
-  fieldLabel: { color: '#A0A0B2', fontSize: 11, marginBottom: 4, textAlign: 'right' },
+  fieldLabel: { color: C.textMut, fontSize: 11, marginBottom: 4, textAlign: 'right' },
   fieldInput: {
-    backgroundColor: '#2A2A4A', borderRadius: 10,
+    backgroundColor: Dark.surface, borderRadius: 10,
     paddingHorizontal: 12, paddingVertical: 10, color: '#fff', fontSize: 14,
   },
 
   typeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 },
   typeBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
-    borderWidth: 1.5, borderColor: '#3A3A5E', borderRadius: 20,
+    borderWidth: 1.5, borderColor: Dark.borderStrong, borderRadius: 20,
     paddingHorizontal: 10, paddingVertical: 6,
   },
-  typeBtnActive: { backgroundColor: '#6C5CE7', borderColor: '#6C5CE7' },
-  typeBtnText:   { color: '#A0A0B2', fontSize: 12, fontWeight: '600' },
+  typeBtnActive: { backgroundColor: C.cyan, borderColor: C.cyan },
+  typeBtnText:   { color: C.textMut, fontSize: 12, fontWeight: '600' },
 
   modalActions: { flexDirection: 'row', gap: 12, marginTop: 16 },
-  cancelBtn:     { flex: 1, padding: 14, borderRadius: 12, backgroundColor: '#2A2A4A', alignItems: 'center' },
-  cancelBtnText: { color: '#A0A0B2', fontWeight: '700' },
-  createBtn:     { flex: 2, padding: 14, borderRadius: 12, backgroundColor: '#6C5CE7', alignItems: 'center' },
+  cancelBtn:     { flex: 1, padding: 14, borderRadius: 12, backgroundColor: Dark.surface, alignItems: 'center' },
+  cancelBtnText: { color: C.textMut, fontWeight: '700' },
+  createBtn:     { flex: 2, padding: 14, borderRadius: 12, backgroundColor: C.cyan, alignItems: 'center' },
   createBtnText: { color: '#fff', fontWeight: '800', fontSize: 15 },
 });

@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../store/useAuthStore';
 import api from '../services/api';
+import { C, Dark } from '../theme';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -85,7 +86,7 @@ function AlertBadge({ alert }: { alert: Alert_ }) {
 }
 
 function LeaseCard({ lease, onPress }: { lease: CommercialLease; onPress: () => void }) {
-  const statusColor = lease.status === 'active' ? '#00C9A7' : '#A0A0B2';
+  const statusColor = lease.status === 'active' ? '#00C9A7' : C.textMut;
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.85}>
       <View style={styles.cardRow}>
@@ -170,7 +171,7 @@ function DetailModal({ lease, isLandlord, onClose, onCamAdd }: {
             <Text style={styles.sectionTitle}>תאריכים קריטיים</Text>
             {criticals.map(({ label, value, icon }) => (
               <View key={label} style={styles.critRow}>
-                <Ionicons name={icon} size={16} color="#A0A0B2" />
+                <Ionicons name={icon} size={16} color={C.textMut} />
                 <Text style={styles.critLabel}>{label}</Text>
                 <Text style={styles.critVal}>{fmtDate(value)}</Text>
               </View>
@@ -398,11 +399,11 @@ export default function CommercialScreen({ navigation }: any) {
 
       {isLoading ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color="#6C5CE7" />
+          <ActivityIndicator size="large" color={C.cyan} />
         </View>
       ) : leases.length === 0 ? (
         <View style={styles.center}>
-          <Ionicons name="business-outline" size={48} color="#3A3A5E" />
+          <Ionicons name="business-outline" size={48} color={C.textMut} />
           <Text style={styles.emptyTitle}>אין חוזים מסחריים</Text>
           <Text style={styles.emptyHint}>
             {isLandlord ? 'לחץ + כדי להוסיף חוזה נדל"ן מסחרי' : 'חוזים מסחריים יופיעו כאן'}
@@ -436,17 +437,17 @@ export default function CommercialScreen({ navigation }: any) {
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1A1A2E' },
+  container: { flex: 1, backgroundColor: Dark.bg },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 16, paddingVertical: 14,
-    backgroundColor: '#22223A', borderBottomWidth: 1, borderBottomColor: '#2A2A3E',
+    backgroundColor: Dark.surface, borderBottomWidth: 1, borderBottomColor: Dark.border,
   },
   backBtn:     { padding: 4 },
   headerTitle: { color: '#fff', fontSize: 17, fontWeight: '700' },
-  addBtn:      { backgroundColor: '#6C5CE7', borderRadius: 20, padding: 6 },
+  addBtn:      { backgroundColor: C.cyan, borderRadius: 20, padding: 6 },
 
-  alertsBar: { backgroundColor: '#22223A', borderBottomWidth: 1, borderBottomColor: '#2A2A3E' },
+  alertsBar: { backgroundColor: Dark.surface, borderBottomWidth: 1, borderBottomColor: Dark.border },
   alertBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
     borderWidth: 1.5, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 5,
@@ -456,52 +457,52 @@ const styles = StyleSheet.create({
 
   center:     { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 },
   emptyTitle: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  emptyHint:  { color: '#A0A0B2', fontSize: 13, textAlign: 'center', paddingHorizontal: 40 },
+  emptyHint:  { color: C.textMut, fontSize: 13, textAlign: 'center', paddingHorizontal: 40 },
 
   list: { padding: 16, gap: 12 },
 
-  card: { backgroundColor: '#22223A', borderRadius: 14, padding: 16, gap: 6 },
+  card: { backgroundColor: Dark.surface, borderRadius: 14, padding: 16, gap: 6 },
   cardRow:  { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   cardLeft: { flex: 1, gap: 2 },
   cardRight:{ alignItems: 'flex-end', gap: 4 },
   bizName:  { color: '#fff', fontSize: 15, fontWeight: '700' },
-  bizType:  { color: '#A0A0B2', fontSize: 12 },
-  rent:     { color: '#6C5CE7', fontSize: 17, fontWeight: '800' },
-  rentSub:  { fontSize: 11, color: '#A0A0B2' },
+  bizType:  { color: C.textMut, fontSize: 12 },
+  rent:     { color: C.cyan, fontSize: 17, fontWeight: '800' },
+  rentSub:  { fontSize: 11, color: C.textMut },
   statusDot:{ width: 8, height: 8, borderRadius: 4 },
   camLine:  { color: '#F39C12', fontSize: 11 },
-  dates:    { color: '#A0A0B2', fontSize: 11 },
+  dates:    { color: C.textMut, fontSize: 11 },
 
   // Detail modal
   overlay:   { flex: 1, backgroundColor: 'rgba(0,0,0,0.65)', justifyContent: 'flex-end' },
-  detailBox: { backgroundColor: '#1A1A2E', borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '88%' },
+  detailBox: { backgroundColor: Dark.bg, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '88%' },
   detailHeader: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    padding: 20, borderBottomWidth: 1, borderBottomColor: '#2A2A3E',
+    padding: 20, borderBottomWidth: 1, borderBottomColor: Dark.border,
   },
   detailTitle:  { color: '#fff', fontSize: 17, fontWeight: '700', flex: 1 },
   detailScroll: { padding: 20, gap: 8, paddingBottom: 40 },
 
   figureRow: { flexDirection: 'row', gap: 12, marginBottom: 8 },
-  figure:    { flex: 1, backgroundColor: '#22223A', borderRadius: 12, padding: 12, alignItems: 'center' },
-  figureVal: { color: '#6C5CE7', fontSize: 16, fontWeight: '800' },
-  figureLabel:{ color: '#A0A0B2', fontSize: 11, marginTop: 2 },
+  figure:    { flex: 1, backgroundColor: Dark.surface, borderRadius: 12, padding: 12, alignItems: 'center' },
+  figureVal: { color: C.cyan, fontSize: 16, fontWeight: '800' },
+  figureLabel:{ color: C.textMut, fontSize: 11, marginTop: 2 },
 
-  sectionTitle: { color: '#A0A0B2', fontSize: 12, fontWeight: '700', marginTop: 12, marginBottom: 4 },
+  sectionTitle: { color: C.textMut, fontSize: 12, fontWeight: '700', marginTop: 12, marginBottom: 4 },
 
   critRow:   { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 6,
-               borderBottomWidth: 1, borderBottomColor: '#22223A' },
+               borderBottomWidth: 1, borderBottomColor: Dark.surface },
   critLabel: { flex: 1, color: '#fff', fontSize: 13 },
-  critVal:   { color: '#A0A0B2', fontSize: 13 },
+  critVal:   { color: C.textMut, fontSize: 13 },
 
   camRow:   { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 4 },
   camYear:  { color: '#fff', fontWeight: '700', width: 44 },
-  camEst:   { color: '#A0A0B2', fontSize: 12, flex: 1 },
+  camEst:   { color: C.textMut, fontSize: 12, flex: 1 },
   camDiff:  { fontSize: 12, fontWeight: '700' },
 
   camForm:  { flexDirection: 'row', gap: 8 },
   camInput: {
-    flex: 1, backgroundColor: '#2A2A4A', borderRadius: 10,
+    flex: 1, backgroundColor: Dark.surface, borderRadius: 10,
     paddingHorizontal: 12, paddingVertical: 8, color: '#fff', fontSize: 13,
   },
   camSubmitBtn: {
@@ -510,23 +511,23 @@ const styles = StyleSheet.create({
   },
   camSubmitText: { color: '#fff', fontWeight: '700' },
 
-  notesText: { color: '#A0A0B2', fontSize: 13, lineHeight: 20 },
+  notesText: { color: C.textMut, fontSize: 13, lineHeight: 20 },
 
   // Create modal
   createBox: {
-    backgroundColor: '#22223A', borderTopLeftRadius: 24, borderTopRightRadius: 24,
+    backgroundColor: Dark.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24,
     padding: 24, maxHeight: '90%',
   },
   createTitle: { color: '#fff', fontSize: 18, fontWeight: '800', marginBottom: 16, textAlign: 'right' },
   fieldWrap:   { marginBottom: 12 },
-  fieldLabel:  { color: '#A0A0B2', fontSize: 11, marginBottom: 4, textAlign: 'right' },
+  fieldLabel:  { color: C.textMut, fontSize: 11, marginBottom: 4, textAlign: 'right' },
   fieldInput:  {
-    backgroundColor: '#2A2A4A', borderRadius: 10,
+    backgroundColor: Dark.surface, borderRadius: 10,
     paddingHorizontal: 12, paddingVertical: 10, color: '#fff', fontSize: 14,
   },
   createActions: { flexDirection: 'row', gap: 12, marginTop: 16 },
-  cancelBtn2:    { flex: 1, padding: 14, borderRadius: 12, backgroundColor: '#2A2A4A', alignItems: 'center' },
-  cancelBtn2Text:{ color: '#A0A0B2', fontWeight: '700' },
-  createBtn:     { flex: 2, padding: 14, borderRadius: 12, backgroundColor: '#6C5CE7', alignItems: 'center' },
+  cancelBtn2:    { flex: 1, padding: 14, borderRadius: 12, backgroundColor: Dark.surface, alignItems: 'center' },
+  cancelBtn2Text:{ color: C.textMut, fontWeight: '700' },
+  createBtn:     { flex: 2, padding: 14, borderRadius: 12, backgroundColor: C.cyan, alignItems: 'center' },
   createBtnText: { color: '#fff', fontWeight: '800', fontSize: 15 },
 });
