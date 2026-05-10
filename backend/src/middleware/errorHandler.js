@@ -28,6 +28,14 @@ function errorHandler(err, req, res, next) {
     return res.status(422).json({ error: err.message });
   }
 
+  // Multer / contract upload
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    return res.status(413).json({ error: 'הקובץ גדול מדי (מקסימום 15MB)' });
+  }
+  if (err.code === 'INVALID_DOC_TYPE' || err.status === 415) {
+    return res.status(415).json({ error: err.message || 'סוג קובץ לא נתמך' });
+  }
+
   logger.error(`[${req.method}] ${req.path} →`, err);
 
   const status = err.status || err.statusCode || 500;

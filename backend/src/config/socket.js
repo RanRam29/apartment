@@ -1,5 +1,6 @@
 const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
+const { Op } = require('sequelize');
 const logger = require('../utils/logger');
 
 let io;
@@ -25,6 +26,26 @@ function initSocket(server) {
     const userId = socket.user.id;
     socket.join(`user:${userId}`);
     logger.debug(`User ${userId} connected via WebSocket`);
+
+    // Join all accepted-match chat rooms so messages arrive without opening Chat first
+    void (async () => {
+      try {
+        const { Match } = require('../models');
+        const rows = await Match.findAll({
+          where: {
+            status: 'accepted',
+            [Op.or]: [{ tenantId: userId }, { landlordId: userId }],
+          },
+          attributes: ['id'],
+        });
+        for (const m of rows) {
+          socket.join(`chat:${m.id}`);
+        }
+        if (rows.length) logger.debug(`User ${userId} auto-joined ${rows.length} chat rooms`);
+      } catch (err) {
+        logger.warn(`Socket chat auto-join failed: ${err.message}`);
+      }
+    })();
 
     // Join a specific match chat room
     socket.on('join_chat', (matchId) => {

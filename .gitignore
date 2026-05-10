@@ -18,6 +18,9 @@ coverage.xml
 coverage/
 .nyc_output/
 
+# Uploaded contract files (local disk)
+backend/uploads/
+
 .vercel
 .env*.local
 .worktrees/

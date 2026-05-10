@@ -6,6 +6,7 @@ import { ActivityIndicator, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { useAuthStore } from '../store/useAuthStore';
+import { useChatStore } from '../store/useChatStore';
 import { C } from '../theme';
 import type { RootStackParamList, TenantTabParamList, LandlordTabParamList, MainStackParamList } from '../types';
 
@@ -117,6 +118,7 @@ function LandlordTabs() {
             Home:      focused ? 'compass'       : 'compass-outline',
             Dashboard: focused ? 'stats-chart'   : 'stats-chart-outline',
             Leads:     focused ? 'people'        : 'people-outline',
+            Matches:   focused ? 'chatbubbles'   : 'chatbubbles-outline',
             Listings:  focused ? 'list'          : 'list-outline',
             Profile:   focused ? 'person'        : 'person-outline',
           };
@@ -127,6 +129,7 @@ function LandlordTabs() {
       <LandlordTab.Screen name="Home"      component={HomeScreen}        options={{ title: 'Home' }} />
       <LandlordTab.Screen name="Dashboard" component={LandlordDashboard} options={{ title: 'דשבורד' }} />
       <LandlordTab.Screen name="Leads"     component={LeadsScreen}       options={{ title: 'לידים' }} />
+      <LandlordTab.Screen name="Matches"   component={MatchesScreen}     options={{ title: 'צ׳אטים' }} />
       <LandlordTab.Screen name="Listings"  component={ListingsScreen}    options={{ title: 'מודעות' }} />
       <LandlordTab.Screen name="Profile"   component={ProfileScreen}     options={{ title: 'פרופיל' }} />
     </LandlordTab.Navigator>
@@ -135,6 +138,11 @@ function LandlordTabs() {
 
 function MainNavigator() {
   const { user, needsOnboarding } = useAuthStore();
+
+  useEffect(() => {
+    useChatStore.getState().connect();
+    return () => useChatStore.getState().disconnect();
+  }, []);
 
   return (
     <MainStack.Navigator

@@ -99,6 +99,16 @@ router.post('/:id/accept', authenticate, requireRole('landlord'), async (req, re
       });
     }).catch(() => {});
 
+    // Ensure both parties join the Socket.io chat room for realtime messages
+    try {
+      const { getIO } = require('../config/socket');
+      const io = getIO();
+      io.to(`user:${match.tenantId}`).emit('join_chat_room', match.id);
+      io.to(`user:${match.landlordId}`).emit('join_chat_room', match.id);
+    } catch {
+      /* socket not initialized in tests */
+    }
+
     res.json({ match });
   } catch (err) {
     next(err);

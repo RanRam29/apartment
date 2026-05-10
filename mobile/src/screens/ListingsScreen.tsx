@@ -97,6 +97,28 @@ export default function ListingsScreen() {
     }
   }
 
+  function confirmDelete(apt: Apartment) {
+    Alert.alert(
+      'מחיקת מודעה',
+      `למחוק לצמיתות את "${apt.title}"? פעולה זו אינה הפיכה.`,
+      [
+        { text: 'ביטול', style: 'cancel' },
+        {
+          text: 'מחק',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await apartmentsApi.deletePermanently(apt.id);
+              await queryClient.invalidateQueries({ queryKey: ['landlord-dashboard'] });
+            } catch {
+              Alert.alert('שגיאה', 'לא ניתן למחוק את המודעה');
+            }
+          },
+        },
+      ]
+    );
+  }
+
   function renderItem({ item }: { item: Apartment }) {
     const thumb = getThumbUrl(item);
     return (
@@ -138,6 +160,13 @@ export default function ListingsScreen() {
               size={22}
               color={item.isActive ? '#6C5CE7' : '#A0A0B2'}
             />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.actionBtn}
+            onPress={() => confirmDelete(item)}
+            accessibilityLabel="מחק מודעה"
+          >
+            <Ionicons name="trash-outline" size={22} color="#FF7675" />
           </TouchableOpacity>
         </View>
       </TouchableOpacity>

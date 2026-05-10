@@ -71,6 +71,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
       }));
     });
 
+    socket.on('join_chat_room', (matchId: string) => {
+      if (matchId) socket.emit('join_chat', matchId);
+    });
+
     set({ socket });
   },
 

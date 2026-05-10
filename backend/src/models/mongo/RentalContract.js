@@ -39,6 +39,11 @@ const rentalContractSchema = new mongoose.Schema({
   },
   depositPaidAt:    { type: Date, default: null },
   depositSettledAt: { type: Date, default: null },
+
+  /** Uploaded contract file (PDF / DOC / DOCX) — served via GET /api/contracts/:id/attachment */
+  uploadedDocumentFilename:   { type: String, default: null },
+  uploadedDocumentMimeType:   { type: String, default: null },
+  uploadedDocumentOriginalName: { type: String, default: null },
 }, {
   collection: 'rental_contracts',
   timestamps: true,

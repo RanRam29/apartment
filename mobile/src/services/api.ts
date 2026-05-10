@@ -171,6 +171,9 @@ export const contractsApi = {
     endDate: string;
     customClauses?: string;
   }) => api.post('/contracts', data),
+  /** multipart: matchId, monthlyRent, depositMonths, startDate, endDate, optional customClauses, file field `document` */
+  uploadWithDocument: (formData: FormData) =>
+    api.post('/contracts/upload', formData, { timeout: 120000 }),
   list: () => api.get('/contracts'),
   getById: (id: string) => api.get(`/contracts/${id}`),
   sign: (id: string) => api.post(`/contracts/${id}/sign`),

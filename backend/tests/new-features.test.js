@@ -389,6 +389,11 @@ describe('F10 — Contracts routes', () => {
       .set('Authorization', 'Bearer tenant');
     expect(res.status).toBe(403);
   });
+
+  it('GET /api/contracts/:id/attachment — 401 without auth', async () => {
+    const res = await request(app).get('/api/contracts/c-1/attachment');
+    expect(res.status).toBe(401);
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════

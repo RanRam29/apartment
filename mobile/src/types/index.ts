@@ -130,6 +130,7 @@ export type LandlordTabParamList = {
   Home: undefined;
   Dashboard: undefined;
   Leads: undefined;
+  Matches: undefined;
   Listings: undefined;
   Profile: undefined;
 };

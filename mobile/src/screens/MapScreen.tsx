@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  SafeAreaView, ActivityIndicator, Switch,
+  SafeAreaView, ActivityIndicator, Switch, Platform,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { Ionicons } from '@expo/vector-icons';
@@ -119,7 +119,18 @@ export function buildHtml(markers: AptMarker[], tama38Url: string): string {
     map.fitBounds(markerGroup.getBounds().pad(0.15));
   }
 
-  // TAMA 38 layer toggle — called from React Native
+  function postToHost(obj) {
+    var s = JSON.stringify(obj);
+    try {
+      if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+        window.ReactNativeWebView.postMessage(s);
+      } else if (window.parent && window.parent !== window) {
+        window.parent.postMessage(s, '*');
+      }
+    } catch (e) {}
+  }
+
+  // TAMA 38 layer toggle — called from React Native or web iframe parent
   window.toggleTama38 = function(show) {
     if (show && !tamaLayer) {
       fetch(tama38Url)
@@ -134,7 +145,7 @@ export function buildHtml(markers: AptMarker[], tama38Url: string): string {
             })
             .filter(Boolean);
           if (!features.length) {
-            window.ReactNativeWebView && window.ReactNativeWebView.postMessage(JSON.stringify({type:'tama_empty'}));
+            postToHost({ type: 'tama_empty' });
             return;
           }
           tamaLayer = L.geoJSON({ type:'FeatureCollection', features: features }, {
@@ -144,10 +155,10 @@ export function buildHtml(markers: AptMarker[], tama38Url: string): string {
               layer.bindPopup('<b>TAMA 38</b><br/>' + escapeHtml(p.address || p.street || ''));
             }
           }).addTo(map);
-          window.ReactNativeWebView && window.ReactNativeWebView.postMessage(JSON.stringify({type:'tama_loaded', count: features.length}));
+          postToHost({ type: 'tama_loaded', count: features.length });
         })
         .catch(function(){
-          window.ReactNativeWebView && window.ReactNativeWebView.postMessage(JSON.stringify({type:'tama_error'}));
+          postToHost({ type: 'tama_error' });
         });
     } else if (!show && tamaLayer) {
       map.removeLayer(tamaLayer);
@@ -161,6 +172,7 @@ export function buildHtml(markers: AptMarker[], tama38Url: string): string {
 
 export default function MapScreen() {
   const webRef = React.useRef<WebView>(null);
+  const iframeRef = React.useRef<HTMLIFrameElement | null>(null);
   const [tamaOn, setTamaOn] = React.useState(false);
   const [tamaStatus, setTamaStatus] = React.useState<'idle' | 'loading' | 'loaded' | 'empty' | 'error'>('idle');
 
@@ -190,8 +202,30 @@ export default function MapScreen() {
     setTamaOn(value);
     if (value) setTamaStatus('loading');
     else setTamaStatus('idle');
-    webRef.current?.injectJavaScript(`window.toggleTama38(${value}); true;`);
+    if (Platform.OS === 'web') {
+      const w = iframeRef.current?.contentWindow as { toggleTama38?: (v: boolean) => void } | null;
+      w?.toggleTama38?.(value);
+    } else {
+      webRef.current?.injectJavaScript(`window.toggleTama38(${value}); true;`);
+    }
   }
+
+  React.useEffect(() => {
+    if (Platform.OS !== 'web' || typeof window === 'undefined') return;
+    const onMsg = (event: MessageEvent) => {
+      if (iframeRef.current && event.source !== iframeRef.current.contentWindow) return;
+      if (typeof event.data !== 'string') return;
+      try {
+        const msg = JSON.parse(event.data);
+        if (!msg || typeof msg.type !== 'string' || !msg.type.startsWith('tama_')) return;
+      } catch {
+        return;
+      }
+      handleMessage({ nativeEvent: { data: event.data } });
+    };
+    window.addEventListener('message', onMsg);
+    return () => window.removeEventListener('message', onMsg);
+  }, []);
 
   function handleMessage(event: any) {
     try {
@@ -238,6 +272,23 @@ export default function MapScreen() {
         <View style={styles.loadingWrap}>
           <ActivityIndicator size="large" color="#6C5CE7" />
           <Text style={styles.loadingText}>טוען דירות…</Text>
+        </View>
+      ) : Platform.OS === 'web' ? (
+        <View style={styles.map}>
+          {React.createElement('iframe', {
+            ref: iframeRef,
+            srcDoc: html,
+            title: 'מפת דירות',
+            style: {
+              width: '100%',
+              height: '100%',
+              border: 'none',
+              flex: 1,
+              minHeight: 320,
+            } as object,
+            sandbox:
+              'allow-scripts allow-same-origin allow-forms allow-popups allow-downloads',
+          })}
         </View>
       ) : (
         <WebView

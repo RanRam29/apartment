@@ -127,7 +127,7 @@ describe('Critical journey routes', () => {
     jest.clearAllMocks();
   });
 
-  it('creates listing, updates listing, and deactivates listing', async () => {
+  it('creates listing, updates listing, and deletes listing', async () => {
     Apartment.create.mockResolvedValue({
       id: 'apt-1',
       city: 'Tel Aviv',
@@ -170,7 +170,7 @@ describe('Critical journey routes', () => {
       .set('Authorization', 'Bearer landlord');
 
     expect(deleted.status).toBe(200);
-    expect(deleted.body.message).toBe('Apartment deactivated');
+    expect(deleted.body.message).toBe('Apartment deleted');
   });
 
   it('swipe creates/returns pending match and exposes it in matches list', async () => {

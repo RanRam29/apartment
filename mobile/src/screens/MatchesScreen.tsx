@@ -14,6 +14,7 @@ import type { Match } from '../types';
 export default function MatchesScreen() {
   const navigation = useNavigation<any>();
   const { user } = useAuthStore();
+  const isLandlord = user?.role === 'landlord';
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ['matches'],
@@ -38,7 +39,7 @@ export default function MatchesScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.header}>התאמות</Text>
+      <Text style={styles.header}>{isLandlord ? 'צ׳אטים' : 'התאמות'}</Text>
 
       <FlatList
         data={[...accepted, ...pending]}
@@ -75,8 +76,14 @@ export default function MatchesScreen() {
         ListEmptyComponent={
           <View style={styles.empty}>
             <Text style={styles.emptyEmoji}>💬</Text>
-            <Text style={styles.emptyTitle}>אין התאמות עדיין</Text>
-            <Text style={styles.emptySub}>המשך להחליק כדי למצוא דירות</Text>
+            <Text style={styles.emptyTitle}>
+              {isLandlord ? 'אין שיחות עדיין' : 'אין התאמות עדיין'}
+            </Text>
+            <Text style={styles.emptySub}>
+              {isLandlord
+                ? 'כשתאשר ליד מדף הלידים — השיחה עם השוכר תופיע כאן.'
+                : 'המשך להחליק כדי למצוא דירות'}
+            </Text>
           </View>
         }
       />

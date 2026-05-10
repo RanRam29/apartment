@@ -261,7 +261,7 @@ router.patch('/:id', authenticate, requireRole('landlord'), async (req, res, nex
   }
 });
 
-// ─── DELETE /api/apartments/:id — deactivate listing ─────────────────────────
+// ─── DELETE /api/apartments/:id — permanently delete listing (owner only) ───
 router.delete('/:id', authenticate, requireRole('landlord'), async (req, res, next) => {
   try {
     const apartment = await Apartment.findOne({
@@ -269,11 +269,16 @@ router.delete('/:id', authenticate, requireRole('landlord'), async (req, res, ne
     });
     if (!apartment) return res.status(404).json({ error: 'Apartment not found' });
 
-    await apartment.update({ isActive: false });
-    await cacheDel(`apartment:${apartment.id}`);
+    const normalizedCity = typeof apartment.city === 'string' ? apartment.city.toLowerCase() : null;
+    const aid = apartment.id;
+    await apartment.destroy();
+    await cacheDel(`apartment:${aid}`);
     await cacheDel(`landlord:dashboard:${req.user.id}`);
+    if (normalizedCity) {
+      await cacheDel(`feed:${normalizedCity}`);
+    }
 
-    res.json({ message: 'Apartment deactivated' });
+    res.json({ message: 'Apartment deleted' });
   } catch (err) {
     next(err);
   }

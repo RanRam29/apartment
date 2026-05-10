@@ -25,9 +25,10 @@ const TENANT_SERVICES = [
 
 const LANDLORD_SERVICES = [
   { id: 'Dashboard', label: 'Dashboard', subLabel: 'Stats & overview',  icon: 'stats-chart-outline' as const, color: C.navy,  glow: 'rgba(22,40,57,0.20)' },
+  { id: 'Matches',   label: 'Chats',     subLabel: 'Tenant messages',    icon: 'chatbubbles-outline' as const,   color: '#7C3AED', glow: 'rgba(124,58,237,0.22)' },
   { id: 'Leads',     label: 'Leads',     subLabel: 'Interested tenants', icon: 'people-outline' as const,      color: C.coral, glow: 'rgba(255,127,127,0.25)' },
   { id: 'Listings',  label: 'Listings',  subLabel: 'Your properties',    icon: 'list-outline' as const,        color: C.cyan,  glow: 'rgba(0,229,255,0.25)' },
-  { id: 'Profile',   label: 'Profile',   subLabel: 'Account settings',   icon: 'person-outline' as const,      color: '#7C3AED', glow: 'rgba(124,58,237,0.20)' },
+  { id: 'Profile',   label: 'Profile',   subLabel: 'Account settings',   icon: 'person-outline' as const,      color: '#10B981', glow: 'rgba(16,185,129,0.20)' },
 ] as const;
 
 // ── ServiceTile component ──────────────────────────────────────────────────
