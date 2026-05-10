@@ -21,3 +21,6 @@ coverage/
 .vercel
 .env*.local
 .worktrees/
+
+# Nested clone accidentally committed as submodule (see git history); keep untracked locally
+apartment/
