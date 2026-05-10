@@ -15,6 +15,7 @@ function resolveDemoPassword() {
 }
 
 const DEMO_PASSWORD = resolveDemoPassword();
+const DEMO_SEED_ENABLED_VALUE = 'true';
 
 const ADMIN_ACCOUNTS = [
   { email: 'admin1@dirapp.com', firstName: 'Admin', lastName: 'One', password: 'Admin1234!', role: 'landlord' },
@@ -103,6 +104,11 @@ async function seed() {
  */
 async function autoSeed(queryInterface) {
   try {
+    if (!shouldAutoSeedOnStartup()) {
+      console.log('Auto-seed disabled in production. Set DEMO_SEED_ENABLED=true to enable demo data.');
+      return;
+    }
+
     // Always ensure admin accounts exist (upsert regardless of DB state)
     const adminHash = await bcrypt.hash('Admin1234!', 12);
     for (const a of ADMIN_ACCOUNTS) {
@@ -143,7 +149,13 @@ async function autoSeed(queryInterface) {
   }
 }
 
-module.exports = { autoSeed };
+function shouldAutoSeedOnStartup(env = process.env) {
+  if (env.DEMO_SEED_ENABLED === DEMO_SEED_ENABLED_VALUE) return true;
+  if (env.NODE_ENV === 'production' || env.RENDER === 'true') return false;
+  return true;
+}
+
+module.exports = { autoSeed, shouldAutoSeedOnStartup };
 
 if (require.main === module) {
   seed().catch((err) => {
