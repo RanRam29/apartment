@@ -24,8 +24,10 @@ backend/uploads/
 # Claude Code local worktrees (nested clones; do not commit)
 .claude/worktrees/
 
-# Accidental large deploy bundle in repo root
+# Metro / Expo web export — never commit minified bundles
 mobile/tmp-deployed.js
+mobile/tmp-*.js
+mobile/dist/
 
 .vercel
 .env*.local
