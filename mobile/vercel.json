@@ -1,4 +1,5 @@
 {
+  "installCommand": "pnpm install --no-frozen-lockfile",
   "buildCommand": "npx expo export --platform web && node scripts/patch-web-index.js",
   "outputDirectory": "dist",
   "framework": null,
