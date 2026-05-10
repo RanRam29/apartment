@@ -34,8 +34,19 @@ const FILTER_LABEL: Record<string, string> = {
   availableFrom: 'פנוי מ',
 };
 
-function formatFilterSummary(filters: Record<string, unknown> | null | undefined): string {
+function formatFilterSummary(
+  filters: Record<string, unknown> | null | undefined,
+  opts?: { hasResults?: boolean; queryPreview?: string }
+): string {
   if (!filters || Object.keys(filters).length === 0) {
+    if (opts?.hasResults && opts.queryPreview?.trim()) {
+      const q = opts.queryPreview.trim();
+      const short = q.length > 90 ? `${q.slice(0, 90)}…` : q;
+      return `חיפוש לפי הבקשה שלך: «${short}»`;
+    }
+    if (opts?.hasResults) {
+      return 'החיפוש הוחל; להלן דירות רלוונטיות.';
+    }
     return 'לא זוהו פילטרים ספציפיים מהטקסט — מוצגות דירות זמינות.';
   }
   const parts = Object.entries(filters).map(([k, val]) => {
@@ -97,7 +108,10 @@ export default function ApartmentSearchChatbot() {
         filters?: Record<string, unknown>;
       };
 
-      const summary = formatFilterSummary(filters);
+      const summary = formatFilterSummary(filters, {
+        hasResults: apartments.length > 0,
+        queryPreview: q,
+      });
       const count = apartments.length;
       const body =
         count === 0

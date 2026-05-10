@@ -123,31 +123,33 @@ export default function ListingsScreen() {
   function renderItem({ item }: { item: Apartment }) {
     const thumb = getThumbUrl(item);
     return (
-      <TouchableOpacity
-        style={styles.card}
-        onPress={() => navigation.navigate('ApartmentDetail', { apartmentId: item.id })}
-        activeOpacity={0.85}
-      >
-        {thumb ? (
-          <Image source={{ uri: thumb }} style={styles.thumb} contentFit="cover" />
-        ) : (
-          <View style={[styles.thumb, styles.thumbFallback]}>
-            <Ionicons name="home-outline" size={28} color={C.textMut} />
+      <View style={styles.card}>
+        <TouchableOpacity
+          style={styles.cardMainPress}
+          onPress={() => navigation.navigate('ApartmentDetail', { apartmentId: item.id })}
+          activeOpacity={0.85}
+        >
+          {thumb ? (
+            <Image source={{ uri: thumb }} style={styles.thumb} contentFit="cover" />
+          ) : (
+            <View style={[styles.thumb, styles.thumbFallback]}>
+              <Ionicons name="home-outline" size={28} color={C.textMut} />
+            </View>
+          )}
+          <View style={styles.cardBody}>
+            <Text style={styles.cardTitle} numberOfLines={1}>{item.title}</Text>
+            <Text style={styles.cardSub}>
+              {item.city}{item.neighborhood ? ` · ${item.neighborhood}` : ''} · {item.rooms} חד׳
+            </Text>
+            <Text style={styles.cardPrice}>{formatPrice((item as any).price)}</Text>
+            <View style={styles.statsRow}>
+              <Ionicons name="eye-outline" size={13} color={C.textMut} />
+              <Text style={styles.statText}>{item.viewCount ?? 0}</Text>
+              <Ionicons name="heart-outline" size={13} color={C.textMut} style={{ marginLeft: 8 }} />
+              <Text style={styles.statText}>{item.likeCount ?? 0}</Text>
+            </View>
           </View>
-        )}
-        <View style={styles.cardBody}>
-          <Text style={styles.cardTitle} numberOfLines={1}>{item.title}</Text>
-          <Text style={styles.cardSub}>
-            {item.city}{item.neighborhood ? ` · ${item.neighborhood}` : ''} · {item.rooms} חד׳
-          </Text>
-          <Text style={styles.cardPrice}>{formatPrice((item as any).price)}</Text>
-          <View style={styles.statsRow}>
-            <Ionicons name="eye-outline" size={13} color={C.textMut} />
-            <Text style={styles.statText}>{item.viewCount ?? 0}</Text>
-            <Ionicons name="heart-outline" size={13} color={C.textMut} style={{ marginLeft: 8 }} />
-            <Text style={styles.statText}>{item.likeCount ?? 0}</Text>
-          </View>
-        </View>
+        </TouchableOpacity>
         <View style={styles.cardActions}>
           <TouchableOpacity style={styles.actionBtn} onPress={() => openCopyModal(item)}>
             <Ionicons name="sparkles-outline" size={22} color="#F39C12" />
@@ -170,7 +172,7 @@ export default function ListingsScreen() {
             <Ionicons name="trash-outline" size={22} color="#FF7675" />
           </TouchableOpacity>
         </View>
-      </TouchableOpacity>
+      </View>
     );
   }
 
@@ -296,7 +298,9 @@ const styles = StyleSheet.create({
   createBtnText: { color: C.navy, fontWeight: '700', fontSize: 13 },
   createBtnLarge: { backgroundColor: C.cyan, paddingHorizontal: 20, paddingVertical: 12, borderRadius: 12 },
   list: { paddingHorizontal: 16, paddingBottom: 24 },
-  card: { flexDirection: 'row', backgroundColor: Dark.surface, borderRadius: 14, marginBottom: 12, overflow: 'hidden', alignItems: 'center', borderWidth: 1, borderColor: Dark.border },
+  card: { flexDirection: 'row', backgroundColor: Dark.surface, borderRadius: 14, marginBottom: 12, overflow: 'hidden', alignItems: 'stretch', borderWidth: 1, borderColor: Dark.border },
+  /** תמונה+טקסט בלבד — לא עוטף את עמודת הפעולות (מונע קינון TouchableOpacity שלא מקבל לחיצות) */
+  cardMainPress: { flex: 1, flexDirection: 'row', alignItems: 'center', minHeight: 80 },
   thumb: { width: 80, height: 80 },
   thumbFallback: { backgroundColor: Dark.inset, justifyContent: 'center', alignItems: 'center' },
   cardBody: { flex: 1, padding: 12 },
