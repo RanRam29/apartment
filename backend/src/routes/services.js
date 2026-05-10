@@ -1,4 +1,5 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const { body, validationResult } = require('express-validator');
 const { authenticate } = require('../middleware/auth');
 const ServiceListing = require('../models/mongo/ServiceListing');
@@ -106,6 +107,27 @@ router.patch(
     }
   }
 );
+
+// DELETE /api/services/:id — remove listing and its reviews (owner only)
+router.delete('/:id', authenticate, async (req, res, next) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ error: 'Service not found' });
+    }
+    const service = await ServiceListing.findById(req.params.id);
+    if (!service) return res.status(404).json({ error: 'Service not found' });
+    if (String(service.providerId) !== String(req.user.id)) {
+      return res.status(403).json({ error: 'Not your listing' });
+    }
+
+    await ServiceReview.deleteMany({ serviceId: service._id });
+    await service.deleteOne();
+
+    res.json({ message: 'Service deleted' });
+  } catch (err) {
+    next(err);
+  }
+});
 
 // POST /api/services/:id/review — submit review; update average rating
 router.post(

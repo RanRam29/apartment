@@ -7,6 +7,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { servicesApi } from '../services/api';
+import { useAuthStore } from '../store/useAuthStore';
 import { C, Dark } from '../theme';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -150,12 +151,14 @@ function ReviewModal({
 // ─── Detail Modal ─────────────────────────────────────────────────────────────
 
 function DetailModal({
-  service, reviews, onClose, onReview,
+  service, reviews, onClose, onReview, isOwner, onDelete,
 }: {
   service: ServiceListing | null;
   reviews: ServiceReview[];
   onClose: () => void;
   onReview: () => void;
+  isOwner: boolean;
+  onDelete: () => void;
 }) {
   if (!service) return null;
 
@@ -220,6 +223,13 @@ function DetailModal({
               >
                 <Ionicons name="call-outline" size={18} color={C.cyan} />
                 <Text style={styles.phoneBtnText}>{service.phone}</Text>
+              </TouchableOpacity>
+            ) : null}
+
+            {isOwner ? (
+              <TouchableOpacity style={styles.deleteListingBtn} onPress={onDelete}>
+                <Ionicons name="trash-outline" size={18} color="#FF7675" />
+                <Text style={styles.deleteListingText}>מחק את המודעה שלי</Text>
               </TouchableOpacity>
             ) : null}
 
@@ -408,6 +418,7 @@ function ServiceCard({ service, onPress }: { service: ServiceListing; onPress: (
 
 export default function ServicesScreen({ navigation }: any) {
   const queryClient = useQueryClient();
+  const userId = useAuthStore((s) => s.user?.id);
 
   const [activeCategory, setActiveCategory] = useState<Category | 'all'>('all');
   const [selected, setSelected]             = useState<ServiceListing | null>(null);
@@ -429,6 +440,17 @@ export default function ServicesScreen({ navigation }: any) {
       setCreateVisible(false);
     },
     onError: (e: any) => Alert.alert('שגיאה', e.response?.data?.error || 'לא ניתן ליצור שירות'),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => servicesApi.remove(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['services'] });
+      setSelected(null);
+      setSelectedReviews([]);
+    },
+    onError: (e: any) =>
+      Alert.alert('שגיאה', e.response?.data?.error || 'לא ניתן למחוק את המודעה'),
   });
 
   const reviewMutation = useMutation({
@@ -457,6 +479,21 @@ export default function ServicesScreen({ navigation }: any) {
     } catch {
       setSelectedReviews([]);
     }
+  }
+
+  function confirmDeleteService(svc: ServiceListing) {
+    Alert.alert(
+      'מחיקת מודעה',
+      `למחוק לצמיתות את "${svc.title}"?`,
+      [
+        { text: 'ביטול', style: 'cancel' },
+        {
+          text: 'מחק',
+          style: 'destructive',
+          onPress: () => deleteMutation.mutate(svc._id),
+        },
+      ]
+    );
   }
 
   const services: ServiceListing[] = data?.services ?? [];
@@ -529,6 +566,10 @@ export default function ServicesScreen({ navigation }: any) {
         reviews={selectedReviews}
         onClose={() => { setSelected(null); setSelectedReviews([]); }}
         onReview={() => setReviewVisible(true)}
+        isOwner={!!userId && !!selected && String(selected.providerId) === String(userId)}
+        onDelete={() => {
+          if (selected) confirmDeleteService(selected);
+        }}
       />
 
       {/* Review modal */}
@@ -644,6 +685,13 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: C.cyanAlpha(0.3),
   },
   phoneBtnText: { color: C.cyan, fontWeight: '700', fontSize: 15 },
+
+  deleteListingBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    marginTop: 14, paddingVertical: 12, borderRadius: 12,
+    borderWidth: 1, borderColor: 'rgba(255, 118, 117, 0.45)', backgroundColor: 'rgba(255, 118, 117, 0.08)',
+  },
+  deleteListingText: { color: '#FF7675', fontWeight: '700', fontSize: 14 },
 
   reviewsHeader:   { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 },
   writeReviewBtn:  { flexDirection: 'row', alignItems: 'center', gap: 4 },

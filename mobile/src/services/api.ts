@@ -220,6 +220,7 @@ export const servicesApi = {
   create: (data: object) => api.post('/services', data),
   getById: (id: string) => api.get(`/services/${id}`),
   update: (id: string, data: object) => api.patch(`/services/${id}`, data),
+  remove: (id: string) => api.delete(`/services/${id}`),
   review: (id: string, rating: number, comment: string) =>
     api.post(`/services/${id}/review`, { rating, comment }),
 };
