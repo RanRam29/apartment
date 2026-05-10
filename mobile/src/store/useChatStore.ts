@@ -44,7 +44,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       }));
     });
 
-    socket.on('user_typing', ({ userId, matchId }: { userId: string; matchId: string }) => {
+    socket.on('user_typing', ({ matchId }: { userId: string; matchId: string }) => {
       set((state) => ({
         typingUsers: { ...state.typingUsers, [matchId]: true },
       }));

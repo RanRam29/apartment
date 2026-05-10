@@ -8,7 +8,7 @@ import { useMutation } from '@tanstack/react-query';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { recommendationsApi } from '../services/api';
 import { useAuthStore } from '../store/useAuthStore';
-import type { MainStackParamList, Amenity } from '../types';
+import type { MainStackParamList } from '../types';
 import { C, Dark } from '../theme';
 
 const CITIES = ['תל אביב', 'ירושלים', 'חיפה', 'ראשון לציון', 'פתח תקווה',

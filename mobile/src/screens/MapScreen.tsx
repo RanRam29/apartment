@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  View, Text, TouchableOpacity, StyleSheet,
+  View, Text, StyleSheet,
   SafeAreaView, ActivityIndicator, Switch, Platform,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
@@ -37,6 +37,7 @@ function jsonForInlineScript(value: unknown): string {
   });
 }
 
+/** Leaflet + OpenStreetMap — free; street labels follow local languages outside Israel. */
 export function buildHtml(markers: AptMarker[], tama38Url: string): string {
   const markersJson = jsonForInlineScript(markers);
   const tama38UrlJson = jsonForInlineScript(tama38Url);
@@ -46,7 +47,7 @@ export function buildHtml(markers: AptMarker[], tama38Url: string): string {
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><\/script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body, #map { width: 100%; height: 100%; background: #162839; }
@@ -63,9 +64,7 @@ export function buildHtml(markers: AptMarker[], tama38Url: string): string {
   var markers = ${markersJson};
   var tama38Url = ${tama38UrlJson};
   var tamaLayer = null;
-  var tamaVisible = false;
 
-  // Default centre — Tel Aviv
   var defaultLat = markers.length ? markers[0].lat : 32.08;
   var defaultLng = markers.length ? markers[0].lng : 34.78;
 
@@ -76,7 +75,6 @@ export function buildHtml(markers: AptMarker[], tama38Url: string): string {
     maxZoom: 19,
   }).addTo(map);
 
-  // Custom apartment icon
   function escapeHtml(value) {
     return String(value == null ? '' : value)
       .replace(/&/g, '&amp;')
@@ -91,7 +89,7 @@ export function buildHtml(markers: AptMarker[], tama38Url: string): string {
     var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="28">'
       + '<rect rx="8" ry="8" width="64" height="24" fill="#00E5FF"/>'
       + '<text x="32" y="16" font-size="11" font-family="sans-serif" font-weight="700" '
-      + 'fill="#162839" text-anchor="middle">' + label + '<\/text><\/svg>';
+      + 'fill="#162839" text-anchor="middle">' + label + '</text></svg>';
     return L.divIcon({
       html: svg,
       className: '',
@@ -108,10 +106,10 @@ export function buildHtml(markers: AptMarker[], tama38Url: string): string {
     var m = L.marker([apt.lat, apt.lng], { icon: makeIcon(apt.price) });
     m.bindPopup(
       '<div class="apt-popup">'
-      + '<div class="title">' + escapeHtml(apt.title) + '<\/div>'
-      + '<div class="price">₪' + apt.price.toLocaleString() + '/חודש<\/div>'
-      + '<div class="meta">' + escapeHtml(apt.rooms) + ' חדרים · ' + escapeHtml(apt.city) + '<\/div>'
-      + '<\/div>'
+      + '<div class="title">' + escapeHtml(apt.title) + '</div>'
+      + '<div class="price">₪' + apt.price.toLocaleString() + '/חודש</div>'
+      + '<div class="meta">' + escapeHtml(apt.rooms) + ' חדרים · ' + escapeHtml(apt.city) + '</div>'
+      + '</div>'
     );
     markerGroup.addLayer(m);
   });
@@ -131,7 +129,6 @@ export function buildHtml(markers: AptMarker[], tama38Url: string): string {
     } catch (e) {}
   }
 
-  // TAMA 38 layer toggle — called from React Native or web iframe parent
   window.toggleTama38 = function(show) {
     if (show && !tamaLayer) {
       fetch(tama38Url)
@@ -166,7 +163,7 @@ export function buildHtml(markers: AptMarker[], tama38Url: string): string {
       tamaLayer = null;
     }
   };
-<\/script>
+</script>
 </body>
 </html>`;
 }
@@ -177,7 +174,7 @@ export default function MapScreen() {
   const [tamaOn, setTamaOn] = React.useState(false);
   const [tamaStatus, setTamaStatus] = React.useState<'idle' | 'loading' | 'loaded' | 'empty' | 'error'>('idle');
 
-  const { data: feedData, isLoading } = useQuery({
+  const { data: feedData, isPending: feedLoading } = useQuery({
     queryKey: ['apartments-feed-map'],
     queryFn: () => apartmentsApi.getFeed({ limit: 100 }).then((r) => r.data),
   });
@@ -234,7 +231,9 @@ export default function MapScreen() {
       if (msg.type === 'tama_loaded') setTamaStatus('loaded');
       else if (msg.type === 'tama_empty') setTamaStatus('empty');
       else if (msg.type === 'tama_error') setTamaStatus('error');
-    } catch {}
+    } catch {
+      /* ignore malformed WebView message */
+    }
   }
 
   const tamaHint =
@@ -245,7 +244,6 @@ export default function MapScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Toolbar */}
       <View style={styles.toolbar}>
         <View style={styles.toolbarLeft}>
           <Ionicons name="map-outline" size={18} color="#fff" />
@@ -269,7 +267,7 @@ export default function MapScreen() {
         </View>
       </View>
 
-      {isLoading ? (
+      {feedLoading ? (
         <View style={styles.loadingWrap}>
           <ActivityIndicator size="large" color={C.cyan} />
           <Text style={styles.loadingText}>טוען דירות…</Text>
@@ -300,7 +298,6 @@ export default function MapScreen() {
           onMessage={handleMessage}
           javaScriptEnabled
           domStorageEnabled
-          // Allow external tile + CDN requests
           mixedContentMode="always"
           allowUniversalAccessFromFileURLs
         />

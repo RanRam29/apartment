@@ -15,7 +15,7 @@ interface Props {
   isTop?: boolean;
 }
 
-export default function ApartmentCard({ apartment, isTop = false }: Props) {
+export default function ApartmentCard({ apartment, isTop: _isTop = false }: Props) {
   const firstImage = apartment.images?.[0]?.url;
 
   return (

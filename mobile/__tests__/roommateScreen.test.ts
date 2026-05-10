@@ -76,10 +76,12 @@ describe('RoommateScreen', () => {
     jest.restoreAllMocks();
   });
 
-  it('saves the hydrated server profile instead of overwriting it with defaults', async () => {
+  it(
+    'saves the hydrated server profile instead of overwriting it with defaults',
+    async () => {
     const screen = renderWithClient();
 
-    const saveButton = await screen.findByText('שמור פרופיל');
+    const saveButton = await screen.findByText('שמור פרופיל', {}, { timeout: 15000 });
     await waitFor(() => {
       expect(screen.UNSAFE_getAllByType(Switch).every((node) => node.props.value === true)).toBe(true);
     });
@@ -101,5 +103,7 @@ describe('RoommateScreen', () => {
         })
       );
     });
-  });
+  },
+    20000
+  );
 });

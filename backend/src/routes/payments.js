@@ -64,7 +64,7 @@ router.post(
 
       res.json({ paymentUrl: transaction.data?.pageUrl, transactionId: transaction.data?.transactionId });
     } catch (err) {
-      logger.error('Payment error:', err.message);
+      logger.error(`Payment error: ${err?.message || err}`);
       next(err);
     }
   }

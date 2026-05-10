@@ -6,10 +6,8 @@ import {
 import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { useAuthStore } from '../store/useAuthStore';
 import { C } from '../theme';
-import type { TenantTabParamList, LandlordTabParamList } from '../types';
 
 const { width: W } = Dimensions.get('window');
 const TILE_SIZE = (W - 48 - 16) / 2;  // 2 columns, 24px margin each side, 16px gap

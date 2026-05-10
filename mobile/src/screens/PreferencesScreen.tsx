@@ -4,7 +4,6 @@ import {
   StyleSheet, SafeAreaView, Alert, ActivityIndicator,
   Switch,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { recommendationsApi } from '../services/api';

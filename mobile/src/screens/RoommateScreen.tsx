@@ -108,7 +108,7 @@ export default function RoommateScreen() {
   const [form, setForm] = React.useState<Omit<RoommateProfile, 'userId'>>(DEFAULT_PROFILE);
   const [hydrated, setHydrated] = React.useState(false);
 
-  const { data: profileData, isLoading: profileLoading, isSuccess: profileLoaded } = useQuery({
+  const { data: profileData, isPending: profileLoading, isSuccess: profileLoaded } = useQuery({
     queryKey: ['roommate-profile'],
     queryFn: () => roommateApi.getProfile().then((r) => r.data),
   });
@@ -119,7 +119,7 @@ export default function RoommateScreen() {
     setHydrated(true);
   }, [profileLoaded, profileData, hydrated]);
 
-  const { data: matchesData, isLoading: matchesLoading, refetch: refetchMatches } = useQuery({
+  const { data: matchesData, isPending: matchesLoading, refetch: refetchMatches } = useQuery({
     queryKey: ['roommate-matches'],
     queryFn: () => roommateApi.getMatches().then((r) => r.data),
     enabled: tab === 'matches',

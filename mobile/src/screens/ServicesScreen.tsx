@@ -6,7 +6,6 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuthStore } from '../store/useAuthStore';
 import { servicesApi } from '../services/api';
 import { C, Dark } from '../theme';
 
@@ -56,10 +55,6 @@ const CATEGORIES: { key: Category | 'all'; label: string; icon: keyof typeof Ion
 const CATEGORY_LABELS: Record<Category, string> = {
   movers: 'הובלות', cleaning: 'ניקיון', painting: 'צביעה',
   plumbing: 'אינסטלציה', electricity: 'חשמל', carpentry: 'נגרות', other: 'אחר',
-};
-
-const PRICE_TYPE_LABELS: Record<PriceType, string> = {
-  hourly: '/שעה', fixed: '', quote: 'לפי הצעה',
 };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -412,7 +407,6 @@ function ServiceCard({ service, onPress }: { service: ServiceListing; onPress: (
 // ─── Main Screen ─────────────────────────────────────────────────────────────
 
 export default function ServicesScreen({ navigation }: any) {
-  const { user } = useAuthStore();
   const queryClient = useQueryClient();
 
   const [activeCategory, setActiveCategory] = useState<Category | 'all'>('all');

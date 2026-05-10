@@ -1,7 +1,7 @@
 import React, { useEffect, useCallback, useRef, useState } from 'react';
 import {
   View, Text, StyleSheet, SafeAreaView,
-  TouchableOpacity, Modal, Dimensions, ActivityIndicator, Animated,
+  TouchableOpacity, Modal, ActivityIndicator, Animated,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,7 +11,6 @@ import SwipeHouseLogo from '../components/SwipeHouseLogo';
 import { C } from '../theme';
 import type { Apartment, SwipeDirection } from '../types';
 
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const FREE_DAILY_LIMIT = 20;
 
 export default function SwipeScreen() {

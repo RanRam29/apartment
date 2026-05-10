@@ -29,7 +29,6 @@
   },
   "dependencies": {
     "axios": "^1.6.2",
-    "aws-sdk": "^2.1499.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",

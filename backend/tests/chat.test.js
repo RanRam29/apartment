@@ -92,6 +92,14 @@ beforeAll(async () => {
 }, 30_000);
 
 afterAll(async () => {
+  try {
+    const { mongoose } = require('../src/config/mongodb');
+    if (mongoose.connection.readyState === 1) {
+      await mongoose.connection.close();
+    }
+  } catch {
+    /* ignore */
+  }
   await sequelize.close();
   getRedisClient().disconnect();
 });

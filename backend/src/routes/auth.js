@@ -95,7 +95,7 @@ router.post('/register', registerValidator, async (req, res, next) => {
     // Create empty preferences doc in MongoDB for tenants (fire-and-forget)
     if (role === 'tenant') {
       UserPreferences.create({ userId: user.id }).catch((err) => {
-        logger.warn('Failed to create UserPreferences doc:', err.message);
+        logger.warn(`Failed to create UserPreferences doc: ${err?.message || err}`);
       });
     }
 
@@ -165,16 +165,18 @@ router.post('/login', loginValidator, async (req, res, next) => {
     }
 
     const smtpConfigured = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
-    if (!user.isVerified && smtpConfigured) {
-      return res.status(403).json({
-        error: 'Please verify your email before logging in',
-        code: 'EMAIL_NOT_VERIFIED',
-        verificationRequired: true,
-        resendAvailable: true,
-        email: user.email,
-      });
-    }
-    if (!user.isVerified && !smtpConfigured) {
+    // Require verified email when SMTP is configured (production-like), or always in tests.
+    // Without SMTP (local dev), auto-verify so developers can log in without mail infra.
+    if (!user.isVerified) {
+      if (smtpConfigured || process.env.NODE_ENV === 'test') {
+        return res.status(403).json({
+          error: 'Please verify your email before logging in',
+          code: 'EMAIL_NOT_VERIFIED',
+          verificationRequired: true,
+          resendAvailable: true,
+          email: user.email,
+        });
+      }
       await user.update({ isVerified: true, verifiedAt: new Date() });
     }
 
