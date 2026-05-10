@@ -1,4 +1,4 @@
-const { Sequelize } = require('sequelize');
+const { DataTypes, Sequelize } = require('sequelize');
 const logger = require('../utils/logger');
 
 const databaseUrl = process.env.DATABASE_URL;
@@ -28,10 +28,43 @@ const sequelize = databaseUrl
       define: { underscored: true, timestamps: true },
     });
 
+const USER_VERIFICATION_COLUMNS = {
+  verification_token: { type: DataTypes.STRING(128), allowNull: true },
+  verified_at: { type: DataTypes.DATE, allowNull: true },
+};
+
+function isMissingUsersTableError(err) {
+  const message = String(err?.message || '');
+  return /users.*does not exist|relation "users" does not exist|No description found/i.test(message);
+}
+
+async function ensureUserVerificationColumns(queryInterface = sequelize.getQueryInterface()) {
+  let usersTable;
+  try {
+    usersTable = await queryInterface.describeTable('users');
+  } catch (err) {
+    if (isMissingUsersTableError(err)) {
+      return;
+    }
+    throw err;
+  }
+
+  for (const [columnName, definition] of Object.entries(USER_VERIFICATION_COLUMNS)) {
+    if (!usersTable[columnName]) {
+      await queryInterface.addColumn('users', columnName, definition);
+      logger.info(`Added missing users.${columnName} column`);
+    }
+  }
+}
+
 async function initPostgres() {
   await sequelize.authenticate();
-  await sequelize.sync({ alter: process.env.NODE_ENV === 'development' });
+  await ensureUserVerificationColumns();
+  const syncAlter =
+    process.env.NODE_ENV === 'development' ||
+    process.env.POSTGRES_SYNC_ALTER === 'true';
+  await sequelize.sync({ alter: syncAlter });
   logger.info('PostgreSQL connected and synced');
 }
 
-module.exports = { sequelize, initPostgres };
+module.exports = { sequelize, initPostgres, ensureUserVerificationColumns };

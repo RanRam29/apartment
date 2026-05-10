@@ -144,7 +144,7 @@ router.post('/', authenticate, requireRole('tenant'), requireVerified, swipeVali
         },
       },
       { upsert: true }
-    ).catch((err) => logger.warn('Failed to update swipe history in Mongo:', err.message));
+    ).catch((err) => logger.warn(`Failed to update swipe history in Mongo: ${err?.message || err}`));
 
     if (direction === 'like' || direction === 'superlike') {
       Apartment.increment('likeCount', { where: { id: apartmentId } }).catch(() => {});

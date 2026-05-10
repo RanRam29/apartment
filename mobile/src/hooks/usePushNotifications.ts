@@ -1,27 +1,29 @@
 import { useEffect } from 'react';
 import { Platform } from 'react-native';
-import * as Notifications from 'expo-notifications';
-import * as Device from 'expo-device';
 import { authApi } from '../services/api';
-
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-  }),
-});
+import { C } from '../theme';
 
 export function usePushNotifications() {
   useEffect(() => {
-    register();
+    if (Platform.OS === 'web') return;
+    registerNativePush().catch(() => {});
   }, []);
 }
 
-async function register() {
-  if (!Device.isDevice) return; // skip emulator / web
+async function registerNativePush() {
+  const Notifications = await import('expo-notifications');
+  const Device = await import('expo-device');
+  if (!Device.isDevice) return; // skip emulator/web
+
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldShowBanner: true,
+      shouldShowList: true,
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+    }),
+  });
 
   const { status: existing } = await Notifications.getPermissionsAsync();
   const finalStatus = existing === 'granted'
@@ -42,7 +44,7 @@ async function register() {
       name: 'Match Notifications',
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#6C5CE7',
+      lightColor: C.cyan,
     }).catch(() => {});
   }
 }

@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity,
+  Text, TextInput, TouchableOpacity,
   StyleSheet, ActivityIndicator, ScrollView,
-  Alert,
 } from 'react-native';
 import { useAuthStore } from '../store/useAuthStore';
+import { getVerificationPromptEmail, type MaybeAuthError } from '../services/verificationUx';
+import { formatLoginError } from '../utils/authErrors';
 import { C } from '../theme';
 
 interface Props {
@@ -12,22 +13,31 @@ interface Props {
 }
 
 export default function LoginScreen({ onSwitch }: Props) {
-  const { login } = useAuthStore();
+  const { login, resendVerification } = useAuthStore();
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading]   = useState(false);
+  const [error, setError]       = useState('');
+  const [info, setInfo]         = useState('');
 
   async function handleLogin() {
+    setError('');
+    setInfo('');
     if (!email.trim() || !password) {
-      Alert.alert('שגיאה', 'נא למלא אימייל וסיסמה');
+      setError('נא למלא אימייל וסיסמה');
       return;
     }
     setLoading(true);
     try {
       await login(email.trim().toLowerCase(), password);
-    } catch (err: any) {
-      const msg = err?.response?.data?.error || 'שגיאה בכניסה, נסה שנית';
-      Alert.alert('שגיאה', msg);
+    } catch (err: unknown) {
+      const unverifiedEmail = getVerificationPromptEmail(err as MaybeAuthError);
+      if (unverifiedEmail) {
+        setInfo('האימייל לא אומת. שלחנו לך מייל אימות — בדוק את תיבת הדואר.');
+        resendVerification(unverifiedEmail).catch(() => {});
+      } else {
+        setError(formatLoginError(err));
+      }
     } finally {
       setLoading(false);
     }
@@ -61,6 +71,9 @@ export default function LoginScreen({ onSwitch }: Props) {
         secureTextEntry
         textAlign="right"
       />
+
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
+      {info  ? <Text style={styles.infoText}>{info}</Text>   : null}
 
       <TouchableOpacity
         style={[styles.button, loading && styles.buttonDisabled]}
@@ -111,6 +124,8 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: { opacity: 0.6 },
   buttonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  errorText: { color: '#E74C3C', fontSize: 13, textAlign: 'right', marginBottom: 10, lineHeight: 20 },
+  infoText:  { color: '#27AE60', fontSize: 13, textAlign: 'right', marginBottom: 10, lineHeight: 20 },
   switchRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 24 },
   switchText: { color: C.textSub, fontSize: 14 },
   switchLink: { color: C.navy, fontWeight: '700' },

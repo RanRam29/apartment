@@ -1,9 +1,8 @@
 import { create } from 'zustand';
 import { io, Socket } from 'socket.io-client';
 import { chatApi, tokenStorage } from '../services/api';
+import { getApiBaseUrl } from '../services/apiConfig';
 import type { Message } from '../types';
-
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
 
 interface ChatState {
   messages: Record<string, Message[]>;
@@ -29,7 +28,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     const token = await tokenStorage.get();
     if (!token) return;
 
-    const socket = io(API_URL, {
+    const socket = io(getApiBaseUrl(), {
       auth: { token },
       transports: ['websocket'],
       reconnection: true,
@@ -45,7 +44,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       }));
     });
 
-    socket.on('user_typing', ({ userId, matchId }: { userId: string; matchId: string }) => {
+    socket.on('user_typing', ({ matchId }: { userId: string; matchId: string }) => {
       set((state) => ({
         typingUsers: { ...state.typingUsers, [matchId]: true },
       }));
@@ -70,6 +69,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
           [matchId]: (state.messages[matchId] ?? []).map((m) => ({ ...m, isRead: true })),
         },
       }));
+    });
+
+    socket.on('join_chat_room', (matchId: string) => {
+      if (matchId) socket.emit('join_chat', matchId);
     });
 
     set({ socket });

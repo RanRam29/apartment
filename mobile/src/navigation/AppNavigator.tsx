@@ -3,9 +3,11 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { ActivityIndicator, View } from 'react-native';
+import ApartmentSearchChatbot from '../components/ApartmentSearchChatbot';
 import { Ionicons } from '@expo/vector-icons';
 
 import { useAuthStore } from '../store/useAuthStore';
+import { useChatStore } from '../store/useChatStore';
 import { C } from '../theme';
 import type { RootStackParamList, TenantTabParamList, LandlordTabParamList, MainStackParamList } from '../types';
 
@@ -20,9 +22,19 @@ import ListingsScreen from '../screens/ListingsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import ApartmentDetailScreen from '../screens/ApartmentDetailScreen';
 import CreateListingScreen from '../screens/CreateListingScreen';
+import EditListingScreen from '../screens/EditListingScreen';
 import PreferencesScreen from '../screens/PreferencesScreen';
+import RoommateScreen from '../screens/RoommateScreen';
+import VerifyIdentityScreen from '../screens/VerifyIdentityScreen';
+import ContractsScreen from '../screens/ContractsScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import HomeScreen from '../screens/HomeScreen';
+import MapScreen from '../screens/MapScreen';
+import RentPaymentsScreen from '../screens/RentPaymentsScreen';
+import CommercialScreen from '../screens/CommercialScreen';
+import GamificationScreen from '../screens/GamificationScreen';
+import ServicesScreen from '../screens/ServicesScreen';
+import IoTScreen from '../screens/IoTScreen';
 
 const RootStack  = createNativeStackNavigator<RootStackParamList>();
 const TenantTab  = createBottomTabNavigator<TenantTabParamList>();
@@ -31,6 +43,7 @@ const MainStack  = createNativeStackNavigator<MainStackParamList>();
 
 function TenantTabs() {
   return (
+    <View style={{ flex: 1 }}>
     <TenantTab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
@@ -60,6 +73,7 @@ function TenantTabs() {
             Swipe:   focused ? 'home'   : 'home-outline',
             Matches: focused ? 'heart'  : 'heart-outline',
             Search:  focused ? 'search' : 'search-outline',
+            Map:     focused ? 'map'    : 'map-outline',
             Profile: focused ? 'person' : 'person-outline',
           };
           return <Ionicons name={icons[route.name]} size={size} color={color} />;
@@ -70,8 +84,11 @@ function TenantTabs() {
       <TenantTab.Screen name="Swipe"   component={SwipeScreen}   options={{ title: 'דירות' }} />
       <TenantTab.Screen name="Matches" component={MatchesScreen} options={{ title: 'התאמות' }} />
       <TenantTab.Screen name="Search"  component={SearchScreen}  options={{ title: 'חיפוש' }} />
+      <TenantTab.Screen name="Map"     component={MapScreen}     options={{ title: 'מפה' }} />
       <TenantTab.Screen name="Profile" component={ProfileScreen} options={{ title: 'פרופיל' }} />
     </TenantTab.Navigator>
+    <ApartmentSearchChatbot />
+    </View>
   );
 }
 
@@ -105,6 +122,7 @@ function LandlordTabs() {
             Home:      focused ? 'compass'       : 'compass-outline',
             Dashboard: focused ? 'stats-chart'   : 'stats-chart-outline',
             Leads:     focused ? 'people'        : 'people-outline',
+            Matches:   focused ? 'chatbubbles'   : 'chatbubbles-outline',
             Listings:  focused ? 'list'          : 'list-outline',
             Profile:   focused ? 'person'        : 'person-outline',
           };
@@ -115,6 +133,7 @@ function LandlordTabs() {
       <LandlordTab.Screen name="Home"      component={HomeScreen}        options={{ title: 'Home' }} />
       <LandlordTab.Screen name="Dashboard" component={LandlordDashboard} options={{ title: 'דשבורד' }} />
       <LandlordTab.Screen name="Leads"     component={LeadsScreen}       options={{ title: 'לידים' }} />
+      <LandlordTab.Screen name="Matches"   component={MatchesScreen}     options={{ title: 'צ׳אטים' }} />
       <LandlordTab.Screen name="Listings"  component={ListingsScreen}    options={{ title: 'מודעות' }} />
       <LandlordTab.Screen name="Profile"   component={ProfileScreen}     options={{ title: 'פרופיל' }} />
     </LandlordTab.Navigator>
@@ -123,6 +142,11 @@ function LandlordTabs() {
 
 function MainNavigator() {
   const { user, needsOnboarding } = useAuthStore();
+
+  useEffect(() => {
+    useChatStore.getState().connect();
+    return () => useChatStore.getState().disconnect();
+  }, []);
 
   return (
     <MainStack.Navigator
@@ -162,6 +186,16 @@ function MainNavigator() {
         }}
       />
       <MainStack.Screen
+        name="EditListing"
+        component={EditListingScreen}
+        options={{
+          headerShown: true, headerTitle: 'עריכת מודעה',
+          headerStyle: { backgroundColor: C.bgCard },
+          headerTintColor: C.navy,
+          headerShadowVisible: false,
+        }}
+      />
+      <MainStack.Screen
         name="Preferences"
         component={PreferencesScreen}
         options={{
@@ -170,6 +204,46 @@ function MainNavigator() {
           headerTintColor: C.navy,
           headerShadowVisible: false,
         }}
+      />
+      <MainStack.Screen
+        name="Roommate"
+        component={RoommateScreen}
+        options={{ headerShown: false }}
+      />
+      <MainStack.Screen
+        name="VerifyIdentity"
+        component={VerifyIdentityScreen}
+        options={{ headerShown: false }}
+      />
+      <MainStack.Screen
+        name="Contracts"
+        component={ContractsScreen}
+        options={{ headerShown: false }}
+      />
+      <MainStack.Screen
+        name="RentPayments"
+        component={RentPaymentsScreen}
+        options={{ headerShown: false }}
+      />
+      <MainStack.Screen
+        name="Commercial"
+        component={CommercialScreen}
+        options={{ headerShown: false }}
+      />
+      <MainStack.Screen
+        name="Gamification"
+        component={GamificationScreen}
+        options={{ headerShown: false }}
+      />
+      <MainStack.Screen
+        name="Services"
+        component={ServicesScreen}
+        options={{ headerShown: false }}
+      />
+      <MainStack.Screen
+        name="IoT"
+        component={IoTScreen}
+        options={{ headerShown: false }}
       />
     </MainStack.Navigator>
   );

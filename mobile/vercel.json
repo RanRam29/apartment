@@ -1,5 +1,6 @@
 {
-  "buildCommand": "npx expo export --platform web",
+  "installCommand": "pnpm install --no-frozen-lockfile",
+  "buildCommand": "node scripts/assert-public-api-url.mjs && npx expo export --platform web && node scripts/patch-web-index.js",
   "outputDirectory": "dist",
   "framework": null,
   "rewrites": [

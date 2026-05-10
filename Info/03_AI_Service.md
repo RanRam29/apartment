@@ -1,17 +1,19 @@
-# 🧠 שירות AI - Python (Flask/FastAPI)
+# 🧠 שירות AI — Python (FastAPI)
 
-מיקרו-סרביס זה קורא נתונים (מ-DB או מ-Kafka), מנתח אותם, ומחזיר תובנות אל ה-Backend.
+מיקרו־סרביס אופציונלי ב-[`ai-service/`](../ai-service/) שמספק NLP, סיכום דירות, דירוג דירות וציון לידים.  
+**נתיב הייצור העיקרי למובייל** הוא Backend ב-Node שקורא ל-Gemini ישירות — ראה [`AI_Capabilities_Current_State.md`](AI_Capabilities_Current_State.md) ו-[`ADR_AI_Service_Strategy.md`](ADR_AI_Service_Strategy.md).
 
-## 🔗 חיבורים למערכות (Connections)
+## 🔗 חיבורים למערכות
 
 ### 1. Google Gemini API
-מנוע השפה (LLM) שמפענח בקשות כמו "דירה לזוג פלוס כלב בתל אביב עם חלונות גדולים" או מסכם תיאורי דירות.
-- **Project Name/Number**: `projects/291241351035`
-- **שם מפתח**: `apartment_gemini_api`
-- **API Key**: `AlzaSyC0epluUa9Rh8B_efB1NQBrnQj8z6GO9f8`
 
-### 2. ממשקים לשירותים פנימיים
-- **חיבור ל-MongoDB / PostgreSQL**: לרוב סרוויס כזה אמור לגשת לנתונים לקריאה בלבד (Read-Only) מ-Mongo כדי למשוך `UserPreferences` ולבצע התאמות.
-  - הוא חולק את אותו Connection String של ה-Backend לגישה למסדי הנתונים.
-- **חיבור ל-Kafka (Consumer)**: האפליקציה מאזינה ל-Broker ב-`kafka:9092` ולוקחת `Swipe Events` כדי לעדכן פרופילי משתמש בזמן אמת ולדייק את מנוע ההמלצות (`recommendation_engine.py`).
-- **חיבור ל-Redis**: נעזר ברדיס כאחסון ביניים לעדכון "דירוג איכות ליד" (`lead_scoring.py`) בצורה סופר-מהירה כך שה-Backend יוכל לשלוף אותו מיידית עבור דאשבורד המשכירים.
+מנוע השפה לפריסת שאילתות בשפה חופשית ולסיכומי דירות בתוך השירות ב-Python.
+
+- מפתח API מוגדר במשתנה סביבה **`GEMINI_API_KEY`** (בפריסת השירות Python בלבד אם משתמשים בו).
+- יצירת מפתח: [Google AI Studio / Cloud](https://aistudio.google.com/) — לא לאחסן מפתחות במסמכי Markdown ב-repo.
+
+### 2. ממשקים פנימיים
+
+- **MongoDB**: קריאת `UserPreferences` לדירוג דירות (`/api/recommendations/score`) כשהשירות רץ ומחובר.
+- **Redis**: מטמון ל-NLP בזרימת FastAPI (אם מוגדר).
+- **Kafka**: מתואר כיעד ארכיטקטוני עתידי ל-streaming אירועים — לא חובה להפעלת השירות הבסיסית.

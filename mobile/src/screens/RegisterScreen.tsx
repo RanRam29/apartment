@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
   StyleSheet, ActivityIndicator, KeyboardAvoidingView,
-  Platform, Alert, ScrollView,
+  Platform, ScrollView,
 } from 'react-native';
 import { useAuthStore } from '../store/useAuthStore';
+import { formatLoginError } from '../utils/authErrors';
 import { C } from '../theme';
 
 interface Props {
@@ -22,30 +23,35 @@ export default function RegisterScreen({ onSwitch }: Props) {
   const [password,  setPassword]  = useState('');
   const [role,      setRole]      = useState<Role>('tenant');
   const [loading,   setLoading]   = useState(false);
+  const [error,     setError]     = useState('');
+  const [success,   setSuccess]   = useState('');
 
   async function handleRegister() {
+    setError('');
+    setSuccess('');
     if (!firstName || !lastName || !email || !password) {
-      Alert.alert('שגיאה', 'נא למלא את כל השדות החובה');
+      setError('נא למלא את כל השדות החובה');
       return;
     }
     if (password.length < 8) {
-      Alert.alert('שגיאה', 'הסיסמה חייבת להכיל לפחות 8 תווים');
+      setError('הסיסמה חייבת להכיל לפחות 8 תווים');
       return;
     }
     setLoading(true);
     try {
       await register({ firstName, lastName, email: email.trim().toLowerCase(), password, role, phone: phone || undefined });
-      Alert.alert('בדוק את המייל', 'שלחנו לך קישור לאימות כתובת האימייל.');
-    } catch (err: any) {
-      if (!err?.response) {
-        Alert.alert('שגיאה', 'לא ניתן להתחבר לשרת. בדוק ש-API פעיל ושכתובת השרת נכונה.');
+      setSuccess('נרשמת בהצלחה! שלחנו קישור אימות למייל שלך.');
+    } catch (err: unknown) {
+      const ax = err as { response?: { data?: { errors?: Array<{ msg: string }> } } };
+      if (!ax?.response) {
+        setError('לא ניתן להתחבר לשרת. בדוק את החיבור לאינטרנט.');
         return;
       }
-      const errors = err?.response?.data?.errors;
-      const msg = errors
-        ? errors.map((e: any) => e.msg).join('\n')
-        : err?.response?.data?.error || 'שגיאה בהרשמה';
-      Alert.alert('שגיאה', msg);
+      const errors = ax.response?.data?.errors;
+      const msg = errors?.length
+        ? errors.map((e) => e.msg).join('\n')
+        : formatLoginError(err, 'שגיאה בהרשמה');
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -124,6 +130,9 @@ export default function RegisterScreen({ onSwitch }: Props) {
           textAlign="right"
         />
 
+        {error   ? <Text style={styles.errorText}>{error}</Text>   : null}
+        {success ? <Text style={styles.successText}>{success}</Text> : null}
+
         <TouchableOpacity
           style={[styles.button, loading && styles.buttonDisabled]}
           onPress={handleRegister}
@@ -185,6 +194,8 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: { opacity: 0.6 },
   buttonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  errorText:   { color: '#E74C3C', fontSize: 13, textAlign: 'right', marginBottom: 10, lineHeight: 20 },
+  successText: { color: '#27AE60', fontSize: 13, textAlign: 'right', marginBottom: 10, lineHeight: 20 },
   switchRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 24 },
   switchText: { color: C.textSub, fontSize: 14 },
   switchLink: { color: C.navy, fontWeight: '700' },

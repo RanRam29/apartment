@@ -11,18 +11,20 @@ const request = require('supertest');
 const { sequelize } = require('../src/config/database');
 const { initRedis, getRedisClient } = require('../src/config/redis');
 const app = require('../src/app');
+const { generateStrongTestPassword } = require('./helpers/testCredentials');
 
 const ts = Date.now();
+const TEST_PASSWORD = generateStrongTestPassword();
 const LANDLORD = {
   email: `apt_landlord_${ts}@test.com`,
-  password: 'Test1234!',
+  password: TEST_PASSWORD,
   firstName: 'Apt',
   lastName: 'Landlord',
   role: 'landlord',
 };
 const TENANT = {
   email: `apt_tenant_${ts}@test.com`,
-  password: 'Test1234!',
+  password: TEST_PASSWORD,
   firstName: 'Apt',
   lastName: 'Tenant',
   role: 'tenant',
@@ -209,21 +211,20 @@ describe('DELETE /api/apartments/:id', () => {
     expect(res.status).toBe(403);
   });
 
-  it('deactivates the apartment (soft delete)', async () => {
+  it('deletes the apartment permanently', async () => {
     if (!apartmentId) return;
     const res = await request(app)
       .delete(`/api/apartments/${apartmentId}`)
       .set('Authorization', `Bearer ${landlordToken}`);
     expect(res.status).toBe(200);
-    expect(res.body.message).toMatch(/deactivated/i);
+    expect(res.body.message).toMatch(/deleted/i);
   });
 
-  it('returns 404 after deactivation (apartment no longer owned by same landlord query)', async () => {
+  it('returns 404 when deleting same apartment again (already destroyed)', async () => {
     if (!apartmentId) return;
     const res = await request(app)
       .delete(`/api/apartments/${apartmentId}`)
       .set('Authorization', `Bearer ${landlordToken}`);
-    // Still 200 or 404 depending on whether findOne includes isActive check
-    expect([200, 404]).toContain(res.status);
+    expect(res.status).toBe(404);
   });
 });

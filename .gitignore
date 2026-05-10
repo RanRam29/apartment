@@ -14,9 +14,24 @@ venv/
 *.egg-info/
 .pytest_cache/
 .coverage
+coverage.xml
 coverage/
 .nyc_output/
+
+# Uploaded contract files (local disk)
+backend/uploads/
+
+# Claude Code local worktrees (nested clones; do not commit)
+.claude/worktrees/
+
+# Metro / Expo web export — never commit minified bundles
+mobile/tmp-deployed.js
+mobile/tmp-*.js
+mobile/dist/
 
 .vercel
 .env*.local
 .worktrees/
+
+# Nested clone accidentally committed as submodule (see git history); keep untracked locally
+apartment/

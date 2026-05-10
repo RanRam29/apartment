@@ -12,18 +12,20 @@ const request = require('supertest');
 const { sequelize } = require('../src/config/database');
 const { initRedis, getRedisClient } = require('../src/config/redis');
 const app = require('../src/app');
+const { generateStrongTestPassword } = require('./helpers/testCredentials');
 
 const ts = Date.now();
+const TEST_PASSWORD = generateStrongTestPassword();
 const LANDLORD = {
   email: `chat_landlord_${ts}@test.com`,
-  password: 'Test1234!',
+  password: TEST_PASSWORD,
   firstName: 'Chat',
   lastName: 'Landlord',
   role: 'landlord',
 };
 const TENANT = {
   email: `chat_tenant_${ts}@test.com`,
-  password: 'Test1234!',
+  password: TEST_PASSWORD,
   firstName: 'Chat',
   lastName: 'Tenant',
   role: 'tenant',
@@ -90,6 +92,14 @@ beforeAll(async () => {
 }, 30_000);
 
 afterAll(async () => {
+  try {
+    const { mongoose } = require('../src/config/mongodb');
+    if (mongoose.connection.readyState === 1) {
+      await mongoose.connection.close();
+    }
+  } catch {
+    /* ignore */
+  }
   await sequelize.close();
   getRedisClient().disconnect();
 });
@@ -126,7 +136,7 @@ describe('GET /api/chat/:matchId — with accepted match', () => {
     // Register a third-party user
     const outsider = await request(app).post('/api/auth/register').send({
       email: `outsider_${ts}@test.com`,
-      password: 'Test1234!',
+      password: generateStrongTestPassword(),
       firstName: 'Out',
       lastName: 'Sider',
       role: 'tenant',

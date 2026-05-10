@@ -11,19 +11,21 @@ const request = require('supertest');
 const { sequelize } = require('../src/config/database');
 const { initRedis, getRedisClient } = require('../src/config/redis');
 const app = require('../src/app');
+const { generateStrongTestPassword } = require('./helpers/testCredentials');
 jest.setTimeout(30_000);
 
 const ts = Date.now();
+const TEST_PASSWORD = generateStrongTestPassword();
 const LANDLORD = {
   email: `match_landlord_${ts}@test.com`,
-  password: 'Test1234!',
+  password: TEST_PASSWORD,
   firstName: 'Match',
   lastName: 'Landlord',
   role: 'landlord',
 };
 const TENANT = {
   email: `match_tenant_${ts}@test.com`,
-  password: 'Test1234!',
+  password: TEST_PASSWORD,
   firstName: 'Match',
   lastName: 'Tenant',
   role: 'tenant',

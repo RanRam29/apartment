@@ -1,24 +1,48 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
-import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 import { getApiBaseUrl } from './apiConfig';
 
 const BASE_URL = getApiBaseUrl();
 const TOKEN_KEY = 'auth_token';
+const hasWebStorage = typeof globalThis !== 'undefined' && 'localStorage' in globalThis;
+const SecureStore = Platform.OS === 'web' ? null : require('expo-secure-store');
 
 const storage = {
-  getItemAsync: (key: string): Promise<string | null> =>
-    Platform.OS === 'web'
-      ? Promise.resolve(localStorage.getItem(key))
-      : SecureStore.getItemAsync(key),
-  setItemAsync: (key: string, value: string): Promise<void> =>
-    Platform.OS === 'web'
-      ? Promise.resolve(void localStorage.setItem(key, value))
-      : SecureStore.setItemAsync(key, value),
-  deleteItemAsync: (key: string): Promise<void> =>
-    Platform.OS === 'web'
-      ? Promise.resolve(void localStorage.removeItem(key))
-      : SecureStore.deleteItemAsync(key),
+  getItemAsync: async (key: string): Promise<string | null> => {
+    if (Platform.OS === 'web') {
+      if (!hasWebStorage) return null;
+      try {
+        return globalThis.localStorage.getItem(key);
+      } catch {
+        return null;
+      }
+    }
+    return SecureStore.getItemAsync(key);
+  },
+  setItemAsync: async (key: string, value: string): Promise<void> => {
+    if (Platform.OS === 'web') {
+      if (!hasWebStorage) return;
+      try {
+        globalThis.localStorage.setItem(key, value);
+      } catch {
+        // Ignore storage errors on web (private mode/quota).
+      }
+      return;
+    }
+    return SecureStore.setItemAsync(key, value);
+  },
+  deleteItemAsync: async (key: string): Promise<void> => {
+    if (Platform.OS === 'web') {
+      if (!hasWebStorage) return;
+      try {
+        globalThis.localStorage.removeItem(key);
+      } catch {
+        // Ignore storage errors on web (private mode/quota).
+      }
+      return;
+    }
+    return SecureStore.deleteItemAsync(key);
+  },
 };
 
 const api: AxiosInstance = axios.create({
@@ -69,10 +93,17 @@ export const apartmentsApi = {
   getById: (id: string) => api.get(`/apartments/${id}`),
   create: (formData: FormData) =>
     api.post('/apartments', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
-  update: (id: string, data: Partial<{ title: string; price: number; isActive: boolean; description: string }>) =>
-    api.patch(`/apartments/${id}`, data),
+  update: (id: string, data: Partial<{
+    title: string; description: string | null; price: number; rooms: number;
+    floor: number | null; totalFloors: number | null; sizeSqm: number | null;
+    city: string; neighborhood: string | null; address: string | null;
+    amenities: string[]; petsAllowed: boolean; availableFrom: string | null;
+    minLeasePeriod: number | null; isActive: boolean;
+  }>) => api.patch(`/apartments/${id}`, data),
   toggleFreeze: (id: string) => api.post(`/apartments/${id}/freeze`),
   deletePermanently: (id: string) => api.delete(`/apartments/${id}`),
+  generateMarketingCopy: (id: string, style: 'professional' | 'friendly' | 'luxury') =>
+    api.post(`/apartments/${id}/marketing-copy`, { style }),
 };
 
 // ─── Swipe ────────────────────────────────────────────────────────────────────
@@ -120,6 +151,96 @@ export const landlordApi = {
 // ─── Payments ─────────────────────────────────────────────────────────────────
 export const paymentApi = {
   startPremium: () => api.post('/payments/premium', {}),
+  // Rent collection (F11)
+  createRentRequest: (contractId: string, month: string) =>
+    api.post('/payments/rent', { contractId, month }),
+  listRentPayments: () => api.get('/payments/rent'),
+  initiatePayment: (id: string, method: 'bit' | 'paybox') =>
+    api.post(`/payments/rent/${id}/pay`, { method }),
+  markPaid: (id: string, method?: 'bank_transfer' | 'manual') =>
+    api.post(`/payments/rent/${id}/mark-paid`, { method }),
+};
+
+// ─── Contracts / Digital Agreements (F10) ────────────────────────────────────
+export const contractsApi = {
+  create: (data: {
+    matchId: string;
+    monthlyRent: number;
+    depositMonths?: number;
+    startDate: string;
+    endDate: string;
+    customClauses?: string;
+  }) => api.post('/contracts', data),
+  /** multipart: matchId, monthlyRent, depositMonths, startDate, endDate, optional customClauses, file field `document` */
+  uploadWithDocument: (formData: FormData) =>
+    api.post('/contracts/upload', formData, { timeout: 120000 }),
+  list: () => api.get('/contracts'),
+  getById: (id: string) => api.get(`/contracts/${id}`),
+  sign: (id: string) => api.post(`/contracts/${id}/sign`),
+  updateDeposit: (id: string, action: 'mark_paid' | 'release' | 'forfeit') =>
+    api.post(`/contracts/${id}/deposit`, { action }),
+};
+
+// ─── Screening / Identity Verification (F9) ──────────────────────────────────
+export const screeningApi = {
+  submitIdentity: (data: { idNumber: string; fullName: string; phone: string }) =>
+    api.post('/screening/identity', data),
+  getStatus: () => api.get('/screening/status'),
+  getTenantStatus: (userId: string) => api.get(`/screening/tenant/${userId}`),
+};
+
+// ─── Roommates (F8) ───────────────────────────────────────────────────────────
+export const roommateApi = {
+  getProfile: () => api.get('/roommates/profile'),
+  saveProfile: (data: {
+    lookingForRoommate?: boolean;
+    sleepSchedule?: 'early_bird' | 'night_owl' | 'flexible';
+    cleanlinessLevel?: number;
+    noiseLevel?: 'quiet' | 'moderate' | 'lively';
+    guestsFrequency?: 'never' | 'rarely' | 'sometimes' | 'often';
+    smokingAllowed?: boolean;
+    petsAllowed?: boolean;
+    workFromHome?: boolean;
+    cities?: string[];
+  }) => api.post('/roommates/profile', data),
+  getMatches: () => api.get('/roommates/matches'),
+};
+
+// ─── Gamification (F13) ───────────────────────────────────────────────────────
+export const gamificationApi = {
+  getMe:       ()                    => api.get('/gamification/me'),
+  awardPoints: (action: string)      => api.post('/gamification/award', { action }),
+  leaderboard: ()                    => api.get('/gamification/leaderboard'),
+};
+
+// ─── Services Marketplace (F14) ──────────────────────────────────────────────
+export const servicesApi = {
+  list: (params?: { category?: string; city?: string; page?: number }) =>
+    api.get('/services', { params }),
+  create: (data: object) => api.post('/services', data),
+  getById: (id: string) => api.get(`/services/${id}`),
+  update: (id: string, data: object) => api.patch(`/services/${id}`, data),
+  remove: (id: string) => api.delete(`/services/${id}`),
+  review: (id: string, rating: number, comment: string) =>
+    api.post(`/services/${id}/review`, { rating, comment }),
+};
+
+// ─── IoT / Commercial Tenants (F15) ──────────────────────────────────────────
+export const iotApi = {
+  listDevices: (leaseId?: string) =>
+    api.get('/iot/devices', { params: leaseId ? { leaseId } : {} }),
+  registerDevice: (data: object) =>
+    api.post('/iot/devices', data),
+  updateDeviceStatus: (deviceId: string, status: string) =>
+    api.patch(`/iot/devices/${deviceId}/status`, { status }),
+  simulateAccess: (deviceId: string, action: string) =>
+    api.post('/iot/access', { deviceId, action }),
+  listTickets: (params?: { leaseId?: string; status?: string }) =>
+    api.get('/iot/maintenance', { params }),
+  createTicket: (data: object) =>
+    api.post('/iot/maintenance', data),
+  updateTicket: (id: string, data: object) =>
+    api.patch(`/iot/maintenance/${id}`, data),
 };
 
 // ─── Token helpers ────────────────────────────────────────────────────────────

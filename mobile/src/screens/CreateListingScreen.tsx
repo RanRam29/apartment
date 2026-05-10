@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useQueryClient } from '@tanstack/react-query';
 import { apartmentsApi } from '../services/api';
 import type { Amenity } from '../types';
+import { C, Dark } from '../theme';
 
 const AMENITY_OPTIONS: { key: Amenity; label: string }[] = [
   { key: 'parking',     label: '🚗 חניה' },
@@ -65,7 +66,7 @@ export default function CreateListingScreen({ navigation }: any) {
 
   async function handleSubmit() {
     if (!title || !price || !rooms || !city) {
-      showMessage('שגיאה', 'נא למלא: כותרת, מחיר, חדרות ועיר');
+      showMessage('שגיאה', 'נא למלא: כותרת, מחיר, חדרים ועיר');
       return;
     }
 
@@ -119,46 +120,46 @@ export default function CreateListingScreen({ navigation }: any) {
 
           <Field label="כותרת *">
             <TextInput style={styles.input} value={title} onChangeText={setTitle}
-              placeholder="לדוג׳: דירת 3 חדרות מרוהטת בלב תל אביב" placeholderTextColor="#A0A0B2" textAlign="right" />
+              placeholder="לדוג׳: דירת 3 חדרים מרוהטת בלב תל אביב" placeholderTextColor={C.textMut} textAlign="right" />
           </Field>
 
           <View style={styles.row}>
             <Field label="מחיר ₪ *" style={{ flex: 1, marginLeft: 8 }}>
               <TextInput style={styles.input} value={price} onChangeText={setPrice}
-                keyboardType="numeric" placeholder="6500" placeholderTextColor="#A0A0B2" textAlign="right" />
+                keyboardType="numeric" placeholder="6500" placeholderTextColor={C.textMut} textAlign="right" />
             </Field>
-            <Field label="חדרות *" style={{ flex: 1 }}>
+            <Field label="חדרים *" style={{ flex: 1 }}>
               <TextInput style={styles.input} value={rooms} onChangeText={setRooms}
-                keyboardType="decimal-pad" placeholder="3" placeholderTextColor="#A0A0B2" textAlign="right" />
+                keyboardType="decimal-pad" placeholder="3" placeholderTextColor={C.textMut} textAlign="right" />
             </Field>
           </View>
 
           <View style={styles.row}>
             <Field label="עיר *" style={{ flex: 1, marginLeft: 8 }}>
               <TextInput style={styles.input} value={city} onChangeText={setCity}
-                placeholder="תל אביב" placeholderTextColor="#A0A0B2" textAlign="right" />
+                placeholder="תל אביב" placeholderTextColor={C.textMut} textAlign="right" />
             </Field>
             <Field label="שכונה" style={{ flex: 1 }}>
               <TextInput style={styles.input} value={neighborhood} onChangeText={setNeighborhood}
-                placeholder="פלורנטין" placeholderTextColor="#A0A0B2" textAlign="right" />
+                placeholder="פלורנטין" placeholderTextColor={C.textMut} textAlign="right" />
             </Field>
           </View>
 
           <View style={styles.row}>
             <Field label="קומה" style={{ flex: 1, marginLeft: 8 }}>
               <TextInput style={styles.input} value={floor} onChangeText={setFloor}
-                keyboardType="numeric" placeholder="3" placeholderTextColor="#A0A0B2" textAlign="right" />
+                keyboardType="numeric" placeholder="3" placeholderTextColor={C.textMut} textAlign="right" />
             </Field>
             <Field label='גודל מ"ר' style={{ flex: 1 }}>
               <TextInput style={styles.input} value={sizeSqm} onChangeText={setSizeSqm}
-                keyboardType="numeric" placeholder="75" placeholderTextColor="#A0A0B2" textAlign="right" />
+                keyboardType="numeric" placeholder="75" placeholderTextColor={C.textMut} textAlign="right" />
             </Field>
           </View>
 
           <Field label="תיאור">
             <TextInput style={[styles.input, styles.textarea]} value={description}
               onChangeText={setDescription} multiline numberOfLines={4}
-              placeholder="תאר את הדירה..." placeholderTextColor="#A0A0B2" textAlign="right" />
+              placeholder="תאר את הדירה..." placeholderTextColor={C.textMut} textAlign="right" />
           </Field>
 
           {/* Amenities */}
@@ -181,7 +182,7 @@ export default function CreateListingScreen({ navigation }: any) {
           <Text style={styles.fieldLabel}>תמונות ({images.length}/10)</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imagesRow}>
             <TouchableOpacity style={styles.addImageBtn} onPress={pickImages}>
-              <Ionicons name="camera-outline" size={28} color="#6C5CE7" />
+              <Ionicons name="camera-outline" size={28} color={C.cyan} />
               <Text style={styles.addImageText}>הוסף</Text>
             </TouchableOpacity>
             {images.map((img, i) => (
@@ -203,7 +204,7 @@ export default function CreateListingScreen({ navigation }: any) {
             disabled={loading}
           >
             {loading
-              ? <ActivityIndicator color="#fff" />
+              ? <ActivityIndicator color={C.navy} />
               : <Text style={styles.submitText}>פרסם מודעה 🏠</Text>
             }
           </TouchableOpacity>
@@ -223,39 +224,39 @@ function Field({ label, children, style }: { label: string; children: React.Reac
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1A1A2E' },
+  container: { flex: 1, backgroundColor: Dark.bg },
   scroll: { padding: 20, paddingBottom: 40 },
   header: { fontSize: 22, fontWeight: '800', color: '#fff', textAlign: 'right', marginBottom: 20 },
   row: { flexDirection: 'row', marginBottom: 0 },
-  fieldLabel: { color: '#A0A0B2', fontSize: 12, fontWeight: '600', textAlign: 'right', marginBottom: 6 },
+  fieldLabel: { color: C.textMut, fontSize: 12, fontWeight: '600', textAlign: 'right', marginBottom: 6 },
   input: {
-    backgroundColor: '#2A2A3E', borderRadius: 12, padding: 14,
-    fontSize: 14, color: '#fff', borderWidth: 1, borderColor: '#3A3A5E',
+    backgroundColor: Dark.surface, borderRadius: 12, padding: 14,
+    fontSize: 14, color: '#fff', borderWidth: 1, borderColor: Dark.border,
   },
   textarea: { height: 100, textAlignVertical: 'top' },
   amenitiesGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 },
   amenityChip: {
     paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10,
-    backgroundColor: '#2A2A3E', borderWidth: 1, borderColor: '#3A3A5E',
+    backgroundColor: Dark.surface, borderWidth: 1, borderColor: Dark.border,
   },
-  amenityChipActive: { backgroundColor: 'rgba(108,92,231,0.2)', borderColor: '#6C5CE7' },
-  amenityText: { color: '#A0A0B2', fontSize: 13 },
-  amenityTextActive: { color: '#6C5CE7', fontWeight: '600' },
+  amenityChipActive: { backgroundColor: C.cyanAlpha(0.2), borderColor: C.cyan },
+  amenityText: { color: C.textMut, fontSize: 13 },
+  amenityTextActive: { color: C.cyan, fontWeight: '600' },
   imagesRow: { marginBottom: 24 },
   addImageBtn: {
     width: 80, height: 80, borderRadius: 12, borderWidth: 2,
-    borderColor: '#6C5CE7', borderStyle: 'dashed',
+    borderColor: C.cyan, borderStyle: 'dashed',
     justifyContent: 'center', alignItems: 'center',
-    marginRight: 8, backgroundColor: 'rgba(108,92,231,0.08)',
+    marginRight: 8, backgroundColor: C.cyanAlpha(0.08),
   },
-  addImageText: { color: '#6C5CE7', fontSize: 11, marginTop: 2 },
+  addImageText: { color: C.cyan, fontSize: 11, marginTop: 2 },
   imageThumb: { width: 80, height: 80, borderRadius: 12, marginRight: 8, position: 'relative' },
   imageThumbImg: { width: 80, height: 80, borderRadius: 12 },
   removeImageBtn: { position: 'absolute', top: -6, right: -6 },
   submitBtn: {
-    backgroundColor: '#6C5CE7', borderRadius: 14,
+    backgroundColor: C.cyan, borderRadius: 14,
     paddingVertical: 16, alignItems: 'center', marginTop: 8,
   },
   submitBtnDisabled: { opacity: 0.6 },
-  submitText: { color: '#fff', fontSize: 16, fontWeight: '800' },
+  submitText: { color: C.navy, fontSize: 16, fontWeight: '800' },
 });

@@ -10,6 +10,7 @@ import { useChatStore } from '../store/useChatStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { chatApi } from '../services/api';
 import type { Message } from '../types';
+import { C, Dark } from '../theme';
 
 type ChatRoute = RouteProp<{ Chat: { matchId: string; title: string } }, 'Chat'>;
 
@@ -70,7 +71,7 @@ export default function ChatScreen() {
   if (loading) {
     return (
       <SafeAreaView style={styles.centered}>
-        <ActivityIndicator size="large" color="#6C5CE7" />
+        <ActivityIndicator size="large" color={C.cyan} />
       </SafeAreaView>
     );
   }
@@ -106,14 +107,14 @@ export default function ChatScreen() {
             disabled={!input.trim() || sending}
           >
             {sending
-              ? <ActivityIndicator size="small" color="#fff" />
-              : <Ionicons name="send" size={18} color="#fff" />
+              ? <ActivityIndicator size="small" color={C.navy} />
+              : <Ionicons name="send" size={18} color={C.navy} />
             }
           </TouchableOpacity>
           <TextInput
             style={styles.input}
             placeholder="הקלד הודעה..."
-            placeholderTextColor="#A0A0B2"
+            placeholderTextColor={C.textMut}
             value={input}
             onChangeText={handleTyping}
             multiline
@@ -138,7 +139,7 @@ function ChatBubble({ message, isMe }: { message: Message; isMe: boolean }) {
           <Ionicons
             name={message.isRead ? 'checkmark-done' : 'checkmark'}
             size={12}
-            color={message.isRead ? '#A78BFA' : 'rgba(255,255,255,0.45)'}
+            color={message.isRead ? C.cyan : 'rgba(255,255,255,0.45)'}
           />
         )}
         <Text style={styles.bubbleTime}>
@@ -187,48 +188,50 @@ function TypingDots() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1A1A2E' },
-  centered: { flex: 1, backgroundColor: '#1A1A2E', justifyContent: 'center', alignItems: 'center' },
+  container: { flex: 1, backgroundColor: Dark.bg },
+  centered: { flex: 1, backgroundColor: Dark.bg, justifyContent: 'center', alignItems: 'center' },
   messagesList: { padding: 16, gap: 8, flexGrow: 1 },
   bubble: {
     maxWidth: '75%', borderRadius: 16, padding: 10,
     paddingHorizontal: 14,
   },
   bubbleMe: {
-    alignSelf: 'flex-end', backgroundColor: '#6C5CE7',
+    alignSelf: 'flex-end', backgroundColor: C.cyan,
     borderBottomRightRadius: 4,
   },
   bubbleThem: {
-    alignSelf: 'flex-start', backgroundColor: '#2A2A3E',
+    alignSelf: 'flex-start', backgroundColor: Dark.surface,
     borderBottomLeftRadius: 4,
   },
   bubbleText: { fontSize: 15, lineHeight: 20 },
-  bubbleTextMe: { color: '#fff' },
+  bubbleTextMe: { color: C.navy },
   bubbleTextThem: { color: '#E0E0E0' },
   bubbleMeta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 3, marginTop: 3 },
   bubbleTime: { fontSize: 10, color: 'rgba(255,255,255,0.5)' },
   typingBubble: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     marginHorizontal: 16, marginBottom: 8,
-    backgroundColor: '#2A2A3E', borderRadius: 16, borderBottomLeftRadius: 4,
+    backgroundColor: Dark.surface, borderRadius: 16, borderBottomLeftRadius: 4,
     alignSelf: 'flex-start', paddingHorizontal: 14, paddingVertical: 10,
   },
-  typingDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#A0A0B2' },
+  typingDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: C.textMut },
   emptyChat: { flex: 1, alignItems: 'center', paddingTop: 60 },
-  emptyChatText: { color: '#A0A0B2', fontSize: 14 },
+  emptyChatText: { color: C.textMut, fontSize: 14 },
   inputBar: {
     flexDirection: 'row', alignItems: 'flex-end',
-    padding: 10, borderTopWidth: 1, borderTopColor: '#2A2A3E',
-    backgroundColor: '#1A1A2E', gap: 8,
+    padding: 10, borderTopWidth: 1, borderTopColor: Dark.surface,
+    backgroundColor: Dark.bg, gap: 8,
   },
   input: {
-    flex: 1, backgroundColor: '#2A2A3E', borderRadius: 20,
+    flex: 1, backgroundColor: Dark.surface, borderRadius: 20,
     paddingHorizontal: 16, paddingVertical: 10,
     color: '#fff', fontSize: 15, maxHeight: 100,
+    borderWidth: 1,
+    borderColor: Dark.border,
   },
   sendBtn: {
     width: 42, height: 42, borderRadius: 21,
-    backgroundColor: '#6C5CE7',
+    backgroundColor: C.cyan,
     justifyContent: 'center', alignItems: 'center',
   },
   sendBtnDisabled: { opacity: 0.5 },

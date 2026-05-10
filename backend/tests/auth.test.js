@@ -33,8 +33,10 @@ const request = require('supertest');
 const { sequelize } = require('../src/config/database');
 const { initRedis, getRedisClient } = require('../src/config/redis');
 const app = require('../src/app');
-const TEST_PASSWORD = `T-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-const WRONG_PASSWORD = `W-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+const { generateStrongTestPassword } = require('./helpers/testCredentials');
+
+const TEST_PASSWORD = generateStrongTestPassword();
+const WRONG_PASSWORD = generateStrongTestPassword();
 const UNKNOWN_EMAIL = `unknown_${Date.now()}@test.com`;
 const INVALID_EMAIL = `invalid_${Date.now()}@test.com`;
 
@@ -140,7 +142,7 @@ describe('POST /api/auth/verify/resend', () => {
     const ts = Date.now();
     const unverified = {
       email: `unverified_${ts}@test.com`,
-      password: 'Test1234!',
+      password: generateStrongTestPassword(),
       firstName: 'Un',
       lastName: 'Verified',
       role: 'tenant',

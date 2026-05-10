@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { landlordApi } from '../services/api';
 import type { LandlordDashboard as DashboardData } from '../types';
+import { C, Dark } from '../theme';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const CHART_WIDTH = SCREEN_WIDTH - 64; // padding 16*2 + section padding 14*2
@@ -29,7 +30,7 @@ export default function LandlordDashboard() {
   if (isLoading) {
     return (
       <SafeAreaView style={styles.centered}>
-        <ActivityIndicator size="large" color="#6C5CE7" />
+        <ActivityIndicator size="large" color={C.cyan} />
       </SafeAreaView>
     );
   }
@@ -48,15 +49,15 @@ export default function LandlordDashboard() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
-        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#6C5CE7" />}
+        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={C.cyan} />}
         contentContainerStyle={styles.scroll}
       >
         <Text style={styles.header}>דשבורד</Text>
 
         {/* KPI row */}
         <View style={styles.kpiRow}>
-          <KPICard icon="eye-outline"   label="צפיות"   value={summary.totalViews}              color="#6C5CE7" />
-          <KPICard icon="heart-outline" label="לייקים"  value={summary.totalLikes}              color="#FF4757" />
+          <KPICard icon="eye-outline"   label="צפיות"   value={summary.totalViews}              color={C.cyan} />
+          <KPICard icon="heart-outline" label="לייקים"  value={summary.totalLikes}              color={C.coral} />
           <KPICard icon="trending-up"  label="המרה"    value={`${summary.conversionRate}%`}    color="#00E676" />
           <KPICard icon="home-outline"  label="פעילות"  value={summary.activeListings}          color="#FFA502" />
         </View>
@@ -67,7 +68,7 @@ export default function LandlordDashboard() {
           <View style={styles.matchRow}>
             <MatchStat label="ממתין"  value={summary.matches.pending}  color="#FFA502" />
             <MatchStat label="אושר"   value={summary.matches.accepted} color="#00E676" />
-            <MatchStat label="נדחה"   value={summary.matches.rejected} color="#FF4757" />
+            <MatchStat label="נדחה"   value={summary.matches.rejected} color={C.danger} />
           </View>
         </View>
 
@@ -109,7 +110,7 @@ export default function LandlordDashboard() {
             const likeRatio = (apt.likeCount ?? 0) / maxLikes;
             return (
               <View key={apt.id} style={styles.listingRow}>
-                <View style={[styles.activeIndicator, { backgroundColor: apt.isActive ? '#00E676' : '#FF4757' }]} />
+                <View style={[styles.activeIndicator, { backgroundColor: apt.isActive ? C.success : C.danger }]} />
                 <View style={styles.listingInfo}>
                   <Text style={styles.listingTitle} numberOfLines={1}>{apt.title}</Text>
                   <Text style={styles.listingMeta}>{apt.city} · ₪{apt.price?.toLocaleString()}</Text>
@@ -120,11 +121,11 @@ export default function LandlordDashboard() {
                 </View>
                 <View style={styles.listingStats}>
                   <View style={styles.statPill}>
-                    <Ionicons name="eye-outline" size={11} color="#A0A0B2" />
+                    <Ionicons name="eye-outline" size={11} color={C.textMut} />
                     <Text style={styles.listingStatText}>{apt.viewCount}</Text>
                   </View>
                   <View style={styles.statPill}>
-                    <Ionicons name="heart-outline" size={11} color="#FF4757" />
+                    <Ionicons name="heart-outline" size={11} color={C.coral} />
                     <Text style={styles.listingStatText}>{apt.likeCount}</Text>
                   </View>
                 </View>
@@ -184,9 +185,9 @@ function SwipeTrendChart({ data, days }: { data: { date: string; count: number }
             <Ionicons
               name={wowChange >= 0 ? 'trending-up' : 'trending-down'}
               size={13}
-              color={wowChange >= 0 ? '#00E676' : '#FF4757'}
+              color={wowChange >= 0 ? C.success : C.danger}
             />
-            <Text style={[styles.wowText, { color: wowChange >= 0 ? '#00E676' : '#FF4757' }]}>
+            <Text style={[styles.wowText, { color: wowChange >= 0 ? C.success : C.danger }]}>
               {wowChange >= 0 ? '+' : ''}{wowChange}% שבוע
             </Text>
           </View>
@@ -261,84 +262,88 @@ function MatchStat({ label, value, color }: { label: string; value: number; colo
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1A1A2E' },
-  centered: { flex: 1, backgroundColor: '#1A1A2E', justifyContent: 'center', alignItems: 'center' },
+  container: { flex: 1, backgroundColor: Dark.bg },
+  centered: { flex: 1, backgroundColor: Dark.bg, justifyContent: 'center', alignItems: 'center' },
   scroll: { padding: 16, paddingBottom: 40 },
   header: { fontSize: 22, fontWeight: '800', color: '#fff', marginBottom: 16, textAlign: 'right' },
 
   kpiRow: { flexDirection: 'row', gap: 8, marginBottom: 12 },
   kpiCard: {
-    flex: 1, backgroundColor: '#2A2A3E', borderRadius: 12, padding: 10,
+    flex: 1, backgroundColor: Dark.surface, borderRadius: 12, padding: 10,
     alignItems: 'center', gap: 4, borderTopWidth: 3,
+    borderWidth: 1,
+    borderColor: Dark.border,
   },
   kpiValue: { fontSize: 18, fontWeight: '800', color: '#fff' },
-  kpiLabel: { fontSize: 10, color: '#A0A0B2' },
+  kpiLabel: { fontSize: 10, color: C.textMut },
 
-  section: { backgroundColor: '#2A2A3E', borderRadius: 16, padding: 14, marginBottom: 12 },
+  section: { backgroundColor: Dark.surface, borderRadius: 16, padding: 14, marginBottom: 12, borderWidth: 1, borderColor: Dark.border },
   sectionTitle: { fontSize: 14, fontWeight: '700', color: '#fff', textAlign: 'right', marginBottom: 10 },
 
   matchRow: { flexDirection: 'row', justifyContent: 'space-around' },
   matchStat: { alignItems: 'center', gap: 4 },
   matchStatValue: { fontSize: 24, fontWeight: '800' },
-  matchStatLabel: { fontSize: 11, color: '#A0A0B2' },
+  matchStatLabel: { fontSize: 11, color: C.textMut },
 
   chartHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
   periodRow: { flexDirection: 'row', gap: 4 },
   periodBtn: {
     paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8,
-    backgroundColor: '#1A1A2E',
+    backgroundColor: Dark.inset,
   },
-  periodBtnActive: { backgroundColor: 'rgba(108,92,231,0.3)' },
-  periodBtnText: { color: '#A0A0B2', fontSize: 10, fontWeight: '600' },
-  periodBtnTextActive: { color: '#6C5CE7' },
+  periodBtnActive: { backgroundColor: Dark.periodActive },
+  periodBtnText: { color: C.textMut, fontSize: 10, fontWeight: '600' },
+  periodBtnTextActive: { color: C.cyan },
 
   chartSummary: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
   chartTotal: { fontSize: 22, fontWeight: '800', color: '#fff', textAlign: 'right' },
-  chartTotalLabel: { fontSize: 10, color: '#A0A0B2', textAlign: 'right' },
+  chartTotalLabel: { fontSize: 10, color: C.textMut, textAlign: 'right' },
   wowBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10,
   },
-  wowBadgeUp: { backgroundColor: 'rgba(0,230,118,0.12)' },
-  wowBadgeDown: { backgroundColor: 'rgba(255,71,87,0.12)' },
+  wowBadgeUp: { backgroundColor: 'rgba(16,185,129,0.12)' },
+  wowBadgeDown: { backgroundColor: 'rgba(186,26,26,0.12)' },
   wowText: { fontSize: 11, fontWeight: '700' },
 
   tooltip: {
-    alignSelf: 'center', backgroundColor: '#3A3A5E',
+    alignSelf: 'center', backgroundColor: Dark.surface,
     borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6,
     marginBottom: 6, alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Dark.border,
   },
-  tooltipDate: { color: '#A0A0B2', fontSize: 10 },
+  tooltipDate: { color: C.textMut, fontSize: 10 },
   tooltipCount: { color: '#fff', fontSize: 13, fontWeight: '700' },
 
   barsContainer: { flexDirection: 'row', alignItems: 'flex-end', gap: 2 },
   barWrap: { alignItems: 'center', justifyContent: 'flex-end', gap: 3 },
-  bar: { backgroundColor: '#6C5CE7', borderRadius: 3, opacity: 0.8 },
-  barSelected: { backgroundColor: '#A78BFA', opacity: 1 },
-  barWeekend: { backgroundColor: '#4A3F7A' },
-  barLabel: { fontSize: 8, color: '#A0A0B2', width: '100%', textAlign: 'center' },
+  bar: { backgroundColor: C.cyan, borderRadius: 3, opacity: 0.85 },
+  barSelected: { backgroundColor: '#7AEFFF', opacity: 1 },
+  barWeekend: { backgroundColor: C.navyMid, opacity: 0.95 },
+  barLabel: { fontSize: 8, color: C.textMut, width: '100%', textAlign: 'center' },
 
   leadRow: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#3A3A5E',
+    paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: Dark.border,
   },
   leadInfo: { flex: 1 },
   leadName: { color: '#fff', fontSize: 13, fontWeight: '600', textAlign: 'right' },
-  leadApt: { color: '#A0A0B2', fontSize: 11, textAlign: 'right' },
+  leadApt: { color: C.textMut, fontSize: 11, textAlign: 'right' },
   pendingTag: { backgroundColor: 'rgba(255,165,2,0.15)', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 },
   pendingTagText: { color: '#FFA502', fontSize: 11, fontWeight: '600' },
 
   listingRow: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
-    paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#3A3A5E',
+    paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: Dark.border,
   },
   activeIndicator: { width: 8, height: 8, borderRadius: 4 },
   listingInfo: { flex: 1, gap: 3 },
   listingTitle: { color: '#fff', fontSize: 13, fontWeight: '600', textAlign: 'right' },
-  listingMeta: { color: '#A0A0B2', fontSize: 11, textAlign: 'right' },
-  perfBarTrack: { height: 3, backgroundColor: '#3A3A5E', borderRadius: 2, overflow: 'hidden' },
-  perfBarFill: { height: 3, backgroundColor: '#6C5CE7', borderRadius: 2 },
+  listingMeta: { color: C.textMut, fontSize: 11, textAlign: 'right' },
+  perfBarTrack: { height: 3, backgroundColor: C.navyMidAlpha(0.6), borderRadius: 2, overflow: 'hidden' },
+  perfBarFill: { height: 3, backgroundColor: C.cyan, borderRadius: 2 },
   listingStats: { gap: 4, alignItems: 'flex-end' },
   statPill: { flexDirection: 'row', alignItems: 'center', gap: 3 },
-  listingStatText: { color: '#A0A0B2', fontSize: 11 },
+  listingStatText: { color: C.textMut, fontSize: 11 },
 });

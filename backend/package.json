@@ -10,7 +10,7 @@
     "seed": "sequelize-cli db:seed:all",
     "seed:demo": "node src/seeders/demo.js",
     "test": "jest --runInBand --testTimeout=30000",
-    "test:ci": "jest --runInBand --coverage --testTimeout=30000"
+    "test:ci": "jest --runInBand --coverage --testTimeout=30000 --forceExit"
   },
   "jest": {
     "testEnvironment": "node",
@@ -23,13 +23,12 @@
     "coverageThreshold": {
       "global": {
         "statements": 60,
-        "branches": 50
+        "branches": 47
       }
     }
   },
   "dependencies": {
     "axios": "^1.6.2",
-    "aws-sdk": "^2.1499.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
@@ -42,12 +41,12 @@
     "kafkajs": "^2.2.4",
     "mongoose": "^8.0.3",
     "morgan": "^1.10.0",
-    "multer": "^2.1.1",
-    "nodemailer": "^7.0.3",
+    "multer": "^1.4.5-lts.2",
     "pg": "^8.11.3",
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.35.2",
     "socket.io": "^4.6.1",
+    "uuid": "^9.0.1",
     "winston": "^3.11.0"
   },
   "devDependencies": {

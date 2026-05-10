@@ -11,18 +11,20 @@ const request = require('supertest');
 const { sequelize } = require('../src/config/database');
 const { initRedis, getRedisClient } = require('../src/config/redis');
 const app = require('../src/app');
+const { generateStrongTestPassword } = require('./helpers/testCredentials');
 
 const ts = Date.now();
+const TEST_PASSWORD = generateStrongTestPassword();
 const LANDLORD = {
   email: `swipe_landlord_${ts}@test.com`,
-  password: 'Test1234!',
+  password: TEST_PASSWORD,
   firstName: 'Swipe',
   lastName: 'Landlord',
   role: 'landlord',
 };
 const TENANT = {
   email: `swipe_tenant_${ts}@test.com`,
-  password: 'Test1234!',
+  password: TEST_PASSWORD,
   firstName: 'Swipe',
   lastName: 'Tenant',
   role: 'tenant',

@@ -31,7 +31,7 @@ export type Amenity =
 export interface Apartment {
   id: string;
   landlordId: string;
-  landlord?: Pick<User, 'id' | 'firstName' | 'lastName' | 'avatarUrl' | 'isVerified'>;
+  landlord?: Pick<User, 'id' | 'firstName' | 'lastName' | 'avatarUrl' | 'isVerified' | 'isPremium'>;
   title: string;
   description: string | null;
   price: number;
@@ -122,6 +122,7 @@ export type TenantTabParamList = {
   Swipe: undefined;
   Matches: undefined;
   Search: undefined;
+  Map: undefined;
   Profile: undefined;
 };
 
@@ -129,6 +130,7 @@ export type LandlordTabParamList = {
   Home: undefined;
   Dashboard: undefined;
   Leads: undefined;
+  Matches: undefined;
   Listings: undefined;
   Profile: undefined;
 };
@@ -139,5 +141,15 @@ export type MainStackParamList = {
   Chat: { matchId: string; title: string };
   ApartmentDetail: { apartmentId: string };
   CreateListing: undefined;
+  EditListing: { apartmentId: string };
   Preferences: undefined;
+  Roommate: undefined;
+  VerifyIdentity: undefined;
+  Contracts: undefined;
+  ContractDetail: { contractId: string };
+  RentPayments: undefined;
+  Commercial: undefined;
+  Gamification: undefined;
+  Services: undefined;
+  IoT: undefined;
 };

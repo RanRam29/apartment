@@ -4,6 +4,7 @@ const { body, validationResult } = require('express-validator');
 const { Apartment, Swipe, User } = require('../models');
 const { UserPreferences } = require('../models');
 const { authenticate, requireRole } = require('../middleware/auth');
+const { geminiSearchLimiter } = require('../middleware/geminiRateLimit');
 const { parseSearchQuery } = require('../services/geminiService');
 const { cacheGet, cacheSet } = require('../config/redis');
 const logger = require('../utils/logger');
@@ -15,6 +16,7 @@ router.post(
   '/search',
   authenticate,
   requireRole('tenant'),
+  geminiSearchLimiter,
   [body('query').trim().isLength({ min: 2, max: 500 }).withMessage('Query must be 2-500 chars')],
   async (req, res, next) => {
     try {
@@ -23,8 +25,8 @@ router.post(
 
       const { query, city, maxPrice, minRooms, petsAllowed } = req.body;
 
-      // Cache parsed filters for identical queries (5 min)
-      const filterCacheKey = `nlp:${Buffer.from(query).toString('base64').slice(0, 40)}`;
+      // Cache parsed filters for identical queries (5 min). Bump version when parser semantics change.
+      const filterCacheKey = `nlp:v3:${Buffer.from(query).toString('base64').slice(0, 40)}`;
       let filters = await cacheGet(filterCacheKey);
 
       if (!filters) {

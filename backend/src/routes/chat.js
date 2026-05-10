@@ -76,7 +76,14 @@ router.post(
       const match = await verifyMatchParticipant(req.params.matchId, req.user.id);
       if (!match) return res.status(404).json({ error: 'Match not found or not accepted' });
 
-      const { content, type = 'text', imageUrl } = req.body;
+      const { type = 'text', imageUrl } = req.body;
+      if (typeof req.body?.content !== 'string') {
+        return res.status(422).json({ error: 'content must be a string' });
+      }
+      const content = req.body.content.trim();
+      if (!content.length || content.length > 2000) {
+        return res.status(422).json({ error: 'Message must be 1-2000 chars' });
+      }
 
       const message = await Message.create({
         matchId: req.params.matchId,
@@ -116,7 +123,7 @@ router.post(
       // Push notification to the other party (fire-and-forget)
       const recipientId = req.user.id === match.tenantId ? match.landlordId : match.tenantId;
       getRedisClient().get(`push:token:${recipientId}`).then((token) => {
-        const preview = content.length > 80 ? content.slice(0, 77) + '...' : content;
+        const preview = content.length > 80 ? `${content.slice(0, 77)}...` : content;
         sendPushNotification(token, {
           title: 'הודעה חדשה 💬',
           body: preview,

@@ -7,6 +7,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
+    "export:web": "expo export -p web",
     "lint": "eslint src --ext .ts,.tsx",
     "test": "jest --runInBand",
     "test:coverage": "jest --coverage --runInBand"
@@ -23,6 +24,7 @@
     "expo": "~53.0.0",
     "expo-constants": "17.1.8",
     "expo-device": "~7.1.4",
+    "expo-document-picker": "~13.1.6",
     "expo-font": "~13.3.2",
     "expo-haptics": "~14.1.4",
     "expo-image": "~2.4.1",
@@ -41,10 +43,12 @@
     "react-native-screens": "~4.11.1",
     "react-native-vector-icons": "^10.1.0",
     "react-native-web": "^0.20.0",
+    "react-native-webview": "^13.13.5",
     "socket.io-client": "^4.7.5",
     "zustand": "^4.5.4"
   },
   "devDependencies": {
+    "@eslint/js": "^9.15.0",
     "@babel/core": "^7.24.0",
     "@testing-library/jest-native": "^5.4.3",
     "@testing-library/react-native": "^12.7.2",
@@ -52,13 +56,15 @@
     "@types/react": "~19.0.10",
     "jest": "^29.7.0",
     "jest-expo": "~53.0.14",
+    "eslint": "^9.15.0",
     "react-test-renderer": "19.0.0",
-    "typescript": "~5.8.3"
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.15.0"
   },
   "jest": {
     "preset": "jest-expo",
     "transformIgnorePatterns": [
-      "node_modules/(?!(?:\\.pnpm/)?((jest-)?react-native|@react-native|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|@react-navigation/.*|react-navigation|react-native-svg|react-native-reanimated|react-native-gesture-handler|react-native-safe-area-context|react-native-screens))"
+      "node_modules/(?!(?:\\.pnpm/)?((jest-)?react-native|@react-native|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|@react-navigation/.*|react-navigation|react-native-svg|react-native-reanimated|react-native-gesture-handler|react-native-safe-area-context|react-native-screens|react-native-webview))"
     ],
     "setupFilesAfterEnv": [
       "<rootDir>/jest.setup.ts"
@@ -75,5 +81,9 @@
         "branches": 40
       }
     }
+  },
+  "overrides": {
+    "postcss": ">=8.5.10",
+    "@tootallnate/once": ">=3.0.1"
   }
 }
