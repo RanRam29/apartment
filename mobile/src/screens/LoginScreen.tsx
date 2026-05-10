@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
   StyleSheet, ActivityIndicator, ScrollView,
-  Alert,
 } from 'react-native';
 import { useAuthStore } from '../store/useAuthStore';
 import { getVerificationPromptEmail } from '../services/verificationUx';
@@ -17,10 +16,14 @@ export default function LoginScreen({ onSwitch }: Props) {
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading]   = useState(false);
+  const [error, setError]       = useState('');
+  const [info, setInfo]         = useState('');
 
   async function handleLogin() {
+    setError('');
+    setInfo('');
     if (!email.trim() || !password) {
-      Alert.alert('שגיאה', 'נא למלא אימייל וסיסמה');
+      setError('נא למלא אימייל וסיסמה');
       return;
     }
     setLoading(true);
@@ -29,17 +32,12 @@ export default function LoginScreen({ onSwitch }: Props) {
     } catch (err: any) {
       const unverifiedEmail = getVerificationPromptEmail(err);
       if (unverifiedEmail) {
-        Alert.alert(
-          'האימייל לא אומת',
-          'שלחנו לך מייל אימות. בדוק את תיבת הדואר שלך ואשר את הכתובת.',
-          [
-            { text: 'שלח שוב', onPress: () => resendVerification(unverifiedEmail) },
-            { text: 'סגור', style: 'cancel' },
-          ],
-        );
+        setInfo('האימייל לא אומת. שלחנו לך מייל אימות — בדוק את תיבת הדואר.');
+        resendVerification(unverifiedEmail).catch(() => {});
+      } else if (!err?.response) {
+        setError('לא ניתן להתחבר לשרת. בדוק את החיבור לאינטרנט.');
       } else {
-        const msg = err?.response?.data?.error || 'שגיאה בכניסה, נסה שנית';
-        Alert.alert('שגיאה', msg);
+        setError(err?.response?.data?.error || 'שגיאה בכניסה, נסה שנית');
       }
     } finally {
       setLoading(false);
@@ -74,6 +72,9 @@ export default function LoginScreen({ onSwitch }: Props) {
         secureTextEntry
         textAlign="right"
       />
+
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
+      {info  ? <Text style={styles.infoText}>{info}</Text>   : null}
 
       <TouchableOpacity
         style={[styles.button, loading && styles.buttonDisabled]}
@@ -124,6 +125,8 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: { opacity: 0.6 },
   buttonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  errorText: { color: '#E74C3C', fontSize: 13, textAlign: 'right', marginBottom: 10, lineHeight: 20 },
+  infoText:  { color: '#27AE60', fontSize: 13, textAlign: 'right', marginBottom: 10, lineHeight: 20 },
   switchRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 24 },
   switchText: { color: C.textSub, fontSize: 14 },
   switchLink: { color: C.navy, fontWeight: '700' },
