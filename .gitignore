@@ -21,6 +21,12 @@ coverage/
 # Uploaded contract files (local disk)
 backend/uploads/
 
+# Claude Code local worktrees (nested clones; do not commit)
+.claude/worktrees/
+
+# Accidental large deploy bundle in repo root
+mobile/tmp-deployed.js
+
 .vercel
 .env*.local
 .worktrees/
