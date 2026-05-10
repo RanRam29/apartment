@@ -134,7 +134,7 @@ router.get(
     query('maxPrice').optional().isInt({ min: 0 }),
     query('rooms').optional().isFloat({ min: 1 }),
     query('page').optional().isInt({ min: 1 }),
-    query('limit').optional().isInt({ min: 1, max: 50 }),
+    query('limit').optional().isInt({ min: 1, max: 150 }),
   ],
   async (req, res, next) => {
     try {
@@ -143,7 +143,7 @@ router.get(
         page = 1, limit = 20,
       } = req.query;
 
-      const cacheKey = `feed:${req.user.id}:${city || 'all'}:${minPrice || 0}:${maxPrice || 99999}:${rooms || 'all'}:${page}`;
+      const cacheKey = `feed:v2:${req.user.id}:${city || 'all'}:${minPrice || 0}:${maxPrice || 99999}:${rooms || 'all'}:${page}`;
       const cached = await cacheGet(cacheKey);
       if (cached) {
         return res.json({ ...cached, fromCache: true });
@@ -171,10 +171,20 @@ router.get(
       const offset = (parseInt(page) - 1) * parseInt(limit);
       const { rows: apartments, count } = await Apartment.findAndCountAll({
         where,
-        include: [{ model: User, as: 'landlord', attributes: ['id', 'firstName', 'lastName', 'avatarUrl', 'isVerified'] }],
-        order: [['createdAt', 'DESC']],
+        include: [{
+          model: User,
+          as: 'landlord',
+          attributes: ['id', 'firstName', 'lastName', 'avatarUrl', 'isVerified', 'isPremium'],
+        }],
+        // פרימיום (משלם) קודם — מודגש במפה ובפיד
+        order: [
+          [{ model: User, as: 'landlord' }, 'isPremium', 'DESC'],
+          ['createdAt', 'DESC'],
+        ],
         limit: parseInt(limit),
         offset,
+        distinct: true,
+        subQuery: false,
       });
 
       const payload = {

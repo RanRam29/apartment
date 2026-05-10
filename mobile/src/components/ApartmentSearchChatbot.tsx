@@ -34,6 +34,18 @@ const FILTER_LABEL: Record<string, string> = {
   availableFrom: 'פנוי מ',
 };
 
+/** תוויות בעברית לערכי amenities מהשרת (אנגלית) */
+const AMENITY_LABEL: Record<string, string> = {
+  parking: 'חניה',
+  balcony: 'מרפסת',
+  elevator: 'מעלית',
+  ac: 'מזגן',
+  storage: 'מחסן',
+  pets_allowed: 'מתאים לחיות',
+  furnished: 'מרוהט',
+  sun_boiler: 'דוד שמש',
+};
+
 function formatFilterSummary(
   filters: Record<string, unknown> | null | undefined,
   opts?: { hasResults?: boolean; queryPreview?: string }
@@ -51,7 +63,13 @@ function formatFilterSummary(
   }
   const parts = Object.entries(filters).map(([k, val]) => {
     const label = FILTER_LABEL[k] ?? k;
-    if (Array.isArray(val)) return `${label}: ${val.join(', ')}`;
+    if (Array.isArray(val)) {
+      const shown =
+        k === 'amenities'
+          ? val.map((x) => AMENITY_LABEL[String(x)] ?? String(x))
+          : val.map(String);
+      return `${label}: ${shown.join(', ')}`;
+    }
     if (typeof val === 'boolean') return `${label}: ${val ? 'כן' : 'לא'}`;
     return `${label}: ${String(val)}`;
   });

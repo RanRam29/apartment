@@ -27,6 +27,8 @@ describe('MapScreen HTML builder', () => {
         price: 7000,
         rooms: 3,
         city: payload,
+        promoted: false,
+        approxLocation: false,
       }],
       `https://example.test/tama?q=${payload}`
     );

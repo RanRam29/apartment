@@ -8,13 +8,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { apartmentsApi } from '../services/api';
 import { C, Dark } from '../theme';
+import { resolveMapCoords } from '../constants/cityCenters';
 
 // TAMA 38 resource IDs from data.gov.il (urban renewal zones)
 const TAMA38_URL =
   'https://data.gov.il/api/3/action/datastore_search' +
   '?resource_id=be5b7935-3922-4f71-8c2a-e83b8e2a22e6&limit=500';
 
-interface AptMarker {
+export interface AptMarker {
   id: string;
   lat: number;
   lng: number;
@@ -22,6 +23,10 @@ interface AptMarker {
   price: number;
   rooms: number;
   city: string;
+  /** משכיר/מודעה במנוי פרימיום — מסומן בולט ומעל שאר הסיכות */
+  promoted: boolean;
+  /** נקודה לפי מרכז עיר (אין lat/lng במסד) */
+  approxLocation: boolean;
 }
 
 function jsonForInlineScript(value: unknown): string {
@@ -55,6 +60,8 @@ export function buildHtml(markers: AptMarker[], tama38Url: string): string {
     .apt-popup .price { color: #00E5FF; font-weight: 700; font-size: 15px; }
     .apt-popup .meta  { color: #555; font-size: 12px; margin-top: 2px; }
     .apt-popup .title { font-weight: 600; font-size: 13px; margin-bottom: 4px; }
+    .apt-popup .badge { display: inline-block; background: #F59E0B; color: #162839; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 6px; margin-bottom: 4px; }
+    .apt-popup .approx { color: #F59E0B; font-size: 11px; margin-top: 4px; }
     .tama-layer { fill: #F39C12; fill-opacity: 0.18; stroke: #F39C12; stroke-width: 1.5; }
   </style>
 </head>
@@ -84,31 +91,51 @@ export function buildHtml(markers: AptMarker[], tama38Url: string): string {
       .replace(/'/g, '&#39;');
   }
 
-  function makeIcon(price) {
+  function makeIcon(apt) {
+    var price = apt.price;
+    var promoted = !!apt.promoted;
     var label = '₪' + (price >= 1000 ? Math.round(price/1000) + 'K' : price);
-    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="28">'
-      + '<rect rx="8" ry="8" width="64" height="24" fill="#00E5FF"/>'
-      + '<text x="32" y="16" font-size="11" font-family="sans-serif" font-weight="700" '
+    var w = promoted ? 78 : 64;
+    var h = promoted ? 32 : 24;
+    var fill = promoted ? '#F59E0B' : '#00E5FF';
+    var stroke = promoted ? '#fff' : 'none';
+    var sw = promoted ? 2.5 : 0;
+    var fs = promoted ? 12 : 11;
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + (h + 4) + '">'
+      + (promoted ? '<filter id="glow"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#F59E0B" flood-opacity="0.7"/></filter>' : '')
+      + '<rect rx="9" ry="9" x="' + (sw/2) + '" y="' + (sw/2) + '" width="' + (w - sw) + '" height="' + h + '" fill="' + fill + '"'
+      + (stroke !== 'none' ? ' stroke="' + stroke + '" stroke-width="' + sw + '"' : '')
+      + (promoted ? ' filter="url(#glow)"' : '') + '/>'
+      + '<text x="' + (w/2) + '" y="' + (h/2 + 5) + '" font-size="' + fs + '" font-family="sans-serif" font-weight="800" '
       + 'fill="#162839" text-anchor="middle">' + label + '</text></svg>';
     return L.divIcon({
       html: svg,
       className: '',
-      iconSize: [64, 28],
-      iconAnchor: [32, 28],
-      popupAnchor: [0, -30],
+      iconSize: [w, h + 4],
+      iconAnchor: [w/2, h + 4],
+      popupAnchor: [0, -(h + 6)],
     });
   }
 
   var markerGroup = L.featureGroup().addTo(map);
 
   markers.forEach(function(apt) {
-    if (!apt.lat || !apt.lng) return;
-    var m = L.marker([apt.lat, apt.lng], { icon: makeIcon(apt.price) });
+    if (apt.lat == null || apt.lng == null || isNaN(apt.lat) || isNaN(apt.lng)) return;
+    var pr = !!apt.promoted;
+    var m = L.marker([apt.lat, apt.lng], {
+      icon: makeIcon(apt),
+      zIndexOffset: pr ? 800 : 0,
+    });
+    var badge = pr ? '<div class="badge">מודעה בולטת</div>' : '';
+    var approx = apt.approxLocation
+      ? '<div class="approx">מיקום משוער לפי עיר</div>' : '';
     m.bindPopup(
       '<div class="apt-popup">'
+      + badge
       + '<div class="title">' + escapeHtml(apt.title) + '</div>'
-      + '<div class="price">₪' + apt.price.toLocaleString() + '/חודש</div>'
+      + '<div class="price">₪' + Number(apt.price).toLocaleString() + '/חודש</div>'
       + '<div class="meta">' + escapeHtml(apt.rooms) + ' חדרים · ' + escapeHtml(apt.city) + '</div>'
+      + approx
       + '</div>'
     );
     markerGroup.addLayer(m);
@@ -176,22 +203,32 @@ export default function MapScreen() {
 
   const { data: feedData, isPending: feedLoading } = useQuery({
     queryKey: ['apartments-feed-map'],
-    queryFn: () => apartmentsApi.getFeed({ limit: 100 }).then((r) => r.data),
+    queryFn: () => apartmentsApi.getFeed({ limit: 120 }).then((r) => r.data),
   });
 
   const markers: AptMarker[] = React.useMemo(() => {
     const list = feedData?.apartments ?? [];
-    return list
-      .filter((a: any) => a.latitude && a.longitude)
-      .map((a: any) => ({
-        id:    a.id,
-        lat:   Number(a.latitude),
-        lng:   Number(a.longitude),
+    const mapped = list.map((a: any) => {
+      const coords = resolveMapCoords(a.id, a.city, a.latitude, a.longitude);
+      const promoted = !!(a.landlord?.isPremium === true);
+      return {
+        id: a.id,
+        lat: coords.lat,
+        lng: coords.lng,
         title: a.title,
         price: Number(a.price),
         rooms: Number(a.rooms),
-        city:  a.city,
-      }));
+        city: a.city ?? '',
+        promoted,
+        approxLocation: coords.approx,
+      } satisfies AptMarker;
+    });
+    /** סיכות רגילות ראשונות, בולטות (פרימיום) מעל הכול */
+    mapped.sort((x: AptMarker, y: AptMarker) => {
+      if (x.promoted === y.promoted) return 0;
+      return x.promoted ? 1 : -1;
+    });
+    return mapped;
   }, [feedData]);
 
   const html = React.useMemo(() => buildHtml(markers, TAMA38_URL), [markers]);

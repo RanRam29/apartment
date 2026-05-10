@@ -31,7 +31,7 @@ export type Amenity =
 export interface Apartment {
   id: string;
   landlordId: string;
-  landlord?: Pick<User, 'id' | 'firstName' | 'lastName' | 'avatarUrl' | 'isVerified'>;
+  landlord?: Pick<User, 'id' | 'firstName' | 'lastName' | 'avatarUrl' | 'isVerified' | 'isPremium'>;
   title: string;
   description: string | null;
   price: number;

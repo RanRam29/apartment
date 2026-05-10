@@ -4,9 +4,9 @@ const logger = require('../utils/logger');
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 
 const PARSE_SYSTEM_PROMPT = `You are a real estate search assistant for an Israeli apartment rental app.
-Your job is to parse a free-text search query in Hebrew or English into a structured JSON filter object.
+Parse free-text in Hebrew or English into a JSON filter object.
 
-Output ONLY valid JSON with these optional fields:
+Output ONLY valid JSON. Optional fields:
 {
   "city": string,
   "neighborhood": string,
@@ -14,14 +14,20 @@ Output ONLY valid JSON with these optional fields:
   "maxPrice": number,
   "minRooms": number,
   "maxRooms": number,
-  "amenities": string[],  // from: ["parking","balcony","elevator","ac","storage","pets_allowed","furnished","sun_boiler"]
+  "amenities": string[],
   "petsAllowed": boolean,
-  "availableFrom": string  // ISO date YYYY-MM-DD
+  "availableFrom": string
 }
 
-When the user names an Israeli city or area (Hebrew or English, e.g. תל אביב, Tel Aviv, חיפה), you MUST include the "city" field with that name (use Hebrew city name when the user wrote Hebrew).
+Rules:
+- Israeli city or English name → always set "city" (Hebrew spelling when the user wrote Hebrew).
+- Room count: phrases like "3 חדרים", "דירת 4 חדרים", "4 rooms" → set "minRooms" to that integer (minimum rooms wanted).
+- Budget: "עד 8000", "עד שמונה אלף", "מקסימום 7000", "under 5000" → "maxPrice" (number). "מעל 4000", "לפחות 5000 שקל" → "minPrice".
+- Features map to "amenities" using ONLY these tokens: parking, balcony, elevator, ac, storage, pets_allowed, furnished, sun_boiler.
+  Hebrew examples: חניה/חנייה → parking; מרפסת → balcony; מעלית → elevator; מזגן/אייסי → ac; מחסן → storage; ריהוט/מרוהט → furnished; דוד שמש → sun_boiler.
+- Pets: חיות מחמד, עם כלב, pet friendly → "petsAllowed": true.
 
-Only include other fields that are clearly mentioned. Output nothing but the JSON object.`;
+Output nothing but the JSON object.`;
 
 const ALLOWED_AMENITIES = new Set([
   'parking', 'balcony', 'elevator', 'ac', 'storage', 'pets_allowed', 'furnished', 'sun_boiler',
@@ -107,26 +113,167 @@ const CITY_INFERENCE_RULES = [
   { city: 'לוד', patterns: ['לוד', 'lod'] },
 ];
 
+/**
+ * @returns {{ minRooms?: number }}
+ */
+function inferRoomConstraints(query) {
+  const out = {};
+  const m =
+    query.match(/(\d+)\s*חדרים?/u) ||
+    query.match(/חדרים?\s*(\d+)/u) ||
+    query.match(/(\d+)\s*rooms?\b/i);
+  if (m) {
+    const n = parseInt(m[1], 10);
+    if (n >= 1 && n <= 20) out.minRooms = n;
+  }
+  return out;
+}
+
+/**
+ * @returns {{ maxPrice?: number, minPrice?: number }}
+ */
+function inferPriceConstraints(query) {
+  const out = {};
+  const compact = query.replace(/\s/g, ' ');
+  /** ₪ may sit flush before digits (₪8,000) */
+  const moneyNum = '(?:₪\\s*)?([\\d][\\d,]*)';
+  let m = compact.match(new RegExp(`עד\\s*${moneyNum}`, 'u'));
+  if (m) {
+    const n = parseInt(m[1].replace(/,/g, ''), 10);
+    if (Number.isFinite(n) && n > 0) out.maxPrice = n;
+  }
+  m = compact.match(new RegExp(`מקסימום\\s*${moneyNum}`, 'u'));
+  if (m && out.maxPrice === undefined) {
+    const n = parseInt(m[1].replace(/,/g, ''), 10);
+    if (Number.isFinite(n) && n > 0) out.maxPrice = n;
+  }
+  m = compact.match(new RegExp(`מתחת ל\\s*${moneyNum}`, 'u'));
+  if (m && out.maxPrice === undefined) {
+    const n = parseInt(m[1].replace(/,/g, ''), 10);
+    if (Number.isFinite(n) && n > 0) out.maxPrice = n;
+  }
+  m = compact.match(new RegExp(`לפחות\\s*${moneyNum}`, 'u'));
+  if (m) {
+    const n = parseInt(m[1].replace(/,/g, ''), 10);
+    if (Number.isFinite(n) && n > 0) out.minPrice = n;
+  }
+  m = compact.match(new RegExp(`מעל\\s*${moneyNum}`, 'u'));
+  if (m && out.minPrice === undefined) {
+    const n = parseInt(m[1].replace(/,/g, ''), 10);
+    if (Number.isFinite(n) && n > 0) out.minPrice = n;
+  }
+  return out;
+}
+
+const AMENITY_KEYWORD_RULES = [
+  { token: 'parking', patterns: ['חניה', 'חנייה', 'חניון', 'parking', 'car spot'] },
+  { token: 'balcony', patterns: ['מרפסת', 'balcony'] },
+  { token: 'elevator', patterns: ['מעלית', 'elevator', 'lift'] },
+  { token: 'ac', patterns: ['מזגן', 'אייסי', 'מיזוג', 'air cond'] },
+  { token: 'storage', patterns: ['מחסן', 'מחסן אחסון', 'storage'] },
+  { token: 'furnished', patterns: ['מרוהט', 'ריהוט', 'furnished'] },
+  { token: 'sun_boiler', patterns: ['דוד שמש', 'sun boiler'] },
+];
+
+/**
+ * @returns {{ amenities?: string[], petsAllowed?: boolean }}
+ */
+function inferAmenitiesAndPets(query) {
+  const lower = query.toLowerCase();
+  const trimmed = query.trim();
+  const found = new Set();
+
+  for (const { token, patterns } of AMENITY_KEYWORD_RULES) {
+    for (const p of patterns) {
+      const isHebrew = /[\u0590-\u05FF]/.test(p);
+      const hay = isHebrew ? trimmed : lower;
+      const needle = isHebrew ? p : p.toLowerCase();
+      if (hay.includes(needle)) found.add(token);
+    }
+  }
+
+  let petsAllowed = false;
+  if (
+    /חיות מחמד/u.test(trimmed) ||
+    /ניתן לחיות/u.test(trimmed) ||
+    /עם חיות/u.test(trimmed) ||
+    /(?:^|[\s,.])(כלבים?|חתולים?)(?:[\s,.]|$)/u.test(trimmed) ||
+    /\bpets?\b/i.test(lower)
+  ) {
+    petsAllowed = true;
+  }
+
+  const out = {};
+  const amenities = [...found].filter((x) => ALLOWED_AMENITIES.has(x));
+  if (amenities.length) out.amenities = amenities;
+  if (petsAllowed) out.petsAllowed = true;
+  return out;
+}
+
 function inferFiltersFromQuery(query) {
   if (!query || typeof query !== 'string') return {};
   const trimmed = query.trim();
   if (!trimmed) return {};
+
+  const out = {};
   const lowerAscii = trimmed.toLowerCase();
 
   for (const { city, patterns } of CITY_INFERENCE_RULES) {
+    let hit = false;
     for (const p of patterns) {
       const isHebrew = /[\u0590-\u05FF]/.test(p);
       const haystack = isHebrew ? trimmed : lowerAscii;
       const needle = isHebrew ? p : p.toLowerCase();
-      if (haystack.includes(needle)) return { city };
+      if (haystack.includes(needle)) {
+        out.city = city;
+        hit = true;
+        break;
+      }
     }
+    if (hit) break;
   }
-  return {};
+
+  Object.assign(out, inferRoomConstraints(trimmed));
+  Object.assign(out, inferPriceConstraints(trimmed));
+  Object.assign(out, inferAmenitiesAndPets(trimmed));
+
+  return out;
 }
 
 function mergeParsedFilters(query, geminiFilters) {
   const inferred = inferFiltersFromQuery(query);
-  return { ...inferred, ...geminiFilters };
+  const gemini = geminiFilters && typeof geminiFilters === 'object' && !Array.isArray(geminiFilters) ? geminiFilters : {};
+
+  const merged = { ...inferred, ...gemini };
+
+  const amenUnion = [
+    ...new Set([
+      ...(Array.isArray(inferred.amenities) ? inferred.amenities : []),
+      ...(Array.isArray(gemini.amenities) ? gemini.amenities : []),
+    ]),
+  ].filter((x) => typeof x === 'string' && ALLOWED_AMENITIES.has(x));
+  if (amenUnion.length) merged.amenities = amenUnion;
+  else delete merged.amenities;
+
+  const minRoomsCand = [inferred.minRooms, gemini.minRooms].filter((x) => x != null && Number.isFinite(Number(x)));
+  if (minRoomsCand.length) merged.minRooms = Math.max(...minRoomsCand.map(Number));
+
+  const maxRoomsCand = [inferred.maxRooms, gemini.maxRooms].filter((x) => x != null && Number.isFinite(Number(x)));
+  if (maxRoomsCand.length === 2) merged.maxRooms = Math.min(...maxRoomsCand.map(Number));
+  else if (maxRoomsCand.length === 1) merged.maxRooms = maxRoomsCand[0];
+
+  const maxPriceCand = [inferred.maxPrice, gemini.maxPrice].filter((x) => x != null && Number.isFinite(Number(x)));
+  if (maxPriceCand.length) merged.maxPrice = Math.min(...maxPriceCand.map(Number));
+
+  const minPriceCand = [inferred.minPrice, gemini.minPrice].filter((x) => x != null && Number.isFinite(Number(x)));
+  if (minPriceCand.length) merged.minPrice = Math.max(...minPriceCand.map(Number));
+
+  if (inferred.petsAllowed === true || gemini.petsAllowed === true) merged.petsAllowed = true;
+
+  if (gemini.city && typeof gemini.city === 'string' && gemini.city.trim()) merged.city = gemini.city.trim();
+  else if (inferred.city) merged.city = inferred.city;
+
+  return merged;
 }
 
 /**

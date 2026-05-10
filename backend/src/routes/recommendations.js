@@ -25,8 +25,8 @@ router.post(
 
       const { query, city, maxPrice, minRooms, petsAllowed } = req.body;
 
-      // Cache parsed filters for identical queries (5 min)
-      const filterCacheKey = `nlp:${Buffer.from(query).toString('base64').slice(0, 40)}`;
+      // Cache parsed filters for identical queries (5 min). Bump version when parser semantics change.
+      const filterCacheKey = `nlp:v3:${Buffer.from(query).toString('base64').slice(0, 40)}`;
       let filters = await cacheGet(filterCacheKey);
 
       if (!filters) {

@@ -47,8 +47,27 @@ describe('geminiService helpers', () => {
       expect(inferFiltersFromQuery('something בתל אביב near sea')).toEqual({ city: 'תל אביב' });
     });
 
-    it('detects English city names', () => {
-      expect(inferFiltersFromQuery('2 rooms Tel Aviv')).toEqual({ city: 'תל אביב' });
+    it('detects English city names and room count', () => {
+      expect(inferFiltersFromQuery('2 rooms Tel Aviv')).toEqual({
+        city: 'תל אביב',
+        minRooms: 2,
+      });
+    });
+
+    it('detects parking and rooms with city (Hebrew)', () => {
+      expect(inferFiltersFromQuery('חניה')).toEqual({ amenities: ['parking'] });
+      expect(inferFiltersFromQuery('4 חדרים ברמת גן')).toMatchObject({
+        city: 'רמת גן',
+        minRooms: 4,
+      });
+    });
+
+    it('detects budget phrases', () => {
+      expect(inferFiltersFromQuery('עד 7500')).toEqual({ maxPrice: 7500 });
+      expect(inferFiltersFromQuery('עד ₪8,000 בתל אביב')).toMatchObject({
+        city: 'תל אביב',
+        maxPrice: 8000,
+      });
     });
 
     it('prefers longer city names (פתח תקווה)', () => {
@@ -63,6 +82,18 @@ describe('geminiService helpers', () => {
       expect(mergeParsedFilters('דירה בתל אביב', { maxPrice: 8000 })).toEqual({
         city: 'תל אביב',
         maxPrice: 8000,
+      });
+    });
+
+    it('mergeParsedFilters unions amenities and takes max minRooms', () => {
+      expect(
+        mergeParsedFilters('חניה ומרפסת', {
+          minRooms: 3,
+          amenities: ['ac'],
+        })
+      ).toMatchObject({
+        minRooms: 3,
+        amenities: expect.arrayContaining(['parking', 'balcony', 'ac']),
       });
     });
   });
