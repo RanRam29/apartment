@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd mobile && npm install --legacy-peer-deps && npx expo export --platform web && node scripts/patch-web-index.js",
+  "buildCommand": "cd mobile && node scripts/assert-public-api-url.mjs && npm install --legacy-peer-deps && npx expo export --platform web && node scripts/patch-web-index.js",
   "outputDirectory": "mobile/dist",
   "framework": null,
   "nodeVersion": "22.x",

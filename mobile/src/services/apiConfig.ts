@@ -1,5 +1,8 @@
 import { Platform } from 'react-native';
 
+/** Local backend when EXPO_PUBLIC_API_URL is unset (development / tests only). */
+const DEV_FALLBACK_API_URL = 'http://localhost:3000';
+
 function normalizeLocalhostForAndroid(url: string): string {
   // Android emulator cannot reach host machine via localhost.
   return url
@@ -8,9 +11,17 @@ function normalizeLocalhostForAndroid(url: string): string {
 }
 
 export function getApiBaseUrl(): string {
-  // Online-first default. Override via EXPO_PUBLIC_API_URL for local/dev as needed.
-  const configuredBaseUrl = process.env.EXPO_PUBLIC_API_URL || 'https://apartment-backend-v24y.onrender.com';
+  const raw = process.env.EXPO_PUBLIC_API_URL?.trim();
   const isProduction = process.env.NODE_ENV === 'production';
+
+  if (isProduction && (!raw || raw.length === 0)) {
+    throw new Error(
+      'EXPO_PUBLIC_API_URL is not set. Configure one production API URL in Vercel / EAS (https://your-api.example.com).'
+    );
+  }
+
+  const configuredBaseUrl = raw || DEV_FALLBACK_API_URL;
+
   if (isProduction && configuredBaseUrl.startsWith('http://')) {
     throw new Error('EXPO_PUBLIC_API_URL must use HTTPS in production');
   }

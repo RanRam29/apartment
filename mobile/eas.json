@@ -6,23 +6,13 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal",
-      "env": {
-        "EXPO_PUBLIC_API_URL": "https://apartment-backend-v24y.onrender.com"
-      }
+      "distribution": "internal"
     },
     "preview": {
       "distribution": "internal",
-      "android": { "buildType": "apk" },
-      "env": {
-        "EXPO_PUBLIC_API_URL": "https://apartment-backend-v24y.onrender.com"
-      }
+      "android": { "buildType": "apk" }
     },
-    "production": {
-      "env": {
-        "EXPO_PUBLIC_API_URL": "https://apartment-backend-v24y.onrender.com"
-      }
-    }
+    "production": {}
   },
   "submit": {
     "production": {
