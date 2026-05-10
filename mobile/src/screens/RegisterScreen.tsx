@@ -5,6 +5,7 @@ import {
   Platform, ScrollView,
 } from 'react-native';
 import { useAuthStore } from '../store/useAuthStore';
+import { formatLoginError } from '../utils/authErrors';
 import { C } from '../theme';
 
 interface Props {
@@ -40,15 +41,16 @@ export default function RegisterScreen({ onSwitch }: Props) {
     try {
       await register({ firstName, lastName, email: email.trim().toLowerCase(), password, role, phone: phone || undefined });
       setSuccess('נרשמת בהצלחה! שלחנו קישור אימות למייל שלך.');
-    } catch (err: any) {
-      if (!err?.response) {
+    } catch (err: unknown) {
+      const ax = err as { response?: { data?: { errors?: Array<{ msg: string }> } } };
+      if (!ax?.response) {
         setError('לא ניתן להתחבר לשרת. בדוק את החיבור לאינטרנט.');
         return;
       }
-      const errors = err?.response?.data?.errors;
-      const msg = errors
-        ? errors.map((e: any) => e.msg).join('\n')
-        : err?.response?.data?.error || 'שגיאה בהרשמה';
+      const errors = ax.response?.data?.errors;
+      const msg = errors?.length
+        ? errors.map((e) => e.msg).join('\n')
+        : formatLoginError(err, 'שגיאה בהרשמה');
       setError(msg);
     } finally {
       setLoading(false);

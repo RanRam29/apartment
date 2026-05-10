@@ -12,11 +12,12 @@ const request = require('supertest');
 const { sequelize } = require('../src/config/database');
 const { initRedis, getRedisClient } = require('../src/config/redis');
 const app = require('../src/app');
+const { generateStrongTestPassword } = require('./helpers/testCredentials');
 
 const ts = Date.now();
 const USER = {
   email: `payment_user_${ts}@test.com`,
-  password: 'Test1234!',
+  password: generateStrongTestPassword(),
   firstName: 'Pay',
   lastName: 'User',
   role: 'tenant',
@@ -24,6 +25,7 @@ const USER = {
 
 let userToken = '';
 let userId = '';
+const UNKNOWN_USER_ID = `unknown-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
 beforeAll(async () => {
   await Promise.all([
@@ -108,7 +110,7 @@ describe('POST /api/payments/webhook', () => {
   it('handles failed webhook without crashing', async () => {
     const res = await request(app)
       .post('/api/payments/webhook')
-      .send({ transactionId: 'txn_fail_456', status: 'failed', userId: 'unknown-user' });
+      .send({ transactionId: 'txn_fail_456', status: 'failed', userId: UNKNOWN_USER_ID });
     expect(res.status).toBe(200);
     expect(res.body.received).toBe(true);
   });

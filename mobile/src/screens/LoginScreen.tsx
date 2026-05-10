@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { useAuthStore } from '../store/useAuthStore';
 import { getVerificationPromptEmail } from '../services/verificationUx';
+import { formatLoginError } from '../utils/authErrors';
 import { C } from '../theme';
 
 interface Props {
@@ -29,15 +30,13 @@ export default function LoginScreen({ onSwitch }: Props) {
     setLoading(true);
     try {
       await login(email.trim().toLowerCase(), password);
-    } catch (err: any) {
+    } catch (err: unknown) {
       const unverifiedEmail = getVerificationPromptEmail(err);
       if (unverifiedEmail) {
         setInfo('האימייל לא אומת. שלחנו לך מייל אימות — בדוק את תיבת הדואר.');
         resendVerification(unverifiedEmail).catch(() => {});
-      } else if (!err?.response) {
-        setError('לא ניתן להתחבר לשרת. בדוק את החיבור לאינטרנט.');
       } else {
-        setError(err?.response?.data?.error || 'שגיאה בכניסה, נסה שנית');
+        setError(formatLoginError(err));
       }
     } finally {
       setLoading(false);

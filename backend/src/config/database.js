@@ -60,7 +60,10 @@ async function ensureUserVerificationColumns(queryInterface = sequelize.getQuery
 async function initPostgres() {
   await sequelize.authenticate();
   await ensureUserVerificationColumns();
-  await sequelize.sync({ alter: process.env.NODE_ENV === 'development' });
+  const syncAlter =
+    process.env.NODE_ENV === 'development' ||
+    process.env.POSTGRES_SYNC_ALTER === 'true';
+  await sequelize.sync({ alter: syncAlter });
   logger.info('PostgreSQL connected and synced');
 }
 

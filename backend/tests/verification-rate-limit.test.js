@@ -1,9 +1,12 @@
 process.env.POSTGRES_SSL = 'false';
 process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED = 'false';
-process.env.JWT_SECRET = 'test_jwt_secret_for_verification_tests';
+
+const crypto = require('crypto');
+process.env.JWT_SECRET = crypto.randomBytes(32).toString('hex');
 
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
+const { generateStrongTestPassword } = require('./helpers/testCredentials');
 
 jest.mock('../src/config/redis', () => ({
   initRedis: jest.fn(async () => undefined),
@@ -41,7 +44,7 @@ describe('Email verification + auth rate limiting', () => {
     const email = `verify_${Date.now()}@test.com`;
     const registerRes = await request(app).post('/api/auth/register').send({
       email,
-      password: 'Test1234!',
+      password: generateStrongTestPassword(),
       firstName: 'Verify',
       lastName: 'User',
       role: 'landlord',
@@ -144,7 +147,9 @@ describe('Email verification + auth rate limiting', () => {
       // Invalid login payload is enough to exercise limiter.
       // Keep single loop to avoid brittle timing assertions.
       // eslint-disable-next-line no-await-in-loop
-      const res = await request(app).post('/api/auth/login').send({ email: 'bad', password: 'bad' });
+      const res = await request(app)
+        .post('/api/auth/login')
+        .send({ email: 'bad', password: generateStrongTestPassword() });
       attempts.push(res.status);
     }
     expect(attempts.includes(429)).toBe(true);

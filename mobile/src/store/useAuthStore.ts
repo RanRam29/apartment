@@ -34,6 +34,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   needsOnboarding: false,
 
   login: async (email, password) => {
+    await tokenStorage.clear();
     const res = await authApi.login(email, password);
     const { token, user } = res.data;
     await tokenStorage.save(token);
@@ -41,6 +42,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   register: async (data) => {
+    await tokenStorage.clear();
     const res = await authApi.register(data);
     const { token, user } = res.data;
     await tokenStorage.save(token);

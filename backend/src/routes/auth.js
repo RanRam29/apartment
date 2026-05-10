@@ -16,7 +16,7 @@ const router = express.Router();
 async function issueVerificationTokenForUser(user) {
   const verificationToken = crypto.randomBytes(32).toString('hex');
   const verificationCacheKey = `email:verify:${verificationToken}`;
-  await cacheSet(verificationCacheKey, { userId: user.id }, 24 * 60 * 60);
+  await safeCacheSet(verificationCacheKey, { userId: user.id }, 24 * 60 * 60);
 
   const appBaseUrl =
     process.env.APP_BASE_URL ||
@@ -25,7 +25,12 @@ async function issueVerificationTokenForUser(user) {
   const cleanBase = String(appBaseUrl).replace(/\/$/, '');
   const verificationUrl = `${cleanBase}/verify-email?token=${verificationToken}`;
 
-  await sendVerificationEmail({ to: user.email, verificationUrl });
+  try {
+    await sendVerificationEmail({ to: user.email, verificationUrl });
+  } catch (err) {
+    logger.warn(`Verification email failed for ${user.id}: ${err.message}`);
+  }
+
   return verificationToken;
 }
 
@@ -36,6 +41,29 @@ function signToken(user) {
     jwtSecret,
     { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
   );
+}
+
+/** Returns a JWT or sends 503 if signing fails (e.g. JWT_SECRET missing on the host). */
+function signTokenOr503(user, res) {
+  try {
+    return signToken(user);
+  } catch (err) {
+    logger.error(`JWT sign failed (${user?.email || user?.id}): ${err.message}`);
+    res.status(503).json({
+      error: 'Authentication service is misconfigured',
+      code: 'JWT_SIGN_FAILED',
+    });
+    return null;
+  }
+}
+
+/** Redis cache is optional; failures must not block auth flows (e.g. flaky hosted Redis). */
+async function safeCacheSet(key, value, ttlSeconds) {
+  try {
+    await cacheSet(key, value, ttlSeconds);
+  } catch (err) {
+    logger.warn(`Redis cacheSet failed (${key}): ${err.message}`);
+  }
 }
 
 // POST /api/auth/register
@@ -71,13 +99,14 @@ router.post('/register', registerValidator, async (req, res, next) => {
       });
     }
 
-    const token = signToken(user);
-    const verificationToken = await issueVerificationTokenForUser(user).catch((err) => {
-      logger.warn(`Failed to enqueue verification email for ${user.id}: ${err.message}`);
-      return null;
-    });
-    if (verificationToken) {
+    const token = signTokenOr503(user, res);
+    if (!token) return;
+
+    const verificationToken = await issueVerificationTokenForUser(user);
+    try {
       await user.update({ verificationToken, verifiedAt: null });
+    } catch (err) {
+      logger.warn(`Failed to persist verification token for user ${user.id}: ${err.message}`);
     }
 
     logger.info(`New user registered: ${user.id} (${role})`);
@@ -113,12 +142,24 @@ router.post('/login', loginValidator, async (req, res, next) => {
 
     const { email, password } = req.body;
 
-    const user = await User.findOne({ where: { email } });
+    let user;
+    try {
+      user = await User.findOne({ where: { email } });
+    } catch (err) {
+      logger.error(`Login lookup failed for ${email}: ${err.message}`);
+      return res.status(503).json({ error: 'Service temporarily unavailable' });
+    }
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    const valid = await bcrypt.compare(password, user.passwordHash);
+    let valid;
+    try {
+      valid = await bcrypt.compare(password, user.passwordHash);
+    } catch (err) {
+      logger.warn(`bcrypt.compare failed for login ${email}: ${err.message}`);
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
     if (!valid) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
@@ -137,19 +178,24 @@ router.post('/login', loginValidator, async (req, res, next) => {
       await user.update({ isVerified: true, verifiedAt: new Date() });
     }
 
-    await user.update({ lastActiveAt: new Date() });
+    try {
+      await user.update({ lastActiveAt: new Date() });
+    } catch (err) {
+      logger.warn(`Failed to update lastActiveAt for user ${user.id}: ${err.message}`);
+    }
 
-    const token = signToken(user);
+    const token = signTokenOr503(user, res);
+    if (!token) return;
 
-    // Cache basic user profile for fast lookups (non-critical)
-    cacheSet(`user:${user.id}`, {
+    // Cache basic user profile for fast lookups
+    await safeCacheSet(`user:${user.id}`, {
       id: user.id,
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
       role: user.role,
       avatarUrl: user.avatarUrl,
-    }, 3600).catch((e) => logger.warn('Cache set failed on login:', e.message));
+    }, 3600);
 
     res.json({
       token,
@@ -211,13 +257,10 @@ router.post('/verify/resend', async (req, res, next) => {
 
     const user = await User.findOne({ where: { email } });
     if (user && !user.isVerified) {
-      const verificationToken = await issueVerificationTokenForUser(user).catch((err) => {
-        logger.warn(`Failed to resend verification for ${user.id}: ${err.message}`);
-        return null;
-      });
-      if (verificationToken) {
-        user.update({ verificationToken, verifiedAt: null }).catch(() => {});
-      }
+      const verificationToken = await issueVerificationTokenForUser(user);
+      user.update({ verificationToken, verifiedAt: null }).catch((err) =>
+        logger.warn(`Failed to persist resend verification token: ${err.message}`)
+      );
 
       const payload = {
         message: 'If the email exists and is unverified, a verification link has been sent',
@@ -240,7 +283,11 @@ router.post('/resend-verification', require('../middleware/auth').authenticate, 
     if (user.isVerified) return res.status(400).json({ error: 'Account already verified' });
 
     const verificationToken = await issueVerificationTokenForUser(user);
-    await user.update({ verificationToken, verifiedAt: null });
+    try {
+      await user.update({ verificationToken, verifiedAt: null });
+    } catch (err) {
+      logger.warn(`Failed to persist verification token (resend-verification): ${err.message}`);
+    }
 
     res.json({ ok: true, message: 'Verification email sent' });
   } catch (err) {
@@ -256,7 +303,9 @@ router.post('/logout', async (req, res, next) => {
       const token = authHeader.slice(7);
       try {
         const decoded = jwt.verify(token, getJwtSecret());
-        await cacheDel(`user:${decoded.id}`);
+        await cacheDel(`user:${decoded.id}`).catch((err) =>
+          logger.warn(`Redis cacheDel failed on logout: ${err.message}`)
+        );
       } catch {
         // token already invalid — fine
       }
@@ -335,7 +384,7 @@ router.patch('/push-token', require('../middleware/auth').authenticate, async (r
     if (!pushToken || typeof pushToken !== 'string') {
       return res.status(400).json({ error: 'pushToken required' });
     }
-    await cacheSet(`push:token:${req.user.id}`, pushToken, 30 * 24 * 60 * 60);
+    await safeCacheSet(`push:token:${req.user.id}`, pushToken, 30 * 24 * 60 * 60);
     res.json({ ok: true });
   } catch (err) {
     next(err);

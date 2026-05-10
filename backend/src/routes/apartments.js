@@ -76,6 +76,9 @@ router.post(
         latitude, longitude, amenities, availableFrom,
         minLeasePeriod, petsAllowed,
       } = req.body;
+      if (typeof city !== 'string') {
+        return res.status(422).json({ error: 'city must be a string' });
+      }
 
       let images = [];
       if (req.files?.length) {
@@ -155,7 +158,7 @@ router.get(
       const where = {
         isActive: true,
         ...(swipedIds.length && { id: { [Op.notIn]: swipedIds } }),
-        ...(city && { city: { [Op.iLike]: city } }),
+        ...(typeof city === 'string' && city && { city: { [Op.iLike]: city } }),
         ...(minPrice && { price: { [Op.gte]: parseInt(minPrice) } }),
         ...(maxPrice && {
           price: { [Op.lte]: parseInt(maxPrice) },
@@ -246,7 +249,10 @@ router.patch('/:id', authenticate, requireRole('landlord'), async (req, res, nex
 
     await apartment.update(updates);
     await cacheDel(`apartment:${apartment.id}`);
-    await cacheDel(`feed:${apartment.city.toLowerCase()}`);
+    const normalizedCity = typeof apartment.city === 'string' ? apartment.city.toLowerCase() : null;
+    if (normalizedCity) {
+      await cacheDel(`feed:${normalizedCity}`);
+    }
     await cacheDel(`landlord:dashboard:${req.user.id}`);
 
     res.json({ apartment });

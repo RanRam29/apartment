@@ -8,21 +8,27 @@ const bcrypt = require('bcryptjs');
 const { initPostgres } = require('../config/database');
 const { User, Apartment } = require('../models');
 
+function resolveDemoPassword() {
+  if (process.env.DEMO_SEED_PASSWORD) return process.env.DEMO_SEED_PASSWORD;
+  return 'Demo1234!';
+}
+
+const DEMO_PASSWORD = resolveDemoPassword();
+
 const ADMIN_ACCOUNTS = [
   { email: 'admin1@dirapp.com', firstName: 'Admin', lastName: 'One', password: 'Admin1234!', role: 'landlord' },
   { email: 'admin2@dirapp.com', firstName: 'Admin', lastName: 'Two', password: 'Admin1234!', role: 'tenant' },
 ];
 
 const LANDLORDS = [
-  { email: 'demo.landlord1@dirapp.test', firstName: 'יוסי', lastName: 'כהן', password: 'Demo1234!' },
-  { email: 'demo.landlord2@dirapp.test', firstName: 'רחל', lastName: 'לוי', password: 'Demo1234!' },
+  { email: 'demo.landlord1@dirapp.test', firstName: 'יוסי', lastName: 'כהן' },
+  { email: 'demo.landlord2@dirapp.test', firstName: 'רחל', lastName: 'לוי' },
 ];
 
 const TENANT = {
   email: 'demo.tenant@dirapp.test',
   firstName: 'דנה',
   lastName: 'מזרחי',
-  password: 'Demo1234!',
 };
 
 const APARTMENTS = [
@@ -138,7 +144,7 @@ async function seed() {
     console.log(`${created ? '➕' : '⏩'} Admin: ${a.email}`);
   }
 
-  const hash = await bcrypt.hash('Demo1234!', 12);
+  const hash = await bcrypt.hash(DEMO_PASSWORD, 12);
 
   // Create landlords
   const landlordIds = [];
@@ -172,7 +178,7 @@ async function seed() {
   console.log(`\n🏠 ${created} apartments created (${APARTMENTS.length - created} already existed)`);
   console.log('\n📋 Admin accounts (password: Admin1234!):');
   ADMIN_ACCOUNTS.forEach((a) => console.log(`  ${a.role === 'landlord' ? 'Landlord' : 'Tenant '}: ${a.email}`));
-  console.log('\n📋 Demo accounts (password: Demo1234!):');
+  console.log('\n📋 Demo accounts (password:', DEMO_PASSWORD + '):');
   console.log('  Landlord 1:', LANDLORDS[0].email);
   console.log('  Landlord 2:', LANDLORDS[1].email);
   console.log('  Tenant:    ', TENANT.email);
@@ -197,7 +203,7 @@ async function autoSeed(queryInterface) {
     const count = await User.count();
     if (count > ADMIN_ACCOUNTS.length) return;
     console.log('Empty database detected — running initial seed…');
-    const demoHash = await bcrypt.hash('Demo1234!', 12);
+    const demoHash = await bcrypt.hash(DEMO_PASSWORD, 12);
     const landlordIds = [];
     for (const l of LANDLORDS) {
       const [user] = await User.findOrCreate({
