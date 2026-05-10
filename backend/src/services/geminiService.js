@@ -19,7 +19,9 @@ Output ONLY valid JSON with these optional fields:
   "availableFrom": string  // ISO date YYYY-MM-DD
 }
 
-Only include fields that are clearly mentioned. Do not guess. Output nothing but the JSON object.`;
+When the user names an Israeli city or area (Hebrew or English, e.g. תל אביב, Tel Aviv, חיפה), you MUST include the "city" field with that name (use Hebrew city name when the user wrote Hebrew).
+
+Only include other fields that are clearly mentioned. Output nothing but the JSON object.`;
 
 const ALLOWED_AMENITIES = new Set([
   'parking', 'balcony', 'elevator', 'ac', 'storage', 'pets_allowed', 'furnished', 'sun_boiler',
@@ -77,6 +79,57 @@ function sanitizeParsedFilters(raw) {
 }
 
 /**
+ * Fallback when Gemini returns nothing or misses geography: map known substrings to city (DB uses Hebrew names).
+ * Longer patterns are tested first so e.g. "פתח תקווה" wins over shorter overlaps.
+ */
+const CITY_INFERENCE_RULES = [
+  { city: 'פתח תקווה', patterns: ['פתח תקווה', 'petah tikva', 'petah tikvah'] },
+  { city: 'ראשון לציון', patterns: ['ראשון לציון', 'rishon', 'rishon lezion'] },
+  { city: 'באר שבע', patterns: ['באר שבע', 'beer sheva', 'beersheba'] },
+  { city: 'הוד השרון', patterns: ['הוד השרון', 'hod hasharon'] },
+  { city: 'קריית אתא', patterns: ['קריית אתא', 'קרית אתא', 'kiryat ata'] },
+  { city: 'כפר סבא', patterns: ['כפר סבא', 'kfar saba', 'kfar sabba'] },
+  { city: 'רמת גן', patterns: ['רמת גן', 'ramat gan'] },
+  { city: 'תל אביב', patterns: ['תל אביב', 'תל-אביב', 'tel aviv', 'tel-aviv'] },
+  { city: 'ירושלים', patterns: ['ירושלים', 'jerusalem'] },
+  { city: 'חיפה', patterns: ['חיפה', 'haifa'] },
+  { city: 'הרצליה', patterns: ['הרצליה', 'herzliya', 'herzlia'] },
+  { city: 'גבעתיים', patterns: ['גבעתיים', 'givatayim'] },
+  { city: 'נתניה', patterns: ['נתניה', 'netanya'] },
+  { city: 'אשדוד', patterns: ['אשדוד', 'ashdod'] },
+  { city: 'רחובות', patterns: ['רחובות', 'rehovot'] },
+  { city: 'אילת', patterns: ['אילת', 'eilat', 'elat'] },
+  { city: 'נצרת', patterns: ['נצרת', 'nazareth'] },
+  { city: 'עכו', patterns: ['עכו', 'acre', 'akka'] },
+  { city: 'אשקלון', patterns: ['אשקלון', 'ashkelon'] },
+  { city: 'רעננה', patterns: ['רעננה', 'raanana', 'ra\'anana'] },
+  { city: 'רמלה', patterns: ['רמלה', 'ramla', 'ramle'] },
+  { city: 'לוד', patterns: ['לוד', 'lod'] },
+];
+
+function inferFiltersFromQuery(query) {
+  if (!query || typeof query !== 'string') return {};
+  const trimmed = query.trim();
+  if (!trimmed) return {};
+  const lowerAscii = trimmed.toLowerCase();
+
+  for (const { city, patterns } of CITY_INFERENCE_RULES) {
+    for (const p of patterns) {
+      const isHebrew = /[\u0590-\u05FF]/.test(p);
+      const haystack = isHebrew ? trimmed : lowerAscii;
+      const needle = isHebrew ? p : p.toLowerCase();
+      if (haystack.includes(needle)) return { city };
+    }
+  }
+  return {};
+}
+
+function mergeParsedFilters(query, geminiFilters) {
+  const inferred = inferFiltersFromQuery(query);
+  return { ...inferred, ...geminiFilters };
+}
+
+/**
  * Parses a free-text apartment search query into structured filters using Gemini.
  * @param {string} query - User's natural language query (Hebrew or English)
  * @returns {object} Structured filter object
@@ -84,8 +137,8 @@ function sanitizeParsedFilters(raw) {
 async function parseSearchQuery(query) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    logger.warn('GEMINI_API_KEY not set — returning empty filters');
-    return {};
+    logger.warn('GEMINI_API_KEY not set — using heuristic filters only');
+    return inferFiltersFromQuery(query);
   }
 
   const t0 = Date.now();
@@ -113,15 +166,16 @@ async function parseSearchQuery(query) {
     const parsed = extractJsonObject(rawText);
     if (!parsed) {
       logger.warn(`Gemini nlp_parse invalid_json ms=${Date.now() - t0}`);
-      return {};
+      return inferFiltersFromQuery(query);
     }
 
-    const filters = sanitizeParsedFilters(parsed);
+    const geminiFilters = sanitizeParsedFilters(parsed);
+    const filters = mergeParsedFilters(query, geminiFilters);
     logger.info(`Gemini nlp_parse ok ms=${Date.now() - t0} keys=${Object.keys(filters).length}`);
     return filters;
   } catch (err) {
     logger.error(`Gemini nlp_parse error ms=${Date.now() - t0}: ${err.message}`);
-    return {};
+    return inferFiltersFromQuery(query);
   }
 }
 
@@ -190,4 +244,6 @@ module.exports = {
   COPY_STYLE_INSTRUCTIONS,
   sanitizeParsedFilters,
   extractJsonObject,
+  inferFiltersFromQuery,
+  mergeParsedFilters,
 };
