@@ -1,0 +1,6 @@
+android/
+.idea/
+node_modules/
+dist/
+.expo/
+*.log
