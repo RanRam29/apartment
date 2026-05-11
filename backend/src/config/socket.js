@@ -2,6 +2,9 @@ const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
 const logger = require('../utils/logger');
+const { logSystemEvent } = require('../services/systemEventService');
+const { logAudit } = require('../services/auditLogService');
+const { SYSTEM_CATEGORY, SYSTEM_SEVERITY, AUDIT_ACTIONS } = require('../constants/logging');
 
 let io;
 
@@ -18,6 +21,13 @@ function initSocket(server) {
       socket.user = jwt.verify(token, process.env.JWT_SECRET);
       next();
     } catch {
+      logSystemEvent({
+        source: 'socket',
+        category: SYSTEM_CATEGORY.SECURITY,
+        severity: SYSTEM_SEVERITY.WARN,
+        event: 'socket.auth.invalid_token',
+        message: 'Socket connection rejected due to invalid token',
+      });
       next(new Error('Invalid token'));
     }
   });
@@ -26,6 +36,16 @@ function initSocket(server) {
     const userId = socket.user.id;
     socket.join(`user:${userId}`);
     logger.debug(`User ${userId} connected via WebSocket`);
+    logAudit({
+      actorId: userId,
+      actorRole: socket.user.role,
+      action: AUDIT_ACTIONS.SOCKET_CONNECT,
+      resourceType: 'socket',
+      resourceId: socket.id,
+      statusCode: 200,
+      outcome: 'success',
+      metadata: { transport: socket.conn.transport.name },
+    });
 
     // Join all accepted-match chat rooms so messages arrive without opening Chat first
     void (async () => {
@@ -100,9 +120,28 @@ function initSocket(server) {
         };
 
         io.to(`chat:${matchId}`).emit('new_message', payload);
+        logAudit({
+          actorId: userId,
+          actorRole: socket.user.role,
+          action: AUDIT_ACTIONS.SOCKET_MESSAGE_SEND,
+          resourceType: 'chat',
+          resourceId: matchId,
+          statusCode: 200,
+          outcome: 'success',
+          metadata: { type },
+        });
         ack?.({ success: true, message: payload });
       } catch (err) {
         logger.error('Socket send_message error:', err.message);
+        logSystemEvent({
+          source: 'socket',
+          category: SYSTEM_CATEGORY.APPLICATION,
+          severity: SYSTEM_SEVERITY.ERROR,
+          event: 'socket.send_message.error',
+          message: 'Socket send_message failed',
+          actorId: userId,
+          metadata: { error: err.message },
+        });
         ack?.({ error: 'Failed to send message' });
       }
     });
@@ -118,6 +157,16 @@ function initSocket(server) {
 
     socket.on('disconnect', () => {
       logger.debug(`User ${userId} disconnected`);
+      logAudit({
+        actorId: userId,
+        actorRole: socket.user.role,
+        action: AUDIT_ACTIONS.SOCKET_DISCONNECT,
+        resourceType: 'socket',
+        resourceId: socket.id,
+        statusCode: 200,
+        outcome: 'success',
+        metadata: { reason: 'disconnect' },
+      });
     });
   });
 

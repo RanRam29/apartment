@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { useAuthStore } from '../store/useAuthStore';
 import { useChatStore } from '../store/useChatStore';
+import { clientLogsApi } from '../services/api';
 import { C } from '../theme';
 import type { RootStackParamList, TenantTabParamList, LandlordTabParamList, MainStackParamList } from '../types';
 
@@ -35,6 +36,7 @@ import CommercialScreen from '../screens/CommercialScreen';
 import GamificationScreen from '../screens/GamificationScreen';
 import ServicesScreen from '../screens/ServicesScreen';
 import IoTScreen from '../screens/IoTScreen';
+import LogsConsoleScreen from '../screens/LogsConsoleScreen';
 
 const RootStack  = createNativeStackNavigator<RootStackParamList>();
 const TenantTab  = createBottomTabNavigator<TenantTabParamList>();
@@ -245,6 +247,17 @@ function MainNavigator() {
         component={IoTScreen}
         options={{ headerShown: false }}
       />
+      <MainStack.Screen
+        name="LogsConsole"
+        component={LogsConsoleScreen}
+        options={{
+          headerShown: true,
+          headerTitle: 'Logs Console',
+          headerStyle: { backgroundColor: C.bgCard },
+          headerTintColor: C.navy,
+          headerShadowVisible: false,
+        }}
+      />
     </MainStack.Navigator>
   );
 }
@@ -254,6 +267,57 @@ export default function AppNavigator() {
 
   useEffect(() => {
     restoreSession();
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    clientLogsApi.event({
+      level: 'info',
+      category: 'application',
+      event: 'client.web.app_started',
+      message: 'Web app session started',
+      metadata: { userAgent: navigator.userAgent },
+      tags: ['web', 'startup'],
+    }).catch(() => {});
+
+    const onWindowError = (event: ErrorEvent) => {
+      clientLogsApi.event({
+        level: 'error',
+        category: 'application',
+        event: 'client.web.window_error',
+        message: event.message || 'Unhandled window error',
+        metadata: {
+          filename: event.filename,
+          line: event.lineno,
+          column: event.colno,
+        },
+        tags: ['web', 'runtime'],
+      }).catch(() => {});
+    };
+
+    const onUnhandledRejection = (event: PromiseRejectionEvent) => {
+      clientLogsApi.event({
+        level: 'error',
+        category: 'application',
+        event: 'client.web.unhandled_rejection',
+        message: 'Unhandled promise rejection',
+        metadata: {
+          reason:
+            typeof event.reason === 'string'
+              ? event.reason
+              : event.reason?.message || 'unknown',
+        },
+        tags: ['web', 'runtime'],
+      }).catch(() => {});
+    };
+
+    window.addEventListener('error', onWindowError);
+    window.addEventListener('unhandledrejection', onUnhandledRejection);
+    return () => {
+      window.removeEventListener('error', onWindowError);
+      window.removeEventListener('unhandledrejection', onUnhandledRejection);
+    };
   }, []);
 
   if (isLoading) {

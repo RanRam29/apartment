@@ -20,7 +20,13 @@ const commercialRoutes = require('./routes/commercial');
 const gamificationRoutes = require('./routes/gamification');
 const servicesRoutes   = require('./routes/services');
 const iotRoutes        = require('./routes/iot');
+const adminLogsRoutes = require('./routes/adminLogs');
+const logsRoutes = require('./routes/logs');
+const { requestContext } = require('./middleware/requestContext');
+const { auditCapture } = require('./middleware/auditCapture');
 const { errorHandler } = require('./middleware/errorHandler');
+const { logSystemEvent } = require('./services/systemEventService');
+const { SYSTEM_CATEGORY, SYSTEM_SEVERITY } = require('./constants/logging');
 const logger = require('./utils/logger');
 
 const app = express();
@@ -69,12 +75,27 @@ if (process.env.NODE_ENV !== 'test') {
 }
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+app.use(requestContext);
+app.use(auditCapture);
 
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 200,
   standardHeaders: true,
   legacyHeaders: false,
+  handler: (req, res) => {
+    logSystemEvent({
+      source: 'rate-limit',
+      category: SYSTEM_CATEGORY.SECURITY,
+      severity: SYSTEM_SEVERITY.WARN,
+      event: 'rate_limit.global',
+      message: 'Global rate limit exceeded',
+      requestId: req.requestContext?.requestId,
+      actorId: req.user?.id || null,
+      metadata: { ip: req.ip, path: req.path, method: req.method },
+    });
+    res.status(429).json({ error: 'Too many requests' });
+  },
 });
 
 // Stricter limit for auth endpoints to prevent brute-force
@@ -88,6 +109,18 @@ const authLimiter = rateLimit({
     const email = typeof req.body?.email === 'string' ? req.body.email : '';
     return `${req.ip}:${req.path}:${email}`;
   },
+  handler: (req, res) => {
+    logSystemEvent({
+      source: 'rate-limit',
+      category: SYSTEM_CATEGORY.SECURITY,
+      severity: SYSTEM_SEVERITY.WARN,
+      event: 'rate_limit.auth',
+      message: 'Auth rate limit exceeded',
+      requestId: req.requestContext?.requestId,
+      metadata: { ip: req.ip, path: req.path },
+    });
+    res.status(429).json({ error: 'Too many auth attempts, please try again later' });
+  },
 });
 
 // Swipe endpoint gets its own budget to prevent abuse
@@ -97,6 +130,19 @@ const swipeLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Swipe rate limit exceeded' },
+  handler: (req, res) => {
+    logSystemEvent({
+      source: 'rate-limit',
+      category: SYSTEM_CATEGORY.SECURITY,
+      severity: SYSTEM_SEVERITY.WARN,
+      event: 'rate_limit.swipe',
+      message: 'Swipe rate limit exceeded',
+      requestId: req.requestContext?.requestId,
+      actorId: req.user?.id || null,
+      metadata: { ip: req.ip, path: req.path },
+    });
+    res.status(429).json({ error: 'Swipe rate limit exceeded' });
+  },
 });
 
 app.use(globalLimiter);
@@ -119,6 +165,8 @@ app.use('/api/commercial', commercialRoutes);
 app.use('/api/gamification', gamificationRoutes);
 app.use('/api/services', servicesRoutes);
 app.use('/api/iot', iotRoutes);
+app.use('/api/admin/logs', adminLogsRoutes);
+app.use('/api/logs', logsRoutes);
 
 app.use(errorHandler);
 

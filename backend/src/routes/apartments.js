@@ -9,6 +9,8 @@ const { upload, uploadMany } = require('../services/uploadService');
 const { cacheGet, cacheSet, cacheDel } = require('../config/redis');
 const { generateMarketingCopy, COPY_STYLE_INSTRUCTIONS } = require('../services/geminiService');
 const logger = require('../utils/logger');
+const { logAudit } = require('../services/auditLogService');
+const { AUDIT_ACTIONS, AUDIT_OUTCOMES } = require('../constants/logging');
 
 const router = express.Router();
 
@@ -123,6 +125,17 @@ router.post(
       await cacheDel(`landlord:dashboard:${req.user.id}`);
 
       logger.info(`Apartment created: ${apartment.id} by landlord ${req.user.id}`);
+      await logAudit({
+        ...req.getAuditContext?.(),
+        actorId: req.user.id,
+        actorRole: req.user.role,
+        action: AUDIT_ACTIONS.APARTMENT_CREATE,
+        resourceType: 'apartment',
+        resourceId: apartment.id,
+        outcome: AUDIT_OUTCOMES.SUCCESS,
+        statusCode: 201,
+        metadata: { city: apartment.city, price: apartment.price },
+      });
       res.status(201).json({ apartment });
     } catch (err) {
       next(err);
@@ -272,7 +285,17 @@ router.patch('/:id', authenticate, requireRole('landlord'), async (req, res, nex
       await cacheDel(`feed:${normalizedCity}`);
     }
     await cacheDel(`landlord:dashboard:${req.user.id}`);
-
+    await logAudit({
+      ...req.getAuditContext?.(),
+      actorId: req.user.id,
+      actorRole: req.user.role,
+      action: AUDIT_ACTIONS.APARTMENT_UPDATE,
+      resourceType: 'apartment',
+      resourceId: apartment.id,
+      outcome: AUDIT_OUTCOMES.SUCCESS,
+      statusCode: 200,
+      metadata: { updatedFields: Object.keys(updates) },
+    });
     res.json({ apartment });
   } catch (err) {
     next(err);
@@ -301,7 +324,17 @@ router.delete('/:id', authenticate, requireRole('landlord'), async (req, res, ne
     if (normalizedCity) {
       await cacheDel(`feed:${normalizedCity}`);
     }
-
+    await logAudit({
+      ...req.getAuditContext?.(),
+      actorId: req.user.id,
+      actorRole: req.user.role,
+      action: AUDIT_ACTIONS.APARTMENT_DELETE,
+      resourceType: 'apartment',
+      resourceId: aid,
+      outcome: AUDIT_OUTCOMES.SUCCESS,
+      statusCode: 200,
+      metadata: { city: apartment.city },
+    });
     res.json({ message: 'Apartment deleted' });
   } catch (err) {
     next(err);

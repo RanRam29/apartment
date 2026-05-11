@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { io, Socket } from 'socket.io-client';
-import { chatApi, tokenStorage } from '../services/api';
+import { chatApi, clientLogsApi, tokenStorage } from '../services/api';
 import { getApiBaseUrl } from '../services/apiConfig';
 import type { Message } from '../types';
 
@@ -44,6 +44,26 @@ export const useChatStore = create<ChatState>((set, get) => ({
         },
       }));
     });
+    socket.on('connect', () => {
+      clientLogsApi.event({
+        level: 'info',
+        category: 'integration',
+        event: 'client.socket.connected',
+        message: 'Socket connected',
+        metadata: { socketId: socket.id || null },
+        tags: ['socket'],
+      }).catch(() => {});
+    });
+    socket.on('connect_error', (err) => {
+      clientLogsApi.event({
+        level: 'warn',
+        category: 'integration',
+        event: 'client.socket.connect_error',
+        message: 'Socket connection failed',
+        metadata: { error: err?.message || 'unknown' },
+        tags: ['socket'],
+      }).catch(() => {});
+    });
 
     socket.on('user_typing', ({ matchId }: { userId: string; matchId: string }) => {
       set((state) => ({
@@ -80,6 +100,13 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   disconnect: () => {
+    clientLogsApi.event({
+      level: 'info',
+      category: 'integration',
+      event: 'client.socket.disconnect',
+      message: 'Socket disconnected by client',
+      tags: ['socket'],
+    }).catch(() => {});
     get().socket?.disconnect();
     set({ socket: null, messages: {}, typingUsers: {} });
   },

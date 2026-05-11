@@ -1,4 +1,4 @@
-export type UserRole = 'tenant' | 'landlord';
+export type UserRole = 'tenant' | 'landlord' | 'admin';
 
 export interface User {
   id: string;
@@ -9,6 +9,34 @@ export interface User {
   avatarUrl: string | null;
   isVerified: boolean;
   isPremium: boolean;
+}
+
+export interface AuditLogItem {
+  id: string;
+  createdAt: string;
+  actorId: string | null;
+  actorRole: string | null;
+  action: string;
+  resourceType: string | null;
+  resourceId: string | null;
+  outcome: 'success' | 'failure';
+  statusCode: number | null;
+  requestId: string | null;
+  method: string | null;
+  route: string | null;
+  metadata?: Record<string, unknown>;
+}
+
+export interface SystemEventItem {
+  _id: string;
+  createdAt: string;
+  source: string;
+  category: 'application' | 'security' | 'integration' | 'performance';
+  severity: 'debug' | 'info' | 'warn' | 'error' | 'critical';
+  event: string;
+  message: string;
+  actorId?: string | null;
+  metadata?: Record<string, unknown>;
 }
 
 export interface ApartmentImage {
@@ -153,4 +181,5 @@ export type MainStackParamList = {
   Gamification: undefined;
   Services: undefined;
   IoT: undefined;
+  LogsConsole: undefined;
 };
