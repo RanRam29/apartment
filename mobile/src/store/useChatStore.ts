@@ -30,7 +30,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
     const socket = io(getApiBaseUrl(), {
       auth: { token },
-      transports: ['websocket'],
+      // Default: polling then upgrade to websocket. Forcing websocket-only often fails on
+      // Android / carrier networks and some reverse proxies (Render, etc.).
       reconnection: true,
       reconnectionDelay: 1000,
     });
