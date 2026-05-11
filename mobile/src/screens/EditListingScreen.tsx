@@ -10,6 +10,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { apartmentsApi } from '../services/api';
 import { C } from '../theme';
 import type { Amenity, MainStackParamList } from '../types';
+import { CITY_CENTER_BY_NAME } from '../constants/cityCenters';
 
 const AMENITY_OPTIONS: { key: Amenity; label: string }[] = [
   { key: 'parking',      label: '🚗 חניה' },
@@ -21,6 +22,7 @@ const AMENITY_OPTIONS: { key: Amenity; label: string }[] = [
   { key: 'sun_boiler',   label: '☀️ דוד שמש' },
   { key: 'pets_allowed', label: '🐾 חיות מותרות' },
 ];
+const ISRAELI_CITIES = Object.keys(CITY_CENTER_BY_NAME).sort((a, b) => a.localeCompare(b, 'he'));
 
 type Props = NativeStackScreenProps<MainStackParamList, 'EditListing'>;
 
@@ -84,25 +86,22 @@ export default function EditListingScreen({ route, navigation }: Props) {
     return value.trim().toLowerCase();
   }
 
+  function getCityMatches(query: string) {
+    const q = normalizeText(query);
+    if (q.length < 2) return [];
+    const startsWith = ISRAELI_CITIES.filter((name) => normalizeText(name).startsWith(q));
+    const contains = ISRAELI_CITIES.filter((name) => {
+      const norm = normalizeText(name);
+      return !norm.startsWith(q) && norm.includes(q);
+    });
+    return [...startsWith, ...contains].slice(0, 8);
+  }
+
   const canSearchStreet = useMemo(() => city.trim().length > 0, [city]);
 
   async function validateIsraeliCity(cityName: string) {
-    try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=il&addressdetails=1&accept-language=he&limit=10&q=${encodeURIComponent(cityName)}`,
-        { headers: { 'User-Agent': 'ApartmentApp/1.0 (EditListing)' } }
-      );
-      const data = await res.json();
-      if (!Array.isArray(data)) return false;
-      const cityNorm = normalizeText(cityName);
-      return data.some((item: any) => {
-        const address = item?.address || {};
-        const candidate = normalizeText(address.city || address.town || address.village || address.municipality || '');
-        return candidate === cityNorm;
-      });
-    } catch {
-      return false;
-    }
+    const cityNorm = normalizeText(cityName);
+    return ISRAELI_CITIES.some((candidate) => normalizeText(candidate) === cityNorm);
   }
 
   async function validateStreetInCity(cityName: string, streetName: string) {
@@ -127,42 +126,8 @@ export default function EditListingScreen({ route, navigation }: Props) {
   }
 
   useEffect(() => {
-    const q = city.trim();
-    if (q.length < 2) {
-      setCitySuggestions([]);
-      setIsLoadingCities(false);
-      return;
-    }
-    const controller = new AbortController();
-    const timer = setTimeout(async () => {
-      setIsLoadingCities(true);
-      try {
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=il&addressdetails=1&accept-language=he&limit=20&q=${encodeURIComponent(q)}`,
-          {
-            signal: controller.signal,
-            headers: { 'User-Agent': 'ApartmentApp/1.0 (EditListing)' },
-          }
-        );
-        const data = await res.json();
-        const parsed = Array.isArray(data)
-          ? data
-              .map((item: any) => item?.address)
-              .map((address: any) => address?.city || address?.town || address?.village || address?.municipality)
-              .filter(Boolean)
-          : [];
-        const unique = Array.from(new Set(parsed));
-        setCitySuggestions(unique.slice(0, 8));
-      } catch {
-        setCitySuggestions([]);
-      } finally {
-        setIsLoadingCities(false);
-      }
-    }, 300);
-    return () => {
-      clearTimeout(timer);
-      controller.abort();
-    };
+    setIsLoadingCities(false);
+    setCitySuggestions(getCityMatches(city));
   }, [city]);
 
   useEffect(() => {
@@ -178,7 +143,7 @@ export default function EditListingScreen({ route, navigation }: Props) {
       setIsLoadingStreets(true);
       try {
         const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=il&addressdetails=1&accept-language=he&limit=25&street=${encodeURIComponent(q)}&city=${encodeURIComponent(selectedCity)}`,
+          `https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=il&addressdetails=1&accept-language=he&limit=25&q=${encodeURIComponent(`${q}, ${selectedCity}, ישראל`)}`,
           {
             signal: controller.signal,
             headers: { 'User-Agent': 'ApartmentApp/1.0 (EditListing)' },
@@ -191,7 +156,8 @@ export default function EditListingScreen({ route, navigation }: Props) {
               .filter(Boolean)
               .filter((address: any) => {
                 const addressCity = normalizeText(address?.city || address?.town || address?.village || address?.municipality || '');
-                return addressCity.includes(normalizeText(selectedCity));
+                const streetName = normalizeText(address?.road || '');
+                return addressCity === normalizeText(selectedCity) && streetName.startsWith(normalizeText(q));
               })
               .map((address: any) => address?.road)
               .filter(Boolean)
@@ -310,7 +276,14 @@ export default function EditListingScreen({ route, navigation }: Props) {
               {!!citySuggestions.length && (
                 <View style={styles.suggestionsBox}>
                   {citySuggestions.map((item) => (
-                    <TouchableOpacity key={item} style={styles.suggestionItem} onPress={() => setCity(item)}>
+                    <TouchableOpacity
+                      key={item}
+                      style={styles.suggestionItem}
+                      onPress={() => {
+                        setCity(item);
+                        setCitySuggestions([]);
+                      }}
+                    >
                       <Text style={styles.suggestionText}>{item}</Text>
                     </TouchableOpacity>
                   ))}
@@ -324,7 +297,14 @@ export default function EditListingScreen({ route, navigation }: Props) {
               {!!streetSuggestions.length && (
                 <View style={styles.suggestionsBox}>
                   {streetSuggestions.map((item) => (
-                    <TouchableOpacity key={item} style={styles.suggestionItem} onPress={() => setStreet(item)}>
+                    <TouchableOpacity
+                      key={item}
+                      style={styles.suggestionItem}
+                      onPress={() => {
+                        setStreet(item);
+                        setStreetSuggestions([]);
+                      }}
+                    >
                       <Text style={styles.suggestionText}>{item}</Text>
                     </TouchableOpacity>
                   ))}
@@ -402,7 +382,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.bg },
   scroll: { padding: 20, paddingBottom: 40 },
   header: { fontSize: 22, fontWeight: '800', color: C.text, textAlign: 'right', marginBottom: 20 },
-  row: { flexDirection: 'row', marginBottom: 0 },
+  row: { flexDirection: 'row', marginBottom: 0, alignItems: 'flex-start' },
   fieldLabel: { color: C.textSub, fontSize: 12, fontWeight: '600', textAlign: 'right', marginBottom: 6 },
   input: {
     backgroundColor: C.bgCard, borderRadius: 12, padding: 14,
@@ -413,13 +393,15 @@ const styles = StyleSheet.create({
   helperText: { marginTop: 4, textAlign: 'right', color: C.textMut, fontSize: 11 },
   loader: { marginTop: 6 },
   suggestionsBox: {
-    marginTop: 6,
+    marginTop: 4,
     borderRadius: 10,
     borderWidth: 1,
     borderColor: C.borderLight,
     backgroundColor: C.bg,
     maxHeight: 180,
     overflow: 'hidden',
+    zIndex: 50,
+    elevation: 8,
   },
   suggestionItem: {
     paddingVertical: 10,
