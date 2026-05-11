@@ -13,6 +13,8 @@ spec:
       labels:
         app: backend
     spec:
+      imagePullSecrets:
+        - name: ghcr-io
       containers:
         - name: backend
           image: dirapp/backend:latest

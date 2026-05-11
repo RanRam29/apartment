@@ -13,6 +13,8 @@ spec:
       labels:
         app: ai-service
     spec:
+      imagePullSecrets:
+        - name: ghcr-io
       containers:
         - name: ai-service
           image: dirapp/ai-service:latest

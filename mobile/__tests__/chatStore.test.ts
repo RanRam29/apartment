@@ -22,6 +22,9 @@ jest.mock('../src/services/api', () => ({
   tokenStorage: {
     get: jest.fn(),
   },
+  clientLogsApi: {
+    event: jest.fn().mockResolvedValue(undefined),
+  },
 }));
 
 describe('useChatStore', () => {
