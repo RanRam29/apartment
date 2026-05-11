@@ -24,7 +24,8 @@ import { C } from '../theme';
 
 const FILTER_LABEL: Record<string, string> = {
   city: 'עיר',
-  neighborhood: 'שכונה',
+  street: 'רחוב',
+  neighborhood: 'רחוב',
   minPrice: 'מחיר מ',
   maxPrice: 'מחיר עד',
   minRooms: 'חדרים מ',

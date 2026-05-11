@@ -10,6 +10,8 @@ const { cacheGet, cacheSet, cacheDel } = require('../config/redis');
 const { getJwtSecret } = require('../config/security');
 const { sendVerificationEmail } = require('../services/emailService');
 const logger = require('../utils/logger');
+const { logAudit } = require('../services/auditLogService');
+const { AUDIT_ACTIONS, AUDIT_OUTCOMES } = require('../constants/logging');
 
 const router = express.Router();
 
@@ -110,6 +112,17 @@ router.post('/register', registerValidator, async (req, res, next) => {
     }
 
     logger.info(`New user registered: ${user.id} (${role})`);
+    await logAudit({
+      ...req.getAuditContext?.(),
+      actorId: user.id,
+      actorRole: user.role,
+      action: AUDIT_ACTIONS.USER_REGISTER,
+      resourceType: 'user',
+      resourceId: user.id,
+      outcome: AUDIT_OUTCOMES.SUCCESS,
+      statusCode: 201,
+      metadata: { email: user.email, role: user.role },
+    });
 
     const payload = {
       token,
@@ -150,6 +163,15 @@ router.post('/login', loginValidator, async (req, res, next) => {
       return res.status(503).json({ error: 'Service temporarily unavailable' });
     }
     if (!user) {
+      await logAudit({
+        ...req.getAuditContext?.(),
+        action: AUDIT_ACTIONS.USER_LOGIN_FAILED,
+        resourceType: 'user',
+        resourceId: null,
+        outcome: AUDIT_OUTCOMES.FAILURE,
+        statusCode: 401,
+        metadata: { email },
+      });
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
@@ -161,6 +183,15 @@ router.post('/login', loginValidator, async (req, res, next) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
     if (!valid) {
+      await logAudit({
+        ...req.getAuditContext?.(),
+        action: AUDIT_ACTIONS.USER_LOGIN_FAILED,
+        resourceType: 'user',
+        resourceId: user.id,
+        outcome: AUDIT_OUTCOMES.FAILURE,
+        statusCode: 401,
+        metadata: { email: user.email },
+      });
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
@@ -212,6 +243,17 @@ router.post('/login', loginValidator, async (req, res, next) => {
         isPremium: user.isPremium,
       },
     });
+    await logAudit({
+      ...req.getAuditContext?.(),
+      actorId: user.id,
+      actorRole: user.role,
+      action: AUDIT_ACTIONS.USER_LOGIN_SUCCESS,
+      resourceType: 'user',
+      resourceId: user.id,
+      outcome: AUDIT_OUTCOMES.SUCCESS,
+      statusCode: 200,
+      metadata: { email: user.email, verified: user.isVerified },
+    });
   } catch (err) {
     next(err);
   }
@@ -232,6 +274,16 @@ router.get('/verify/:token', async (req, res, next) => {
         verificationToken: null,
       });
       await cacheDel(`email:verify:${token}`).catch(() => {});
+      await logAudit({
+        ...req.getAuditContext?.(),
+        actorId: userByToken.id,
+        actorRole: userByToken.role,
+        action: AUDIT_ACTIONS.USER_VERIFY_EMAIL,
+        resourceType: 'user',
+        resourceId: userByToken.id,
+        outcome: AUDIT_OUTCOMES.SUCCESS,
+        statusCode: 200,
+      });
       return res.json({ message: 'Email verified successfully' });
     }
 
@@ -245,6 +297,16 @@ router.get('/verify/:token', async (req, res, next) => {
 
     await user.update({ isVerified: true, verifiedAt: new Date() });
     await cacheDel(cacheKey);
+    await logAudit({
+      ...req.getAuditContext?.(),
+      actorId: user.id,
+      actorRole: user.role,
+      action: AUDIT_ACTIONS.USER_VERIFY_EMAIL,
+      resourceType: 'user',
+      resourceId: user.id,
+      outcome: AUDIT_OUTCOMES.SUCCESS,
+      statusCode: 200,
+    });
     res.json({ message: 'Email verified successfully' });
   } catch (err) {
     next(err);
@@ -313,6 +375,14 @@ router.post('/logout', async (req, res, next) => {
       }
     }
     res.json({ message: 'Logged out successfully' });
+    await logAudit({
+      ...req.getAuditContext?.(),
+      action: AUDIT_ACTIONS.USER_LOGOUT,
+      resourceType: 'user',
+      resourceId: req.user?.id || null,
+      outcome: AUDIT_OUTCOMES.SUCCESS,
+      statusCode: 200,
+    });
   } catch (err) {
     next(err);
   }
@@ -349,6 +419,17 @@ router.patch('/profile', require('../middleware/auth').authenticate, async (req,
 
     await user.update(updates);
     const { passwordHash: _, ...safeUser } = user.toJSON();
+    await logAudit({
+      ...req.getAuditContext?.(),
+      actorId: req.user.id,
+      actorRole: req.user.role,
+      action: AUDIT_ACTIONS.USER_PROFILE_UPDATE,
+      resourceType: 'user',
+      resourceId: user.id,
+      outcome: AUDIT_OUTCOMES.SUCCESS,
+      statusCode: 200,
+      metadata: { updatedFields: Object.keys(updates) },
+    });
     res.json({ user: safeUser });
   } catch (err) {
     next(err);

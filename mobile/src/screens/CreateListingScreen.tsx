@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
   StyleSheet, SafeAreaView, Alert, ActivityIndicator,
@@ -10,7 +10,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useQueryClient } from '@tanstack/react-query';
 import { apartmentsApi } from '../services/api';
 import type { Amenity } from '../types';
-import { C, Dark } from '../theme';
+import { C } from '../theme';
+import { CITY_CENTER_BY_NAME } from '../constants/cityCenters';
 
 const AMENITY_OPTIONS: { key: Amenity; label: string }[] = [
   { key: 'parking',     label: '🚗 חניה' },
@@ -22,6 +23,7 @@ const AMENITY_OPTIONS: { key: Amenity; label: string }[] = [
   { key: 'sun_boiler',  label: '☀️ דוד שמש' },
   { key: 'pets_allowed',label: '🐾 חיות מותרות' },
 ];
+const ISRAELI_CITIES = Object.keys(CITY_CENTER_BY_NAME).sort((a, b) => a.localeCompare(b, 'he'));
 
 export default function CreateListingScreen({ navigation }: any) {
   const queryClient = useQueryClient();
@@ -31,12 +33,16 @@ export default function CreateListingScreen({ navigation }: any) {
   const [price, setPrice]             = useState('');
   const [rooms, setRooms]             = useState('');
   const [city, setCity]               = useState('');
-  const [neighborhood, setNeighborhood] = useState('');
+  const [street, setStreet]             = useState('');
   const [floor, setFloor]             = useState('');
   const [sizeSqm, setSizeSqm]         = useState('');
   const [amenities, setAmenities]     = useState<Amenity[]>([]);
   const [images, setImages]           = useState<{ uri: string }[]>([]);
   const [loading, setLoading]         = useState(false);
+  const [citySuggestions, setCitySuggestions] = useState<string[]>([]);
+  const [streetSuggestions, setStreetSuggestions] = useState<string[]>([]);
+  const [isLoadingCities, setIsLoadingCities] = useState(false);
+  const [isLoadingStreets, setIsLoadingStreets] = useState(false);
 
   function showMessage(title: string, message: string) {
     if (Platform.OS === 'web') {
@@ -52,6 +58,109 @@ export default function CreateListingScreen({ navigation }: any) {
     );
   }
 
+  function keepDigitsOnly(value: string) {
+    return value.replace(/[^\d]/g, '');
+  }
+
+  function sanitizeTitleInput(value: string) {
+    const withoutCodeChars = value.replace(/[<>`{}]/g, '');
+    return withoutCodeChars.slice(0, 100);
+  }
+
+  function normalizeText(value: string) {
+    return value.trim().toLowerCase();
+  }
+
+  function getCityMatches(query: string) {
+    const q = normalizeText(query);
+    if (q.length < 2) return [];
+    const startsWith = ISRAELI_CITIES.filter((name) => normalizeText(name).startsWith(q));
+    const contains = ISRAELI_CITIES.filter((name) => {
+      const norm = normalizeText(name);
+      return !norm.startsWith(q) && norm.includes(q);
+    });
+    return [...startsWith, ...contains].slice(0, 8);
+  }
+
+  const canSearchStreet = useMemo(() => city.trim().length > 0, [city]);
+
+  async function validateIsraeliCity(cityName: string) {
+    const cityNorm = normalizeText(cityName);
+    return ISRAELI_CITIES.some((candidate) => normalizeText(candidate) === cityNorm);
+  }
+
+  async function validateStreetInCity(cityName: string, streetName: string) {
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=il&addressdetails=1&accept-language=he&limit=10&street=${encodeURIComponent(streetName)}&city=${encodeURIComponent(cityName)}`,
+        { headers: { 'User-Agent': 'ApartmentApp/1.0 (CreateListing)' } }
+      );
+      const data = await res.json();
+      if (!Array.isArray(data)) return false;
+      const cityNorm = normalizeText(cityName);
+      const streetNorm = normalizeText(streetName);
+      return data.some((item: any) => {
+        const address = item?.address || {};
+        const candidateCity = normalizeText(address.city || address.town || address.village || address.municipality || '');
+        const candidateStreet = normalizeText(address.road || '');
+        return candidateCity === cityNorm && candidateStreet === streetNorm;
+      });
+    } catch {
+      return false;
+    }
+  }
+
+  useEffect(() => {
+    setIsLoadingCities(false);
+    setCitySuggestions(getCityMatches(city));
+  }, [city]);
+
+  useEffect(() => {
+    const q = street.trim();
+    const selectedCity = city.trim();
+    if (!selectedCity || q.length < 2) {
+      setStreetSuggestions([]);
+      setIsLoadingStreets(false);
+      return;
+    }
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      setIsLoadingStreets(true);
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=il&addressdetails=1&accept-language=he&limit=25&q=${encodeURIComponent(`${q}, ${selectedCity}, ישראל`)}`,
+          {
+            signal: controller.signal,
+            headers: { 'User-Agent': 'ApartmentApp/1.0 (CreateListing)' },
+          }
+        );
+        const data = await res.json();
+        const parsed = Array.isArray(data)
+          ? data
+              .map((item: any) => item?.address)
+              .filter(Boolean)
+              .filter((address: any) => {
+                const addressCity = normalizeText(address?.city || address?.town || address?.village || address?.municipality || '');
+                const streetName = normalizeText(address?.road || '');
+                return addressCity === normalizeText(selectedCity) && streetName.startsWith(normalizeText(q));
+              })
+              .map((address: any) => address?.road)
+              .filter(Boolean)
+          : [];
+        const unique = Array.from(new Set(parsed));
+        setStreetSuggestions(unique.slice(0, 8));
+      } catch {
+        setStreetSuggestions([]);
+      } finally {
+        setIsLoadingStreets(false);
+      }
+    }, 300);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [street, city]);
+
   async function pickImages() {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -65,20 +174,46 @@ export default function CreateListingScreen({ navigation }: any) {
   }
 
   async function handleSubmit() {
-    if (!title || !price || !rooms || !city) {
-      showMessage('שגיאה', 'נא למלא: כותרת, מחיר, חדרים ועיר');
+    const titleValue = title.trim();
+    const cityValue = city.trim();
+    const streetValue = street.trim();
+
+    if (!titleValue || !price || !rooms || !cityValue || !streetValue) {
+      showMessage('שגיאה', 'נא למלא: כותרת, מחיר, חדרים, עיר ורחוב');
+      return;
+    }
+    if (titleValue.length > 100) {
+      showMessage('שגיאה', 'כותרת יכולה להכיל עד 100 תווים');
+      return;
+    }
+    if (/[<>`{}]/.test(titleValue)) {
+      showMessage('שגיאה', 'כותרת לא יכולה להכיל קוד או תווים לא תקינים');
+      return;
+    }
+    if (!/^\d+$/.test(price) || !/^\d+$/.test(rooms) || (sizeSqm && !/^\d+$/.test(sizeSqm)) || (floor && !/^\d+$/.test(floor))) {
+      showMessage('שגיאה', 'שדות מחיר, חדרים, קומה וגודל חייבים להכיל מספרים בלבד');
+      return;
+    }
+    const isCityValid = await validateIsraeliCity(cityValue);
+    if (!isCityValid) {
+      showMessage('שגיאה', 'יש לבחור עיר קיימת בישראל מתוך ההצעות');
+      return;
+    }
+    const isStreetValid = await validateStreetInCity(cityValue, streetValue);
+    if (!isStreetValid) {
+      showMessage('שגיאה', 'יש לבחור רחוב שקיים בעיר שנבחרה');
       return;
     }
 
     setLoading(true);
     try {
       const form = new FormData();
-      form.append('title', title);
+      form.append('title', titleValue);
       form.append('description', description);
       form.append('price', price);
       form.append('rooms', rooms);
-      form.append('city', city);
-      form.append('neighborhood', neighborhood);
+      form.append('city', cityValue);
+      form.append('street', streetValue);
       form.append('floor', floor);
       form.append('sizeSqm', sizeSqm);
       form.append('amenities', JSON.stringify(amenities));
@@ -116,98 +251,192 @@ export default function CreateListingScreen({ navigation }: any) {
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-          <Text style={styles.header}>פרסם מודעה חדשה</Text>
+          <View style={styles.formCard}>
+            <Text style={styles.header}>פרסם מודעה חדשה</Text>
 
-          <Field label="כותרת *">
-            <TextInput style={styles.input} value={title} onChangeText={setTitle}
-              placeholder="לדוג׳: דירת 3 חדרים מרוהטת בלב תל אביב" placeholderTextColor={C.textMut} textAlign="right" />
-          </Field>
-
-          <View style={styles.row}>
-            <Field label="מחיר ₪ *" style={{ flex: 1, marginLeft: 8 }}>
-              <TextInput style={styles.input} value={price} onChangeText={setPrice}
-                keyboardType="numeric" placeholder="6500" placeholderTextColor={C.textMut} textAlign="right" />
+            <Field label="כותרת *">
+              <TextInput
+                style={styles.input}
+                value={title}
+                onChangeText={(value) => setTitle(sanitizeTitleInput(value))}
+                placeholder="לדוג׳: דירת 3 חדרים מרוהטת בלב תל אביב"
+                placeholderTextColor={C.textMut}
+                textAlign="right"
+                maxLength={100}
+              />
+              <Text style={styles.helperText}>{title.length}/100</Text>
             </Field>
-            <Field label="חדרים *" style={{ flex: 1 }}>
-              <TextInput style={styles.input} value={rooms} onChangeText={setRooms}
-                keyboardType="decimal-pad" placeholder="3" placeholderTextColor={C.textMut} textAlign="right" />
-            </Field>
-          </View>
 
-          <View style={styles.row}>
-            <Field label="עיר *" style={{ flex: 1, marginLeft: 8 }}>
-              <TextInput style={styles.input} value={city} onChangeText={setCity}
-                placeholder="תל אביב" placeholderTextColor={C.textMut} textAlign="right" />
-            </Field>
-            <Field label="שכונה" style={{ flex: 1 }}>
-              <TextInput style={styles.input} value={neighborhood} onChangeText={setNeighborhood}
-                placeholder="פלורנטין" placeholderTextColor={C.textMut} textAlign="right" />
-            </Field>
-          </View>
+            <View style={styles.row}>
+              <Field label="מחיר ₪ *" style={{ flex: 1 }}>
+                <TextInput
+                  style={styles.input}
+                  value={price}
+                  onChangeText={(value) => setPrice(keepDigitsOnly(value))}
+                  keyboardType="numeric"
+                  placeholder="6500"
+                  placeholderTextColor={C.textMut}
+                  textAlign="right"
+                />
+              </Field>
+              <Field label="חדרים *" style={{ flex: 1 }}>
+                <TextInput
+                  style={styles.input}
+                  value={rooms}
+                  onChangeText={(value) => setRooms(keepDigitsOnly(value))}
+                  keyboardType="numeric"
+                  placeholder="3"
+                  placeholderTextColor={C.textMut}
+                  textAlign="right"
+                />
+              </Field>
+            </View>
 
-          <View style={styles.row}>
-            <Field label="קומה" style={{ flex: 1, marginLeft: 8 }}>
-              <TextInput style={styles.input} value={floor} onChangeText={setFloor}
-                keyboardType="numeric" placeholder="3" placeholderTextColor={C.textMut} textAlign="right" />
+            <View style={styles.row}>
+              <Field label="עיר *" style={{ flex: 1 }}>
+                <TextInput
+                  style={styles.input}
+                  value={city}
+                  onChangeText={(value) => {
+                    setCity(value);
+                    setStreet('');
+                    setStreetSuggestions([]);
+                  }}
+                  placeholder="בחר עיר בישראל"
+                  placeholderTextColor={C.textMut}
+                  textAlign="right"
+                />
+                {isLoadingCities ? <ActivityIndicator size="small" color={C.navy} style={styles.loader} /> : null}
+                {!!citySuggestions.length && (
+                  <View style={styles.suggestionsBox}>
+                    {citySuggestions.map((item) => (
+                      <TouchableOpacity
+                        key={item}
+                        style={styles.suggestionItem}
+                        onPress={() => {
+                          setCity(item);
+                          setCitySuggestions([]);
+                        }}
+                      >
+                        <Text style={styles.suggestionText}>{item}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+              </Field>
+              <Field label="רחוב *" style={{ flex: 1 }}>
+                <TextInput
+                  style={styles.input}
+                  value={street}
+                  onChangeText={setStreet}
+                  placeholder={canSearchStreet ? 'בחר רחוב לפי העיר' : 'יש לבחור עיר קודם'}
+                  placeholderTextColor={C.textMut}
+                  textAlign="right"
+                  editable={canSearchStreet}
+                />
+                {isLoadingStreets ? <ActivityIndicator size="small" color={C.navy} style={styles.loader} /> : null}
+                {!!streetSuggestions.length && (
+                  <View style={styles.suggestionsBox}>
+                    {streetSuggestions.map((item) => (
+                      <TouchableOpacity
+                        key={item}
+                        style={styles.suggestionItem}
+                        onPress={() => {
+                          setStreet(item);
+                          setStreetSuggestions([]);
+                        }}
+                      >
+                        <Text style={styles.suggestionText}>{item}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+              </Field>
+            </View>
+
+            <View style={styles.row}>
+              <Field label="קומה" style={{ flex: 1 }}>
+                <TextInput
+                  style={styles.input}
+                  value={floor}
+                  onChangeText={(value) => setFloor(keepDigitsOnly(value))}
+                  keyboardType="numeric"
+                  placeholder="3"
+                  placeholderTextColor={C.textMut}
+                  textAlign="right"
+                />
+              </Field>
+              <Field label='גודל מ"ר' style={{ flex: 1 }}>
+                <TextInput
+                  style={styles.input}
+                  value={sizeSqm}
+                  onChangeText={(value) => setSizeSqm(keepDigitsOnly(value))}
+                  keyboardType="numeric"
+                  placeholder="75"
+                  placeholderTextColor={C.textMut}
+                  textAlign="right"
+                />
+              </Field>
+            </View>
+
+            <Field label="תיאור">
+              <TextInput
+                style={[styles.input, styles.textarea]}
+                value={description}
+                onChangeText={setDescription}
+                multiline
+                numberOfLines={4}
+                placeholder="תאר את הדירה..."
+                placeholderTextColor={C.textMut}
+                textAlign="right"
+              />
             </Field>
-            <Field label='גודל מ"ר' style={{ flex: 1 }}>
-              <TextInput style={styles.input} value={sizeSqm} onChangeText={setSizeSqm}
-                keyboardType="numeric" placeholder="75" placeholderTextColor={C.textMut} textAlign="right" />
-            </Field>
-          </View>
 
-          <Field label="תיאור">
-            <TextInput style={[styles.input, styles.textarea]} value={description}
-              onChangeText={setDescription} multiline numberOfLines={4}
-              placeholder="תאר את הדירה..." placeholderTextColor={C.textMut} textAlign="right" />
-          </Field>
-
-          {/* Amenities */}
-          <Text style={styles.fieldLabel}>שירותים</Text>
-          <View style={styles.amenitiesGrid}>
-            {AMENITY_OPTIONS.map(({ key, label }) => (
-              <TouchableOpacity
-                key={key}
-                style={[styles.amenityChip, amenities.includes(key) && styles.amenityChipActive]}
-                onPress={() => toggleAmenity(key)}
-              >
-                <Text style={[styles.amenityText, amenities.includes(key) && styles.amenityTextActive]}>
-                  {label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          {/* Images */}
-          <Text style={styles.fieldLabel}>תמונות ({images.length}/10)</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imagesRow}>
-            <TouchableOpacity style={styles.addImageBtn} onPress={pickImages}>
-              <Ionicons name="camera-outline" size={28} color={C.cyan} />
-              <Text style={styles.addImageText}>הוסף</Text>
-            </TouchableOpacity>
-            {images.map((img, i) => (
-              <View key={i} style={styles.imageThumb}>
-                <Image source={img} style={styles.imageThumbImg} contentFit="cover" />
+            <Text style={styles.fieldLabel}>שירותים</Text>
+            <View style={styles.amenitiesGrid}>
+              {AMENITY_OPTIONS.map(({ key, label }) => (
                 <TouchableOpacity
-                  style={styles.removeImageBtn}
-                  onPress={() => setImages((prev) => prev.filter((_, idx) => idx !== i))}
+                  key={key}
+                  style={[styles.amenityChip, amenities.includes(key) && styles.amenityChipActive]}
+                  onPress={() => toggleAmenity(key)}
                 >
-                  <Ionicons name="close-circle" size={18} color="#FF4757" />
+                  <Text style={[styles.amenityText, amenities.includes(key) && styles.amenityTextActive]}>
+                    {label}
+                  </Text>
                 </TouchableOpacity>
-              </View>
-            ))}
-          </ScrollView>
+              ))}
+            </View>
 
-          <TouchableOpacity
-            style={[styles.submitBtn, loading && styles.submitBtnDisabled]}
-            onPress={handleSubmit}
-            disabled={loading}
-          >
-            {loading
-              ? <ActivityIndicator color={C.navy} />
-              : <Text style={styles.submitText}>פרסם מודעה 🏠</Text>
-            }
-          </TouchableOpacity>
+            <Text style={styles.fieldLabel}>תמונות ({images.length}/10)</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imagesRow} contentContainerStyle={styles.imagesRowContent}>
+              <TouchableOpacity style={styles.addImageBtn} onPress={pickImages}>
+                <Ionicons name="camera-outline" size={28} color={C.navy} />
+                <Text style={styles.addImageText}>הוסף</Text>
+              </TouchableOpacity>
+              {images.map((img, i) => (
+                <View key={i} style={styles.imageThumb}>
+                  <Image source={img} style={styles.imageThumbImg} contentFit="cover" />
+                  <TouchableOpacity
+                    style={styles.removeImageBtn}
+                    onPress={() => setImages((prev) => prev.filter((_, idx) => idx !== i))}
+                  >
+                    <Ionicons name="close-circle" size={18} color={C.danger} />
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </ScrollView>
+
+            <TouchableOpacity
+              style={[styles.submitBtn, loading && styles.submitBtnDisabled]}
+              onPress={handleSubmit}
+              disabled={loading}
+            >
+              {loading
+                ? <ActivityIndicator color="#fff" />
+                : <Text style={styles.submitText}>פרסם מודעה 🏠</Text>
+              }
+            </TouchableOpacity>
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -224,39 +453,80 @@ function Field({ label, children, style }: { label: string; children: React.Reac
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Dark.bg },
-  scroll: { padding: 20, paddingBottom: 40 },
-  header: { fontSize: 22, fontWeight: '800', color: '#fff', textAlign: 'right', marginBottom: 20 },
-  row: { flexDirection: 'row', marginBottom: 0 },
-  fieldLabel: { color: C.textMut, fontSize: 12, fontWeight: '600', textAlign: 'right', marginBottom: 6 },
+  container: { flex: 1, backgroundColor: C.bg },
+  scroll: { padding: 16, paddingBottom: 40, alignItems: 'center' },
+  formCard: {
+    width: '100%',
+    maxWidth: 720,
+    backgroundColor: C.bgCard,
+    borderRadius: 18,
+    borderWidth: 1.5,
+    borderColor: C.borderLight,
+    padding: 16,
+    shadowColor: C.navy,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 4,
+  },
+  header: { fontSize: 22, fontWeight: '800', color: C.text, textAlign: 'right', marginBottom: 20 },
+  row: { flexDirection: 'row-reverse', marginBottom: 0, columnGap: 8, alignItems: 'flex-start' },
+  fieldLabel: { color: C.textSub, fontSize: 12, fontWeight: '600', textAlign: 'right', marginBottom: 6 },
   input: {
-    backgroundColor: Dark.surface, borderRadius: 12, padding: 14,
-    fontSize: 14, color: '#fff', borderWidth: 1, borderColor: Dark.border,
+    backgroundColor: C.bgCard,
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 14,
+    color: C.text,
+    borderWidth: 1.5,
+    borderColor: C.border,
+    writingDirection: 'rtl',
   },
   textarea: { height: 100, textAlignVertical: 'top' },
-  amenitiesGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 },
+  helperText: { marginTop: 4, textAlign: 'right', color: C.textMut, fontSize: 11 },
+  loader: { marginTop: 6 },
+  suggestionsBox: {
+    marginTop: 4,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: C.borderLight,
+    backgroundColor: C.bg,
+    maxHeight: 180,
+    overflow: 'hidden',
+    zIndex: 50,
+    elevation: 8,
+  },
+  suggestionItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: C.borderLight,
+  },
+  suggestionText: { textAlign: 'right', color: C.text, fontSize: 14 },
+  amenitiesGrid: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: 8, marginBottom: 20, justifyContent: 'flex-start' },
   amenityChip: {
     paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10,
-    backgroundColor: Dark.surface, borderWidth: 1, borderColor: Dark.border,
+    backgroundColor: C.bg, borderWidth: 1.5, borderColor: C.border,
   },
-  amenityChipActive: { backgroundColor: C.cyanAlpha(0.2), borderColor: C.cyan },
-  amenityText: { color: C.textMut, fontSize: 13 },
-  amenityTextActive: { color: C.cyan, fontWeight: '600' },
+  amenityChipActive: { backgroundColor: C.navy, borderColor: C.navy },
+  amenityText: { color: C.textSub, fontSize: 13, textAlign: 'right' },
+  amenityTextActive: { color: '#fff', fontWeight: '600' },
   imagesRow: { marginBottom: 24 },
+  imagesRowContent: { flexDirection: 'row-reverse', alignItems: 'center' },
   addImageBtn: {
     width: 80, height: 80, borderRadius: 12, borderWidth: 2,
-    borderColor: C.cyan, borderStyle: 'dashed',
+    borderColor: C.navy, borderStyle: 'dashed',
     justifyContent: 'center', alignItems: 'center',
-    marginRight: 8, backgroundColor: C.cyanAlpha(0.08),
+    marginLeft: 8, backgroundColor: C.navyAlpha(0.05),
   },
-  addImageText: { color: C.cyan, fontSize: 11, marginTop: 2 },
-  imageThumb: { width: 80, height: 80, borderRadius: 12, marginRight: 8, position: 'relative' },
+  addImageText: { color: C.navy, fontSize: 11, marginTop: 2 },
+  imageThumb: { width: 80, height: 80, borderRadius: 12, marginLeft: 8, position: 'relative' },
   imageThumbImg: { width: 80, height: 80, borderRadius: 12 },
-  removeImageBtn: { position: 'absolute', top: -6, right: -6 },
+  removeImageBtn: { position: 'absolute', top: -6, left: -6 },
   submitBtn: {
-    backgroundColor: C.cyan, borderRadius: 14,
+    backgroundColor: C.navy, borderRadius: 14,
     paddingVertical: 16, alignItems: 'center', marginTop: 8,
   },
   submitBtnDisabled: { opacity: 0.6 },
-  submitText: { color: C.navy, fontSize: 16, fontWeight: '800' },
+  submitText: { color: '#fff', fontSize: 16, fontWeight: '800' },
 });

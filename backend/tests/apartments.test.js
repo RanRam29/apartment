@@ -94,7 +94,7 @@ describe('POST /api/apartments', () => {
       .field('price', '7000')
       .field('rooms', '3')
       .field('city', 'תל אביב')
-      .field('neighborhood', 'פלורנטין')
+      .field('street', 'פלורנטין')
       .field('description', 'Lovely apartment in the heart of the city');
     expect(res.status).toBe(201);
     expect(res.body.apartment).toBeDefined();

@@ -26,7 +26,7 @@ router.get('/', authenticate, async (req, res, next) => {
         {
           model: Apartment,
           as: 'apartment',
-          attributes: ['id', 'title', 'price', 'city', 'neighborhood', 'rooms', 'images'],
+          attributes: ['id', 'title', 'price', 'city', 'street', 'rooms', 'images'],
         },
         {
           model: User,

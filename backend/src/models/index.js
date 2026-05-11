@@ -2,8 +2,10 @@ const User = require('./pg/User');
 const Apartment = require('./pg/Apartment');
 const Swipe = require('./pg/Swipe');
 const Match = require('./pg/Match');
+const AuditLog = require('./pg/AuditLog');
 const UserPreferences = require('./mongo/UserPreferences');
 const Message = require('./mongo/Message');
+const SystemEvent = require('./mongo/SystemEvent');
 
 // User → Apartments (landlord owns many apartments)
 User.hasMany(Apartment, { foreignKey: 'landlordId', as: 'listings' });
@@ -32,6 +34,8 @@ module.exports = {
   Apartment,
   Swipe,
   Match,
+  AuditLog,
   UserPreferences,
   Message,
+  SystemEvent,
 };

@@ -115,7 +115,7 @@ describe('Email verification + auth rate limiting', () => {
       title: 'Verification Test Apartment',
       description: 'd',
       city: 'Tel Aviv',
-      neighborhood: 'Center',
+      street: 'Center',
       address: '123 Test St',
       latitude: 32.08,
       longitude: 34.78,

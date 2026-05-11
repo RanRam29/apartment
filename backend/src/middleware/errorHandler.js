@@ -1,4 +1,6 @@
 const logger = require('../utils/logger');
+const { logSystemEvent } = require('../services/systemEventService');
+const { SYSTEM_CATEGORY, SYSTEM_SEVERITY } = require('../constants/logging');
 
 function errorHandler(err, req, res, next) {
   // Sequelize unique constraint
@@ -37,6 +39,22 @@ function errorHandler(err, req, res, next) {
   }
 
   logger.error(`[${req.method}] ${req.path} →`, err);
+  logSystemEvent({
+    requestId: req.requestContext?.requestId,
+    source: 'api',
+    category: SYSTEM_CATEGORY.APPLICATION,
+    severity: SYSTEM_SEVERITY.ERROR,
+    event: 'request.error',
+    message: `Unhandled error on ${req.method} ${req.path}`,
+    actorId: req.user?.id || null,
+    metadata: {
+      status: err.status || err.statusCode || 500,
+      name: err.name,
+      error: err.message,
+      path: req.path,
+      method: req.method,
+    },
+  });
 
   const status = err.status || err.statusCode || 500;
   res.status(status).json({

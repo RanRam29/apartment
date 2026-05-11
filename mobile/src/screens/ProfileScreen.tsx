@@ -26,6 +26,7 @@ export default function ProfileScreen() {
 
   const initials = `${user?.firstName?.[0] ?? ''}${user?.lastName?.[0] ?? ''}`.toUpperCase();
   const isTenant = user?.role === 'tenant';
+  const isAdmin = user?.role === 'admin';
 
   async function pickAndUploadAvatar() {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -178,6 +179,9 @@ export default function ProfileScreen() {
           <MenuItem icon="trophy-outline" label="הישגים ונקודות" onPress={() => navigation.navigate('Gamification')} />
           <MenuItem icon="construct-outline" label="שירותים לדירה" onPress={() => navigation.navigate('Services')} />
           <MenuItem icon="hardware-chip-outline" label="ניהול IoT" onPress={() => navigation.navigate('IoT')} />
+          {isAdmin && (
+            <MenuItem icon="list-outline" label="Logs Console" onPress={() => navigation.navigate('LogsConsole')} />
+          )}
           <MenuItem icon="notifications-outline" label="התראות"
             onPress={() => Platform.OS === 'web' ? window.alert('בקרוב\nהגדרות התראות יתווספו בקרוב') : Alert.alert('בקרוב', 'הגדרות התראות יתווספו בקרוב')} />
           <MenuItem icon="shield-checkmark-outline" label="פרטיות ואבטחה"

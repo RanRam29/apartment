@@ -51,10 +51,17 @@ const api: AxiosInstance = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
+const clientLogApi: AxiosInstance = axios.create({
+  baseURL: `${BASE_URL}/api`,
+  timeout: 8000,
+  headers: { 'Content-Type': 'application/json', 'x-client-platform': Platform.OS },
+});
+
 // Attach JWT on every request
 api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
   const token = await storage.getItemAsync(TOKEN_KEY);
   if (token) config.headers.Authorization = `Bearer ${token}`;
+  config.headers['x-client-platform'] = Platform.OS;
   return config;
 });
 
@@ -62,6 +69,39 @@ api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
 api.interceptors.response.use(
   (res) => res,
   async (error) => {
+    const config = error.config || {};
+    const url = String(config.url || '');
+    const shouldReport =
+      !url.includes('/logs/client-event') &&
+      !config.headers?.['x-client-log-no-report'];
+    if (shouldReport) {
+      try {
+        const token = await storage.getItemAsync(TOKEN_KEY);
+        if (token) {
+          clientLogApi.defaults.headers.common.Authorization = `Bearer ${token}`;
+        } else {
+          delete clientLogApi.defaults.headers.common.Authorization;
+        }
+        await clientLogApi.post(
+          '/logs/client-event',
+          {
+            level: error.response?.status >= 500 ? 'error' : 'warn',
+            category: 'application',
+            event: 'client.http.error',
+            message: `HTTP request failed (${error.response?.status || 'network'})`,
+            metadata: {
+              method: config.method,
+              url,
+              status: error.response?.status || null,
+            },
+            tags: ['client', 'http'],
+          },
+          { headers: { 'x-client-log-no-report': '1' } }
+        );
+      } catch {
+        // Swallow logging failures to avoid feedback loops.
+      }
+    }
     if (error.response?.status === 401) {
       await storage.deleteItemAsync(TOKEN_KEY);
     }
@@ -96,7 +136,7 @@ export const apartmentsApi = {
   update: (id: string, data: Partial<{
     title: string; description: string | null; price: number; rooms: number;
     floor: number | null; totalFloors: number | null; sizeSqm: number | null;
-    city: string; neighborhood: string | null; address: string | null;
+    city: string; street: string | null; neighborhood: string | null; address: string | null;
     amenities: string[]; petsAllowed: boolean; availableFrom: string | null;
     minLeasePeriod: number | null; isActive: boolean;
   }>) => api.patch(`/apartments/${id}`, data),
@@ -241,6 +281,45 @@ export const iotApi = {
     api.post('/iot/maintenance', data),
   updateTicket: (id: string, data: object) =>
     api.patch(`/iot/maintenance/${id}`, data),
+};
+
+// ─── Admin Logs ───────────────────────────────────────────────────────────────
+export const adminLogsApi = {
+  getAudit: (params?: {
+    actorId?: string;
+    action?: string;
+    resourceType?: string;
+    outcome?: 'success' | 'failure';
+    search?: string;
+    from?: string;
+    to?: string;
+    limit?: number;
+    offset?: number;
+  }) => api.get('/admin/logs/audit', { params }),
+  getSystem: (params?: {
+    severity?: 'debug' | 'info' | 'warn' | 'error' | 'critical';
+    category?: 'application' | 'security' | 'integration' | 'performance';
+    source?: 'mobile' | 'web' | 'socket' | 'api' | 'server' | 'client' | 'rate-limit';
+    event?: string;
+    actorId?: string;
+    search?: string;
+    from?: string;
+    to?: string;
+    limit?: number;
+    offset?: number;
+  }) => api.get('/admin/logs/system', { params }),
+  exportAuditCsv: () => api.get('/admin/logs/audit/export.csv', { responseType: 'text' as any }),
+};
+
+export const clientLogsApi = {
+  event: (data: {
+    level?: 'debug' | 'info' | 'warn' | 'error' | 'critical';
+    category?: 'application' | 'security' | 'integration' | 'performance';
+    event: string;
+    message: string;
+    metadata?: Record<string, unknown>;
+    tags?: string[];
+  }) => api.post('/logs/client-event', data, { headers: { 'x-client-log-no-report': '1' } }),
 };
 
 // ─── Token helpers ────────────────────────────────────────────────────────────

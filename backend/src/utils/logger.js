@@ -24,4 +24,12 @@ const logger = winston.createLogger({
   transports: [new winston.transports.Console()],
 });
 
+function withRequestContext(req, meta = {}) {
+  const requestId = req?.requestContext?.requestId || req?.headers?.['x-request-id'] || null;
+  const actorId = req?.user?.id || null;
+  return { ...meta, requestId, actorId };
+}
+
+logger.withRequestContext = withRequestContext;
+
 module.exports = logger;

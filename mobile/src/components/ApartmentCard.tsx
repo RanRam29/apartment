@@ -17,6 +17,7 @@ interface Props {
 
 export default function ApartmentCard({ apartment, isTop: _isTop = false }: Props) {
   const firstImage = apartment.images?.[0]?.url;
+  const street = apartment.street ?? apartment.neighborhood;
 
   return (
     <View style={styles.card}>
@@ -62,7 +63,7 @@ export default function ApartmentCard({ apartment, isTop: _isTop = false }: Prop
         <Text style={styles.title} numberOfLines={1}>{apartment.title}</Text>
 
         <View style={styles.metaRow}>
-          <MetaChip icon="location-outline" label={`${apartment.city}${apartment.neighborhood ? ` · ${apartment.neighborhood}` : ''}`} />
+          <MetaChip icon="location-outline" label={`${apartment.city}${street ? ` · ${street}` : ''}`} />
           <MetaChip icon="bed-outline" label={`${apartment.rooms} חד׳`} />
           {apartment.sizeSqm ? <MetaChip icon="resize-outline" label={`${apartment.sizeSqm} מ"ר`} /> : null}
         </View>

@@ -125,7 +125,7 @@ router.post(
       const match = await Match.findOne({
         where: { id: matchId, landlordId: req.user.id, status: 'accepted' },
         include: [
-          { model: Apartment, as: 'apartment', attributes: ['title', 'address', 'city', 'neighborhood'] },
+          { model: Apartment, as: 'apartment', attributes: ['title', 'address', 'city', 'street'] },
           { model: User, as: 'tenant', attributes: ['firstName', 'lastName'] },
         ],
       });
@@ -151,7 +151,7 @@ router.post(
         endDate:   new Date(endDate),
         customClauses,
         apartmentTitle:   apt.title,
-        apartmentAddress: [apt.address, apt.neighborhood, apt.city].filter(Boolean).join(', '),
+        apartmentAddress: [apt.address, apt.street, apt.city].filter(Boolean).join(', '),
         tenantName:   `${match.tenant.firstName} ${match.tenant.lastName}`,
         landlordName: `${landlord.firstName} ${landlord.lastName}`,
         status: 'pending_tenant',
@@ -199,7 +199,7 @@ router.post(
       const match = await Match.findOne({
         where: { id: matchId, landlordId: req.user.id, status: 'accepted' },
         include: [
-          { model: Apartment, as: 'apartment', attributes: ['title', 'address', 'city', 'neighborhood'] },
+          { model: Apartment, as: 'apartment', attributes: ['title', 'address', 'city', 'street'] },
           { model: User, as: 'tenant', attributes: ['firstName', 'lastName'] },
         ],
       });
@@ -231,7 +231,7 @@ router.post(
         endDate: new Date(endDate),
         customClauses,
         apartmentTitle: apt.title || '',
-        apartmentAddress: [apt.address, apt.neighborhood, apt.city].filter(Boolean).join(', '),
+        apartmentAddress: [apt.address, apt.street, apt.city].filter(Boolean).join(', '),
         tenantName: `${match.tenant.firstName} ${match.tenant.lastName}`,
         landlordName: `${landlord.firstName} ${landlord.lastName}`,
         status: 'pending_tenant',
