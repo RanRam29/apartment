@@ -26,11 +26,12 @@ export default function ApartmentCard({ apartment, isTop: _isTop = false }: Prop
         style={styles.image}
         contentFit="cover"
         transition={200}
+        accessibilityLabel={apartment.title ? `תמונת דירה: ${apartment.title}` : 'תמונת דירה'}
       />
 
       {/* Soft gradient — lighter than before */}
       <LinearGradient
-        colors={['transparent', 'rgba(0,0,0,0.72)']}
+        colors={['transparent', C.overlay.imageGradientEnd]}
         style={styles.gradient}
       />
 
@@ -45,7 +46,7 @@ export default function ApartmentCard({ apartment, isTop: _isTop = false }: Prop
       {/* Image count */}
       {(apartment.images?.length ?? 0) > 1 && (
         <View style={styles.imageCount}>
-          <Ionicons name="images-outline" size={11} color="#fff" />
+          <Ionicons name="images-outline" size={11} color={C.onInverse.primary} />
           <Text style={styles.imageCountText}>{apartment.images.length}</Text>
         </View>
       )}
@@ -86,7 +87,7 @@ export default function ApartmentCard({ apartment, isTop: _isTop = false }: Prop
 function MetaChip({ icon, label }: { icon: keyof typeof Ionicons.glyphMap; label: string }) {
   return (
     <View style={styles.chip}>
-      <Ionicons name={icon} size={11} color="rgba(255,255,255,0.9)" />
+      <Ionicons name={icon} size={11} color={C.onInverse.secondary} />
       <Text style={styles.chipText} numberOfLines={1}>{label}</Text>
     </View>
   );
@@ -111,18 +112,18 @@ const styles = StyleSheet.create({
   verifiedBadge: {
     position: 'absolute', top: 16, left: 16,
     flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: 'rgba(0,0,0,0.45)',
+    backgroundColor: C.overlay.scrim45,
     paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20,
   },
-  verifiedText: { color: '#fff', fontSize: 11, fontWeight: '600' },
+  verifiedText: { color: C.onInverse.primary, fontSize: 11, fontWeight: '600' },
 
   imageCount: {
     position: 'absolute', top: 16, right: 16,
     flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: C.overlay.scrim50,
     paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10,
   },
-  imageCountText: { color: '#fff', fontSize: 11 },
+  imageCountText: { color: C.onInverse.primary, fontSize: 11 },
 
   info: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: 20, paddingBottom: 26 },
 
@@ -131,10 +132,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'baseline', gap: 3,
     alignSelf: 'flex-end',
   },
-  price: { fontSize: 27, fontWeight: '800', color: '#fff' },
-  priceLabel: { fontSize: 13, color: 'rgba(255,255,255,0.75)' },
+  price: { fontSize: 27, fontWeight: '800', color: C.onInverse.primary },
+  priceLabel: { fontSize: 13, color: C.onInverse.muted },
 
-  title: { fontSize: 15, color: '#fff', fontWeight: '600', marginBottom: 10, textAlign: 'right' },
+  title: { fontSize: 15, color: C.onInverse.primary, fontWeight: '600', marginBottom: 10, textAlign: 'right' },
 
   metaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 10, justifyContent: 'flex-end' },
   chip: {
@@ -142,9 +143,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.18)',
     paddingHorizontal: 9, paddingVertical: 4, borderRadius: 8,
   },
-  chipText: { color: '#fff', fontSize: 11 },
+  chipText: { color: C.onInverse.primary, fontSize: 11 },
 
   landlordRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  landlordName: { color: 'rgba(255,255,255,0.65)', fontSize: 12 },
+  landlordName: { color: C.onInverse.subtle, fontSize: 12 },
   availableFrom: { color: C.cyan, fontSize: 12, fontWeight: '600' },
 });

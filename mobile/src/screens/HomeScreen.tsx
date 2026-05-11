@@ -15,18 +15,18 @@ const TILE_SIZE = (W - 48 - 16) / 2;  // 2 columns, 24px margin each side, 16px 
 // ── Service definitions ────────────────────────────────────────────────────
 
 const TENANT_SERVICES = [
-  { id: 'Swipe',   label: 'Discover',  subLabel: 'Swipe apartments',  icon: 'home-outline' as const,   color: C.navy,  glow: 'rgba(22,40,57,0.20)' },
-  { id: 'Matches', label: 'Matches',   subLabel: 'Your saved homes',  icon: 'heart-outline' as const,  color: C.coral, glow: 'rgba(255,127,127,0.25)' },
-  { id: 'Search',  label: 'Search',    subLabel: 'Filter & explore',  icon: 'search-outline' as const, color: C.cyan,  glow: 'rgba(0,229,255,0.25)' },
-  { id: 'Profile', label: 'Profile',   subLabel: 'Your preferences',  icon: 'person-outline' as const, color: '#7C3AED', glow: 'rgba(124,58,237,0.20)' },
+  { id: 'Swipe',   label: 'Discover',  subLabel: 'Swipe apartments',  icon: 'home-outline' as const,   color: C.navy,  glow: C.navyAlpha(0.2) },
+  { id: 'Matches', label: 'Matches',   subLabel: 'Your saved homes',  icon: 'heart-outline' as const,  color: C.coral, glow: C.coralAlpha(0.25) },
+  { id: 'Search',  label: 'Search',    subLabel: 'Filter & explore',  icon: 'search-outline' as const, color: C.cyan,  glow: C.cyanAlpha(0.25) },
+  { id: 'Profile', label: 'Profile',   subLabel: 'Your preferences',  icon: 'person-outline' as const, color: C.accent.violet, glow: C.violetAlpha(0.2) },
 ] as const;
 
 const LANDLORD_SERVICES = [
-  { id: 'Dashboard', label: 'Dashboard', subLabel: 'Stats & overview',  icon: 'stats-chart-outline' as const, color: C.navy,  glow: 'rgba(22,40,57,0.20)' },
-  { id: 'Matches',   label: 'Chats',     subLabel: 'Tenant messages',    icon: 'chatbubbles-outline' as const,   color: '#7C3AED', glow: 'rgba(124,58,237,0.22)' },
-  { id: 'Leads',     label: 'Leads',     subLabel: 'Interested tenants', icon: 'people-outline' as const,      color: C.coral, glow: 'rgba(255,127,127,0.25)' },
-  { id: 'Listings',  label: 'Listings',  subLabel: 'Your properties',    icon: 'list-outline' as const,        color: C.cyan,  glow: 'rgba(0,229,255,0.25)' },
-  { id: 'Profile',   label: 'Profile',   subLabel: 'Account settings',   icon: 'person-outline' as const,      color: '#10B981', glow: 'rgba(16,185,129,0.20)' },
+  { id: 'Dashboard', label: 'Dashboard', subLabel: 'Stats & overview',  icon: 'stats-chart-outline' as const, color: C.navy,  glow: C.navyAlpha(0.2) },
+  { id: 'Matches',   label: 'Chats',     subLabel: 'Tenant messages',    icon: 'chatbubbles-outline' as const,   color: C.accent.violet, glow: C.violetAlpha(0.22) },
+  { id: 'Leads',     label: 'Leads',     subLabel: 'Interested tenants', icon: 'people-outline' as const,      color: C.coral, glow: C.coralAlpha(0.25) },
+  { id: 'Listings',  label: 'Listings',  subLabel: 'Your properties',    icon: 'list-outline' as const,        color: C.cyan,  glow: C.cyanAlpha(0.25) },
+  { id: 'Profile',   label: 'Profile',   subLabel: 'Account settings',   icon: 'person-outline' as const,      color: C.success, glow: C.successAlpha(0.2) },
 ] as const;
 
 // ── ServiceTile component ──────────────────────────────────────────────────
@@ -81,6 +81,9 @@ function ServiceTile({ service, onPress }: { service: ServiceItem; onPress: () =
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         activeOpacity={1}
+        accessibilityRole="button"
+        accessibilityLabel={service.label}
+        accessibilityHint={service.subLabel}
       >
         {/* Icon container with glow */}
         <Animated.View
@@ -90,7 +93,7 @@ function ServiceTile({ service, onPress }: { service: ServiceItem; onPress: () =
           ]}
         >
           <View style={[styles.iconGlow, { backgroundColor: service.glow }]} />
-          <Ionicons name={service.icon} size={28} color="#fff" />
+          <Ionicons name={service.icon} size={28} color={C.onInverse.primary} />
         </Animated.View>
 
         <Text style={styles.tileLabel}>{service.label}</Text>

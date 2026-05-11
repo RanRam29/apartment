@@ -359,7 +359,7 @@ export default function EditListingScreen({ route, navigation }: Props) {
             disabled={saving}
           >
             {saving
-              ? <ActivityIndicator color="#fff" />
+              ? <ActivityIndicator color={C.onInverse.primary} />
               : <Text style={styles.saveBtnText}>שמור שינויים</Text>
             }
           </TouchableOpacity>
@@ -417,7 +417,7 @@ const styles = StyleSheet.create({
   },
   amenityChipActive: { backgroundColor: C.navy, borderColor: C.navy },
   amenityText: { color: C.textSub, fontSize: 13 },
-  amenityTextActive: { color: '#fff', fontWeight: '600' },
+  amenityTextActive: { color: C.onInverse.primary, fontWeight: '600' },
   petsRow: {
     flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 24,
     backgroundColor: C.bg, borderRadius: 12, padding: 14,
@@ -432,5 +432,5 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.18, shadowRadius: 8, elevation: 4,
   },
   saveBtnDisabled: { opacity: 0.6 },
-  saveBtnText: { color: '#fff', fontSize: 16, fontWeight: '800' },
+  saveBtnText: { color: C.onInverse.primary, fontSize: 16, fontWeight: '800' },
 });

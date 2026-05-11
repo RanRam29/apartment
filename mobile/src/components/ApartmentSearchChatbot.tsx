@@ -189,12 +189,22 @@ export default function ApartmentSearchChatbot() {
       <Modal visible={open} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setOpen(false)}>
         <SafeAreaView style={styles.modalRoot}>
           <View style={styles.modalHeader}>
-            <TouchableOpacity onPress={clearChat} style={styles.headerBtn}>
+            <TouchableOpacity
+              onPress={clearChat}
+              style={styles.headerBtn}
+              accessibilityRole="button"
+              accessibilityLabel="נקה צ׳אט"
+            >
               <Text style={styles.headerBtnText}>נקה</Text>
             </TouchableOpacity>
             <Text style={styles.modalTitle}>חיפוש דירות בצ׳אט</Text>
-            <TouchableOpacity onPress={() => setOpen(false)} style={styles.headerBtn}>
-              <Ionicons name="close" size={24} color="#fff" />
+            <TouchableOpacity
+              onPress={() => setOpen(false)}
+              style={styles.headerBtn}
+              accessibilityRole="button"
+              accessibilityLabel="סגור"
+            >
+              <Ionicons name="close" size={24} color={C.onInverse.primary} />
             </TouchableOpacity>
           </View>
 
@@ -238,6 +248,8 @@ export default function ApartmentSearchChatbot() {
                         <Pressable
                           style={styles.miniCard}
                           onPress={() => openDetail(item.id)}
+                          accessibilityRole="button"
+                          accessibilityLabel={`${item.title}, ${item.price} שקלים לחודש`}
                         >
                           <Image
                             source={{
@@ -271,6 +283,8 @@ export default function ApartmentSearchChatbot() {
                 style={[styles.sendBtn, (!input.trim() || pending) && styles.sendBtnDisabled]}
                 onPress={send}
                 disabled={!input.trim() || pending}
+                accessibilityRole="button"
+                accessibilityLabel="שלח הודעה"
               >
                 <Ionicons name="send" size={20} color={C.navy} />
               </TouchableOpacity>
@@ -295,7 +309,7 @@ export default function ApartmentSearchChatbot() {
   );
 }
 
-const BORDER = 'rgba(0, 229, 255, 0.14)';
+const BORDER = C.cyanAlpha(0.14);
 
 const styles = StyleSheet.create({
   fab: {
@@ -309,7 +323,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     zIndex: 50,
     elevation: 12,
-    shadowColor: '#000',
+    shadowColor: C.navy,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 8,
@@ -325,7 +339,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: BORDER,
   },
-  modalTitle: { color: '#fff', fontSize: 17, fontWeight: '800' },
+  modalTitle: { color: C.onInverse.primary, fontSize: 17, fontWeight: '800' },
   headerBtn: { padding: 10, minWidth: 48 },
   headerBtnText: { color: C.cyan, fontSize: 14, fontWeight: '600' },
   chatScroll: { flex: 1 },
@@ -349,7 +363,7 @@ const styles = StyleSheet.create({
     borderColor: BORDER,
   },
   bubbleText: {
-    color: '#fff',
+    color: C.onInverse.primary,
     fontSize: 14,
     lineHeight: 21,
     textAlign: 'right',
@@ -373,7 +387,7 @@ const styles = StyleSheet.create({
     borderColor: BORDER,
   },
   miniThumb: { width: '100%', height: 64, borderRadius: 8, marginBottom: 6 },
-  miniTitle: { color: '#fff', fontSize: 11, fontWeight: '600', textAlign: 'right', minHeight: 28 },
+  miniTitle: { color: C.onInverse.primary, fontSize: 11, fontWeight: '600', textAlign: 'right', minHeight: 28 },
   miniPrice: { color: C.cyan, fontSize: 12, fontWeight: '700', textAlign: 'right' },
   inputRow: {
     flexDirection: 'row',
@@ -392,7 +406,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    color: '#fff',
+    color: C.onInverse.primary,
     fontSize: 14,
     borderWidth: 1,
     borderColor: BORDER,

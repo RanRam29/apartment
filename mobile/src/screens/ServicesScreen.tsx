@@ -75,7 +75,7 @@ function StarRow({ rating, size = 14 }: { rating: number; size?: number }) {
           key={s}
           name={s <= Math.round(rating) ? 'star' : 'star-outline'}
           size={size}
-          color="#F39C12"
+          color={C.statusTone.caution}
         />
       ))}
     </View>
@@ -112,7 +112,7 @@ function ReviewModal({
                 <Ionicons
                   name={s <= stars ? 'star' : 'star-outline'}
                   size={32}
-                  color="#F39C12"
+                  color={C.statusTone.caution}
                 />
               </TouchableOpacity>
             ))}
@@ -120,7 +120,7 @@ function ReviewModal({
           <TextInput
             style={styles.reviewInput}
             placeholder="תגובה (אופציונלי)"
-            placeholderTextColor="#555"
+            placeholderTextColor={C.field.placeholder}
             value={comment}
             onChangeText={setComment}
             multiline
@@ -137,7 +137,7 @@ function ReviewModal({
               disabled={submitting}
             >
               {submitting
-                ? <ActivityIndicator size="small" color="#fff" />
+                ? <ActivityIndicator size="small" color={C.onInverse.primary} />
                 : <Text style={styles.submitBtnText}>שלח</Text>
               }
             </TouchableOpacity>
@@ -171,7 +171,7 @@ function DetailModal({
           <View style={styles.detailHeader}>
             <Text style={styles.detailTitle} numberOfLines={1}>{service.title}</Text>
             <TouchableOpacity onPress={onClose}>
-              <Ionicons name="close" size={22} color="#fff" />
+              <Ionicons name="close" size={22} color={C.onInverse.primary} />
             </TouchableOpacity>
           </View>
 
@@ -228,7 +228,7 @@ function DetailModal({
 
             {isOwner ? (
               <TouchableOpacity style={styles.deleteListingBtn} onPress={onDelete}>
-                <Ionicons name="trash-outline" size={18} color="#FF7675" />
+                <Ionicons name="trash-outline" size={18} color={C.statusTone.negativeSoft} />
                 <Text style={styles.deleteListingText}>מחק את המודעה שלי</Text>
               </TouchableOpacity>
             ) : null}
@@ -311,7 +311,7 @@ function CreateModal({
           <ScrollView showsVerticalScrollIndicator={false}>
             <Text style={styles.fieldLabel}>כותרת *</Text>
             <TextInput style={styles.fieldInput} value={title} onChangeText={setTitle}
-              placeholderTextColor="#555" placeholder="למשל: הובלות אמינות בתל אביב" textAlign="right" />
+              placeholderTextColor={C.field.placeholder} placeholder="למשל: הובלות אמינות בתל אביב" textAlign="right" />
 
             <Text style={styles.fieldLabel}>קטגוריה</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 10 }}>
@@ -347,21 +347,21 @@ function CreateModal({
               <>
                 <Text style={styles.fieldLabel}>מחיר (₪)</Text>
                 <TextInput style={styles.fieldInput} value={price} onChangeText={setPrice}
-                  keyboardType="numeric" placeholderTextColor="#555" placeholder="0" textAlign="right" />
+                  keyboardType="numeric" placeholderTextColor={C.field.placeholder} placeholder="0" textAlign="right" />
               </>
             )}
 
             <Text style={styles.fieldLabel}>תיאור</Text>
             <TextInput style={[styles.fieldInput, { height: 72 }]} value={description} onChangeText={setDescription}
-              multiline placeholderTextColor="#555" placeholder="תיאור השירות" textAlign="right" />
+              multiline placeholderTextColor={C.field.placeholder} placeholder="תיאור השירות" textAlign="right" />
 
             <Text style={styles.fieldLabel}>ערים (מופרד בפסיקים)</Text>
             <TextInput style={styles.fieldInput} value={cities} onChangeText={setCities}
-              placeholderTextColor="#555" placeholder="תל אביב, חיפה, ירושלים" textAlign="right" />
+              placeholderTextColor={C.field.placeholder} placeholder="תל אביב, חיפה, ירושלים" textAlign="right" />
 
             <Text style={styles.fieldLabel}>טלפון</Text>
             <TextInput style={styles.fieldInput} value={phone} onChangeText={setPhone}
-              keyboardType="phone-pad" placeholderTextColor="#555" placeholder="05X-XXXXXXX" textAlign="right" />
+              keyboardType="phone-pad" placeholderTextColor={C.field.placeholder} placeholder="05X-XXXXXXX" textAlign="right" />
           </ScrollView>
 
           <View style={styles.createActions}>
@@ -503,7 +503,7 @@ export default function ServicesScreen({ navigation }: any) {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="chevron-back" size={22} color="#fff" />
+          <Ionicons name="chevron-back" size={22} color={C.onInverse.primary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>שירותים לדירה</Text>
         <View style={{ width: 36 }} />
@@ -525,7 +525,7 @@ export default function ServicesScreen({ navigation }: any) {
             <Ionicons
               name={c.icon}
               size={13}
-              color={activeCategory === c.key ? '#fff' : C.textMut}
+              color={activeCategory === c.key ? C.onInverse.primary : C.textMut}
             />
             <Text style={[styles.filterChipText, activeCategory === c.key && styles.filterChipTextActive]}>
               {c.label}
@@ -557,7 +557,7 @@ export default function ServicesScreen({ navigation }: any) {
 
       {/* FAB */}
       <TouchableOpacity style={styles.fab} onPress={() => setCreateVisible(true)}>
-        <Ionicons name="add" size={28} color="#fff" />
+        <Ionicons name="add" size={28} color={C.onInverse.primary} />
       </TouchableOpacity>
 
       {/* Detail modal */}
@@ -604,7 +604,7 @@ const styles = StyleSheet.create({
     backgroundColor: Dark.surface, borderBottomWidth: 1, borderBottomColor: Dark.border,
   },
   backBtn:     { padding: 4 },
-  headerTitle: { color: '#fff', fontSize: 17, fontWeight: '700' },
+  headerTitle: { color: C.onInverse.primary, fontSize: 17, fontWeight: '700' },
 
   filtersBar:     { maxHeight: 54, backgroundColor: Dark.surface },
   filtersContent: { paddingHorizontal: 12, paddingVertical: 10, gap: 8, alignItems: 'center' },
@@ -615,10 +615,10 @@ const styles = StyleSheet.create({
   },
   filterChipActive:     { backgroundColor: C.cyan, borderColor: C.cyan },
   filterChipText:       { color: C.textMut, fontSize: 12, fontWeight: '600' },
-  filterChipTextActive: { color: '#fff' },
+  filterChipTextActive: { color: C.onInverse.primary },
 
   center:     { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 },
-  emptyTitle: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  emptyTitle: { color: C.onInverse.primary, fontSize: 16, fontWeight: '700' },
   emptyHint:  { color: C.textMut, fontSize: 13, textAlign: 'center', paddingHorizontal: 40 },
 
   list: { padding: 16, gap: 12, paddingBottom: 100 },
@@ -626,7 +626,7 @@ const styles = StyleSheet.create({
   card: { backgroundColor: Dark.surface, borderRadius: 14, padding: 16, gap: 10 },
   cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   cardLeft: { flex: 1, gap: 3 },
-  cardTitle:    { color: '#fff', fontSize: 15, fontWeight: '700' },
+  cardTitle:    { color: C.onInverse.primary, fontSize: 15, fontWeight: '700' },
   cardProvider: { color: C.textMut, fontSize: 12 },
   cardChip: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
@@ -640,7 +640,7 @@ const styles = StyleSheet.create({
   cardCities:      { flexDirection: 'row', alignItems: 'center', gap: 3, flex: 1 },
   cardCitiesText:  { color: C.textMut, fontSize: 11 },
   cardRating:      { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  cardRatingText:  { color: '#F39C12', fontSize: 11, fontWeight: '700' },
+  cardRatingText:  { color: C.statusTone.caution, fontSize: 11, fontWeight: '700' },
 
   fab: {
     position: 'absolute', bottom: 28, right: 20,
@@ -657,7 +657,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     padding: 20, borderBottomWidth: 1, borderBottomColor: Dark.border,
   },
-  detailTitle:  { color: '#fff', fontSize: 17, fontWeight: '700', flex: 1, textAlign: 'right', marginRight: 12 },
+  detailTitle:  { color: C.onInverse.primary, fontSize: 17, fontWeight: '700', flex: 1, textAlign: 'right', marginRight: 12 },
   detailScroll: { padding: 20, gap: 8, paddingBottom: 40 },
 
   chipRow:   { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
@@ -668,9 +668,9 @@ const styles = StyleSheet.create({
   },
   chipText:   { color: C.cyan, fontSize: 12, fontWeight: '600' },
   ratingRow:  { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  ratingText: { color: '#F39C12', fontSize: 12, fontWeight: '700' },
+  ratingText: { color: C.statusTone.caution, fontSize: 12, fontWeight: '700' },
 
-  providerName: { color: '#fff', fontSize: 16, fontWeight: '700', textAlign: 'right' },
+  providerName: { color: C.onInverse.primary, fontSize: 16, fontWeight: '700', textAlign: 'right' },
   priceDetail:  { color: C.cyan, fontSize: 22, fontWeight: '800', textAlign: 'right' },
   citiesRow:    { flexDirection: 'row', alignItems: 'center', gap: 5 },
   citiesText:   { color: C.textMut, fontSize: 13 },
@@ -691,7 +691,7 @@ const styles = StyleSheet.create({
     marginTop: 14, paddingVertical: 12, borderRadius: 12,
     borderWidth: 1, borderColor: 'rgba(255, 118, 117, 0.45)', backgroundColor: 'rgba(255, 118, 117, 0.08)',
   },
-  deleteListingText: { color: '#FF7675', fontWeight: '700', fontSize: 14 },
+  deleteListingText: { color: C.statusTone.negativeSoft, fontWeight: '700', fontSize: 14 },
 
   reviewsHeader:   { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 },
   writeReviewBtn:  { flexDirection: 'row', alignItems: 'center', gap: 4 },
@@ -700,7 +700,7 @@ const styles = StyleSheet.create({
 
   reviewCard: { backgroundColor: Dark.surface, borderRadius: 12, padding: 12, gap: 4, marginTop: 6 },
   reviewCardTop:   { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  reviewerName:    { color: '#fff', fontSize: 13, fontWeight: '600' },
+  reviewerName:    { color: C.onInverse.primary, fontSize: 13, fontWeight: '600' },
   reviewComment:   { color: C.textMut, fontSize: 13, textAlign: 'right' },
 
   // Review modal
@@ -708,29 +708,29 @@ const styles = StyleSheet.create({
     backgroundColor: Dark.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24,
     padding: 24, gap: 14,
   },
-  reviewTitle: { color: '#fff', fontSize: 18, fontWeight: '800', textAlign: 'right' },
+  reviewTitle: { color: C.onInverse.primary, fontSize: 18, fontWeight: '800', textAlign: 'right' },
   starsRow:    { flexDirection: 'row', justifyContent: 'center', gap: 8 },
   reviewInput: {
     backgroundColor: Dark.surface, borderRadius: 12,
-    paddingHorizontal: 14, paddingVertical: 10, color: '#fff', fontSize: 14,
+    paddingHorizontal: 14, paddingVertical: 10, color: C.onInverse.primary, fontSize: 14,
     minHeight: 72,
   },
   reviewActions: { flexDirection: 'row', gap: 12 },
   cancelBtn:     { flex: 1, padding: 13, borderRadius: 12, backgroundColor: Dark.surface, alignItems: 'center' },
   cancelBtnText: { color: C.textMut, fontWeight: '700' },
   submitBtn:     { flex: 2, padding: 13, borderRadius: 12, backgroundColor: C.cyan, alignItems: 'center' },
-  submitBtnText: { color: '#fff', fontWeight: '800', fontSize: 15 },
+  submitBtnText: { color: C.onInverse.primary, fontWeight: '800', fontSize: 15 },
 
   // Create modal
   createBox: {
     backgroundColor: Dark.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24,
     padding: 24, maxHeight: '90%', gap: 10,
   },
-  createTitle: { color: '#fff', fontSize: 18, fontWeight: '800', textAlign: 'right', marginBottom: 4 },
+  createTitle: { color: C.onInverse.primary, fontSize: 18, fontWeight: '800', textAlign: 'right', marginBottom: 4 },
   fieldLabel:  { color: C.textMut, fontSize: 11, marginBottom: 4, textAlign: 'right' },
   fieldInput:  {
     backgroundColor: Dark.surface, borderRadius: 10,
-    paddingHorizontal: 12, paddingVertical: 10, color: '#fff', fontSize: 14, marginBottom: 10,
+    paddingHorizontal: 12, paddingVertical: 10, color: C.onInverse.primary, fontSize: 14, marginBottom: 10,
   },
   selectChip: {
     paddingHorizontal: 12, paddingVertical: 6, borderRadius: 18,
@@ -738,7 +738,7 @@ const styles = StyleSheet.create({
   },
   selectChipActive:     { backgroundColor: C.cyan, borderColor: C.cyan },
   selectChipText:       { color: C.textMut, fontSize: 12 },
-  selectChipTextActive: { color: '#fff', fontWeight: '700' },
+  selectChipTextActive: { color: C.onInverse.primary, fontWeight: '700' },
   priceTypeRow:      { flexDirection: 'row', gap: 8, marginBottom: 10 },
   priceChip: {
     flex: 1, paddingVertical: 8, borderRadius: 10, alignItems: 'center',
@@ -746,8 +746,8 @@ const styles = StyleSheet.create({
   },
   priceChipActive:     { backgroundColor: C.cyan, borderColor: C.cyan },
   priceChipText:       { color: C.textMut, fontSize: 12 },
-  priceChipTextActive: { color: '#fff', fontWeight: '700' },
+  priceChipTextActive: { color: C.onInverse.primary, fontWeight: '700' },
   createActions: { flexDirection: 'row', gap: 12, marginTop: 8 },
   createBtn:     { flex: 2, padding: 14, borderRadius: 12, backgroundColor: C.cyan, alignItems: 'center' },
-  createBtnText: { color: '#fff', fontWeight: '800', fontSize: 15 },
+  createBtnText: { color: C.onInverse.primary, fontWeight: '800', fontSize: 15 },
 });

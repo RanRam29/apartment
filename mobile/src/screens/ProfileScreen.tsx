@@ -113,8 +113,8 @@ export default function ProfileScreen() {
           )}
           <View style={styles.cameraOverlay}>
             {avatarUploading
-              ? <ActivityIndicator size="small" color="#fff" />
-              : <Ionicons name="camera" size={14} color="#fff" />
+              ? <ActivityIndicator size="small" color={C.onInverse.primary} />
+              : <Ionicons name="camera" size={14} color={C.onInverse.primary} />
             }
           </View>
         </TouchableOpacity>
@@ -233,7 +233,7 @@ export default function ProfileScreen() {
                 disabled={savingProfile}
               >
                 {savingProfile
-                  ? <ActivityIndicator size="small" color="#fff" />
+                  ? <ActivityIndicator size="small" color={C.onInverse.primary} />
                   : <Text style={styles.saveBtnText}>שמור</Text>
                 }
               </TouchableOpacity>
@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
     borderWidth: 3, borderColor: C.cyanAlpha(0.4),
   },
   avatarImg: { width: 88, height: 88, borderRadius: 44, borderWidth: 3, borderColor: C.cyanAlpha(0.4) },
-  initials:  { fontSize: 30, fontWeight: '800', color: '#fff' },
+  initials:  { fontSize: 30, fontWeight: '800', color: C.onInverse.primary },
   cameraOverlay: {
     position: 'absolute', bottom: 0, right: 0,
     width: 28, height: 28, borderRadius: 14,
@@ -374,5 +374,5 @@ const styles = StyleSheet.create({
     flex: 2, borderRadius: 12, paddingVertical: 13, alignItems: 'center',
     backgroundColor: C.navy,
   },
-  saveBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
+  saveBtnText: { color: C.onInverse.primary, fontWeight: '700', fontSize: 15 },
 });

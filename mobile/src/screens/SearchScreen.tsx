@@ -335,7 +335,7 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
     gap: 10,
   },
-  header: { fontSize: 22, fontWeight: '800', color: '#fff', textAlign: 'right' },
+  header: { fontSize: 22, fontWeight: '800', color: C.onInverse.primary, textAlign: 'right' },
   headerIcon: { marginTop: 2 },
   subtitle: { color: C.textMut, fontSize: 13, paddingHorizontal: 20, textAlign: 'right', marginBottom: 12 },
 
@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     paddingLeft: 36,
-    color: '#fff',
+    color: C.onInverse.primary,
     fontSize: 14,
     borderWidth: 1,
     borderColor: BORDER_SUBTLE,
@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    color: '#fff',
+    color: C.onInverse.primary,
     fontSize: 13,
     borderWidth: 1,
     borderColor: BORDER_SUBTLE,
@@ -495,7 +495,7 @@ const styles = StyleSheet.create({
   },
   resultThumb: { width: 68, height: 68, borderRadius: 10 },
   resultInfo: { flex: 1, gap: 2 },
-  resultTitle: { color: '#fff', fontSize: 13, fontWeight: '600', textAlign: 'right' },
+  resultTitle: { color: C.onInverse.primary, fontSize: 13, fontWeight: '600', textAlign: 'right' },
   resultMeta: { color: C.textMut, fontSize: 11, textAlign: 'right' },
   resultPrice: { color: C.cyan, fontSize: 13, fontWeight: '700', textAlign: 'right' },
   resultAmenities: { color: C.textMut, fontSize: 10, textAlign: 'right', opacity: 0.85 },
@@ -503,6 +503,6 @@ const styles = StyleSheet.create({
 
   noResults: { alignItems: 'center', paddingTop: 60, gap: 8 },
   noResultsEmoji: { fontSize: 48 },
-  noResultsText: { fontSize: 16, fontWeight: '700', color: '#fff' },
+  noResultsText: { fontSize: 16, fontWeight: '700', color: C.onInverse.primary },
   noResultsSub: { fontSize: 13, color: C.textMut },
 });

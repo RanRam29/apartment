@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
   },
   tabButtonActive: { backgroundColor: C.navy },
   tabText: { color: C.text, fontWeight: '600' },
-  tabTextActive: { color: '#fff' },
+  tabTextActive: { color: C.onInverse.primary },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   sourcePresets: { paddingHorizontal: 16, paddingBottom: 8, gap: 8 },
   presetChip: {
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
     backgroundColor: C.navy,
   },
   presetChipText: { color: C.text, fontWeight: '600' },
-  presetChipTextActive: { color: '#fff' },
+  presetChipTextActive: { color: C.onInverse.primary },
   list: { padding: 16, gap: 10 },
   card: {
     backgroundColor: C.bgCard,

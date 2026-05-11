@@ -82,7 +82,7 @@ export default function LoginScreen({ onSwitch }: Props) {
         activeOpacity={0.85}
       >
         {loading
-          ? <ActivityIndicator color="#fff" />
+          ? <ActivityIndicator color={C.onInverse.primary} />
           : <Text style={styles.buttonText}>כניסה</Text>
         }
       </TouchableOpacity>
@@ -123,9 +123,9 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   buttonDisabled: { opacity: 0.6 },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  errorText: { color: '#E74C3C', fontSize: 13, textAlign: 'right', marginBottom: 10, lineHeight: 20 },
-  infoText:  { color: '#27AE60', fontSize: 13, textAlign: 'right', marginBottom: 10, lineHeight: 20 },
+  buttonText: { color: C.onInverse.primary, fontSize: 16, fontWeight: '700' },
+  errorText: { color: C.danger, fontSize: 13, textAlign: 'right', marginBottom: 10, lineHeight: 20 },
+  infoText:  { color: C.success, fontSize: 13, textAlign: 'right', marginBottom: 10, lineHeight: 20 },
   switchRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 24 },
   switchText: { color: C.textSub, fontSize: 14 },
   switchLink: { color: C.navy, fontWeight: '700' },

@@ -432,7 +432,7 @@ export default function CreateListingScreen({ navigation }: any) {
               disabled={loading}
             >
               {loading
-                ? <ActivityIndicator color="#fff" />
+                ? <ActivityIndicator color={C.onInverse.primary} />
                 : <Text style={styles.submitText}>פרסם מודעה 🏠</Text>
               }
             </TouchableOpacity>
@@ -510,7 +510,7 @@ const styles = StyleSheet.create({
   },
   amenityChipActive: { backgroundColor: C.navy, borderColor: C.navy },
   amenityText: { color: C.textSub, fontSize: 13, textAlign: 'right' },
-  amenityTextActive: { color: '#fff', fontWeight: '600' },
+  amenityTextActive: { color: C.onInverse.primary, fontWeight: '600' },
   imagesRow: { marginBottom: 24 },
   imagesRowContent: { flexDirection: 'row-reverse', alignItems: 'center' },
   addImageBtn: {
@@ -528,5 +528,5 @@ const styles = StyleSheet.create({
     paddingVertical: 16, alignItems: 'center', marginTop: 8,
   },
   submitBtnDisabled: { opacity: 0.6 },
-  submitText: { color: '#fff', fontSize: 16, fontWeight: '800' },
+  submitText: { color: C.onInverse.primary, fontSize: 16, fontWeight: '800' },
 });

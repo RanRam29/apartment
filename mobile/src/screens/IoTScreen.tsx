@@ -62,10 +62,10 @@ const TYPE_LABELS: Record<DeviceType, string> = {
 };
 
 const PRIORITY_COLORS: Record<TicketPriority, string> = {
-  critical: '#FF7675',
-  high:     '#F39C12',
+  critical: C.statusTone.negativeSoft,
+  high:     C.statusTone.caution,
   medium:   C.cyan,
-  low:      '#00C9A7',
+  low:      C.statusTone.positive,
 };
 
 const PRIORITY_LABELS: Record<TicketPriority, string> = {
@@ -91,8 +91,8 @@ function fmtDate(d?: string) {
 
 function DeviceCard({ device, onPress }: { device: IoTDevice; onPress: () => void }) {
   const dotColor =
-    device.status === 'online'      ? '#00C9A7' :
-    device.status === 'maintenance' ? '#F39C12' : C.textMut;
+    device.status === 'online'      ? C.statusTone.positive :
+    device.status === 'maintenance' ? C.statusTone.caution : C.textMut;
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.85}>
@@ -121,8 +121,8 @@ function DeviceCard({ device, onPress }: { device: IoTDevice; onPress: () => voi
 function TicketCard({ ticket, onPress }: { ticket: MaintenanceTicket; onPress: () => void }) {
   const prioColor = PRIORITY_COLORS[ticket.priority];
   const statusColor =
-    ticket.status === 'resolved' || ticket.status === 'closed' ? '#00C9A7' :
-    ticket.status === 'in_progress' ? '#F39C12' : C.textMut;
+    ticket.status === 'resolved' || ticket.status === 'closed' ? C.statusTone.positive :
+    ticket.status === 'in_progress' ? C.statusTone.caution : C.textMut;
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.85}>
@@ -195,7 +195,7 @@ function RegisterDeviceModal({ visible, onClose, onCreate }: {
                   style={styles.fieldInput}
                   value={value}
                   onChangeText={set}
-                  placeholderTextColor="#555"
+                  placeholderTextColor={C.field.placeholder}
                   textAlign="right"
                 />
               </View>
@@ -209,8 +209,8 @@ function RegisterDeviceModal({ visible, onClose, onCreate }: {
                   style={[styles.typeBtn, type === t && styles.typeBtnActive]}
                   onPress={() => setType(t)}
                 >
-                  <Ionicons name={TYPE_ICONS[t]} size={16} color={type === t ? '#fff' : C.textMut} />
-                  <Text style={[styles.typeBtnText, type === t && { color: '#fff' }]}>
+                  <Ionicons name={TYPE_ICONS[t]} size={16} color={type === t ? C.onInverse.primary : C.textMut} />
+                  <Text style={[styles.typeBtnText, type === t && { color: C.onInverse.primary }]}>
                     {TYPE_LABELS[t]}
                   </Text>
                 </TouchableOpacity>
@@ -278,7 +278,7 @@ function CreateTicketModal({ visible, onClose, onCreate }: {
                   style={[styles.fieldInput, multi && { height: 70 }]}
                   value={value}
                   onChangeText={set}
-                  placeholderTextColor="#555"
+                  placeholderTextColor={C.field.placeholder}
                   textAlign="right"
                   multiline={multi}
                 />
@@ -296,7 +296,7 @@ function CreateTicketModal({ visible, onClose, onCreate }: {
                   ]}
                   onPress={() => setPriority(p)}
                 >
-                  <Text style={[styles.typeBtnText, priority === p && { color: '#fff' }]}>
+                  <Text style={[styles.typeBtnText, priority === p && { color: C.onInverse.primary }]}>
                     {PRIORITY_LABELS[p]}
                   </Text>
                 </TouchableOpacity>
@@ -356,7 +356,7 @@ function UpdateTicketModal({ ticket, onClose, onUpdate }: {
                 style={[styles.typeBtn, status === value && styles.typeBtnActive]}
                 onPress={() => setStatus(value)}
               >
-                <Text style={[styles.typeBtnText, status === value && { color: '#fff' }]}>{label}</Text>
+                <Text style={[styles.typeBtnText, status === value && { color: C.onInverse.primary }]}>{label}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -367,7 +367,7 @@ function UpdateTicketModal({ ticket, onClose, onUpdate }: {
               style={[styles.fieldInput, { height: 80 }]}
               value={resolutionNotes}
               onChangeText={setResolutionNotes}
-              placeholderTextColor="#555"
+              placeholderTextColor={C.field.placeholder}
               textAlign="right"
               multiline
               placeholder="תאר את הפתרון..."
@@ -488,14 +488,14 @@ export default function IoTScreen({ navigation }: any) {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="chevron-back" size={22} color="#fff" />
+          <Ionicons name="chevron-back" size={22} color={C.onInverse.primary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>ניהול IoT ומתקנים</Text>
         <TouchableOpacity
           style={styles.addBtn}
           onPress={() => activeTab === 'devices' ? setRegisterVisible(true) : setCreateTicketVisible(true)}
         >
-          <Ionicons name="add" size={20} color="#fff" />
+          <Ionicons name="add" size={20} color={C.onInverse.primary} />
         </TouchableOpacity>
       </View>
 
@@ -598,7 +598,7 @@ const styles = StyleSheet.create({
     backgroundColor: Dark.surface, borderBottomWidth: 1, borderBottomColor: Dark.border,
   },
   backBtn:     { padding: 4 },
-  headerTitle: { color: '#fff', fontSize: 17, fontWeight: '700', flex: 1, textAlign: 'center' },
+  headerTitle: { color: C.onInverse.primary, fontSize: 17, fontWeight: '700', flex: 1, textAlign: 'center' },
   addBtn:      { backgroundColor: C.cyan, borderRadius: 20, padding: 6 },
 
   tabBar: {
@@ -611,10 +611,10 @@ const styles = StyleSheet.create({
   },
   tabActive:     { borderBottomColor: C.cyan },
   tabText:       { color: C.textMut, fontWeight: '600', fontSize: 14 },
-  tabTextActive: { color: '#fff' },
+  tabTextActive: { color: C.onInverse.primary },
 
   center:     { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 },
-  emptyTitle: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  emptyTitle: { color: C.onInverse.primary, fontSize: 16, fontWeight: '700' },
   emptyHint:  { color: C.textMut, fontSize: 13, textAlign: 'center', paddingHorizontal: 40 },
 
   list: { padding: 16, gap: 12 },
@@ -626,9 +626,9 @@ const styles = StyleSheet.create({
     backgroundColor: C.cyanAlpha(0.14), justifyContent: 'center', alignItems: 'center',
   },
   cardBody:  { flex: 1, gap: 2 },
-  cardTitle: { color: '#fff', fontSize: 15, fontWeight: '700' },
+  cardTitle: { color: C.onInverse.primary, fontSize: 15, fontWeight: '700' },
   cardSub:   { color: C.textMut, fontSize: 12 },
-  cardMeta:  { color: '#555577', fontSize: 11, marginTop: 2 },
+  cardMeta:  { color: C.field.placeholder, fontSize: 11, marginTop: 2 },
   statusDot: { width: 10, height: 10, borderRadius: 5, alignSelf: 'flex-start', marginTop: 4 },
 
   ticketHeader: { gap: 6, marginBottom: 4 },
@@ -645,13 +645,13 @@ const styles = StyleSheet.create({
     backgroundColor: Dark.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24,
     padding: 24, maxHeight: '90%',
   },
-  modalTitle: { color: '#fff', fontSize: 18, fontWeight: '800', marginBottom: 16, textAlign: 'right' },
+  modalTitle: { color: C.onInverse.primary, fontSize: 18, fontWeight: '800', marginBottom: 16, textAlign: 'right' },
 
   fieldWrap:  { marginBottom: 12 },
   fieldLabel: { color: C.textMut, fontSize: 11, marginBottom: 4, textAlign: 'right' },
   fieldInput: {
     backgroundColor: Dark.surface, borderRadius: 10,
-    paddingHorizontal: 12, paddingVertical: 10, color: '#fff', fontSize: 14,
+    paddingHorizontal: 12, paddingVertical: 10, color: C.onInverse.primary, fontSize: 14,
   },
 
   typeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 },
@@ -667,5 +667,5 @@ const styles = StyleSheet.create({
   cancelBtn:     { flex: 1, padding: 14, borderRadius: 12, backgroundColor: Dark.surface, alignItems: 'center' },
   cancelBtnText: { color: C.textMut, fontWeight: '700' },
   createBtn:     { flex: 2, padding: 14, borderRadius: 12, backgroundColor: C.cyan, alignItems: 'center' },
-  createBtnText: { color: '#fff', fontWeight: '800', fontSize: 15 },
+  createBtnText: { color: C.onInverse.primary, fontWeight: '800', fontSize: 15 },
 });

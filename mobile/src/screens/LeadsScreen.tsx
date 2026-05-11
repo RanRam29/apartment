@@ -157,7 +157,7 @@ function LeadRow({ match, onAccept, onReject, showActions, onOpenChat }: {
       {showActions && (
         <View style={styles.actions}>
           <TouchableOpacity style={styles.rejectBtn} onPress={onReject}>
-            <Ionicons name="close" size={18} color="#FF4757" />
+            <Ionicons name="close" size={18} color={C.statusTone.negative} />
             <Text style={styles.rejectText}>דחה</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.acceptBtn} onPress={onAccept}>
@@ -178,7 +178,7 @@ function LeadRow({ match, onAccept, onReject, showActions, onOpenChat }: {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Dark.bg },
-  header: { fontSize: 22, fontWeight: '800', color: '#fff', padding: 20, paddingBottom: 12, textAlign: 'right' },
+  header: { fontSize: 22, fontWeight: '800', color: C.onInverse.primary, padding: 20, paddingBottom: 12, textAlign: 'right' },
   tabs: { flexDirection: 'row', paddingHorizontal: 16, gap: 8, marginBottom: 8 },
   tab: {
     flex: 1, paddingVertical: 8, borderRadius: 10,
@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
   avatar: { width: 48, height: 48, borderRadius: 24 },
   avatarPlaceholder: { backgroundColor: C.navyMidAlpha(0.7), justifyContent: 'center', alignItems: 'center' },
   leadInfo: { flex: 1 },
-  tenantName: { color: '#fff', fontSize: 15, fontWeight: '700', textAlign: 'right' },
+  tenantName: { color: C.onInverse.primary, fontSize: 15, fontWeight: '700', textAlign: 'right' },
   aptName: { color: C.textMut, fontSize: 13, textAlign: 'right', marginTop: 2 },
   aptMeta: { color: C.cyan, fontSize: 12, textAlign: 'right', marginTop: 2 },
   actions: { flexDirection: 'row', gap: 10 },

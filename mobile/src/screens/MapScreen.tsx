@@ -55,14 +55,14 @@ export function buildHtml(markers: AptMarker[], tama38Url: string): string {
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body, #map { width: 100%; height: 100%; background: #162839; }
+    html, body, #map { width: 100%; height: 100%; background: ${C.navy}; }
     .apt-popup { font-family: sans-serif; text-align: right; direction: rtl; min-width: 140px; }
-    .apt-popup .price { color: #00E5FF; font-weight: 700; font-size: 15px; }
-    .apt-popup .meta  { color: #555; font-size: 12px; margin-top: 2px; }
+    .apt-popup .price { color: ${C.cyan}; font-weight: 700; font-size: 15px; }
+    .apt-popup .meta  { color: ${C.textMut}; font-size: 12px; margin-top: 2px; }
     .apt-popup .title { font-weight: 600; font-size: 13px; margin-bottom: 4px; }
-    .apt-popup .badge { display: inline-block; background: #F59E0B; color: #162839; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 6px; margin-bottom: 4px; }
-    .apt-popup .approx { color: #F59E0B; font-size: 11px; margin-top: 4px; }
-    .tama-layer { fill: #F39C12; fill-opacity: 0.18; stroke: #F39C12; stroke-width: 1.5; }
+    .apt-popup .badge { display: inline-block; background: ${C.gold}; color: ${C.navy}; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 6px; margin-bottom: 4px; }
+    .apt-popup .approx { color: ${C.gold}; font-size: 11px; margin-top: 4px; }
+    .tama-layer { fill: ${C.statusTone.caution}; fill-opacity: 0.18; stroke: ${C.statusTone.caution}; stroke-width: 1.5; }
   </style>
 </head>
 <body>
@@ -97,17 +97,17 @@ export function buildHtml(markers: AptMarker[], tama38Url: string): string {
     var label = '₪' + (price >= 1000 ? Math.round(price/1000) + 'K' : price);
     var w = promoted ? 78 : 64;
     var h = promoted ? 32 : 24;
-    var fill = promoted ? '#F59E0B' : '#00E5FF';
-    var stroke = promoted ? '#fff' : 'none';
+    var fill = promoted ? '${C.gold}' : '${C.cyan}';
+    var stroke = promoted ? '${C.onInverse.primary}' : 'none';
     var sw = promoted ? 2.5 : 0;
     var fs = promoted ? 12 : 11;
     var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + (h + 4) + '">'
-      + (promoted ? '<filter id="glow"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#F59E0B" flood-opacity="0.7"/></filter>' : '')
+      + (promoted ? '<filter id="glow"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="${C.gold}" flood-opacity="0.7"/></filter>' : '')
       + '<rect rx="9" ry="9" x="' + (sw/2) + '" y="' + (sw/2) + '" width="' + (w - sw) + '" height="' + h + '" fill="' + fill + '"'
       + (stroke !== 'none' ? ' stroke="' + stroke + '" stroke-width="' + sw + '"' : '')
       + (promoted ? ' filter="url(#glow)"' : '') + '/>'
       + '<text x="' + (w/2) + '" y="' + (h/2 + 5) + '" font-size="' + fs + '" font-family="sans-serif" font-weight="800" '
-      + 'fill="#162839" text-anchor="middle">' + label + '</text></svg>';
+      + 'fill="${C.navy}" text-anchor="middle">' + label + '</text></svg>';
     return L.divIcon({
       html: svg,
       className: '',
@@ -283,7 +283,7 @@ export default function MapScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.toolbar}>
         <View style={styles.toolbarLeft}>
-          <Ionicons name="map-outline" size={18} color="#fff" />
+          <Ionicons name="map-outline" size={18} color={C.onInverse.primary} />
           <Text style={styles.toolbarTitle}>מפת דירות</Text>
           {markers.length > 0 && (
             <View style={styles.countBadge}>
@@ -298,7 +298,7 @@ export default function MapScreen() {
             value={tamaOn}
             onValueChange={handleTamaToggle}
             trackColor={{ false: Dark.switchTrackOff, true: C.gold }}
-            thumbColor="#fff"
+            thumbColor={C.onInverse.primary}
             style={{ transform: [{ scaleX: 0.85 }, { scaleY: 0.85 }] }}
           />
         </View>
@@ -356,7 +356,7 @@ const styles = StyleSheet.create({
     borderBottomColor: Dark.border,
   },
   toolbarLeft:  { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  toolbarTitle: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  toolbarTitle: { color: C.onInverse.primary, fontSize: 16, fontWeight: '700' },
   countBadge:   { backgroundColor: C.cyan, borderRadius: 10, paddingHorizontal: 7, paddingVertical: 2 },
   countText:    { color: C.navy, fontSize: 11, fontWeight: '700' },
   toolbarRight: { flexDirection: 'row', alignItems: 'center', gap: 6 },

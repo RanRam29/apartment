@@ -30,6 +30,8 @@ export class ErrorBoundary extends React.Component<React.PropsWithChildren, Stat
         <TouchableOpacity
           style={styles.btn}
           onPress={() => this.setState({ hasError: false })}
+          accessibilityRole="button"
+          accessibilityLabel="נסה שוב"
         >
           <Text style={styles.btnText}>נסה שוב</Text>
         </TouchableOpacity>
@@ -43,7 +45,7 @@ const styles = StyleSheet.create({
     flex: 1, backgroundColor: Dark.bg,
     justifyContent: 'center', alignItems: 'center', gap: 16, padding: 32,
   },
-  title: { fontSize: 22, fontWeight: '800', color: '#fff' },
+  title: { fontSize: 22, fontWeight: '800', color: C.onInverse.primary },
   message: { fontSize: 14, color: C.textMut, textAlign: 'center' },
   btn: {
     backgroundColor: C.cyan, borderRadius: 12,

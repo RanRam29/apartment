@@ -168,7 +168,7 @@ function FinishStep({ loading, onSave, onBack }: { loading: boolean; onSave: () 
         onPress={onSave} disabled={loading}
       >
         {loading
-          ? <ActivityIndicator color="#fff" />
+          ? <ActivityIndicator color={C.onInverse.primary} />
           : <Text style={styles.primaryBtnText}>שמור והתחל 🚀</Text>
         }
       </TouchableOpacity>
@@ -202,11 +202,11 @@ const styles = StyleSheet.create({
   scroll: { padding: 24, paddingBottom: 40 },
   step: { alignItems: 'center', gap: 16 },
   emoji: { fontSize: 64, marginBottom: 4 },
-  heading: { fontSize: 24, fontWeight: '800', color: '#fff', textAlign: 'center' },
+  heading: { fontSize: 24, fontWeight: '800', color: C.onInverse.primary, textAlign: 'center' },
   body: { fontSize: 14, color: C.textMut, textAlign: 'center', lineHeight: 22 },
   featureList: { width: '100%', gap: 10, marginTop: 8 },
   featureRow: { flexDirection: 'row', alignItems: 'center', gap: 10, justifyContent: 'flex-end' },
-  featureText: { color: '#E0E0E0', fontSize: 14 },
+  featureText: { color: C.onInverse.secondary, fontSize: 14 },
   primaryBtn: {
     backgroundColor: C.cyan, borderRadius: 14,
     paddingVertical: 16, paddingHorizontal: 32, alignItems: 'center', width: '100%', marginTop: 8,
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
   fieldLabel: { color: C.textMut, fontSize: 12, fontWeight: '600', textAlign: 'right', marginBottom: 6 },
   input: {
     backgroundColor: Dark.surface, borderRadius: 12, padding: 14,
-    fontSize: 14, color: '#fff', borderWidth: 1, borderColor: Dark.border,
+    fontSize: 14, color: C.onInverse.primary, borderWidth: 1, borderColor: Dark.border,
   },
   chipGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, width: '100%' },
   chip: {

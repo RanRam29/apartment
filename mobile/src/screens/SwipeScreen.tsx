@@ -94,12 +94,8 @@ export default function SwipeScreen() {
     <SafeAreaView style={styles.container}>
       {/* ── Header ── */}
       <View style={styles.header}>
-        <SwipeHouseLogo size="sm" showLabel={false} />
-
-        <View style={styles.headerCenter}>
-          <Text style={styles.headerTitle}>DirApp</Text>
-        </View>
-
+        <View style={styles.headerSide} />
+        <SwipeHouseLogo size="sm" />
         <View style={styles.headerRight}>
           {!isPremium && (
             <View style={[
@@ -197,7 +193,7 @@ export default function SwipeScreen() {
               השתמשת ב-{dailyUsed}/{effectiveLimit} הזמות היומיות.{'\n'}שדרג לפרמיום לזמות ללא הגבלה!
             </Text>
             <TouchableOpacity style={styles.premiumBtn} onPress={dismissQuota}>
-              <Ionicons name="star" size={15} color="#fff" />
+              <Ionicons name="star" size={15} color={C.onInverse.primary} />
               <Text style={styles.primaryBtnText}>שדרג לפרמיום ₪29/חודש</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.secondaryBtn} onPress={dismissQuota}>
@@ -239,16 +235,15 @@ const styles = StyleSheet.create({
     marginTop: 16, backgroundColor: C.navy,
     paddingHorizontal: 28, paddingVertical: 12, borderRadius: 14,
   },
-  reloadText: { color: '#fff', fontWeight: '700' },
+  reloadText: { color: C.onInverse.primary, fontWeight: '700' },
 
   // Header
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 20, paddingTop: 6, paddingBottom: 10,
   },
-  headerCenter: { position: 'absolute', left: 0, right: 0, alignItems: 'center', pointerEvents: 'none' },
-  headerTitle: { fontSize: 17, fontWeight: '700', color: C.navy, letterSpacing: 1 },
-  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  headerSide: { flex: 1 },
+  headerRight: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 8 },
   quotaBadge: {
     backgroundColor: C.cyanAlpha(0.12), borderRadius: 10,
     paddingHorizontal: 8, paddingVertical: 3,
@@ -296,7 +291,7 @@ const styles = StyleSheet.create({
   modalCard: {
     backgroundColor: C.bgCard, borderRadius: 28, padding: 32,
     alignItems: 'center', width: '84%', gap: 12,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 20 },
+    shadowColor: C.navy, shadowOffset: { width: 0, height: 20 },
     shadowOpacity: 0.15, shadowRadius: 30, elevation: 10,
   },
   matchIconRow: {
@@ -311,7 +306,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32, paddingVertical: 14,
     width: '100%', alignItems: 'center',
   },
-  primaryBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
+  primaryBtnText: { color: C.onInverse.primary, fontWeight: '700', fontSize: 15 },
   premiumBtn: {
     flexDirection: 'row', gap: 8,
     backgroundColor: C.navy, borderRadius: 14,

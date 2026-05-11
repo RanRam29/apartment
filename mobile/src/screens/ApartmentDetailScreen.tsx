@@ -144,10 +144,10 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
             {hasMultipleImages && (
               <>
                 <TouchableOpacity style={[styles.carouselArrow, styles.carouselArrowLeft]} onPress={prevImage} activeOpacity={0.85}>
-                  <Ionicons name="chevron-back" size={24} color="#fff" />
+                  <Ionicons name="chevron-back" size={24} color={C.onInverse.primary} />
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.carouselArrow, styles.carouselArrowRight]} onPress={nextImage} activeOpacity={0.85}>
-                  <Ionicons name="chevron-forward" size={24} color="#fff" />
+                  <Ionicons name="chevron-forward" size={24} color={C.onInverse.primary} />
                 </TouchableOpacity>
               </>
             )}
@@ -175,7 +175,7 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
 
         {/* Back button overlay */}
         <TouchableOpacity style={styles.floatingBack} onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={24} color="#fff" />
+          <Ionicons name="chevron-back" size={24} color={C.onInverse.primary} />
         </TouchableOpacity>
 
         <View style={styles.content}>
@@ -184,7 +184,7 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
             <Text style={styles.price}>₪{price.toLocaleString()}/חודש</Text>
             {apt.landlord?.isVerified && (
               <View style={styles.verifiedBadge}>
-                <Ionicons name="checkmark-circle" size={14} color="#00D2D3" />
+                <Ionicons name="checkmark-circle" size={14} color={C.cyan} />
                 <Text style={styles.verifiedText}>מאומת</Text>
               </View>
             )}
@@ -301,7 +301,7 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
       >
         <View style={styles.viewerBackdrop}>
           <TouchableOpacity style={styles.viewerClose} onPress={() => setImageViewerOpen(false)}>
-            <Ionicons name="close" size={28} color="#fff" />
+            <Ionicons name="close" size={28} color={C.onInverse.primary} />
           </TouchableOpacity>
           <ScrollView
             ref={viewerRef}
@@ -324,10 +324,10 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
           {hasMultipleImages && (
             <>
               <TouchableOpacity style={[styles.viewerArrow, styles.viewerArrowLeft]} onPress={prevImage} activeOpacity={0.85}>
-                <Ionicons name="chevron-back" size={30} color="#fff" />
+                <Ionicons name="chevron-back" size={30} color={C.onInverse.primary} />
               </TouchableOpacity>
               <TouchableOpacity style={[styles.viewerArrow, styles.viewerArrowRight]} onPress={nextImage} activeOpacity={0.85}>
-                <Ionicons name="chevron-forward" size={30} color="#fff" />
+                <Ionicons name="chevron-forward" size={30} color={C.onInverse.primary} />
               </TouchableOpacity>
             </>
           )}
@@ -367,7 +367,7 @@ function CostRow({ label, amount, bold }: { label: string; amount: number; bold?
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Dark.bg },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Dark.bg },
-  carouselSlide: { width: SCREEN_WIDTH, height: 320, backgroundColor: '#111122', justifyContent: 'center', alignItems: 'center' },
+  carouselSlide: { width: SCREEN_WIDTH, height: 320, backgroundColor: C.surface.imageCarousel, justifyContent: 'center', alignItems: 'center' },
   carouselImage: { width: SCREEN_WIDTH, height: 320 },
   carouselArrow: {
     position: 'absolute',
@@ -375,7 +375,7 @@ const styles = StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 17,
-    backgroundColor: 'rgba(0,0,0,0.45)',
+    backgroundColor: C.overlay.scrim45,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 2,
@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
   noImagePlaceholder: { height: 200, justifyContent: 'center', alignItems: 'center', backgroundColor: Dark.surface },
   floatingBack: {
     position: 'absolute', top: 16, left: 16,
-    backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 20, padding: 8,
+    backgroundColor: C.overlay.scrim50, borderRadius: 20, padding: 8,
   },
   dotRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 10, marginBottom: 4, gap: 8 },
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: C.navyMidAlpha(0.5) },
@@ -395,24 +395,24 @@ const styles = StyleSheet.create({
   price: { fontSize: 24, fontWeight: '800', color: C.cyan },
   verifiedBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: C.cyanAlpha(0.12), paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
   verifiedText: { color: C.cyan, fontSize: 12, fontWeight: '600' },
-  title: { fontSize: 18, fontWeight: '700', color: '#fff', textAlign: 'right', marginBottom: 6 },
+  title: { fontSize: 18, fontWeight: '700', color: C.onInverse.primary, textAlign: 'right', marginBottom: 6 },
   location: { fontSize: 14, color: C.textMut, textAlign: 'right', marginBottom: 16 },
   statsRow: { flexDirection: 'row', gap: 12, marginBottom: 20, flexWrap: 'wrap' },
   stat: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: Dark.surface, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10, borderWidth: 1, borderColor: Dark.border },
-  statText: { color: '#fff', fontSize: 13 },
-  sectionTitle: { fontSize: 15, fontWeight: '700', color: '#fff', textAlign: 'right', marginBottom: 10, marginTop: 4 },
+  statText: { color: C.onInverse.primary, fontSize: 13 },
+  sectionTitle: { fontSize: 15, fontWeight: '700', color: C.onInverse.primary, textAlign: 'right', marginBottom: 10, marginTop: 4 },
   amenitiesWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 },
   amenityChip: { backgroundColor: C.cyanAlpha(0.12), borderRadius: 10, paddingHorizontal: 12, paddingVertical: 6, borderWidth: 1, borderColor: C.cyan },
   amenityText: { color: C.cyan, fontSize: 13 },
-  description: { color: '#C0C0D0', fontSize: 14, lineHeight: 22, textAlign: 'right', marginBottom: 20 },
+  description: { color: C.onInverse.tertiary, fontSize: 14, lineHeight: 22, textAlign: 'right', marginBottom: 20 },
   landlordRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16 },
   avatar: { width: 40, height: 40, borderRadius: 20 },
   avatarFallback: { backgroundColor: Dark.surface, justifyContent: 'center', alignItems: 'center' },
-  landlordName: { color: '#fff', fontSize: 14, fontWeight: '600' },
+  landlordName: { color: C.onInverse.primary, fontSize: 14, fontWeight: '600' },
   detailsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 },
   detailChip: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: Dark.surface, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10, borderWidth: 1, borderColor: Dark.border },
   detailChipText: { color: C.textMut, fontSize: 12 },
-  viewerBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.94)', justifyContent: 'center', alignItems: 'center' },
+  viewerBackdrop: { flex: 1, backgroundColor: C.overlay.scrim94, justifyContent: 'center', alignItems: 'center' },
   viewerClose: { position: 'absolute', top: 48, right: 20, zIndex: 10, padding: 8 },
   viewerCarousel: { width: SCREEN_WIDTH, height: '85%' },
   viewerSlide: { width: SCREEN_WIDTH, height: '100%', justifyContent: 'center', alignItems: 'center' },
@@ -424,7 +424,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(0,0,0,0.45)',
+    backgroundColor: C.overlay.scrim45,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 10,
@@ -437,8 +437,8 @@ const styles = StyleSheet.create({
   costCard: { backgroundColor: Dark.surface, borderRadius: 14, padding: 16, marginBottom: 20, borderWidth: 1, borderColor: Dark.border },
   costRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 6 },
   costLabel: { color: C.textMut, fontSize: 14, textAlign: 'right' },
-  costLabelBold: { color: '#fff', fontWeight: '700', fontSize: 15 },
-  costAmount: { color: '#C0C0D0', fontSize: 14 },
+  costLabelBold: { color: C.onInverse.primary, fontWeight: '700', fontSize: 15 },
+  costAmount: { color: C.onInverse.tertiary, fontSize: 14 },
   costAmountBold: { color: C.cyan, fontWeight: '800', fontSize: 16 },
   costDivider: { height: 1, backgroundColor: Dark.border, marginVertical: 8 },
   costNote: { color: C.textMut, fontSize: 11, textAlign: 'right', marginTop: 8 },

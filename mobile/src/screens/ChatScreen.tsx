@@ -105,6 +105,8 @@ export default function ChatScreen() {
             style={[styles.sendBtn, (!input.trim() || sending) && styles.sendBtnDisabled]}
             onPress={handleSend}
             disabled={!input.trim() || sending}
+            accessibilityRole="button"
+            accessibilityLabel="שלח הודעה"
           >
             {sending
               ? <ActivityIndicator size="small" color={C.navy} />
@@ -139,7 +141,7 @@ function ChatBubble({ message, isMe }: { message: Message; isMe: boolean }) {
           <Ionicons
             name={message.isRead ? 'checkmark-done' : 'checkmark'}
             size={12}
-            color={message.isRead ? C.cyan : 'rgba(255,255,255,0.45)'}
+            color={message.isRead ? C.cyan : C.onInverse.faint}
           />
         )}
         <Text style={styles.bubbleTime}>
@@ -205,9 +207,9 @@ const styles = StyleSheet.create({
   },
   bubbleText: { fontSize: 15, lineHeight: 20 },
   bubbleTextMe: { color: C.navy },
-  bubbleTextThem: { color: '#E0E0E0' },
+  bubbleTextThem: { color: C.onInverse.secondary },
   bubbleMeta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 3, marginTop: 3 },
-  bubbleTime: { fontSize: 10, color: 'rgba(255,255,255,0.5)' },
+  bubbleTime: { fontSize: 10, color: C.onInverse.faint },
   typingBubble: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     marginHorizontal: 16, marginBottom: 8,
@@ -225,7 +227,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1, backgroundColor: Dark.surface, borderRadius: 20,
     paddingHorizontal: 16, paddingVertical: 10,
-    color: '#fff', fontSize: 15, maxHeight: 100,
+    color: C.onInverse.primary, fontSize: 15, maxHeight: 100,
     borderWidth: 1,
     borderColor: Dark.border,
   },

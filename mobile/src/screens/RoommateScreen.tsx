@@ -44,7 +44,7 @@ const DEFAULT_PROFILE: Omit<RoommateProfile, 'userId'> = {
 };
 
 function ScoreBar({ score }: { score: number }) {
-  const color = score >= 75 ? '#00C9A7' : score >= 50 ? '#F39C12' : '#FF7675';
+  const color = score >= 75 ? C.statusTone.positive : score >= 50 ? C.statusTone.caution : C.statusTone.negativeSoft;
   return (
     <View style={styles.scoreBarWrap}>
       <View style={[styles.scoreBarFill, { width: `${score}%` as any, backgroundColor: color }]} />
@@ -145,7 +145,7 @@ export default function RoommateScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="chevron-back" size={22} color="#fff" />
+          <Ionicons name="chevron-back" size={22} color={C.onInverse.primary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>שותפים לדירה</Text>
         <View style={{ width: 38 }} />
@@ -180,7 +180,7 @@ export default function RoommateScreen() {
                   value={form.lookingForRoommate}
                   onValueChange={(v) => setField('lookingForRoommate', v)}
                   trackColor={{ false: Dark.switchTrackOff, true: C.cyan }}
-                  thumbColor="#fff"
+                  thumbColor={C.onInverse.primary}
                 />
               </View>
 
@@ -227,7 +227,7 @@ export default function RoommateScreen() {
                     value={form.smokingAllowed}
                     onValueChange={(v) => setField('smokingAllowed', v)}
                     trackColor={{ false: Dark.switchTrackOff, true: C.cyan }}
-                    thumbColor="#fff"
+                    thumbColor={C.onInverse.primary}
                   />
                 </View>
                 <View style={styles.boolItem}>
@@ -236,7 +236,7 @@ export default function RoommateScreen() {
                     value={form.petsAllowed}
                     onValueChange={(v) => setField('petsAllowed', v)}
                     trackColor={{ false: Dark.switchTrackOff, true: C.cyan }}
-                    thumbColor="#fff"
+                    thumbColor={C.onInverse.primary}
                   />
                 </View>
                 <View style={styles.boolItem}>
@@ -245,7 +245,7 @@ export default function RoommateScreen() {
                     value={form.workFromHome}
                     onValueChange={(v) => setField('workFromHome', v)}
                     trackColor={{ false: Dark.switchTrackOff, true: C.cyan }}
-                    thumbColor="#fff"
+                    thumbColor={C.onInverse.primary}
                   />
                 </View>
               </View>
@@ -256,7 +256,7 @@ export default function RoommateScreen() {
                 onPress={() => saveMutation.mutate()}
               >
                 {saveMutation.isPending
-                  ? <ActivityIndicator color="#fff" />
+                  ? <ActivityIndicator color={C.onInverse.primary} />
                   : <Text style={styles.saveBtnText}>שמור פרופיל</Text>
                 }
               </TouchableOpacity>
@@ -308,7 +308,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Dark.bg },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14 },
   backBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: Dark.surface, justifyContent: 'center', alignItems: 'center' },
-  headerTitle: { color: '#fff', fontSize: 18, fontWeight: '800' },
+  headerTitle: { color: C.onInverse.primary, fontSize: 18, fontWeight: '800' },
   tabs: { flexDirection: 'row', marginHorizontal: 16, backgroundColor: Dark.surface, borderRadius: 12, padding: 4, marginBottom: 8 },
   tab: { flex: 1, paddingVertical: 9, alignItems: 'center', borderRadius: 10 },
   tabActive: { backgroundColor: C.cyan },
@@ -317,7 +317,7 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   formWrap: { padding: 16, paddingBottom: 40 },
   toggleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: Dark.surface, padding: 16, borderRadius: 14, marginBottom: 12, borderWidth: 1, borderColor: Dark.border },
-  toggleLabel: { color: '#fff', fontSize: 15, fontWeight: '600' },
+  toggleLabel: { color: C.onInverse.primary, fontSize: 15, fontWeight: '600' },
   optionBlock: { backgroundColor: Dark.surface, borderRadius: 14, padding: 14, marginBottom: 12, borderWidth: 1, borderColor: Dark.border },
   optionLabel: { color: C.textMut, fontSize: 13, fontWeight: '600', textAlign: 'right', marginBottom: 10 },
   optionRow: { flexDirection: 'row', gap: 6, flexWrap: 'wrap' },
@@ -339,7 +339,7 @@ const styles = StyleSheet.create({
   avatar: { width: 52, height: 52, borderRadius: 26 },
   avatarFallback: { backgroundColor: Dark.inset, justifyContent: 'center', alignItems: 'center' },
   matchInfo: { flex: 1 },
-  matchName: { color: '#fff', fontWeight: '700', fontSize: 15, textAlign: 'right', marginBottom: 4 },
+  matchName: { color: C.onInverse.primary, fontWeight: '700', fontSize: 15, textAlign: 'right', marginBottom: 4 },
   matchMeta: { color: C.textMut, fontSize: 12, textAlign: 'right', marginBottom: 8 },
   scoreBarWrap: { height: 8, backgroundColor: Dark.inset, borderRadius: 4, flexDirection: 'row', alignItems: 'center', overflow: 'visible' },
   scoreBarFill: { height: 8, borderRadius: 4 },

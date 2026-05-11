@@ -10,6 +10,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import { useChatStore } from '../store/useChatStore';
 import { clientLogsApi } from '../services/api';
 import { C } from '../theme';
+import { useAppTheme } from '../hooks/useAppTheme';
 import type { RootStackParamList, TenantTabParamList, LandlordTabParamList, MainStackParamList } from '../types';
 
 import AuthScreen from '../screens/AuthScreen';
@@ -44,6 +45,7 @@ const LandlordTab = createBottomTabNavigator<LandlordTabParamList>();
 const MainStack  = createNativeStackNavigator<MainStackParamList>();
 
 function TenantTabs() {
+  const appTheme = useAppTheme();
   return (
     <View style={{ flex: 1 }}>
     <TenantTab.Navigator
@@ -59,10 +61,9 @@ function TenantTabs() {
           height: 80,
           paddingBottom: 20,
           paddingTop: 8,
-          backgroundColor: 'rgba(251, 250, 250, 0.88)',
+          backgroundColor: appTheme.colors.tabBarBackground,
           borderTopWidth: 0,
-          // Soft Aura Luxury shadow
-          shadowColor: '#162839',
+          shadowColor: appTheme.colors.tabBarShadow,
           shadowOffset: { width: 0, height: -4 },
           shadowOpacity: 0.08,
           shadowRadius: 20,
@@ -95,6 +96,7 @@ function TenantTabs() {
 }
 
 function LandlordTabs() {
+  const appTheme = useAppTheme();
   return (
     <LandlordTab.Navigator
       screenOptions={({ route }) => ({
@@ -109,10 +111,9 @@ function LandlordTabs() {
           height: 80,
           paddingBottom: 20,
           paddingTop: 8,
-          backgroundColor: 'rgba(251, 250, 250, 0.88)',
+          backgroundColor: appTheme.colors.tabBarBackground,
           borderTopWidth: 0,
-          // Soft Aura Luxury shadow
-          shadowColor: '#162839',
+          shadowColor: appTheme.colors.tabBarShadow,
           shadowOffset: { width: 0, height: -4 },
           shadowOpacity: 0.08,
           shadowRadius: 20,
@@ -144,6 +145,7 @@ function LandlordTabs() {
 
 function MainNavigator() {
   const { user, needsOnboarding } = useAuthStore();
+  const appTheme = useAppTheme();
 
   useEffect(() => {
     useChatStore.getState().connect();
@@ -162,8 +164,8 @@ function MainNavigator() {
         component={ChatScreen}
         options={{
           headerShown: true, headerTitle: '',
-          headerStyle: { backgroundColor: C.bgCard },
-          headerTintColor: C.navy,
+          headerStyle: { backgroundColor: appTheme.colors.headerBackground },
+          headerTintColor: appTheme.colors.headerTint,
           headerShadowVisible: false,
         }}
       />
@@ -172,8 +174,8 @@ function MainNavigator() {
         component={ApartmentDetailScreen}
         options={{
           headerShown: true, headerTitle: 'פרטי דירה',
-          headerStyle: { backgroundColor: C.bgCard },
-          headerTintColor: C.navy,
+          headerStyle: { backgroundColor: appTheme.colors.headerBackground },
+          headerTintColor: appTheme.colors.headerTint,
           headerShadowVisible: false,
         }}
       />
@@ -182,8 +184,8 @@ function MainNavigator() {
         component={CreateListingScreen}
         options={{
           headerShown: true, headerTitle: 'פרסם מודעה',
-          headerStyle: { backgroundColor: C.bgCard },
-          headerTintColor: C.navy,
+          headerStyle: { backgroundColor: appTheme.colors.headerBackground },
+          headerTintColor: appTheme.colors.headerTint,
           headerShadowVisible: false,
         }}
       />
@@ -192,8 +194,8 @@ function MainNavigator() {
         component={EditListingScreen}
         options={{
           headerShown: true, headerTitle: 'עריכת מודעה',
-          headerStyle: { backgroundColor: C.bgCard },
-          headerTintColor: C.navy,
+          headerStyle: { backgroundColor: appTheme.colors.headerBackground },
+          headerTintColor: appTheme.colors.headerTint,
           headerShadowVisible: false,
         }}
       />
@@ -202,8 +204,8 @@ function MainNavigator() {
         component={PreferencesScreen}
         options={{
           headerShown: true, headerTitle: 'העדפות חיפוש',
-          headerStyle: { backgroundColor: C.bgCard },
-          headerTintColor: C.navy,
+          headerStyle: { backgroundColor: appTheme.colors.headerBackground },
+          headerTintColor: appTheme.colors.headerTint,
           headerShadowVisible: false,
         }}
       />
@@ -253,8 +255,8 @@ function MainNavigator() {
         options={{
           headerShown: true,
           headerTitle: 'Logs Console',
-          headerStyle: { backgroundColor: C.bgCard },
-          headerTintColor: C.navy,
+          headerStyle: { backgroundColor: appTheme.colors.headerBackground },
+          headerTintColor: appTheme.colors.headerTint,
           headerShadowVisible: false,
         }}
       />
@@ -264,6 +266,7 @@ function MainNavigator() {
 
 export default function AppNavigator() {
   const { isAuthenticated, isLoading, restoreSession } = useAuthStore();
+  const bootTheme = useAppTheme();
 
   useEffect(() => {
     restoreSession();
@@ -322,7 +325,7 @@ export default function AppNavigator() {
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: C.bg }}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: bootTheme.colors.shellBackground }}>
         <ActivityIndicator size="large" color={C.navy} />
       </View>
     );

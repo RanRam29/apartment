@@ -12,7 +12,7 @@ import { C, Dark } from '../theme';
 const BG       = Dark.bg;
 const CARD     = C.navyMid;
 const ACCENT   = C.cyan;
-const TEXT     = '#FFFFFF';
+const TEXT     = C.onInverse.primary;
 const TEXT_SUB = C.textMut;
 const BORDER   = C.cyanAlpha(0.12);
 
@@ -51,8 +51,8 @@ const LEVEL_LABELS: Record<number, string> = {
 
 const LEVEL_COLORS: Record<number, string> = {
   1: C.textMut,
-  2: '#00B894',
-  3: '#0984E3',
+  2: C.statusTone.positive,
+  3: C.accent.blue,
   4: C.gold,
 };
 
@@ -101,7 +101,7 @@ function BadgeCard({ badge }: { badge: Badge }) {
 
 function LeaderRow({ entry }: { entry: LeaderboardEntry }) {
   const isTop3 = entry.rank <= 3;
-  const rankColors = [C.gold, C.textMut, '#CD7F32'];
+  const rankColors = [C.gold, C.textMut, C.accent.bronze];
   const rankColor = isTop3 ? rankColors[entry.rank - 1] : TEXT_SUB;
   return (
     <View style={styles.leaderRow}>

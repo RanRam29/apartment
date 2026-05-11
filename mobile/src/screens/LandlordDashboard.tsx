@@ -58,16 +58,16 @@ export default function LandlordDashboard() {
         <View style={styles.kpiRow}>
           <KPICard icon="eye-outline"   label="צפיות"   value={summary.totalViews}              color={C.cyan} />
           <KPICard icon="heart-outline" label="לייקים"  value={summary.totalLikes}              color={C.coral} />
-          <KPICard icon="trending-up"  label="המרה"    value={`${summary.conversionRate}%`}    color="#00E676" />
-          <KPICard icon="home-outline"  label="פעילות"  value={summary.activeListings}          color="#FFA502" />
+          <KPICard icon="trending-up"  label="המרה"    value={`${summary.conversionRate}%`}    color={C.statusTone.positive} />
+          <KPICard icon="home-outline"  label="פעילות"  value={summary.activeListings}          color={C.statusTone.caution} />
         </View>
 
         {/* Match status */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>סטטוס התאמות</Text>
           <View style={styles.matchRow}>
-            <MatchStat label="ממתין"  value={summary.matches.pending}  color="#FFA502" />
-            <MatchStat label="אושר"   value={summary.matches.accepted} color="#00E676" />
+            <MatchStat label="ממתין"  value={summary.matches.pending}  color={C.statusTone.caution} />
+            <MatchStat label="אושר"   value={summary.matches.accepted} color={C.statusTone.positive} />
             <MatchStat label="נדחה"   value={summary.matches.rejected} color={C.danger} />
           </View>
         </View>
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Dark.bg },
   centered: { flex: 1, backgroundColor: Dark.bg, justifyContent: 'center', alignItems: 'center' },
   scroll: { padding: 16, paddingBottom: 40 },
-  header: { fontSize: 22, fontWeight: '800', color: '#fff', marginBottom: 16, textAlign: 'right' },
+  header: { fontSize: 22, fontWeight: '800', color: C.onInverse.primary, marginBottom: 16, textAlign: 'right' },
 
   kpiRow: { flexDirection: 'row', gap: 8, marginBottom: 12 },
   kpiCard: {
@@ -274,11 +274,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Dark.border,
   },
-  kpiValue: { fontSize: 18, fontWeight: '800', color: '#fff' },
+  kpiValue: { fontSize: 18, fontWeight: '800', color: C.onInverse.primary },
   kpiLabel: { fontSize: 10, color: C.textMut },
 
   section: { backgroundColor: Dark.surface, borderRadius: 16, padding: 14, marginBottom: 12, borderWidth: 1, borderColor: Dark.border },
-  sectionTitle: { fontSize: 14, fontWeight: '700', color: '#fff', textAlign: 'right', marginBottom: 10 },
+  sectionTitle: { fontSize: 14, fontWeight: '700', color: C.onInverse.primary, textAlign: 'right', marginBottom: 10 },
 
   matchRow: { flexDirection: 'row', justifyContent: 'space-around' },
   matchStat: { alignItems: 'center', gap: 4 },
@@ -296,14 +296,14 @@ const styles = StyleSheet.create({
   periodBtnTextActive: { color: C.cyan },
 
   chartSummary: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  chartTotal: { fontSize: 22, fontWeight: '800', color: '#fff', textAlign: 'right' },
+  chartTotal: { fontSize: 22, fontWeight: '800', color: C.onInverse.primary, textAlign: 'right' },
   chartTotalLabel: { fontSize: 10, color: C.textMut, textAlign: 'right' },
   wowBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10,
   },
-  wowBadgeUp: { backgroundColor: 'rgba(16,185,129,0.12)' },
-  wowBadgeDown: { backgroundColor: 'rgba(186,26,26,0.12)' },
+  wowBadgeUp: { backgroundColor: C.successAlpha(0.12) },
+  wowBadgeDown: { backgroundColor: C.dangerMutedAlpha(0.12) },
   wowText: { fontSize: 11, fontWeight: '700' },
 
   tooltip: {
@@ -314,12 +314,12 @@ const styles = StyleSheet.create({
     borderColor: Dark.border,
   },
   tooltipDate: { color: C.textMut, fontSize: 10 },
-  tooltipCount: { color: '#fff', fontSize: 13, fontWeight: '700' },
+  tooltipCount: { color: C.onInverse.primary, fontSize: 13, fontWeight: '700' },
 
   barsContainer: { flexDirection: 'row', alignItems: 'flex-end', gap: 2 },
   barWrap: { alignItems: 'center', justifyContent: 'flex-end', gap: 3 },
   bar: { backgroundColor: C.cyan, borderRadius: 3, opacity: 0.85 },
-  barSelected: { backgroundColor: '#7AEFFF', opacity: 1 },
+  barSelected: { backgroundColor: C.cyan, opacity: 1 },
   barWeekend: { backgroundColor: C.navyMid, opacity: 0.95 },
   barLabel: { fontSize: 8, color: C.textMut, width: '100%', textAlign: 'center' },
 
@@ -328,10 +328,10 @@ const styles = StyleSheet.create({
     paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: Dark.border,
   },
   leadInfo: { flex: 1 },
-  leadName: { color: '#fff', fontSize: 13, fontWeight: '600', textAlign: 'right' },
+  leadName: { color: C.onInverse.primary, fontSize: 13, fontWeight: '600', textAlign: 'right' },
   leadApt: { color: C.textMut, fontSize: 11, textAlign: 'right' },
-  pendingTag: { backgroundColor: 'rgba(255,165,2,0.15)', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 },
-  pendingTagText: { color: '#FFA502', fontSize: 11, fontWeight: '600' },
+  pendingTag: { backgroundColor: C.goldAlpha(0.15), borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 },
+  pendingTagText: { color: C.statusTone.caution, fontSize: 11, fontWeight: '600' },
 
   listingRow: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
@@ -339,7 +339,7 @@ const styles = StyleSheet.create({
   },
   activeIndicator: { width: 8, height: 8, borderRadius: 4 },
   listingInfo: { flex: 1, gap: 3 },
-  listingTitle: { color: '#fff', fontSize: 13, fontWeight: '600', textAlign: 'right' },
+  listingTitle: { color: C.onInverse.primary, fontSize: 13, fontWeight: '600', textAlign: 'right' },
   listingMeta: { color: C.textMut, fontSize: 11, textAlign: 'right' },
   perfBarTrack: { height: 3, backgroundColor: C.navyMidAlpha(0.6), borderRadius: 2, overflow: 'hidden' },
   perfBarFill: { height: 3, backgroundColor: C.cyan, borderRadius: 2 },

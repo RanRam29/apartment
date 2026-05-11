@@ -48,17 +48,17 @@ interface Contract {
 
 const STATUS_META: Record<ContractStatus, { label: string; color: string; icon: string }> = {
   draft:             { label: 'טיוטה',          color: C.textMut, icon: '📝' },
-  pending_tenant:    { label: 'ממתין לחתימת שוכר', color: '#F39C12', icon: '⏳' },
-  pending_landlord:  { label: 'ממתין לחתימת משכיר', color: '#F39C12', icon: '⏳' },
-  active:            { label: 'פעיל',            color: '#00C9A7', icon: '✅' },
-  terminated:        { label: 'בוטל',            color: '#FF7675', icon: '❌' },
+  pending_tenant:    { label: 'ממתין לחתימת שוכר', color: C.statusTone.caution, icon: '⏳' },
+  pending_landlord:  { label: 'ממתין לחתימת משכיר', color: C.statusTone.caution, icon: '⏳' },
+  active:            { label: 'פעיל',            color: C.statusTone.positive, icon: '✅' },
+  terminated:        { label: 'בוטל',            color: C.statusTone.negativeSoft, icon: '❌' },
 };
 
 const DEPOSIT_META: Record<DepositStatus, { label: string; color: string }> = {
   pending:   { label: 'פיקדון: טרם שולם', color: C.textMut },
   held:      { label: 'פיקדון: נמצא בנאמנות', color: C.cyan },
-  released:  { label: 'פיקדון: הוחזר', color: '#00C9A7' },
-  forfeited: { label: 'פיקדון: חולט', color: '#FF7675' },
+  released:  { label: 'פיקדון: הוחזר', color: C.statusTone.positive },
+  forfeited: { label: 'פיקדון: חולט', color: C.statusTone.negativeSoft },
 };
 
 function ContractCard({ contract, onPress }: { contract: Contract; onPress: () => void }) {
@@ -176,7 +176,7 @@ function ContractDetailModal({
         <SafeAreaView style={styles.modalContainer}>
           <View style={styles.modalHeader}>
             <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-              <Ionicons name="close" size={22} color="#fff" />
+              <Ionicons name="close" size={22} color={C.onInverse.primary} />
             </TouchableOpacity>
             <Text style={styles.modalTitle}>חוזה שכירות</Text>
             <View style={{ width: 38 }} />
@@ -189,7 +189,7 @@ function ContractDetailModal({
                 onPress={() => setDocViewerOpen(true)}
                 activeOpacity={0.85}
               >
-                <Ionicons name="document-attach" size={18} color="#fff" />
+                <Ionicons name="document-attach" size={18} color={C.onInverse.primary} />
                 <Text style={styles.openDocBtnText}>
                   צפה במסמך ({contract.uploadedDocumentOriginalName ?? 'PDF / Word'})
                 </Text>
@@ -206,7 +206,7 @@ function ContractDetailModal({
                 onPress={onSign}
               >
                 {signing
-                  ? <ActivityIndicator color="#fff" />
+                  ? <ActivityIndicator color={C.onInverse.primary} />
                   : <><Ionicons name="pencil" size={16} color={C.navy} /><Text style={styles.signBtnText}>חתום על החוזה</Text></>
                 }
               </TouchableOpacity>
@@ -214,7 +214,7 @@ function ContractDetailModal({
 
             {alreadySigned && (
               <View style={styles.signedNote}>
-                <Ionicons name="checkmark-circle" size={18} color="#00C9A7" />
+                <Ionicons name="checkmark-circle" size={18} color={C.statusTone.positive} />
                 <Text style={styles.signedNoteText}>חתמת על החוזה</Text>
               </View>
             )}
@@ -261,7 +261,7 @@ function ContractDetailModal({
         <SafeAreaView style={styles.docViewerWrap}>
           <View style={styles.modalHeader}>
             <TouchableOpacity onPress={() => setDocViewerOpen(false)} style={styles.closeBtn}>
-              <Ionicons name="close" size={22} color="#fff" />
+              <Ionicons name="close" size={22} color={C.onInverse.primary} />
             </TouchableOpacity>
             <Text style={styles.modalTitle}>מסמך חוזה</Text>
             <View style={{ width: 38 }} />
@@ -423,7 +423,7 @@ function AddContractUploadModal({
       <SafeAreaView style={styles.modalContainer}>
         <View style={styles.modalHeader}>
           <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-            <Ionicons name="close" size={22} color="#fff" />
+            <Ionicons name="close" size={22} color={C.onInverse.primary} />
           </TouchableOpacity>
           <Text style={styles.modalTitle}>הוספת חוזה מקובץ</Text>
           <View style={{ width: 38 }} />
@@ -463,7 +463,7 @@ function AddContractUploadModal({
                 style={styles.fieldInput}
                 keyboardType="number-pad"
                 placeholder="5000"
-                placeholderTextColor="#6A6A7E"
+                placeholderTextColor={C.field.placeholder}
                 value={monthlyRent}
                 onChangeText={setMonthlyRent}
               />
@@ -473,7 +473,7 @@ function AddContractUploadModal({
                 style={styles.fieldInput}
                 keyboardType="number-pad"
                 placeholder="1"
-                placeholderTextColor="#6A6A7E"
+                placeholderTextColor={C.field.placeholder}
                 value={depositMonths}
                 onChangeText={setDepositMonths}
               />
@@ -482,7 +482,7 @@ function AddContractUploadModal({
               <TextInput
                 style={styles.fieldInput}
                 placeholder="2026-06-01"
-                placeholderTextColor="#6A6A7E"
+                placeholderTextColor={C.field.placeholder}
                 value={startDate}
                 onChangeText={setStartDate}
               />
@@ -491,13 +491,13 @@ function AddContractUploadModal({
               <TextInput
                 style={styles.fieldInput}
                 placeholder="2027-06-01"
-                placeholderTextColor="#6A6A7E"
+                placeholderTextColor={C.field.placeholder}
                 value={endDate}
                 onChangeText={setEndDate}
               />
 
               <TouchableOpacity style={styles.pickFileBtn} onPress={pickFile} activeOpacity={0.85}>
-                <Ionicons name="cloud-upload-outline" size={20} color="#fff" />
+                <Ionicons name="cloud-upload-outline" size={20} color={C.onInverse.primary} />
                 <Text style={styles.pickFileBtnText}>
                   {pickedFile ? pickedFile.name : 'בחר קובץ PDF או Word'}
                 </Text>
@@ -509,7 +509,7 @@ function AddContractUploadModal({
                 onPress={submit}
               >
                 {uploadMutation.isPending ? (
-                  <ActivityIndicator color="#fff" />
+                  <ActivityIndicator color={C.onInverse.primary} />
                 ) : (
                   <Text style={styles.submitUploadBtnText}>העלה וצור חוזה</Text>
                 )}
@@ -573,12 +573,12 @@ export default function ContractsScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="chevron-back" size={22} color="#fff" />
+          <Ionicons name="chevron-back" size={22} color={C.onInverse.primary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>חוזים</Text>
         {isLandlord ? (
           <TouchableOpacity onPress={() => setAddUploadOpen(true)} style={styles.addHeaderBtn} accessibilityLabel="הוסף חוזה מקובץ">
-            <Ionicons name="add" size={26} color="#fff" />
+            <Ionicons name="add" size={26} color={C.onInverse.primary} />
           </TouchableOpacity>
         ) : (
           <View style={{ width: 38 }} />
@@ -595,7 +595,7 @@ export default function ContractsScreen() {
             <>
               <Text style={styles.emptyHint}>הוסף חוזה מהתבנית מדף ההתאמות, או העלה קובץ PDF / Word.</Text>
               <TouchableOpacity style={styles.emptyAddBtn} onPress={() => setAddUploadOpen(true)}>
-                <Ionicons name="cloud-upload-outline" size={18} color="#fff" />
+                <Ionicons name="cloud-upload-outline" size={18} color={C.onInverse.primary} />
                 <Text style={styles.emptyAddBtnText}>העלה חוזה מקובץ</Text>
               </TouchableOpacity>
             </>
@@ -648,12 +648,12 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14 },
   backBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: Dark.surface, justifyContent: 'center', alignItems: 'center' },
   addHeaderBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: C.cyan, justifyContent: 'center', alignItems: 'center' },
-  headerTitle: { color: '#fff', fontSize: 18, fontWeight: '800' },
+  headerTitle: { color: C.onInverse.primary, fontSize: 18, fontWeight: '800' },
   list: { padding: 16, paddingBottom: 32 },
   card: { backgroundColor: Dark.surface, borderRadius: 14, padding: 16, marginBottom: 12 },
   cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 },
   cardBadges: { flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 0 },
-  cardTitle: { color: '#fff', fontWeight: '700', fontSize: 15, flex: 1, textAlign: 'right', marginLeft: 8 },
+  cardTitle: { color: C.onInverse.primary, fontWeight: '700', fontSize: 15, flex: 1, textAlign: 'right', marginLeft: 8 },
   fileBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 6, paddingVertical: 3, borderRadius: 6, backgroundColor: C.cyanAlpha(0.14) },
   fileBadgeText: { color: C.cyan, fontSize: 10, fontWeight: '700' },
   statusBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
@@ -670,30 +670,30 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 8,
     marginTop: 8, paddingHorizontal: 20, paddingVertical: 12, borderRadius: 12, backgroundColor: C.cyan,
   },
-  emptyAddBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
+  emptyAddBtnText: { color: C.onInverse.primary, fontWeight: '700', fontSize: 15 },
   // Modal
   modalContainer: { flex: 1, backgroundColor: Dark.bg },
   modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: Dark.border },
   closeBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: Dark.surface, justifyContent: 'center', alignItems: 'center' },
-  modalTitle: { color: '#fff', fontSize: 17, fontWeight: '800' },
+  modalTitle: { color: C.onInverse.primary, fontSize: 17, fontWeight: '800' },
   contractScroll: { flex: 1 },
   openDocBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     backgroundColor: Dark.surface, paddingVertical: 12, paddingHorizontal: 14, borderRadius: 12, marginBottom: 16,
   },
-  openDocBtnText: { color: '#fff', fontWeight: '700', fontSize: 14, textAlign: 'center', flex: 1 },
-  contractText: { color: '#C0C0D0', fontSize: 13, lineHeight: 22, fontFamily: 'monospace', textAlign: 'right' },
+  openDocBtnText: { color: C.onInverse.primary, fontWeight: '700', fontSize: 14, textAlign: 'center', flex: 1 },
+  contractText: { color: C.onInverse.tertiary, fontSize: 13, lineHeight: 22, fontFamily: 'monospace', textAlign: 'right' },
   modalActions: { padding: 16, borderTopWidth: 1, borderTopColor: Dark.border, gap: 10 },
   signBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: C.cyan, paddingVertical: 14, borderRadius: 14 },
   signBtnText: { color: C.navy, fontWeight: '800', fontSize: 15 },
   signedNote: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
-  signedNoteText: { color: '#00C9A7', fontWeight: '700', fontSize: 14 },
+  signedNoteText: { color: C.statusTone.positive, fontWeight: '700', fontSize: 14 },
   depositRow: { flexDirection: 'row', gap: 8 },
   depositBtn: { flex: 1, paddingVertical: 12, borderRadius: 12, alignItems: 'center' },
   depositBtnHold:    { backgroundColor: C.cyan },
-  depositBtnRelease: { backgroundColor: '#00C9A7' },
-  depositBtnForfeit: { backgroundColor: '#FF7675' },
-  depositBtnText: { color: '#fff', fontWeight: '700', fontSize: 13 },
+  depositBtnRelease: { backgroundColor: C.statusTone.positive },
+  depositBtnForfeit: { backgroundColor: C.statusTone.negativeSoft },
+  depositBtnText: { color: C.onInverse.primary, fontWeight: '700', fontSize: 13 },
   btnDisabled: { opacity: 0.6 },
   docViewerWrap: { flex: 1, backgroundColor: Dark.bg },
   webView: { flex: 1, backgroundColor: Dark.surface },
@@ -705,19 +705,19 @@ const styles = StyleSheet.create({
   fieldLabel: { color: C.textMut, fontSize: 12, fontWeight: '600', textAlign: 'right', marginBottom: 6 },
   fieldInput: {
     backgroundColor: Dark.surface, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12,
-    color: '#fff', fontSize: 15, marginBottom: 14, textAlign: 'right',
+    color: C.onInverse.primary, fontSize: 15, marginBottom: 14, textAlign: 'right',
   },
   matchPick: { gap: 8, marginBottom: 8 },
   matchChip: { backgroundColor: Dark.surface, borderRadius: 12, padding: 12, borderWidth: 2, borderColor: 'transparent' },
   matchChipSel: { borderColor: C.cyan },
-  matchChipText: { color: '#fff', fontSize: 14, textAlign: 'right' },
+  matchChipText: { color: C.onInverse.primary, fontSize: 14, textAlign: 'right' },
   pickFileBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     backgroundColor: Dark.surface, paddingVertical: 14, borderRadius: 12, marginTop: 8, marginBottom: 16,
   },
-  pickFileBtnText: { color: '#fff', fontWeight: '600', fontSize: 14, flex: 1, textAlign: 'center' },
+  pickFileBtnText: { color: C.onInverse.primary, fontWeight: '600', fontSize: 14, flex: 1, textAlign: 'center' },
   submitUploadBtn: {
     backgroundColor: C.cyan, paddingVertical: 14, borderRadius: 14, alignItems: 'center',
   },
-  submitUploadBtnText: { color: '#fff', fontWeight: '800', fontSize: 16 },
+  submitUploadBtnText: { color: C.onInverse.primary, fontWeight: '800', fontSize: 16 },
 });

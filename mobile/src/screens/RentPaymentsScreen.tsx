@@ -31,10 +31,10 @@ interface Contract {
 }
 
 const STATUS_CONFIG: Record<PaymentStatus, { label: string; color: string; icon: keyof typeof Ionicons.glyphMap }> = {
-  pending:   { label: 'ממתין',    color: '#F39C12', icon: 'time-outline' },
+  pending:   { label: 'ממתין',    color: C.statusTone.caution, icon: 'time-outline' },
   initiated: { label: 'בתהליך',   color: C.cyan, icon: 'hourglass-outline' },
-  paid:      { label: 'שולם',     color: '#00C9A7', icon: 'checkmark-circle-outline' },
-  overdue:   { label: 'באיחור',   color: '#FF7675', icon: 'alert-circle-outline' },
+  paid:      { label: 'שולם',     color: C.statusTone.positive, icon: 'checkmark-circle-outline' },
+  overdue:   { label: 'באיחור',   color: C.statusTone.negativeSoft, icon: 'alert-circle-outline' },
   cancelled: { label: 'בוטל',     color: C.textMut, icon: 'close-circle-outline' },
 };
 
@@ -87,7 +87,7 @@ function PaymentCard({ payment, isLandlord, onPay, onMarkPaid }: {
       {canPay && (
         <View style={styles.actions}>
           <TouchableOpacity style={[styles.actionBtn, styles.bitBtn]} onPress={() => onPay(payment)}>
-            <Ionicons name="phone-portrait-outline" size={14} color="#fff" />
+            <Ionicons name="phone-portrait-outline" size={14} color={C.onInverse.primary} />
             <Text style={styles.actionBtnText}>שלם עכשיו</Text>
           </TouchableOpacity>
         </View>
@@ -96,7 +96,7 @@ function PaymentCard({ payment, isLandlord, onPay, onMarkPaid }: {
       {canConfirm && (
         <View style={styles.actions}>
           <TouchableOpacity style={[styles.actionBtn, styles.confirmBtn]} onPress={() => onMarkPaid(payment)}>
-            <Ionicons name="checkmark-outline" size={14} color="#fff" />
+            <Ionicons name="checkmark-outline" size={14} color={C.onInverse.primary} />
             <Text style={styles.actionBtnText}>סמן כשולם</Text>
           </TouchableOpacity>
         </View>
@@ -201,12 +201,12 @@ export default function RentPaymentsScreen({ navigation }: any) {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="chevron-back" size={22} color="#fff" />
+          <Ionicons name="chevron-back" size={22} color={C.onInverse.primary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>תשלומי שכירות</Text>
         {isLandlord && (
           <TouchableOpacity style={styles.addBtn} onPress={() => setRequestModal(true)}>
-            <Ionicons name="add" size={20} color="#fff" />
+            <Ionicons name="add" size={20} color={C.onInverse.primary} />
           </TouchableOpacity>
         )}
       </View>
@@ -305,11 +305,11 @@ const styles = StyleSheet.create({
     backgroundColor: Dark.surface, borderBottomWidth: 1, borderBottomColor: Dark.border,
   },
   backBtn:     { padding: 4 },
-  headerTitle: { color: '#fff', fontSize: 17, fontWeight: '700' },
+  headerTitle: { color: C.onInverse.primary, fontSize: 17, fontWeight: '700' },
   addBtn:      { backgroundColor: C.cyan, borderRadius: 20, padding: 6 },
 
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 },
-  emptyTitle: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  emptyTitle: { color: C.onInverse.primary, fontSize: 16, fontWeight: '700' },
   emptyHint:  { color: C.textMut, fontSize: 13, textAlign: 'center', paddingHorizontal: 40 },
 
   list: { padding: 16, gap: 12 },
@@ -323,7 +323,7 @@ const styles = StyleSheet.create({
   cardTop:   { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   cardLeft:  { flex: 1, gap: 2 },
   cardRight: { alignItems: 'flex-end', gap: 6 },
-  monthLabel: { color: '#fff', fontSize: 15, fontWeight: '700' },
+  monthLabel: { color: C.onInverse.primary, fontSize: 15, fontWeight: '700' },
   aptTitle:   { color: C.textMut, fontSize: 12 },
   amount:     { color: C.cyan, fontSize: 18, fontWeight: '800' },
   paidAt:     { color: C.textMut, fontSize: 11 },
@@ -333,7 +333,7 @@ const styles = StyleSheet.create({
 
   actions:    { flexDirection: 'row', gap: 8, marginTop: 4 },
   actionBtn:  { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20 },
-  actionBtnText: { color: '#fff', fontSize: 13, fontWeight: '700' },
+  actionBtnText: { color: C.onInverse.primary, fontSize: 13, fontWeight: '700' },
   bitBtn:     { backgroundColor: C.cyan },
   confirmBtn: { backgroundColor: C.success },
 
@@ -343,7 +343,7 @@ const styles = StyleSheet.create({
     backgroundColor: Dark.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24,
     padding: 24, gap: 8,
   },
-  modalTitle:   { color: '#fff', fontSize: 18, fontWeight: '800', marginBottom: 8, textAlign: 'right' },
+  modalTitle:   { color: C.onInverse.primary, fontSize: 18, fontWeight: '800', marginBottom: 8, textAlign: 'right' },
   fieldLabel:   { color: C.textMut, fontSize: 12, fontWeight: '700', textAlign: 'right' },
   noContracts:  { color: C.coral, fontSize: 13, textAlign: 'right' },
   contractRow: {
@@ -352,7 +352,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5, borderColor: 'transparent', marginTop: 6,
   },
   contractRowSel:  { borderColor: C.cyan },
-  contractRowText: { color: '#fff', fontSize: 14, flex: 1 },
+  contractRowText: { color: C.onInverse.primary, fontSize: 14, flex: 1 },
   contractRowRent: { color: C.cyan, fontSize: 14, fontWeight: '700' },
   monthRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 6 },
   monthChip: {

@@ -14,9 +14,9 @@ type VerifStatus = 'pending' | 'verified' | 'rejected' | null;
 function StatusBadge({ status }: { status: VerifStatus }) {
   if (!status) return null;
   const map: Record<NonNullable<VerifStatus>, { icon: string; label: string; color: string; bg: string }> = {
-    pending:  { icon: '⏳', label: 'בבדיקה',    color: '#F39C12', bg: 'rgba(243,156,18,0.12)' },
-    verified: { icon: '✅', label: 'מאומת',      color: '#00C9A7', bg: 'rgba(0,201,167,0.12)' },
-    rejected: { icon: '❌', label: 'נדחה',       color: '#FF7675', bg: 'rgba(255,118,117,0.12)' },
+    pending:  { icon: '⏳', label: 'בבדיקה',    color: C.statusTone.caution, bg: C.goldAlpha(0.12) },
+    verified: { icon: '✅', label: 'מאומת',      color: C.statusTone.positive, bg: C.successAlpha(0.12) },
+    rejected: { icon: '❌', label: 'נדחה',       color: C.statusTone.negativeSoft, bg: C.coralAlpha(0.12) },
   };
   const s = map[status];
   return (
@@ -72,7 +72,7 @@ export default function VerifyIdentityScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="chevron-back" size={22} color="#fff" />
+          <Ionicons name="chevron-back" size={22} color={C.onInverse.primary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>אימות זהות</Text>
         <View style={{ width: 38 }} />
@@ -81,7 +81,7 @@ export default function VerifyIdentityScreen() {
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Info card */}
         <View style={styles.infoCard}>
-          <Ionicons name="shield-checkmark-outline" size={32} color="#00C9A7" style={{ marginBottom: 10 }} />
+          <Ionicons name="shield-checkmark-outline" size={32} color={C.statusTone.positive} style={{ marginBottom: 10 }} />
           <Text style={styles.infoTitle}>אמת את זהותך</Text>
           <Text style={styles.infoText}>
             פרופיל מאומת מגביר את האמינות שלך מול בעלי הדירות ומשפר את סיכויי הקבלה שלך.
@@ -122,7 +122,7 @@ export default function VerifyIdentityScreen() {
               value={idNumber}
               onChangeText={setIdNumber}
               placeholder="9 ספרות"
-              placeholderTextColor="#6A6A7E"
+              placeholderTextColor={C.field.placeholder}
               keyboardType="numeric"
               maxLength={9}
               textAlign="right"
@@ -134,7 +134,7 @@ export default function VerifyIdentityScreen() {
               value={fullName}
               onChangeText={setFullName}
               placeholder="שם פרטי ושם משפחה"
-              placeholderTextColor="#6A6A7E"
+              placeholderTextColor={C.field.placeholder}
               textAlign="right"
             />
 
@@ -144,7 +144,7 @@ export default function VerifyIdentityScreen() {
               value={phone}
               onChangeText={setPhone}
               placeholder="05X-XXXXXXX"
-              placeholderTextColor="#6A6A7E"
+              placeholderTextColor={C.field.placeholder}
               keyboardType="phone-pad"
               textAlign="right"
             />
@@ -159,10 +159,10 @@ export default function VerifyIdentityScreen() {
               onPress={handleSubmit}
             >
               {submitMutation.isPending
-                ? <ActivityIndicator color="#fff" />
+                ? <ActivityIndicator color={C.onInverse.primary} />
                 : (
                   <View style={styles.submitInner}>
-                    <Ionicons name="shield-checkmark" size={18} color="#fff" />
+                    <Ionicons name="shield-checkmark" size={18} color={C.onInverse.primary} />
                     <Text style={styles.submitBtnText}>שלח לאימות</Text>
                   </View>
                 )}
@@ -184,11 +184,11 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Dark.bg },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14 },
   backBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: Dark.surface, justifyContent: 'center', alignItems: 'center' },
-  headerTitle: { color: '#fff', fontSize: 18, fontWeight: '800' },
+  headerTitle: { color: C.onInverse.primary, fontSize: 18, fontWeight: '800' },
   scroll: { flex: 1 },
   content: { padding: 16, paddingBottom: 48 },
   infoCard: { backgroundColor: Dark.surface, borderRadius: 16, padding: 20, alignItems: 'center', marginBottom: 20, borderWidth: 1, borderColor: Dark.border },
-  infoTitle: { color: '#fff', fontSize: 17, fontWeight: '800', marginBottom: 8 },
+  infoTitle: { color: C.onInverse.primary, fontSize: 17, fontWeight: '800', marginBottom: 8 },
   infoText: { color: C.textMut, fontSize: 13, lineHeight: 20, textAlign: 'center' },
   statusRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 10, marginBottom: 6 },
   statusRowLabel: { color: C.textMut, fontSize: 14 },
@@ -198,14 +198,14 @@ const styles = StyleSheet.create({
   verifiedAt: { color: C.textMut, fontSize: 12, textAlign: 'right', marginBottom: 2 },
   idHint: { color: C.textMut, fontSize: 12, textAlign: 'right', marginBottom: 16 },
   form: { marginTop: 8 },
-  sectionTitle: { color: '#fff', fontSize: 16, fontWeight: '700', textAlign: 'right', marginBottom: 14 },
+  sectionTitle: { color: C.onInverse.primary, fontSize: 16, fontWeight: '700', textAlign: 'right', marginBottom: 14 },
   label: { color: C.textMut, fontSize: 13, fontWeight: '600', textAlign: 'right', marginBottom: 6 },
-  input: { backgroundColor: Dark.surface, borderRadius: 12, padding: 14, color: '#fff', fontSize: 15, marginBottom: 14, borderWidth: 1, borderColor: Dark.border },
+  input: { backgroundColor: Dark.surface, borderRadius: 12, padding: 14, color: C.onInverse.primary, fontSize: 15, marginBottom: 14, borderWidth: 1, borderColor: Dark.border },
   disclaimer: { color: C.textMut, fontSize: 11, textAlign: 'right', lineHeight: 16, marginBottom: 20 },
-  submitBtn: { backgroundColor: '#00C9A7', paddingVertical: 14, borderRadius: 14, alignItems: 'center' },
+  submitBtn: { backgroundColor: C.statusTone.positive, paddingVertical: 14, borderRadius: 14, alignItems: 'center' },
   submitBtnDisabled: { opacity: 0.6 },
   submitInner: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  submitBtnText: { color: '#fff', fontWeight: '800', fontSize: 15 },
-  verifiedCard: { backgroundColor: 'rgba(0,201,167,0.12)', borderRadius: 14, padding: 18, borderWidth: 1, borderColor: '#00C9A7', marginTop: 16 },
-  verifiedCardText: { color: '#00C9A7', textAlign: 'center', fontSize: 14, fontWeight: '600', lineHeight: 20 },
+  submitBtnText: { color: C.onInverse.primary, fontWeight: '800', fontSize: 15 },
+  verifiedCard: { backgroundColor: C.successAlpha(0.12), borderRadius: 14, padding: 18, borderWidth: 1, borderColor: C.statusTone.positive, marginTop: 16 },
+  verifiedCardText: { color: C.statusTone.positive, textAlign: 'center', fontSize: 14, fontWeight: '600', lineHeight: 20 },
 });

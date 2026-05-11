@@ -215,15 +215,15 @@ export default function PreferencesScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Dark.bg },
   scroll: { padding: 20, paddingBottom: 40 },
-  header: { fontSize: 22, fontWeight: '800', color: '#fff', textAlign: 'right', marginBottom: 4 },
+  header: { fontSize: 22, fontWeight: '800', color: C.onInverse.primary, textAlign: 'right', marginBottom: 4 },
   subtitle: { color: C.textMut, fontSize: 13, textAlign: 'right', marginBottom: 24 },
-  sectionTitle: { fontSize: 15, fontWeight: '700', color: '#fff', textAlign: 'right', marginBottom: 8, marginTop: 20 },
+  sectionTitle: { fontSize: 15, fontWeight: '700', color: C.onInverse.primary, textAlign: 'right', marginBottom: 8, marginTop: 20 },
   hint: { color: C.textMut, fontSize: 11, textAlign: 'right', marginBottom: 10, marginTop: -4 },
   fieldLabel: { color: C.textMut, fontSize: 12, fontWeight: '600', textAlign: 'right', marginBottom: 6 },
   row: { flexDirection: 'row' },
   input: {
     backgroundColor: Dark.surface, borderRadius: 12, padding: 14,
-    fontSize: 14, color: '#fff', borderWidth: 1, borderColor: Dark.border,
+    fontSize: 14, color: C.onInverse.primary, borderWidth: 1, borderColor: Dark.border,
   },
   chipGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 4 },
   chip: {
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
   chipText: { color: C.textMut, fontSize: 13 },
   chipTextActive: { color: C.cyan, fontWeight: '600' },
   switchRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 20, marginBottom: 8, justifyContent: 'flex-end' },
-  switchLabel: { color: '#E0E0E0', fontSize: 14 },
+  switchLabel: { color: C.onInverse.secondary, fontSize: 14 },
   saveBtn: { backgroundColor: C.cyan, borderRadius: 14, paddingVertical: 16, alignItems: 'center', marginTop: 28 },
   saveBtnDisabled: { opacity: 0.6 },
   saveBtnText: { color: C.navy, fontSize: 16, fontWeight: '800' },

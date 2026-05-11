@@ -62,9 +62,9 @@ const MONTHS_HE = ['ינואר','פברואר','מרץ','אפריל','מאי','�
                    'יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
 
 function alertColor(days: number) {
-  if (days <= 30) return '#FF7675';
-  if (days <= 60) return '#F39C12';
-  return '#00C9A7';
+  if (days <= 30) return C.statusTone.negativeSoft;
+  if (days <= 60) return C.statusTone.caution;
+  return C.statusTone.positive;
 }
 
 function fmtDate(d?: string) {
@@ -86,7 +86,7 @@ function AlertBadge({ alert }: { alert: Alert_ }) {
 }
 
 function LeaseCard({ lease, onPress }: { lease: CommercialLease; onPress: () => void }) {
-  const statusColor = lease.status === 'active' ? '#00C9A7' : C.textMut;
+  const statusColor = lease.status === 'active' ? C.statusTone.positive : C.textMut;
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.85}>
       <View style={styles.cardRow}>
@@ -142,7 +142,7 @@ function DetailModal({ lease, isLandlord, onClose, onCamAdd }: {
           <View style={styles.detailHeader}>
             <Text style={styles.detailTitle} numberOfLines={1}>{lease.businessName}</Text>
             <TouchableOpacity onPress={onClose}>
-              <Ionicons name="close" size={22} color="#fff" />
+              <Ionicons name="close" size={22} color={C.onInverse.primary} />
             </TouchableOpacity>
           </View>
 
@@ -186,7 +186,7 @@ function DetailModal({ lease, isLandlord, onClose, onCamAdd }: {
                     <Text style={styles.camYear}>{r.year}</Text>
                     <Text style={styles.camEst}>₪{r.estimated.toLocaleString()} (הערכה)</Text>
                     {r.actual != null && (
-                      <Text style={[styles.camDiff, { color: (r.difference ?? 0) > 0 ? '#FF7675' : '#00C9A7' }]}>
+                      <Text style={[styles.camDiff, { color: (r.difference ?? 0) > 0 ? C.statusTone.negativeSoft : C.statusTone.positive }]}>
                         ₪{r.actual.toLocaleString()} ({(r.difference ?? 0) > 0 ? '+' : ''}{(r.difference ?? 0).toLocaleString()})
                       </Text>
                     )}
@@ -203,7 +203,7 @@ function DetailModal({ lease, isLandlord, onClose, onCamAdd }: {
                   <TextInput
                     style={styles.camInput}
                     placeholder="שנה"
-                    placeholderTextColor="#555"
+                    placeholderTextColor={C.field.placeholder}
                     keyboardType="numeric"
                     value={camYear}
                     onChangeText={setCamYear}
@@ -211,7 +211,7 @@ function DetailModal({ lease, isLandlord, onClose, onCamAdd }: {
                   <TextInput
                     style={styles.camInput}
                     placeholder="סכום בפועל ₪"
-                    placeholderTextColor="#555"
+                    placeholderTextColor={C.field.placeholder}
                     keyboardType="numeric"
                     value={camActual}
                     onChangeText={setCamActual}
@@ -220,7 +220,7 @@ function DetailModal({ lease, isLandlord, onClose, onCamAdd }: {
                 <TextInput
                   style={[styles.camInput, { width: '100%' }]}
                   placeholder="הערות (אופציונלי)"
-                  placeholderTextColor="#555"
+                  placeholderTextColor={C.field.placeholder}
                   value={camNotes}
                   onChangeText={setCamNotes}
                 />
@@ -308,7 +308,7 @@ function CreateModal({ visible, onClose, onCreate }: {
                   value={value}
                   onChangeText={set as any}
                   keyboardType={kb as any}
-                  placeholderTextColor="#555"
+                  placeholderTextColor={C.field.placeholder}
                   textAlign="right"
                 />
               </View>
@@ -379,12 +379,12 @@ export default function CommercialScreen({ navigation }: any) {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="chevron-back" size={22} color="#fff" />
+          <Ionicons name="chevron-back" size={22} color={C.onInverse.primary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>נדל"ן מסחרי</Text>
         {isLandlord && (
           <TouchableOpacity style={styles.addBtn} onPress={() => setCreateVisible(true)}>
-            <Ionicons name="add" size={20} color="#fff" />
+            <Ionicons name="add" size={20} color={C.onInverse.primary} />
           </TouchableOpacity>
         )}
       </View>
@@ -444,7 +444,7 @@ const styles = StyleSheet.create({
     backgroundColor: Dark.surface, borderBottomWidth: 1, borderBottomColor: Dark.border,
   },
   backBtn:     { padding: 4 },
-  headerTitle: { color: '#fff', fontSize: 17, fontWeight: '700' },
+  headerTitle: { color: C.onInverse.primary, fontSize: 17, fontWeight: '700' },
   addBtn:      { backgroundColor: C.cyan, borderRadius: 20, padding: 6 },
 
   alertsBar: { backgroundColor: Dark.surface, borderBottomWidth: 1, borderBottomColor: Dark.border },
@@ -456,7 +456,7 @@ const styles = StyleSheet.create({
   alertDays:  { fontSize: 10 },
 
   center:     { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 },
-  emptyTitle: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  emptyTitle: { color: C.onInverse.primary, fontSize: 16, fontWeight: '700' },
   emptyHint:  { color: C.textMut, fontSize: 13, textAlign: 'center', paddingHorizontal: 40 },
 
   list: { padding: 16, gap: 12 },
@@ -465,12 +465,12 @@ const styles = StyleSheet.create({
   cardRow:  { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   cardLeft: { flex: 1, gap: 2 },
   cardRight:{ alignItems: 'flex-end', gap: 4 },
-  bizName:  { color: '#fff', fontSize: 15, fontWeight: '700' },
+  bizName:  { color: C.onInverse.primary, fontSize: 15, fontWeight: '700' },
   bizType:  { color: C.textMut, fontSize: 12 },
   rent:     { color: C.cyan, fontSize: 17, fontWeight: '800' },
   rentSub:  { fontSize: 11, color: C.textMut },
   statusDot:{ width: 8, height: 8, borderRadius: 4 },
-  camLine:  { color: '#F39C12', fontSize: 11 },
+  camLine:  { color: C.statusTone.caution, fontSize: 11 },
   dates:    { color: C.textMut, fontSize: 11 },
 
   // Detail modal
@@ -480,7 +480,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     padding: 20, borderBottomWidth: 1, borderBottomColor: Dark.border,
   },
-  detailTitle:  { color: '#fff', fontSize: 17, fontWeight: '700', flex: 1 },
+  detailTitle:  { color: C.onInverse.primary, fontSize: 17, fontWeight: '700', flex: 1 },
   detailScroll: { padding: 20, gap: 8, paddingBottom: 40 },
 
   figureRow: { flexDirection: 'row', gap: 12, marginBottom: 8 },
@@ -492,24 +492,24 @@ const styles = StyleSheet.create({
 
   critRow:   { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 6,
                borderBottomWidth: 1, borderBottomColor: Dark.surface },
-  critLabel: { flex: 1, color: '#fff', fontSize: 13 },
+  critLabel: { flex: 1, color: C.onInverse.primary, fontSize: 13 },
   critVal:   { color: C.textMut, fontSize: 13 },
 
   camRow:   { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 4 },
-  camYear:  { color: '#fff', fontWeight: '700', width: 44 },
+  camYear:  { color: C.onInverse.primary, fontWeight: '700', width: 44 },
   camEst:   { color: C.textMut, fontSize: 12, flex: 1 },
   camDiff:  { fontSize: 12, fontWeight: '700' },
 
   camForm:  { flexDirection: 'row', gap: 8 },
   camInput: {
     flex: 1, backgroundColor: Dark.surface, borderRadius: 10,
-    paddingHorizontal: 12, paddingVertical: 8, color: '#fff', fontSize: 13,
+    paddingHorizontal: 12, paddingVertical: 8, color: C.onInverse.primary, fontSize: 13,
   },
   camSubmitBtn: {
-    backgroundColor: '#F39C12', borderRadius: 10, padding: 12,
+    backgroundColor: C.statusTone.caution, borderRadius: 10, padding: 12,
     alignItems: 'center', marginTop: 8,
   },
-  camSubmitText: { color: '#fff', fontWeight: '700' },
+  camSubmitText: { color: C.onInverse.primary, fontWeight: '700' },
 
   notesText: { color: C.textMut, fontSize: 13, lineHeight: 20 },
 
@@ -518,16 +518,16 @@ const styles = StyleSheet.create({
     backgroundColor: Dark.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24,
     padding: 24, maxHeight: '90%',
   },
-  createTitle: { color: '#fff', fontSize: 18, fontWeight: '800', marginBottom: 16, textAlign: 'right' },
+  createTitle: { color: C.onInverse.primary, fontSize: 18, fontWeight: '800', marginBottom: 16, textAlign: 'right' },
   fieldWrap:   { marginBottom: 12 },
   fieldLabel:  { color: C.textMut, fontSize: 11, marginBottom: 4, textAlign: 'right' },
   fieldInput:  {
     backgroundColor: Dark.surface, borderRadius: 10,
-    paddingHorizontal: 12, paddingVertical: 10, color: '#fff', fontSize: 14,
+    paddingHorizontal: 12, paddingVertical: 10, color: C.onInverse.primary, fontSize: 14,
   },
   createActions: { flexDirection: 'row', gap: 12, marginTop: 16 },
   cancelBtn2:    { flex: 1, padding: 14, borderRadius: 12, backgroundColor: Dark.surface, alignItems: 'center' },
   cancelBtn2Text:{ color: C.textMut, fontWeight: '700' },
   createBtn:     { flex: 2, padding: 14, borderRadius: 12, backgroundColor: C.cyan, alignItems: 'center' },
-  createBtnText: { color: '#fff', fontWeight: '800', fontSize: 15 },
+  createBtnText: { color: C.onInverse.primary, fontWeight: '800', fontSize: 15 },
 });
