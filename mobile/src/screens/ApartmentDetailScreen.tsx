@@ -79,6 +79,7 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
 
   // Normalize here (after guard) so hooks are never called conditionally
   const apt = normalizeApartment(rawData);
+  const street = apt.street ?? apt.neighborhood;
 
   const images: string[] = (apt.images ?? [])
     .map(getImageUrl)
@@ -192,11 +193,11 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
           {apt.title ? <Text style={styles.title}>{apt.title}</Text> : null}
 
           {/* Location */}
-          {(apt.city || apt.neighborhood || apt.address) && (
+          {(apt.city || street || apt.address) && (
             <Text style={styles.location}>
               <Ionicons name="location-outline" size={14} color={C.textMut} />
               {' '}
-              {[apt.address, apt.neighborhood, apt.city].filter(Boolean).join(', ')}
+              {[apt.address, street, apt.city].filter(Boolean).join(', ')}
             </Text>
           )}
 

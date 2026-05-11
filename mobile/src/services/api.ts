@@ -96,7 +96,7 @@ export const apartmentsApi = {
   update: (id: string, data: Partial<{
     title: string; description: string | null; price: number; rooms: number;
     floor: number | null; totalFloors: number | null; sizeSqm: number | null;
-    city: string; neighborhood: string | null; address: string | null;
+    city: string; street: string | null; neighborhood: string | null; address: string | null;
     amenities: string[]; petsAllowed: boolean; availableFrom: string | null;
     minLeasePeriod: number | null; isActive: boolean;
   }>) => api.patch(`/apartments/${id}`, data),

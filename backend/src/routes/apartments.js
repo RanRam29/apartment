@@ -56,6 +56,12 @@ const createApartmentValidator = [
   body('price').isInt({ min: 100 }).withMessage('Price must be a positive number'),
   body('rooms').isFloat({ min: 1 }).withMessage('Rooms must be at least 1'),
   body('city').trim().notEmpty().withMessage('City is required'),
+  body('street')
+    .optional()
+    .isString()
+    .trim()
+    .isLength({ min: 1, max: 100 })
+    .withMessage('Street must be 1-100 chars'),
 ];
 
 // ─── POST /api/apartments — create listing (landlords only) ──────────────────
@@ -74,7 +80,7 @@ router.post(
 
       const {
         title, description, price, rooms, floor, totalFloors,
-        sizeSqm, city, neighborhood, address,
+        sizeSqm, city, neighborhood, street, address,
         latitude, longitude, amenities, availableFrom,
         minLeasePeriod, petsAllowed,
       } = req.body;
@@ -97,7 +103,7 @@ router.post(
         totalFloors: totalFloors ? parseInt(totalFloors) : null,
         sizeSqm: sizeSqm ? parseInt(sizeSqm) : null,
         city,
-        neighborhood,
+        street: street || neighborhood || null,
         address,
         latitude: latitude ? parseFloat(latitude) : null,
         longitude: longitude ? parseFloat(longitude) : null,
@@ -239,7 +245,7 @@ router.patch('/:id', authenticate, requireRole('landlord'), async (req, res, nex
 
     const allowed = [
       'title', 'description', 'price', 'rooms', 'floor', 'totalFloors',
-      'sizeSqm', 'city', 'neighborhood', 'address', 'amenities',
+      'sizeSqm', 'city', 'street', 'neighborhood', 'address', 'amenities',
       'petsAllowed', 'availableFrom', 'minLeasePeriod', 'isActive',
     ];
     const raw = Object.fromEntries(

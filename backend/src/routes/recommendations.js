@@ -192,7 +192,8 @@ function buildWhereFromFilters(filters, tenantId) {
   const where = {};
 
   if (filters.city) where.city = { [Op.iLike]: `%${filters.city}%` };
-  if (filters.neighborhood) where.neighborhood = { [Op.iLike]: `%${filters.neighborhood}%` };
+  const streetFilter = filters.street || filters.neighborhood;
+  if (streetFilter) where.street = { [Op.iLike]: `%${streetFilter}%` };
 
   if (filters.minPrice || filters.maxPrice) {
     where.price = {};

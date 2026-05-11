@@ -32,7 +32,7 @@ const SUGGESTIONS = [
 ];
 
 const FILTER_LABEL: Record<string, string> = {
-  city: 'עיר', neighborhood: 'שכונה', minPrice: 'מחיר מ',
+  city: 'עיר', street: 'רחוב', neighborhood: 'רחוב', minPrice: 'מחיר מ',
   maxPrice: 'מחיר עד', minRooms: 'חד׳ מ', maxRooms: 'חד׳ עד',
   petsAllowed: 'חיות', availableFrom: 'פנוי מ',
 };
@@ -294,6 +294,7 @@ export default function SearchScreen() {
 
 function ResultCard({ apartment, onPress }: { apartment: Apartment; onPress: () => void }) {
   const image = apartment.images?.[0]?.url;
+  const street = apartment.street ?? apartment.neighborhood;
   return (
     <TouchableOpacity style={styles.resultCard} onPress={onPress} activeOpacity={0.85}>
       <Image
@@ -304,7 +305,7 @@ function ResultCard({ apartment, onPress }: { apartment: Apartment; onPress: () 
       <View style={styles.resultInfo}>
         <Text style={styles.resultTitle} numberOfLines={1}>{apartment.title}</Text>
         <Text style={styles.resultMeta} numberOfLines={1}>
-          {apartment.city}{apartment.neighborhood ? ` · ${apartment.neighborhood}` : ''} · {apartment.rooms} חד׳
+          {apartment.city}{street ? ` · ${street}` : ''} · {apartment.rooms} חד׳
         </Text>
         <Text style={styles.resultPrice}>₪{apartment.price.toLocaleString()}/חודש</Text>
         {apartment.amenities?.length > 0 && (

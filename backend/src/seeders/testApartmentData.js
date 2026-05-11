@@ -70,7 +70,7 @@ function buildAdmin1Apartments() {
   for (let i = 0; i < SEED_COUNT; i += 1) {
     const n = i + 1;
     const { city, hoods } = CITIES[i % CITIES.length];
-    const neighborhood = hoods[pick(i, hoods.length)];
+    const street = hoods[pick(i, hoods.length)];
 
     const rooms = [1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5][i % 9];
     const base = 2200 + (i * 631) % 13000;
@@ -84,7 +84,7 @@ function buildAdmin1Apartments() {
 
     const petNote = pick(i, 3) === 0 ? 'מותרות חיות מחמד בכפוף לפרט.' : 'ללא חיות מחמד.';
     const description = [
-      `דירה להדגמה ובדיקות — ${neighborhood}, ${city}.`,
+      `דירה להדגמה ובדיקות — ${street}, ${city}.`,
       `חדרים: ${rooms}, קומה ${floor} מתוך ${totalFloors}, כ-${sizeSqm} מ״ר.`,
       pick(i, 2) === 0 ? 'מתאימה לזוגות ומשפחות קטנות.' : 'מיקום נוח לתחבורה ושירותים.',
       petNote,
@@ -99,7 +99,7 @@ function buildAdmin1Apartments() {
       totalFloors,
       sizeSqm,
       city,
-      neighborhood,
+      street,
       address: `רחוב הדגמה ${10 + (i % 90)}`,
       latitude: 31.5 + (i % 50) * 0.01,
       longitude: 34.8 + (i % 40) * 0.01,

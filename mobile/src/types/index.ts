@@ -40,6 +40,7 @@ export interface Apartment {
   totalFloors: number | null;
   sizeSqm: number | null;
   city: string;
+  street?: string | null;
   neighborhood: string | null;
   address: string | null;
   latitude: number | null;

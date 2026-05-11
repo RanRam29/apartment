@@ -137,6 +137,7 @@ export default function ListingsScreen() {
 
   function renderItem({ item }: { item: Apartment }) {
     const thumb = getThumbUrl(item);
+    const street = item.street ?? item.neighborhood;
     return (
       <View style={styles.card}>
         <TouchableOpacity
@@ -154,7 +155,7 @@ export default function ListingsScreen() {
           <View style={styles.cardBody}>
             <Text style={styles.cardTitle} numberOfLines={1}>{item.title}</Text>
             <Text style={styles.cardSub}>
-              {item.city}{item.neighborhood ? ` · ${item.neighborhood}` : ''} · {item.rooms} חד׳
+              {item.city}{street ? ` · ${street}` : ''} · {item.rooms} חד׳
             </Text>
             <Text style={styles.cardPrice}>{formatPrice((item as any).price)}</Text>
             <View style={styles.statsRow}>

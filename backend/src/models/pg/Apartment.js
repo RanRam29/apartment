@@ -47,9 +47,18 @@ const Apartment = sequelize.define('Apartment', {
     type: DataTypes.STRING(100),
     allowNull: false,
   },
-  neighborhood: {
+  street: {
     type: DataTypes.STRING(100),
     allowNull: true,
+  },
+  neighborhood: {
+    type: DataTypes.VIRTUAL,
+    get() {
+      return this.getDataValue('street');
+    },
+    set(value) {
+      this.setDataValue('street', value);
+    },
   },
   address: {
     type: DataTypes.STRING(255),

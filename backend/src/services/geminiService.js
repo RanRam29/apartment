@@ -9,7 +9,7 @@ Parse free-text in Hebrew or English into a JSON filter object.
 Output ONLY valid JSON. Optional fields:
 {
   "city": string,
-  "neighborhood": string,
+  "street": string,
   "minPrice": number,
   "maxPrice": number,
   "minRooms": number,
@@ -63,8 +63,11 @@ function sanitizeParsedFilters(raw) {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {};
   const out = {};
   if (typeof raw.city === 'string' && raw.city.trim()) out.city = raw.city.trim();
-  if (typeof raw.neighborhood === 'string' && raw.neighborhood.trim()) {
-    out.neighborhood = raw.neighborhood.trim();
+  if (typeof raw.street === 'string' && raw.street.trim()) {
+    out.street = raw.street.trim();
+  }
+  if (typeof raw.neighborhood === 'string' && raw.neighborhood.trim() && !out.street) {
+    out.street = raw.neighborhood.trim();
   }
   for (const key of ['minPrice', 'maxPrice', 'minRooms', 'maxRooms']) {
     const n = Number(raw[key]);
@@ -356,7 +359,7 @@ async function generateMarketingCopy(apartment, style = 'professional') {
   const prompt = `${styleInstruction}
 
 Write a compelling 2–3 sentence Hebrew apartment listing description for:
-City: ${apartment.city}${apartment.neighborhood ? `, ${apartment.neighborhood}` : ''}
+City: ${apartment.city}${(apartment.street || apartment.neighborhood) ? `, ${apartment.street || apartment.neighborhood}` : ''}
 Rooms: ${apartment.rooms}, Size: ${apartment.sizeSqm ? `${apartment.sizeSqm} m²` : 'N/A'}, Floor: ${apartment.floor ?? 'N/A'}
 Price: ₪${apartment.price}/month
 Amenities: ${(apartment.amenities || []).join(', ') || 'None listed'}

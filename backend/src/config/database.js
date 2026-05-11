@@ -32,6 +32,9 @@ const USER_VERIFICATION_COLUMNS = {
   verification_token: { type: DataTypes.STRING(128), allowNull: true },
   verified_at: { type: DataTypes.DATE, allowNull: true },
 };
+const APARTMENT_STREET_COLUMN = {
+  street: { type: DataTypes.STRING(100), allowNull: true },
+};
 
 function isMissingUsersTableError(err) {
   const message = String(err?.message || '');
@@ -57,9 +60,46 @@ async function ensureUserVerificationColumns(queryInterface = sequelize.getQuery
   }
 }
 
+function isMissingApartmentsTableError(err) {
+  const message = String(err?.message || '');
+  return /apartments.*does not exist|relation "apartments" does not exist|No description found/i.test(message);
+}
+
+async function ensureApartmentStreetColumn(queryInterface = sequelize.getQueryInterface()) {
+  let apartmentsTable;
+  try {
+    apartmentsTable = await queryInterface.describeTable('apartments');
+  } catch (err) {
+    if (isMissingApartmentsTableError(err)) {
+      return;
+    }
+    throw err;
+  }
+
+  for (const [columnName, definition] of Object.entries(APARTMENT_STREET_COLUMN)) {
+    if (!apartmentsTable[columnName]) {
+      await queryInterface.addColumn('apartments', columnName, definition);
+      logger.info(`Added missing apartments.${columnName} column`);
+    }
+  }
+
+  // One-time backfill + schema cleanup from legacy neighborhood column.
+  if (apartmentsTable.neighborhood) {
+    await sequelize.query(`
+      UPDATE apartments
+      SET street = neighborhood
+      WHERE street IS NULL
+        AND neighborhood IS NOT NULL
+    `);
+    await queryInterface.removeColumn('apartments', 'neighborhood');
+    logger.info('Dropped legacy apartments.neighborhood column after backfill');
+  }
+}
+
 async function initPostgres() {
   await sequelize.authenticate();
   await ensureUserVerificationColumns();
+  await ensureApartmentStreetColumn();
   const syncAlter =
     process.env.NODE_ENV === 'development' ||
     process.env.POSTGRES_SYNC_ALTER === 'true';
@@ -67,4 +107,4 @@ async function initPostgres() {
   logger.info('PostgreSQL connected and synced');
 }
 
-module.exports = { sequelize, initPostgres, ensureUserVerificationColumns };
+module.exports = { sequelize, initPostgres, ensureUserVerificationColumns, ensureApartmentStreetColumn };
