@@ -1,0 +1,9 @@
+ai-service/.pytest_cache/
+mobile/android/
+mobile/.idea/
+mobile/node_modules/
+mobile/dist/
+mobile/.expo/
+backend/node_modules/
+**/node_modules/
+**/*.log

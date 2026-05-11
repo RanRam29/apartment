@@ -1,2 +1,18 @@
 .vercel
 .env*.local
+
+# Expo / Metro
+.expo/
+dist/
+web-build/
+
+# Prebuild outputs (regenerate with `expo prebuild` / `expo run:android`)
+android/
+ios/
+
+# IDE
+.idea/
+
+# Secrets / signing (never commit)
+*.keystore
+*.jks
