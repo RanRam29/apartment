@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import {
-  Text, TextInput, TouchableOpacity,
+  View, Text, TextInput, TouchableOpacity,
   StyleSheet, ActivityIndicator, ScrollView,
 } from 'react-native';
 import { useAuthStore } from '../store/useAuthStore';
 import { getVerificationPromptEmail, type MaybeAuthError } from '../services/verificationUx';
 import { formatLoginError } from '../utils/authErrors';
 import { C } from '../theme';
+import SwipeHouseLogo from '../components/SwipeHouseLogo';
 
 interface Props {
   onSwitch: () => void;
@@ -49,6 +50,9 @@ export default function LoginScreen({ onSwitch }: Props) {
       keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}
     >
+      <View style={styles.brandRow}>
+        <SwipeHouseLogo size="md" />
+      </View>
       <Text style={styles.title}>ברוך הבא</Text>
       <Text style={styles.subtitle}>התחבר לחשבונך</Text>
 
@@ -97,6 +101,7 @@ export default function LoginScreen({ onSwitch }: Props) {
 
 const styles = StyleSheet.create({
   container: { flexGrow: 1, justifyContent: 'center', padding: 28 },
+  brandRow: { alignItems: 'center', marginBottom: 20 },
   title:    { fontSize: 26, fontWeight: '700', color: C.text, textAlign: 'right', marginBottom: 4 },
   subtitle: { fontSize: 14, color: C.textSub, textAlign: 'right', marginBottom: 28 },
   input: {

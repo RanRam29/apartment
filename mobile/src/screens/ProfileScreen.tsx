@@ -12,6 +12,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import { paymentApi, authApi } from '../services/api';
 import { C } from '../theme';
 import type { MainStackParamList } from '../types';
+import SwipeHouseLogo from '../components/SwipeHouseLogo';
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
 
@@ -101,6 +102,10 @@ export default function ProfileScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+
+        <View style={styles.brandRow}>
+          <SwipeHouseLogo size="sm" />
+        </View>
 
         {/* Avatar */}
         <TouchableOpacity style={styles.avatarContainer} onPress={pickAndUploadAvatar} activeOpacity={0.8}>
@@ -269,6 +274,7 @@ function MenuItem({ icon, label, onPress, last = false }: {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.bg },
   scroll:    { alignItems: 'center', padding: 24, paddingBottom: 40 },
+  brandRow:  { marginBottom: 8 },
 
   avatarContainer: { alignItems: 'center', marginBottom: 10, marginTop: 8, position: 'relative' },
   avatar: {

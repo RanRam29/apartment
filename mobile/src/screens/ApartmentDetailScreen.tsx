@@ -10,6 +10,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { apartmentsApi } from '../services/api';
 import type { MainStackParamList, Amenity } from '../types';
 import { C, Dark } from '../theme';
+import SwipeHouseLogo from '../components/SwipeHouseLogo';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -39,6 +40,17 @@ function getImageUrl(img: unknown): string | null {
 
 export default function ApartmentDetailScreen({ route, navigation }: Props) {
   const { apartmentId } = route.params;
+
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerTitle: () => (
+        <View style={styles.headerLogoWrap}>
+          <SwipeHouseLogo size="sm" />
+        </View>
+      ),
+      headerTitleAlign: 'center',
+    });
+  }, [navigation]);
 
   const [activeImage, setActiveImage] = React.useState(0);
   const [isImageViewerOpen, setImageViewerOpen] = React.useState(false);
@@ -366,6 +378,7 @@ function CostRow({ label, amount, bold }: { label: string; amount: number; bold?
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Dark.bg },
+  headerLogoWrap: { alignItems: 'center', justifyContent: 'center' },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Dark.bg },
   carouselSlide: { width: SCREEN_WIDTH, height: 320, backgroundColor: C.surface.imageCarousel, justifyContent: 'center', alignItems: 'center' },
   carouselImage: { width: SCREEN_WIDTH, height: 320 },

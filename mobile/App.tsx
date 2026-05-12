@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, Linking } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -7,6 +7,7 @@ import { StatusBar } from 'expo-status-bar';
 import AppNavigator from './src/navigation/AppNavigator';
 import { usePushNotifications } from './src/hooks/usePushNotifications';
 import { ErrorBoundary } from './src/components/ErrorBoundary';
+import StartupIntroGate from './src/components/StartupIntroGate';
 import { extractVerificationToken } from './src/services/verification';
 import { useAuthStore } from './src/store/useAuthStore';
 
@@ -48,12 +49,19 @@ function AppInner() {
 }
 
 export default function App() {
+  const [startupDone, setStartupDone] = useState(false);
+  const finishStartup = useCallback(() => setStartupDone(true), []);
+
   return (
     <ErrorBoundary>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <QueryClientProvider client={queryClient}>
-          <AppInner />
-        </QueryClientProvider>
+        {!startupDone ? (
+          <StartupIntroGate onFinish={finishStartup} />
+        ) : (
+          <QueryClientProvider client={queryClient}>
+            <AppInner />
+          </QueryClientProvider>
+        )}
       </GestureHandlerRootView>
     </ErrorBoundary>
   );

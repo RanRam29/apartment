@@ -8,6 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import { matchesApi } from '../services/api';
 import { useAuthStore } from '../store/useAuthStore';
 import MatchCard from '../components/MatchCard';
+import SwipeHouseLogo from '../components/SwipeHouseLogo';
 import { C } from '../theme';
 import type { Match } from '../types';
 
@@ -39,7 +40,10 @@ export default function MatchesScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.header}>{isLandlord ? 'צ׳אטים' : 'התאמות'}</Text>
+      <View style={styles.brandHeader}>
+        <SwipeHouseLogo size="sm" />
+        <Text style={styles.header}>{isLandlord ? 'צ׳אטים' : 'התאמות'}</Text>
+      </View>
 
       <FlatList
         data={[...accepted, ...pending]}
@@ -94,9 +98,17 @@ export default function MatchesScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.bg },
   centered:  { flex: 1, backgroundColor: C.bg, justifyContent: 'center', alignItems: 'center' },
+  brandHeader: {
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 4,
+    gap: 4,
+  },
   header: {
     fontSize: 22, fontWeight: '800', color: C.text,
-    padding: 20, paddingBottom: 8, textAlign: 'right',
+    alignSelf: 'stretch',
+    textAlign: 'right',
   },
   list: { padding: 16, paddingTop: 8 },
   sectionLabel: {

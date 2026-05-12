@@ -6,6 +6,15 @@ jest.mock('expo-image', () => {
   return { Image: RN.Image };
 });
 
+jest.mock('expo-av', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+  return {
+    Video: () => React.createElement(View),
+    ResizeMode: { CONTAIN: 'contain' },
+  };
+});
+
 jest.mock('expo-secure-store', () => ({
   getItemAsync: jest.fn(async () => null),
   setItemAsync: jest.fn(async () => undefined),

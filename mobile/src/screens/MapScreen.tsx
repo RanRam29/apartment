@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { apartmentsApi } from '../services/api';
 import { C, Dark } from '../theme';
 import { resolveMapCoords } from '../constants/cityCenters';
+import SwipeHouseLogo from '../components/SwipeHouseLogo';
 
 // TAMA 38 resource IDs from data.gov.il (urban renewal zones)
 const TAMA38_URL =
@@ -283,6 +284,7 @@ export default function MapScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.toolbar}>
         <View style={styles.toolbarLeft}>
+          <SwipeHouseLogo size="xs" />
           <Ionicons name="map-outline" size={18} color={C.onInverse.primary} />
           <Text style={styles.toolbarTitle}>מפת דירות</Text>
           {markers.length > 0 && (

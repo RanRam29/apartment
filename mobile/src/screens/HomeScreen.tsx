@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useAuthStore } from '../store/useAuthStore';
 import { C } from '../theme';
+import SwipeHouseLogo from '../components/SwipeHouseLogo';
 
 const { width: W } = Dimensions.get('window');
 const TILE_SIZE = (W - 48 - 16) / 2;  // 2 columns, 24px margin each side, 16px gap
@@ -125,7 +126,8 @@ export default function HomeScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <View>
+          <SwipeHouseLogo size="sm" />
+          <View style={styles.headerTextBlock}>
             <Text style={styles.greeting}>{greeting}</Text>
             <Text style={styles.username}>
               {user?.firstName ?? (isLandlord ? 'Landlord' : 'Tenant')} 👋
@@ -196,9 +198,10 @@ const styles = StyleSheet.create({
   scrollContent: { paddingHorizontal: 24, paddingBottom: 32 },
 
   header: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start',
-    paddingTop: 20, marginBottom: 24,
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    paddingTop: 20, marginBottom: 24, gap: 12,
   },
+  headerTextBlock: { flex: 1, alignItems: 'flex-end' },
   greeting:  { fontSize: 14, color: C.textMut, fontWeight: '400', marginBottom: 2 },
   username:  { fontSize: 26, color: C.navy,    fontWeight: '700', letterSpacing: -0.5 },
   headerBadge: {

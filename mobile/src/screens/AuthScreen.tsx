@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { View, StyleSheet, SafeAreaView, KeyboardAvoidingView, Platform } from 'react-native';
 import LoginScreen from './LoginScreen';
 import RegisterScreen from './RegisterScreen';
-import SwipeHouseLogo from '../components/SwipeHouseLogo';
 import { C } from '../theme';
 
 export default function AuthScreen() {
@@ -14,12 +13,7 @@ export default function AuthScreen() {
         style={styles.kav}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        {/* Logo section */}
-        <View style={styles.logoSection}>
-          <SwipeHouseLogo size="lg" showLabel />
-        </View>
-
-        {/* Form card */}
+        {/* Form card (login/register screens include brand mark) */}
         <View style={styles.card}>
           {mode === 'login'
             ? <LoginScreen onSwitch={() => setMode('register')} />
@@ -32,23 +26,11 @@ export default function AuthScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: C.bg },
+  safe: { flex: 1, backgroundColor: C.bgCard },
   kav:  { flex: 1 },
-  logoSection: {
-    alignItems: 'center',
-    paddingTop: 48,
-    paddingBottom: 28,
-  },
   card: {
     flex: 1,
     backgroundColor: C.bgCard,
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
     overflow: 'hidden',
-    shadowColor: C.navy,
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 16,
-    elevation: 8,
   },
 });
