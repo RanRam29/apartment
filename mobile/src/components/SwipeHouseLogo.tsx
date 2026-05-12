@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image as RNImage, Platform, View, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { Image } from 'expo-image';
 import { C } from '../theme';
 
@@ -25,30 +25,13 @@ interface Props {
 
 export default function SwipeHouseLogo({ size = 'md', plate = true }: Props) {
   const width = WIDTH[size];
-  const height = width / LOGO_ASPECT;
-
-  const webSource = React.useMemo(() => {
-    if (Platform.OS !== 'web') return LOGO;
-    const r = RNImage.resolveAssetSource(LOGO);
-    return r?.uri ? { uri: r.uri } : LOGO;
-  }, []);
 
   const inner = (
-    <>
-      {Platform.OS === 'web' ? (
-        <RNImage
-          source={webSource}
-          style={{ width, height }}
-          resizeMode="contain"
-        />
-      ) : (
-        <Image
-          source={LOGO}
-          style={{ width, aspectRatio: LOGO_ASPECT }}
-          contentFit="contain"
-        />
-      )}
-    </>
+    <Image
+      source={LOGO}
+      style={{ width, aspectRatio: LOGO_ASPECT }}
+      contentFit="contain"
+    />
   );
 
   if (!plate) {

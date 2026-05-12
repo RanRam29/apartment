@@ -273,14 +273,15 @@ export default function AppNavigator() {
   }, []);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    // Hermes/RN often exposes `window` without DOM APIs; never call addEventListener unless it exists.
+    if (typeof window === 'undefined' || typeof window.addEventListener !== 'function') return;
 
     clientLogsApi.event({
       level: 'info',
       category: 'application',
       event: 'client.web.app_started',
       message: 'Web app session started',
-      metadata: { userAgent: navigator.userAgent },
+      metadata: { userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : '' },
       tags: ['web', 'startup'],
     }).catch(() => {});
 

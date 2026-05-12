@@ -3,7 +3,11 @@
     "name": "DirApp",
     "slug": "dirapp",
     "version": "1.0.0",
-    "platforms": ["ios", "android", "web"],
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
@@ -42,7 +46,9 @@
       "expo-secure-store",
       [
         "expo-image-picker",
-        { "photosPermission": "Allow DirApp to access your photos to upload apartment images." }
+        {
+          "photosPermission": "Allow DirApp to access your photos to upload apartment images."
+        }
       ],
       [
         "expo-notifications",
@@ -52,7 +58,8 @@
           "androidMode": "default",
           "androidCollapsedTitle": "DirApp"
         }
-      ]
+      ],
+      "expo-video"
     ],
     "scheme": "dirapp",
     "extra": {
@@ -62,4 +69,3 @@
     }
   }
 }
-

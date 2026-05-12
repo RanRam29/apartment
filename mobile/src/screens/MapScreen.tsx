@@ -247,7 +247,12 @@ export default function MapScreen() {
   }
 
   React.useEffect(() => {
-    if (Platform.OS !== 'web' || typeof window === 'undefined') return;
+    if (
+      Platform.OS !== 'web' ||
+      typeof window === 'undefined' ||
+      typeof window.addEventListener !== 'function'
+    )
+      return;
     const onMsg = (event: MessageEvent) => {
       if (iframeRef.current && event.source !== iframeRef.current.contentWindow) return;
       if (typeof event.data !== 'string') return;
