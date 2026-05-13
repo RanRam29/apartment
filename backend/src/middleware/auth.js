@@ -40,8 +40,15 @@ async function authenticate(req, res, next) {
   }
 }
 
+/**
+ * Restrict routes to given roles. Users with role `admin` may access any role-gated route
+ * (tenant / landlord / admin-only) so ops accounts can exercise the full API.
+ */
 function requireRole(...roles) {
   return (req, res, next) => {
+    if (req.user?.role === 'admin') {
+      return next();
+    }
     if (!roles.includes(req.user?.role)) {
       return res.status(403).json({ error: 'Insufficient permissions' });
     }
@@ -51,6 +58,9 @@ function requireRole(...roles) {
 
 async function requireVerified(req, res, next) {
   try {
+    if (req.user?.role === 'admin') {
+      return next();
+    }
     const user = await User.findByPk(req.user?.id, { attributes: ['id', 'isVerified'] });
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
