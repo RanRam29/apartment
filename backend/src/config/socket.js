@@ -1,6 +1,8 @@
 const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
+const { User } = require('../models');
+const { getJwtSecret } = require('./security');
 const logger = require('../utils/logger');
 const { logSystemEvent } = require('../services/systemEventService');
 const { logAudit } = require('../services/auditLogService');
@@ -24,12 +26,12 @@ function initSocket(server) {
     transports: ['websocket', 'polling'],
   });
 
-  io.use((socket, next) => {
+  io.use(async (socket, next) => {
     const token = socket.handshake.auth.token;
     if (!token) return next(new Error('Authentication required'));
+    let decoded;
     try {
-      socket.user = jwt.verify(token, process.env.JWT_SECRET);
-      next();
+      decoded = jwt.verify(token, getJwtSecret());
     } catch {
       logSystemEvent({
         source: 'socket',
@@ -38,7 +40,23 @@ function initSocket(server) {
         event: 'socket.auth.invalid_token',
         message: 'Socket connection rejected due to invalid token',
       });
-      next(new Error('Invalid token'));
+      return next(new Error('Invalid token'));
+    }
+    try {
+      const user = await User.findByPk(decoded.id, {
+        attributes: ['id', 'role', 'email', 'isPremium', 'isVerified'],
+      });
+      if (!user) return next(new Error('Invalid token'));
+      socket.user = {
+        id: user.id,
+        role: user.role,
+        email: user.email,
+        isPremium: Boolean(user.isPremium),
+        isVerified: Boolean(user.isVerified),
+      };
+      next();
+    } catch (err) {
+      next(err);
     }
   });
 
