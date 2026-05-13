@@ -39,7 +39,7 @@ app.use(
       if (isAllowedCorsOrigin(origin)) {
         return callback(null, true);
       }
-      if (origin && process.env.NODE_ENV !== 'production') {
+      if (origin) {
         logger.warn(`CORS rejected origin: ${origin}`);
       }
       callback(null, false);
