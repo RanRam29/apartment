@@ -19,7 +19,7 @@ export default function SwipeScreen() {
   const navigation = useNavigation<any>();
   const user = useAuthStore((s) => s.user);
   const {
-    deck, currentIndex, isLoading, lastMatch, feedError,
+    deck, currentIndex, isLoading, lastMatch, feedError, feedLoadState,
     dailyUsed, dailyLimit, quotaExceeded,
     loadFeed, loadQuota, swipe, undo, resetMatch, dismissQuota, clearFeedError,
   } = useSwipeStore();
@@ -29,9 +29,10 @@ export default function SwipeScreen() {
   const [undoVisible, setUndoVisible] = useState(false);
 
   useEffect(() => {
+    if (user?.role === 'landlord') return;
     loadFeed();
     loadQuota();
-  }, []);
+  }, [user?.id, user?.role]);
 
   function showUndoFab() {
     setUndoVisible(true);
@@ -72,7 +73,27 @@ export default function SwipeScreen() {
   const effectiveLimit = dailyLimit ?? FREE_DAILY_LIMIT;
   const isPremium = dailyLimit === null;
 
-  if (isLoading && deck.length === 0 && !feedError) {
+  if (user?.role === 'landlord') {
+    return (
+      <SafeAreaView style={styles.centered}>
+        <Ionicons name="business-outline" size={56} color={C.border} />
+        <Text style={styles.emptyTitle}>ממשק השוכרים</Text>
+        <Text style={[styles.emptySubtitle, styles.feedErrorDetail]}>
+          חשבון משכיר משתמש בדשבורד ובניהול מודעות. התחבר כשוכר כדי לגלול דירות, או השתמש בטאבים דשבורד / מודעות.
+        </Text>
+        <TouchableOpacity style={styles.reloadBtn} onPress={() => navigation.navigate('Home')}>
+          <Text style={styles.reloadText}>חזרה לדף הבית</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
+
+  const awaitingFeed =
+    feedLoadState === 'pending'
+    || feedLoadState === 'loading'
+    || (isLoading && deck.length === 0 && !feedError);
+
+  if (awaitingFeed && !feedError) {
     return (
       <SafeAreaView style={styles.centered}>
         <ActivityIndicator size="large" color={C.cyan} />
@@ -121,7 +142,7 @@ export default function SwipeScreen() {
     );
   }
 
-  if (!isLoading && visibleCards.length === 0) {
+  if (!feedError && feedLoadState === 'success' && visibleCards.length === 0) {
     return (
       <SafeAreaView style={styles.centered}>
         <Ionicons name="home-outline" size={56} color={C.border} />

@@ -42,8 +42,8 @@ const swipeValidator = [
   body('seenDurationMs').optional().isInt({ min: 0 }),
 ];
 
-// GET /api/swipe/quota — daily usage for the current tenant
-router.get('/quota', authenticate, requireRole('tenant'), requireVerified, async (req, res, next) => {
+// GET /api/swipe/quota — daily usage for the current tenant (read-only; unverified tenants allowed)
+router.get('/quota', authenticate, requireRole('tenant'), async (req, res, next) => {
   try {
     const isPremium = Boolean(req.user.isPremium);
     const used = await getDailyUsed(req.user.id);

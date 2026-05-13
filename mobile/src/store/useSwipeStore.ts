@@ -37,6 +37,7 @@ export const useSwipeStore = create<SwipeState>((set, get) => ({
   deck: [],
   currentIndex: 0,
   isLoading: false,
+  feedLoadState: 'pending',
   hasMore: true,
   lastMatch: null,
   lastSwipedApartment: null,
@@ -45,10 +46,10 @@ export const useSwipeStore = create<SwipeState>((set, get) => ({
   quotaExceeded: false,
   feedError: null,
 
-  clearFeedError: () => set({ feedError: null }),
+  clearFeedError: () => set({ feedError: null, feedLoadState: 'pending' }),
 
   loadFeed: async (params) => {
-    set({ isLoading: true, feedError: null });
+    set({ isLoading: true, feedError: null, feedLoadState: 'loading' });
     try {
       const res = await apartmentsApi.getFeed({ ...params, limit: 20 });
       set({
@@ -56,6 +57,7 @@ export const useSwipeStore = create<SwipeState>((set, get) => ({
         currentIndex: 0,
         hasMore: res.data.totalPages > 1,
         feedError: null,
+        feedLoadState: 'success',
       });
     } catch (err: unknown) {
       const ax = err as { response?: { status?: number; data?: { error?: string } } };
@@ -68,6 +70,7 @@ export const useSwipeStore = create<SwipeState>((set, get) => ({
         currentIndex: 0,
         hasMore: false,
         feedError: { status, message },
+        feedLoadState: 'error',
       });
     } finally {
       set({ isLoading: false });
