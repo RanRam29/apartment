@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DirApp - Profile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="../../tokens/tailwind.browser.js"></script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings:
+            'FILL' 0,
+            'wght' 200,
+            'GRAD' 0,
+            'opsz' 24;
+        }
+        .material-symbols-outlined[data-weight="fill"] {
+            font-variation-settings:
+            'FILL' 1,
+            'wght' 200,
+            'GRAD' 0,
+            'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md text-body-md antialiased pb-32">
+<!-- TopAppBar (From JSON) -->
+<header class="fixed z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md font-sans antialiased tracking-tight docked full-width top-0 flat no shadows flex justify-between items-center w-full px-6 py-4">
+<button aria-label="Open menu" class="text-cyan-500 dark:text-cyan-400 hover:opacity-70 transition-opacity active:scale-95 duration-200">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<h1 class="text-xl font-bold tracking-widest text-slate-800 dark:text-white uppercase">DirApp</h1>
+<button aria-label="Open profile details" class="text-cyan-500 dark:text-cyan-400 hover:opacity-70 transition-opacity active:scale-95 duration-200 w-8 h-8 rounded-full overflow-hidden">
+<img alt="User profile photo" class="w-full h-full object-cover" data-alt="A close up portrait of a sophisticated person with a calm expression, captured in soft, high-key studio lighting. The background is a clean, minimal light grey, emphasizing an elegant, effortless opulence aesthetic appropriate for a luxury property app profile picture." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDyTesW_M9S6Hl7mqghuVuBLD_IraCrpeyIk0SjTePy43da_rdWcNfaLcxk0645HWQy_LCt9zMMCv057nYxVnmgDW4WBvbjS5VocoaDLNArmKL_q99320X56c8ySjLb-ls2Y3gpE2uxzTDKjDdOJuWx3kRdOAhDKcHRDSmRvxS5_oT3-sR614w2fGa7qCTIeoNkUZSwu4bemIKBXj-qwpkEYIJxcKtafi6_8ur6-_MQiyIzL2HvjVU189o-t-9QPI8va1G6EbN93CL8"/>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-24 px-margin max-w-2xl mx-auto space-y-section-gap">
+<!-- Profile Hero -->
+<section class="flex flex-col items-center justify-center text-center pt-8">
+<div class="w-32 h-32 rounded-full overflow-hidden mb-6 ring-1 ring-outline-variant p-1">
+<img alt="Eleanor Vance" class="w-full h-full object-cover rounded-full" data-alt="A close up portrait of a sophisticated person with a calm expression, captured in soft, high-key studio lighting. The background is a clean, minimal light grey, emphasizing an elegant, effortless opulence aesthetic appropriate for a luxury property app profile picture." src="https://lh3.googleusercontent.com/aida-public/AB6AXuASyVx3ajnL1VzZufkty7RqGHeZKiKJArCmGadi7qtEHRlCsga_ygvsl43nQzCCcapowg8YWjsE20NyOVqzBy6DPCq0AWBt7thUG2mxB9ZE15k75ormyh418SvX_g6bPUgCrLtDALjjqFmI2JcVzMPpEl6wklhP8O4L_NRIfox7UXcAwSYoQ5w2tU33tUe_4hlHJR6kgMa5Ay8OtZ_4r9LavBnMu01QFlJ9DXAv3mEuCLLpDHuLy8-r5HH8b3HuLx_9sCSHPoY0N1oB"/>
+</div>
+<h2 class="font-display-lg text-display-lg text-primary mb-2">Eleanor Vance</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Member since 2021</p>
+</section>
+<!-- Action List -->
+<section class="space-y-4">
+<a class="group flex items-center justify-between p-6 bg-surface-container-lowest rounded-xl border border-outline-variant hover:bg-surface-container-low transition-colors duration-200" href="#">
+<div class="flex items-center space-x-6">
+<span class="material-symbols-outlined text-primary text-2xl" data-icon="favorite">favorite</span>
+<span class="font-headline-md text-headline-md text-primary">My Saved Homes</span>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors" data-icon="chevron_right">chevron_right</span>
+</a>
+<a class="group flex items-center justify-between p-6 bg-surface-container-lowest rounded-xl border border-outline-variant hover:bg-surface-container-low transition-colors duration-200" href="#">
+<div class="flex items-center space-x-6">
+<span class="material-symbols-outlined text-primary text-2xl" data-icon="notifications">notifications</span>
+<span class="font-headline-md text-headline-md text-primary">Notifications</span>
+</div>
+<div class="flex items-center space-x-4">
+<span class="bg-secondary text-on-secondary font-label-bold text-caption px-2 py-0.5 rounded-full">3</span>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors" data-icon="chevron_right">chevron_right</span>
+</div>
+</a>
+<a class="group flex items-center justify-between p-6 bg-surface-container-lowest rounded-xl border border-outline-variant hover:bg-surface-container-low transition-colors duration-200" href="#">
+<div class="flex items-center space-x-6">
+<span class="material-symbols-outlined text-primary text-2xl" data-icon="settings">settings</span>
+<span class="font-headline-md text-headline-md text-primary">Settings</span>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors" data-icon="chevron_right">chevron_right</span>
+</a>
+<a class="group flex items-center justify-between p-6 bg-surface-container-lowest rounded-xl border border-outline-variant hover:bg-error-container transition-colors duration-200 mt-8" href="#">
+<div class="flex items-center space-x-6">
+<span class="material-symbols-outlined text-error text-2xl" data-icon="logout">logout</span>
+<span class="font-headline-md text-headline-md text-error">Sign Out</span>
+</div>
+</a>
+</section>
+</main>
+<!-- BottomNavBar (From JSON) -->
+<nav class="md:hidden bg-white/15 dark:bg-slate-800/20 backdrop-blur-xl border border-white/20 dark:border-slate-700/30 fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-md rounded-full px-8 py-3 shadow-[0_20px_50px_rgba(0,0,0,0.12)] z-50 flex justify-between items-center">
+<a class="text-white/60 dark:text-slate-400 hover:text-white transition-colors flex flex-col items-center justify-center" href="#">
+<span class="material-symbols-outlined" data-icon="home_work">home_work</span>
+<span class="hidden font-sans text-[10px] uppercase tracking-widest">home_work</span>
+</a>
+<a class="text-white/60 dark:text-slate-400 hover:text-white transition-colors flex flex-col items-center justify-center" href="#">
+<span class="material-symbols-outlined" data-icon="chat_bubble">chat_bubble</span>
+<span class="hidden font-sans text-[10px] uppercase tracking-widest">chat_bubble</span>
+</a>
+<a class="text-white/60 dark:text-slate-400 hover:text-white transition-colors flex flex-col items-center justify-center" href="#">
+<span class="material-symbols-outlined" data-icon="favorite">favorite</span>
+<span class="hidden font-sans text-[10px] uppercase tracking-widest">favorite</span>
+</a>
+<!-- Active Tab: Profile (person) -->
+<a class="text-cyan-400 scale-110 hover:text-white transition-colors flex flex-col items-center justify-center active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="hidden font-sans text-[10px] uppercase tracking-widest">person</span>
+</a>
+</nav>
+</body></html>

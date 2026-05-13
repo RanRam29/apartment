@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DirApp - Effortless Opulence</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-container": "#96a9be",
+                        "error-container": "#ffdad6",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-high": "#e9e8e9",
+                        "on-error-container": "#93000a",
+                        "surface": "#fbf9fa",
+                        "error": "#ba1a1a",
+                        "on-secondary-fixed-variant": "#842228",
+                        "secondary-fixed": "#ffdad8",
+                        "on-secondary-fixed": "#410007",
+                        "on-surface": "#1b1c1d",
+                        "surface-container-highest": "#e4e2e3",
+                        "tertiary-fixed-dim": "#e3c19b",
+                        "secondary-container": "#ff7f7f",
+                        "secondary-fixed-dim": "#ffb3b1",
+                        "primary-fixed": "#d1e4fb",
+                        "surface-bright": "#fbf9fa",
+                        "on-primary-fixed-variant": "#36485b",
+                        "tertiary-fixed": "#ffddb7",
+                        "primary-container": "#2c3e50",
+                        "on-secondary": "#ffffff",
+                        "primary-fixed-dim": "#b5c8df",
+                        "primary": "#162839",
+                        "on-error": "#ffffff",
+                        "inverse-primary": "#b5c8df",
+                        "outline": "#74777d",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-fixed": "#291802",
+                        "on-tertiary-container": "#c1a17d",
+                        "secondary": "#a43a3d",
+                        "tertiary-container": "#4e381c",
+                        "surface-variant": "#e4e2e3",
+                        "on-surface-variant": "#43474c",
+                        "outline-variant": "#c4c6cd",
+                        "on-background": "#1b1c1d",
+                        "on-secondary-container": "#74161e",
+                        "on-tertiary": "#ffffff",
+                        "inverse-surface": "#303032",
+                        "surface-dim": "#dbd9db",
+                        "surface-tint": "#4e6073",
+                        "on-primary-fixed": "#091d2e",
+                        "surface-container-low": "#f5f3f4",
+                        "inverse-on-surface": "#f2f0f2",
+                        "on-tertiary-fixed-variant": "#5a4225",
+                        "background": "#fbf9fa",
+                        "surface-container": "#efedef",
+                        "tertiary": "#362308"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "20px",
+                        "thumb-zone-height": "33%",
+                        "margin": "24px",
+                        "section-gap": "48px",
+                        "grid-columns": "4"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Assistant"],
+                        "caption": ["Assistant"],
+                        "label-bold": ["Assistant"],
+                        "body-md": ["Assistant"],
+                        "headline-md": ["Assistant"],
+                        "body-lg": ["Assistant"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "300" }],
+                        "caption": ["12px", { "lineHeight": "1.4", "letterSpacing": "0.05em", "fontWeight": "400" }],
+                        "label-bold": ["14px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "1.3", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .splash-gradient {
+            background: radial-gradient(circle at center, #ffffff 0%, #f5f3f4 100%);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md overflow-hidden splash-gradient">
+<!-- Splash Screen Container -->
+<!-- The Splash Screen is a task-focused, linear screen, so navigation bars are suppressed per instructions -->
+<main class="relative h-screen w-full flex flex-col items-center justify-center px-margin">
+<!-- Center Brand Cluster -->
+<div class="flex flex-col items-center gap-8">
+<!-- Scaled Brand Logo -->
+<!-- Note: Using the provided DataStore placeholder string exactly -->
+<div class="relative w-48 h-48 md:w-64 md:h-64 flex items-center justify-center">
+<img alt="DirApp Logo" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida/ADBb0uhQ64l5T-65lQtSkf9xXie3oZPPQUwa4biUzZ3YNhWdKnXMStgXj_rDrQqt2AzkCxQG_Xl8JUdDMSHu0NTH6-kaykDQHRQ8Dcc63DxggomIneVk7TB8CT2bTcgi6Flwmilx-IL3V8-dOfVsOpjtEVprKouYFr1pNGiKqRKqjLt-0G9vtSLGJNNFkrgRH3b9WsuvPv4kxaOgUG_1HQ0AEGKvpc_5MisSj2z_FZ0y1DEZWJEm87U8_5B9_VSIEwJuKB9agKFHFXwYPQ"/>
+</div>
+<!-- Brand Name Typography -->
+<div class="flex flex-col items-center text-center">
+<h1 class="font-display-lg text-display-lg text-primary tracking-tighter">
+                    DirApp
+                </h1>
+<!-- Subtle luxury descriptor -->
+<p class="font-caption text-caption text-outline uppercase tracking-[0.2em] mt-4 opacity-60">
+                    Effortless Opulence
+                </p>
+</div>
+</div>
+<!-- Ambient Depth Layers -->
+<div class="absolute inset-0 pointer-events-none z-[-1] overflow-hidden">
+<!-- Subtle glass orb for depth -->
+<div class="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-primary-fixed/20 blur-[120px] rounded-full"></div>
+<div class="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-secondary-fixed/30 blur-[120px] rounded-full"></div>
+</div>
+<!-- Loading / Status (Subtle Aesthetic Detail) -->
+<div class="absolute bottom-16 flex flex-col items-center gap-4">
+<div class="w-12 h-[1px] bg-outline-variant relative overflow-hidden">
+<div class="absolute inset-0 bg-primary/40 translate-x-[-100%] animate-pulse"></div>
+</div>
+<span class="font-label-bold text-label-bold text-on-surface-variant/40 tracking-widest">
+                EST. 2024
+            </span>
+</div>
+</main>
+<!-- Visual Polish Overlay -->
+<!-- Applying a very faint noise texture or grain could be suggested here, but keeping it minimalist for this design -->
+</body></html>

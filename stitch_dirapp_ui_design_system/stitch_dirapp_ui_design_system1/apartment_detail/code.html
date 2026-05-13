@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DirApp - Apartment Detail</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="../../tokens/tailwind.browser.js"></script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.filled {
+            font-variation-settings: 'FILL' 1, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom scrollbar for horizontal scrolling galleries */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background antialiased font-body-md min-h-screen relative overflow-x-hidden">
+<!-- Floating Back Button (Contextual departure from global nav, suppresses TopAppBar/BottomNav) -->
+<button aria-label="Go back" class="fixed top-margin left-margin z-50 w-12 h-12 bg-surface-bright/80 backdrop-blur-md rounded-full flex items-center justify-center border border-outline-variant shadow-[0_8px_20px_rgba(22,40,57,0.08)] hover:bg-surface-bright transition-all">
+<span class="material-symbols-outlined text-primary text-xl">arrow_back</span>
+</button>
+<!-- Interactive Indicator for Photo Stack -->
+<div class="fixed top-margin left-1/2 -translate-x-1/2 z-50 flex gap-2">
+<div class="w-8 h-1 bg-on-primary rounded-full"></div>
+<div class="w-8 h-1 bg-on-primary/40 rounded-full"></div>
+<div class="w-8 h-1 bg-on-primary/40 rounded-full"></div>
+<div class="w-8 h-1 bg-on-primary/40 rounded-full"></div>
+</div>
+<!-- Hero Image Container -->
+<div class="relative w-full h-[574px] bg-surface-variant">
+<img alt="A breathtaking, minimalist luxury apartment interior with floor-to-ceiling windows revealing a soft cityscape. The scene features light wood floors, sleek modernist furniture, and expansive negative space. Lighting is a soft, high-key natural daylight pouring in, creating a clean, airy, and effortless opulence vibe that perfectly aligns with a premium editorial design language. Colors are muted greys, warm woods, and stark whites." class="w-full h-full object-cover" data-alt="A breathtaking, minimalist luxury apartment interior with floor-to-ceiling windows revealing a soft cityscape. The scene features light wood floors, sleek modernist furniture, and expansive negative space. Lighting is a soft, high-key natural daylight pouring in, creating a clean, airy, and effortless opulence vibe that perfectly aligns with a premium editorial design language. Colors are muted greys, warm woods, and stark whites." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAt5_KDJy3vpT3w39GxFzi13-GZ9uFTEmtlMHwhzk2reKiqh4tAbIkGyqx596sFQOrSKvHZLbUkOSYpLGiJ2KqsXu0dK_Bdb605OyRTyVn1exnXILFWnq9djtaqp_RBnzxmxPYT2NAB8aUccskOPozJGjoQwQ1C_B5rdYiQj9ps8tqevK1XB0DAdkje7bT8ygHoEM6sn5IMffy6XHY9VAkRhWiR2ALc6pIhWX2TrGJ9aSS4cT-TnxEYYDbXmqA2vfJkiR2wVHrKoCug"/>
+<!-- Gradient Overlay for legibility at the bottom of hero if needed -->
+<div class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-black/20 pointer-events-none"></div>
+<!-- Floating Glassmorphism Tag on Hero -->
+<div class="absolute bottom-6 right-margin bg-surface-bright/20 backdrop-blur-xl border border-white/20 px-4 py-2 rounded-full shadow-[0_8px_20px_rgba(22,40,57,0.1)]">
+<span class="font-label-bold text-label-bold text-on-primary">Available Now</span>
+</div>
+</div>
+<!-- Content Area (Fixed Mobile Grid) -->
+<main class="relative z-10 px-margin pb-[calc(env(safe-area-inset-bottom)+120px)] pt-8 rounded-t-[32px] -mt-10 bg-background">
+<!-- Header & Price -->
+<header class="mb-section-gap grid grid-cols-4 gap-gutter">
+<div class="col-span-4 flex justify-between items-end">
+<div>
+<h1 class="font-display-lg text-display-lg text-primary mb-2">The Penthouse Collection</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">West Village, New York</p>
+</div>
+<div class="text-right">
+<p class="font-headline-md text-headline-md text-primary">$4.2M</p>
+</div>
+</div>
+</header>
+<!-- Key Details (Bento-style Grid) -->
+<section class="mb-section-gap grid grid-cols-4 gap-gutter">
+<div class="col-span-1 flex flex-col items-center justify-center p-4 bg-surface-container-lowest border border-surface-container rounded-lg shadow-sm">
+<span class="material-symbols-outlined text-outline text-2xl mb-2">bed</span>
+<span class="font-label-bold text-label-bold text-primary">3 Bed</span>
+</div>
+<div class="col-span-1 flex flex-col items-center justify-center p-4 bg-surface-container-lowest border border-surface-container rounded-lg shadow-sm">
+<span class="material-symbols-outlined text-outline text-2xl mb-2">shower</span>
+<span class="font-label-bold text-label-bold text-primary">3.5 Bath</span>
+</div>
+<div class="col-span-1 flex flex-col items-center justify-center p-4 bg-surface-container-lowest border border-surface-container rounded-lg shadow-sm">
+<span class="material-symbols-outlined text-outline text-2xl mb-2">square_foot</span>
+<span class="font-label-bold text-label-bold text-primary">3,200</span>
+</div>
+<div class="col-span-1 flex flex-col items-center justify-center p-4 bg-surface-container-lowest border border-surface-container rounded-lg shadow-sm">
+<span class="material-symbols-outlined text-outline text-2xl mb-2">directions_car</span>
+<span class="font-label-bold text-label-bold text-primary">2 Spots</span>
+</div>
+</section>
+<!-- Description -->
+<section class="mb-section-gap grid grid-cols-4 gap-gutter">
+<div class="col-span-4">
+<h2 class="font-headline-md text-headline-md text-primary mb-4">About this home</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">
+                    An exceptional opportunity to acquire a masterfully designed residence in the heart of the West Village. This expansive floorplan emphasizes effortless opulence, featuring soaring ceilings and panoramic views.
+                </p>
+</div>
+</section>
+<!-- Amenities Chips -->
+<section class="mb-section-gap grid grid-cols-4 gap-gutter">
+<div class="col-span-4 flex flex-wrap gap-3">
+<div class="px-4 py-2 border border-outline-variant rounded-full bg-transparent">
+<span class="font-caption text-caption text-on-surface">Gym Access</span>
+</div>
+<div class="px-4 py-2 border border-outline-variant rounded-full bg-transparent">
+<span class="font-caption text-caption text-on-surface">Pool</span>
+</div>
+<div class="px-4 py-2 border border-outline-variant rounded-full bg-transparent">
+<span class="font-caption text-caption text-on-surface">Concierge</span>
+</div>
+<div class="px-4 py-2 border border-outline-variant rounded-full bg-transparent">
+<span class="font-caption text-caption text-on-surface">Private Elevator</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Thumb Zone Optimized CTA Area -->
+<div class="fixed bottom-0 left-0 w-full p-margin bg-gradient-to-t from-background via-background/90 to-transparent z-50 flex justify-between items-center gap-4">
+<!-- Save Action Button (Secondary action overlay style) -->
+<button aria-label="Save property" class="w-16 h-16 rounded-full bg-surface-bright/80 backdrop-blur-xl border border-white/20 flex items-center justify-center shadow-[0_8px_20px_rgba(22,40,57,0.12)] hover:bg-surface-bright transition-all">
+<span class="material-symbols-outlined text-primary text-2xl">bookmark</span>
+</button>
+<!-- Primary Contact CTA -->
+<button class="flex-1 h-16 bg-primary rounded-full flex items-center justify-center shadow-[0_8px_20px_rgba(22,40,57,0.15)] hover:bg-primary/90 transition-all">
+<span class="font-label-bold text-label-bold text-on-primary">Contact Agent</span>
+</button>
+</div>
+</body></html>

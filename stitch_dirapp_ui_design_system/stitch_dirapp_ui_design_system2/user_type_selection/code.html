@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Who am I?</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-surface-variant": "#43474c",
+                        "on-surface": "#1b1c1d",
+                        "surface-tint": "#4e6073",
+                        "tertiary-fixed-dim": "#e3c19b",
+                        "outline-variant": "#c4c6cd",
+                        "on-primary-fixed": "#091d2e",
+                        "tertiary-fixed": "#ffddb7",
+                        "primary-fixed": "#d1e4fb",
+                        "primary-fixed-dim": "#b5c8df",
+                        "on-error": "#ffffff",
+                        "surface-container-low": "#f5f3f4",
+                        "surface-dim": "#dbd9db",
+                        "secondary-fixed": "#ffdad8",
+                        "on-tertiary-fixed": "#291802",
+                        "surface-bright": "#fbf9fa",
+                        "on-error-container": "#93000a",
+                        "on-secondary-container": "#74161e",
+                        "tertiary-container": "#4e381c",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed": "#410007",
+                        "surface-container-highest": "#e4e2e3",
+                        "background": "#fbf9fa",
+                        "secondary-fixed-dim": "#ffb3b1",
+                        "inverse-primary": "#b5c8df",
+                        "tertiary": "#362308",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed-variant": "#842228",
+                        "secondary-container": "#ff7f7f",
+                        "primary": "#162839",
+                        "on-background": "#1b1c1d",
+                        "inverse-surface": "#303032",
+                        "error": "#ba1a1a",
+                        "on-primary-container": "#96a9be",
+                        "surface": "#fbf9fa",
+                        "on-primary": "#ffffff",
+                        "primary-container": "#2c3e50",
+                        "outline": "#74777d",
+                        "inverse-on-surface": "#f2f0f2",
+                        "on-primary-fixed-variant": "#36485b",
+                        "surface-variant": "#e4e2e3",
+                        "on-tertiary-fixed-variant": "#5a4225",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-container": "#c1a17d",
+                        "surface-container-high": "#e9e8e9",
+                        "secondary": "#a43a3d",
+                        "surface-container": "#efedef"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "thumb-zone-height": "33%",
+                        "section-gap": "48px",
+                        "margin": "24px",
+                        "gutter": "20px",
+                        "grid-columns": "4"
+                    },
+                    fontFamily: {
+                        "label-bold": ["Assistant"],
+                        "caption": ["Assistant"],
+                        "body-lg": ["Assistant"],
+                        "display-lg": ["Assistant"],
+                        "body-md": ["Assistant"],
+                        "headline-md": ["Assistant"]
+                    },
+                    fontSize: {
+                        "label-bold": ["14px", { lineHeight: "1.2", fontWeight: "700" }],
+                        "caption": ["12px", { lineHeight: "1.4", letterSpacing: "0.05em", fontWeight: "400" }],
+                        "body-lg": ["18px", { lineHeight: "1.6", fontWeight: "400" }],
+                        "display-lg": ["32px", { lineHeight: "1.2", letterSpacing: "-0.02em", fontWeight: "300" }],
+                        "body-md": ["16px", { lineHeight: "1.5", fontWeight: "400" }],
+                        "headline-md": ["24px", { lineHeight: "1.3", fontWeight: "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen antialiased selection:bg-primary-container selection:text-on-primary-container flex flex-col justify-center">
+<!-- Main Content Canvas -->
+<main class="w-full max-w-lg mx-auto px-margin py-section-gap flex flex-col">
+<!-- Header Section -->
+<header class="mb-section-gap text-center flex flex-col items-center">
+<div class="w-12 h-1 bg-outline-variant/30 rounded-full mb-8"></div>
+<h1 class="font-display-lg text-display-lg text-primary">Who am I?</h1>
+</header>
+<!-- Selection Cards (Bento-style layout) -->
+<div class="flex flex-col gap-gutter">
+<!-- Seeker Card -->
+<button class="group relative w-full bg-surface-container-lowest border border-outline-variant/20 rounded-xl p-8 flex flex-col items-center justify-center gap-4 shadow-[0_8px_20px_rgba(44,62,80,0.03)] hover:shadow-[0_8px_20px_rgba(22,40,57,0.12)] hover:border-primary/20 transition-all duration-300 ease-out overflow-hidden" type="button">
+<!-- Hover subtle gradient -->
+<div class="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+<span class="material-symbols-outlined text-[48px] text-primary transition-transform duration-300 group-hover:scale-110" style="font-variation-settings: 'FILL' 0, 'wght' 100;">
+                    explore
+                </span>
+<div class="text-center mt-2 z-10">
+<h2 class="font-headline-md text-headline-md text-primary mb-2">I am a Seeker</h2>
+<p class="font-body-md text-body-md text-surface-tint">Looking for long or short term rentals</p>
+</div>
+</button>
+<!-- Owner Card -->
+<button class="group relative w-full bg-surface-container-lowest border border-outline-variant/20 rounded-xl p-8 flex flex-col items-center justify-center gap-4 shadow-[0_8px_20px_rgba(44,62,80,0.03)] hover:shadow-[0_8px_20px_rgba(22,40,57,0.12)] hover:border-primary/20 transition-all duration-300 ease-out overflow-hidden" type="button">
+<!-- Hover subtle gradient -->
+<div class="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+<span class="material-symbols-outlined text-[48px] text-primary transition-transform duration-300 group-hover:scale-110" style="font-variation-settings: 'FILL' 0, 'wght' 100;">
+                    key
+                </span>
+<div class="text-center mt-2 z-10">
+<h2 class="font-headline-md text-headline-md text-primary mb-2">I am an Owner</h2>
+<p class="font-body-md text-body-md text-surface-tint">Looking to lease my property</p>
+</div>
+</button>
+</div>
+</main>
+</body></html>
