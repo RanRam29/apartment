@@ -13,9 +13,10 @@ import { addYears, format } from 'date-fns';
 import { contractsApi, matchesApi } from '../services/api';
 import { getApiBaseUrl } from '../services/apiConfig';
 import { useAuthStore } from '../store/useAuthStore';
-import { usePersonaIsLandlord } from '../navigation/AdminAppModeContext';
 import type { MainStackParamList, Match } from '../types';
 import { C, Dark } from '../theme';
+import { ResponsiveContainer } from '../components/ResponsiveContainer';
+import { dirType } from '../theme/textStyles';
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
 
@@ -527,7 +528,7 @@ export default function ContractsScreen() {
   const navigation = useNavigation<Nav>();
   const queryClient = useQueryClient();
   const { user, token } = useAuthStore();
-  const isLandlord = usePersonaIsLandlord();
+  const isLandlord = user?.role === 'landlord';
 
   const [selected, setSelected] = React.useState<{ contract: Contract; text: string } | null>(null);
   const [addUploadOpen, setAddUploadOpen] = React.useState(false);
@@ -576,7 +577,7 @@ export default function ContractsScreen() {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="chevron-back" size={22} color={C.onInverse.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>חוזים</Text>
+        <Text style={[styles.headerTitle, dirType.subhead]}>חוזים</Text>
         {isLandlord ? (
           <TouchableOpacity onPress={() => setAddUploadOpen(true)} style={styles.addHeaderBtn} accessibilityLabel="הוסף חוזה מקובץ">
             <Ionicons name="add" size={26} color={C.onInverse.primary} />
@@ -586,36 +587,39 @@ export default function ContractsScreen() {
         )}
       </View>
 
-      {isLoading ? (
-        <ActivityIndicator color={C.cyan} style={{ marginTop: 40 }} />
-      ) : contracts.length === 0 ? (
-        <View style={styles.empty}>
-          <Ionicons name="document-text-outline" size={56} color={C.textMut} />
-          <Text style={styles.emptyText}>אין חוזים עדיין</Text>
-          {isLandlord ? (
-            <>
-              <Text style={styles.emptyHint}>הוסף חוזה מהתבנית מדף ההתאמות, או העלה קובץ PDF / Word.</Text>
-              <TouchableOpacity style={styles.emptyAddBtn} onPress={() => setAddUploadOpen(true)}>
-                <Ionicons name="cloud-upload-outline" size={18} color={C.onInverse.primary} />
-                <Text style={styles.emptyAddBtnText}>העלה חוזה מקובץ</Text>
-              </TouchableOpacity>
-            </>
-          ) : (
-            <Text style={styles.emptyHint}>חוזים שסוכמו עם המשכיר יופיעו כאן</Text>
-          )}
-        </View>
-      ) : (
-        <FlatList
-          data={contracts}
-          keyExtractor={(c) => c._id}
-          renderItem={({ item }) => (
-            <ContractCard contract={item} onPress={() => openContract(item)} />
-          )}
-          contentContainerStyle={styles.list}
-          onRefresh={refetch}
-          refreshing={isLoading}
-        />
-      )}
+      <ResponsiveContainer style={{ flex: 1 }}>
+        {isLoading ? (
+          <ActivityIndicator color={C.cyan} style={{ marginTop: 40 }} />
+        ) : contracts.length === 0 ? (
+          <View style={styles.empty}>
+            <Ionicons name="document-text-outline" size={56} color={C.textMut} />
+            <Text style={[styles.emptyText, dirType.subhead]}>אין חוזים עדיין</Text>
+            {isLandlord ? (
+              <>
+                <Text style={[styles.emptyHint, dirType.caption]}>הוסף חוזה מהתבנית מדף ההתאמות, או העלה קובץ PDF / Word.</Text>
+                <TouchableOpacity style={styles.emptyAddBtn} onPress={() => setAddUploadOpen(true)}>
+                  <Ionicons name="cloud-upload-outline" size={18} color={C.onInverse.primary} />
+                  <Text style={[styles.emptyAddBtnText, dirType.label]}>העלה חוזה מקובץ</Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <Text style={[styles.emptyHint, dirType.caption]}>חוזים שסוכמו עם המשכיר יופיעו כאן</Text>
+            )}
+          </View>
+        ) : (
+          <FlatList
+            style={{ flex: 1 }}
+            data={contracts}
+            keyExtractor={(c) => c._id}
+            renderItem={({ item }) => (
+              <ContractCard contract={item} onPress={() => openContract(item)} />
+            )}
+            contentContainerStyle={styles.list}
+            onRefresh={refetch}
+            refreshing={isLoading}
+          />
+        )}
+      </ResponsiveContainer>
 
       {selected && (
         <ContractDetailModal

@@ -6,9 +6,10 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../store/useAuthStore';
-import { usePersonaIsLandlord } from '../navigation/AdminAppModeContext';
 import api from '../services/api';
 import { C, Dark } from '../theme';
+import { ResponsiveContainer } from '../components/ResponsiveContainer';
+import { dirType } from '../theme/textStyles';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -333,7 +334,7 @@ function CreateModal({ visible, onClose, onCreate }: {
 
 export default function CommercialScreen({ navigation }: any) {
   const { user } = useAuthStore();
-  const isLandlord = usePersonaIsLandlord();
+  const isLandlord = user?.role === 'landlord';
   const queryClient = useQueryClient();
 
   const [selected, setSelected] = React.useState<CommercialLease | null>(null);
@@ -382,7 +383,7 @@ export default function CommercialScreen({ navigation }: any) {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="chevron-back" size={22} color={C.onInverse.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>נדל"ן מסחרי</Text>
+        <Text style={[styles.headerTitle, dirType.subhead]}>נדל"ן מסחרי</Text>
         {isLandlord && (
           <TouchableOpacity style={styles.addBtn} onPress={() => setCreateVisible(true)}>
             <Ionicons name="add" size={20} color={C.onInverse.primary} />
@@ -398,26 +399,29 @@ export default function CommercialScreen({ navigation }: any) {
         </ScrollView>
       )}
 
-      {isLoading ? (
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color={C.cyan} />
-        </View>
-      ) : leases.length === 0 ? (
-        <View style={styles.center}>
-          <Ionicons name="business-outline" size={48} color={C.textMut} />
-          <Text style={styles.emptyTitle}>אין חוזים מסחריים</Text>
-          <Text style={styles.emptyHint}>
-            {isLandlord ? 'לחץ + כדי להוסיף חוזה נדל"ן מסחרי' : 'חוזים מסחריים יופיעו כאן'}
-          </Text>
-        </View>
-      ) : (
-        <FlatList
-          data={leases}
-          keyExtractor={(l) => l._id}
-          contentContainerStyle={styles.list}
-          renderItem={({ item }) => <LeaseCard lease={item} onPress={() => openDetail(item)} />}
-        />
-      )}
+      <ResponsiveContainer style={{ flex: 1 }}>
+        {isLoading ? (
+          <View style={styles.center}>
+            <ActivityIndicator size="large" color={C.cyan} />
+          </View>
+        ) : leases.length === 0 ? (
+          <View style={styles.center}>
+            <Ionicons name="business-outline" size={48} color={C.textMut} />
+            <Text style={[styles.emptyTitle, dirType.subhead]}>אין חוזים מסחריים</Text>
+            <Text style={[styles.emptyHint, dirType.caption]}>
+              {isLandlord ? 'לחץ + כדי להוסיף חוזה נדל"ן מסחרי' : 'חוזים מסחריים יופיעו כאן'}
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            style={{ flex: 1 }}
+            data={leases}
+            keyExtractor={(l) => l._id}
+            contentContainerStyle={styles.list}
+            renderItem={({ item }) => <LeaseCard lease={item} onPress={() => openDetail(item)} />}
+          />
+        )}
+      </ResponsiveContainer>
 
       <DetailModal
         lease={selected}

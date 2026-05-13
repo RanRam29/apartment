@@ -60,11 +60,17 @@ export const useSwipeStore = create<SwipeState>((set, get) => ({
         feedLoadState: 'success',
       });
     } catch (err: unknown) {
-      const ax = err as { response?: { status?: number; data?: { error?: string } } };
+      const ax = err as {
+        response?: {
+          status?: number;
+          statusText?: string;
+          data?: { error?: string };
+        };
+      };
       const status = ax.response?.status ?? 0;
       const raw = ax.response?.data?.error;
       const message =
-        typeof raw === 'string' ? raw : ax.response?.statusText || 'Request failed';
+        typeof raw === 'string' ? raw : ax.response?.statusText ?? 'Request failed';
       set({
         deck: [],
         currentIndex: 0,

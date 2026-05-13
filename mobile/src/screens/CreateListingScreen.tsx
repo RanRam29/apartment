@@ -12,6 +12,7 @@ import { apartmentsApi } from '../services/api';
 import type { Amenity } from '../types';
 import { C } from '../theme';
 import { CITY_CENTER_BY_NAME } from '../constants/cityCenters';
+import { ResponsiveContainer } from '../components/ResponsiveContainer';
 
 const AMENITY_OPTIONS: { key: Amenity; label: string }[] = [
   { key: 'parking',     label: '🚗 חניה' },
@@ -251,6 +252,7 @@ export default function CreateListingScreen({ navigation }: any) {
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+          <ResponsiveContainer>
           <View style={styles.formCard}>
             <Text style={styles.header}>פרסם מודעה חדשה</Text>
 
@@ -437,6 +439,7 @@ export default function CreateListingScreen({ navigation }: any) {
               }
             </TouchableOpacity>
           </View>
+          </ResponsiveContainer>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -454,7 +457,7 @@ function Field({ label, children, style }: { label: string; children: React.Reac
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.bg },
-  scroll: { padding: 16, paddingBottom: 40, alignItems: 'center' },
+  scroll: { paddingVertical: 16, paddingBottom: 40, alignItems: 'center' },
   formCard: {
     width: '100%',
     maxWidth: 720,

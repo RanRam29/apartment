@@ -10,6 +10,8 @@ import { recommendationsApi } from '../services/api';
 import { useAuthStore } from '../store/useAuthStore';
 import type { MainStackParamList } from '../types';
 import { C, Dark } from '../theme';
+import { ResponsiveContainer } from '../components/ResponsiveContainer';
+import { dirType } from '../theme/textStyles';
 
 const CITIES = ['תל אביב', 'ירושלים', 'חיפה', 'ראשון לציון', 'פתח תקווה',
   'נתניה', 'באר שבע', 'בני ברק', 'רמת גן', 'הרצליה'];
@@ -55,27 +57,29 @@ export default function OnboardingScreen({ navigation }: Props) {
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        {step === 0 && <WelcomeStep name={user?.firstName ?? ''} onNext={() => setStep(1)} onSkip={skip} />}
-        {step === 1 && (
-          <BudgetStep
-            minBudget={minBudget} setMinBudget={setMinBudget}
-            maxBudget={maxBudget} setMaxBudget={setMaxBudget}
-            onNext={() => setStep(2)} onBack={() => setStep(0)}
-          />
-        )}
-        {step === 2 && (
-          <CitiesStep
-            cities={cities} setCities={setCities}
-            onNext={() => setStep(3)} onBack={() => setStep(1)}
-          />
-        )}
-        {step === 3 && (
-          <FinishStep
-            loading={saveMutation.isPending}
-            onSave={() => saveMutation.mutate()}
-            onBack={() => setStep(2)}
-          />
-        )}
+        <ResponsiveContainer>
+          {step === 0 && <WelcomeStep name={user?.firstName ?? ''} onNext={() => setStep(1)} onSkip={skip} />}
+          {step === 1 && (
+            <BudgetStep
+              minBudget={minBudget} setMinBudget={setMinBudget}
+              maxBudget={maxBudget} setMaxBudget={setMaxBudget}
+              onNext={() => setStep(2)} onBack={() => setStep(0)}
+            />
+          )}
+          {step === 2 && (
+            <CitiesStep
+              cities={cities} setCities={setCities}
+              onNext={() => setStep(3)} onBack={() => setStep(1)}
+            />
+          )}
+          {step === 3 && (
+            <FinishStep
+              loading={saveMutation.isPending}
+              onSave={() => saveMutation.mutate()}
+              onBack={() => setStep(2)}
+            />
+          )}
+        </ResponsiveContainer>
       </ScrollView>
     </SafeAreaView>
   );
@@ -85,8 +89,8 @@ function WelcomeStep({ name, onNext, onSkip }: { name: string; onNext: () => voi
   return (
     <View style={styles.step}>
       <Text style={styles.emoji}>🏠</Text>
-      <Text style={styles.heading}>ברוכ/ה הבא/ה{name ? `, ${name}` : ''}!</Text>
-      <Text style={styles.body}>
+      <Text style={[styles.heading, dirType.title, { color: C.onInverse.primary }]}>ברוכ/ה הבא/ה{name ? `, ${name}` : ''}!</Text>
+      <Text style={[styles.body, dirType.body, { color: C.textMut }]}>
         DirApp מוצא לך דירות שמתאימות בדיוק למה שאתה/את מחפש/ת.{'\n\n'}
         בשלב הבא נגדיר העדפות בסיסיות כדי שנוכל להראות לך את הדירות הכי רלוונטיות.
       </Text>
@@ -94,7 +98,7 @@ function WelcomeStep({ name, onNext, onSkip }: { name: string; onNext: () => voi
         {['החלק ימינה לאהוב, שמאלה לדלג', 'Super-like לדירות שממש אהבת', 'AI מתאים לך לפי ההעדפות שלך'].map((f, i) => (
           <View key={i} style={styles.featureRow}>
             <Ionicons name="checkmark-circle" size={18} color={C.cyan} />
-            <Text style={styles.featureText}>{f}</Text>
+            <Text style={[styles.featureText, dirType.body]}>{f}</Text>
           </View>
         ))}
       </View>
@@ -113,16 +117,16 @@ function BudgetStep({ minBudget, setMinBudget, maxBudget, setMaxBudget, onNext, 
   return (
     <View style={styles.step}>
       <Text style={styles.emoji}>💰</Text>
-      <Text style={styles.heading}>מה התקציב שלך?</Text>
-      <Text style={styles.body}>הזן תקציב חודשי לשכירות. אפשר לשנות מאוחר יותר.</Text>
+      <Text style={[styles.heading, dirType.title, { color: C.onInverse.primary }]}>מה התקציב שלך?</Text>
+      <Text style={[styles.body, dirType.body, { color: C.textMut }]}>הזן תקציב חודשי לשכירות. אפשר לשנות מאוחר יותר.</Text>
       <View style={styles.row}>
         <View style={{ flex: 1, marginLeft: 8 }}>
-          <Text style={styles.fieldLabel}>מינימום ₪</Text>
+          <Text style={[styles.fieldLabel, dirType.label, { color: C.textMut }]}>מינימום ₪</Text>
           <TextInput style={styles.input} value={minBudget} onChangeText={setMinBudget}
             keyboardType="numeric" placeholder="3000" placeholderTextColor={C.textMut} textAlign="right" />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={styles.fieldLabel}>מקסימום ₪</Text>
+          <Text style={[styles.fieldLabel, dirType.label, { color: C.textMut }]}>מקסימום ₪</Text>
           <TextInput style={styles.input} value={maxBudget} onChangeText={setMaxBudget}
             keyboardType="numeric" placeholder="8000" placeholderTextColor={C.textMut} textAlign="right" />
         </View>
@@ -139,8 +143,8 @@ function CitiesStep({ cities, setCities, onNext, onBack }: any) {
   return (
     <View style={styles.step}>
       <Text style={styles.emoji}>📍</Text>
-      <Text style={styles.heading}>אילו ערים מעניינות אותך?</Text>
-      <Text style={styles.body}>בחר אחת או יותר. ריק = כל הארץ.</Text>
+      <Text style={[styles.heading, dirType.title, { color: C.onInverse.primary }]}>אילו ערים מעניינות אותך?</Text>
+      <Text style={[styles.body, dirType.body, { color: C.textMut }]}>בחר אחת או יותר. ריק = כל הארץ.</Text>
       <View style={styles.chipGrid}>
         {CITIES.map((city) => (
           <TouchableOpacity
@@ -148,7 +152,7 @@ function CitiesStep({ cities, setCities, onNext, onBack }: any) {
             style={[styles.chip, cities.includes(city) && styles.chipActive]}
             onPress={() => toggle(city)}
           >
-            <Text style={[styles.chipText, cities.includes(city) && styles.chipTextActive]}>{city}</Text>
+            <Text style={[styles.chipText, dirType.label, cities.includes(city) && styles.chipTextActive]}>{city}</Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -161,8 +165,8 @@ function FinishStep({ loading, onSave, onBack }: { loading: boolean; onSave: () 
   return (
     <View style={styles.step}>
       <Text style={styles.emoji}>🎉</Text>
-      <Text style={styles.heading}>הכל מוכן!</Text>
-      <Text style={styles.body}>לחץ "שמור והתחל" כדי להתחיל לגלוש בדירות שמתאימות לך.</Text>
+      <Text style={[styles.heading, dirType.title, { color: C.onInverse.primary }]}>הכל מוכן!</Text>
+      <Text style={[styles.body, dirType.body, { color: C.textMut }]}>לחץ "שמור והתחל" כדי להתחיל לגלוש בדירות שמתאימות לך.</Text>
       <TouchableOpacity
         style={[styles.primaryBtn, loading && { opacity: 0.6 }]}
         onPress={onSave} disabled={loading}

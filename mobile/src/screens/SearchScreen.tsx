@@ -11,6 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 import { recommendationsApi, apartmentsApi } from '../services/api';
 import type { Apartment } from '../types';
 import { C } from '../theme';
+import { ResponsiveContainer } from '../components/ResponsiveContainer';
 
 const CITIES = [
   'תל אביב', 'ירושלים', 'חיפה', 'ראשון לציון', 'פתח תקווה',
@@ -101,6 +102,7 @@ export default function SearchScreen() {
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
+        <ResponsiveContainer style={{ flex: 1 }}>
         <View style={styles.headerRow}>
           <Text style={styles.header}>חיפוש חכם</Text>
           <Ionicons name="search" size={22} color={C.cyan} style={styles.headerIcon} />
@@ -266,6 +268,7 @@ export default function SearchScreen() {
         {/* Results */}
         {!searchMutation.isPending && !searchMutation.isError && (
           <FlatList
+            style={{ flex: 1 }}
             data={results}
             keyExtractor={(a) => a.id}
             keyboardShouldPersistTaps="handled"
@@ -287,6 +290,7 @@ export default function SearchScreen() {
             }
           />
         )}
+        </ResponsiveContainer>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -330,16 +334,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-end',
-    paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 4,
     gap: 10,
   },
   header: { fontSize: 22, fontWeight: '800', color: C.onInverse.primary, textAlign: 'right' },
   headerIcon: { marginTop: 2 },
-  subtitle: { color: C.textMut, fontSize: 13, paddingHorizontal: 20, textAlign: 'right', marginBottom: 12 },
+  subtitle: { color: C.textMut, fontSize: 13, textAlign: 'right', marginBottom: 12 },
 
-  searchRow: { flexDirection: 'row', paddingHorizontal: 16, gap: 8, marginBottom: 8, alignItems: 'center' },
+  searchRow: { flexDirection: 'row', gap: 8, marginBottom: 8, alignItems: 'center' },
   inputWrap: { flex: 1, position: 'relative', justifyContent: 'center' },
   searchInput: {
     backgroundColor: C.navyMid,
@@ -375,7 +378,6 @@ const styles = StyleSheet.create({
   filterToggleBtnActive: { backgroundColor: C.cyan, borderColor: C.cyan },
 
   filterPanel: {
-    marginHorizontal: 16,
     marginBottom: 8,
     backgroundColor: C.navyMid,
     borderRadius: 14,
@@ -443,7 +445,7 @@ const styles = StyleSheet.create({
   clearFiltersBtn: { alignItems: 'flex-end' },
   clearFiltersText: { color: C.coral, fontSize: 12 },
 
-  parsedRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, paddingHorizontal: 16, marginBottom: 8 },
+  parsedRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 },
   parsedChip: {
     backgroundColor: C.cyanAlpha(0.12),
     borderRadius: 8,
@@ -454,7 +456,7 @@ const styles = StyleSheet.create({
   },
   parsedChipText: { color: C.cyan, fontSize: 11, fontWeight: '600' },
 
-  suggestions: { padding: 16, gap: 8 },
+  suggestions: { paddingVertical: 16, gap: 8 },
   suggestionsLabel: { color: C.textMut, fontSize: 12, textAlign: 'right', marginBottom: 4 },
   suggestionChip: {
     flexDirection: 'row',
@@ -482,7 +484,7 @@ const styles = StyleSheet.create({
   loadingBox: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 },
   loadingText: { color: C.textMut, fontSize: 14 },
 
-  resultsList: { padding: 16, gap: 10 },
+  resultsList: { paddingVertical: 12, gap: 10 },
   resultCard: {
     flexDirection: 'row',
     alignItems: 'center',

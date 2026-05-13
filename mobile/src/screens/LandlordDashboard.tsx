@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
 import {
   View, Text, ScrollView, StyleSheet,
-  SafeAreaView, ActivityIndicator, RefreshControl, TouchableOpacity, Dimensions,
+  SafeAreaView, ActivityIndicator, RefreshControl, TouchableOpacity,
 } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { landlordApi } from '../services/api';
 import type { LandlordDashboard as DashboardData } from '../types';
 import { C, Dark } from '../theme';
-
-const SCREEN_WIDTH = Dimensions.get('window').width;
-const CHART_WIDTH = SCREEN_WIDTH - 64; // padding 16*2 + section padding 14*2
+import { ResponsiveContainer } from '../components/ResponsiveContainer';
+import { useResponsive } from '../hooks/useResponsive';
 
 const PERIODS: { label: string; days: number }[] = [
   { label: '7 ימים', days: 7 },
@@ -19,6 +18,9 @@ const PERIODS: { label: string; days: number }[] = [
 ];
 
 export default function LandlordDashboard() {
+  const { contentMaxWidth } = useResponsive();
+  const chartWidth = Math.max(220, contentMaxWidth - 28);
+
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ['landlord-dashboard'],
     queryFn: () => landlordApi.dashboard().then((r) => r.data as DashboardData),
@@ -52,6 +54,7 @@ export default function LandlordDashboard() {
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={C.cyan} />}
         contentContainerStyle={styles.scroll}
       >
+        <ResponsiveContainer>
         <Text style={styles.header}>דשבורד</Text>
 
         {/* KPI row */}
@@ -79,7 +82,7 @@ export default function LandlordDashboard() {
               <PeriodToggle period={period} onChange={setPeriod} />
               <Text style={styles.sectionTitle}>לייקים לפי תאריך</Text>
             </View>
-            <SwipeTrendChart data={swipeTrend} days={period} />
+            <SwipeTrendChart data={swipeTrend} days={period} chartWidth={chartWidth} />
           </View>
         )}
 
@@ -133,6 +136,7 @@ export default function LandlordDashboard() {
             );
           })}
         </View>
+        </ResponsiveContainer>
       </ScrollView>
     </SafeAreaView>
   );
@@ -158,7 +162,15 @@ function PeriodToggle({ period, onChange }: { period: number; onChange: (d: numb
   );
 }
 
-function SwipeTrendChart({ data, days }: { data: { date: string; count: number }[]; days: number }) {
+function SwipeTrendChart({
+  data,
+  days,
+  chartWidth,
+}: {
+  data: { date: string; count: number }[];
+  days: number;
+  chartWidth: number;
+}) {
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
   const sliced = data.slice(-days);
   const maxCount = Math.max(...sliced.map((p) => Number(p.count)), 1);
@@ -170,7 +182,7 @@ function SwipeTrendChart({ data, days }: { data: { date: string; count: number }
   const wowChange = lastWeek > 0 ? Math.round(((thisWeek - lastWeek) / lastWeek) * 100) : null;
   const totalPeriod = sliced.reduce((s, p) => s + Number(p.count), 0);
 
-  const barWidth = Math.max(4, (CHART_WIDTH / sliced.length) - 2);
+  const barWidth = Math.max(4, (chartWidth / sliced.length) - 2);
 
   return (
     <View>
@@ -264,7 +276,7 @@ function MatchStat({ label, value, color }: { label: string; value: number; colo
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Dark.bg },
   centered: { flex: 1, backgroundColor: Dark.bg, justifyContent: 'center', alignItems: 'center' },
-  scroll: { padding: 16, paddingBottom: 40 },
+  scroll: { paddingBottom: 40, paddingTop: 8 },
   header: { fontSize: 22, fontWeight: '800', color: C.onInverse.primary, marginBottom: 16, textAlign: 'right' },
 
   kpiRow: { flexDirection: 'row', gap: 8, marginBottom: 12 },
