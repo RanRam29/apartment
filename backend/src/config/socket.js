@@ -5,12 +5,22 @@ const logger = require('../utils/logger');
 const { logSystemEvent } = require('../services/systemEventService');
 const { logAudit } = require('../services/auditLogService');
 const { SYSTEM_CATEGORY, SYSTEM_SEVERITY, AUDIT_ACTIONS } = require('../constants/logging');
+const { isAllowedCorsOrigin } = require('./corsOrigins');
 
 let io;
 
 function initSocket(server) {
   io = new Server(server, {
-    cors: { origin: '*', methods: ['GET', 'POST'] },
+    cors: {
+      origin(origin, callback) {
+        if (isAllowedCorsOrigin(origin)) {
+          return callback(null, true);
+        }
+        callback(new Error('Not allowed by CORS'));
+      },
+      methods: ['GET', 'POST'],
+      credentials: true,
+    },
     transports: ['websocket', 'polling'],
   });
 

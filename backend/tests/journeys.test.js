@@ -95,6 +95,7 @@ jest.mock('../src/models', () => ({
     upsert: jest.fn(),
     findOne: jest.fn(),
     findAll: jest.fn(),
+    destroy: jest.fn(async () => 0),
   },
   Apartment: {
     findOne: jest.fn(),
@@ -106,6 +107,7 @@ jest.mock('../src/models', () => ({
     findOne: jest.fn(),
     findAll: jest.fn(),
     update: jest.fn(async () => [1]),
+    destroy: jest.fn(async () => 0),
   },
   Message: {
     find: jest.fn(),
