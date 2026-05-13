@@ -10,6 +10,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import { useChatStore } from '../store/useChatStore';
 import { clientLogsApi } from '../services/api';
 import { C } from '../theme';
+import { dirApp } from '../theme/dirAppTokens';
 import { useAppTheme } from '../hooks/useAppTheme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type {
@@ -97,7 +98,7 @@ function AdminTabs() {
           <Ionicons
             name="person-outline"
             size={18}
-            color={mode === 'tenant' ? C.onInverse.primary : C.navy}
+            color={mode === 'tenant' ? C.onInverse.primary : dirApp.primary}
           />
           <Text style={[adminShellStyles.segText, mode === 'tenant' && adminShellStyles.segTextOn]}>
             ממשק שוכר
@@ -112,7 +113,7 @@ function AdminTabs() {
           <Ionicons
             name="business-outline"
             size={18}
-            color={mode === 'landlord' ? C.onInverse.primary : C.navy}
+            color={mode === 'landlord' ? C.onInverse.primary : dirApp.primary}
           />
           <Text style={[adminShellStyles.segText, mode === 'landlord' && adminShellStyles.segTextOn]}>
             ממשק משכיר
@@ -148,13 +149,13 @@ const adminShellStyles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   segOn: {
-    backgroundColor: C.navy,
-    borderColor: C.navy,
+    backgroundColor: dirApp.primaryContainer,
+    borderColor: dirApp.primaryContainer,
   },
   segText: {
     fontSize: 14,
     fontWeight: '700',
-    color: C.navy,
+    color: dirApp.primary,
   },
   segTextOn: {
     color: C.onInverse.primary,
@@ -453,7 +454,7 @@ export default function AppNavigator() {
   if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: bootTheme.colors.shellBackground }}>
-        <ActivityIndicator size="large" color={C.navy} />
+        <ActivityIndicator size="large" color={dirApp.secondary} />
       </View>
     );
   }

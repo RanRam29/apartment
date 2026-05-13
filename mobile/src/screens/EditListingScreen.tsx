@@ -9,6 +9,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { apartmentsApi } from '../services/api';
 import { C } from '../theme';
+import { dirApp } from '../theme/dirAppTokens';
 import type { Amenity, MainStackParamList } from '../types';
 import { CITY_CENTER_BY_NAME } from '../constants/cityCenters';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
@@ -238,7 +239,7 @@ export default function EditListingScreen({ route, navigation }: Props) {
   if (isLoading || !hydrated) {
     return (
       <SafeAreaView style={styles.container}>
-        <ActivityIndicator style={{ marginTop: 80 }} size="large" color={C.navy} />
+        <ActivityIndicator style={{ marginTop: 80 }} size="large" color={dirApp.secondary} />
       </SafeAreaView>
     );
   }
@@ -248,22 +249,22 @@ export default function EditListingScreen({ route, navigation }: Props) {
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
           <ResponsiveContainer>
-          <Text style={[styles.header, dirType.title]}>עריכת מודעה</Text>
+          <Text style={styles.header}>עריכת מודעה</Text>
 
           <Field label="כותרת *">
             <TextInput style={styles.input} value={title} onChangeText={(value) => setTitle(sanitizeTitleInput(value))}
-              placeholder="כותרת המודעה" placeholderTextColor={C.textMut} textAlign="right" />
+              placeholder="כותרת המודעה" placeholderTextColor={dirApp.outline} textAlign="right" />
             <Text style={styles.helperText}>{title.length}/100</Text>
           </Field>
 
           <View style={styles.row}>
             <Field label="מחיר ₪ *" style={{ flex: 1, marginLeft: 8 }}>
               <TextInput style={styles.input} value={price} onChangeText={(value) => setPrice(keepDigitsOnly(value))}
-                keyboardType="numeric" placeholder="6500" placeholderTextColor={C.textMut} textAlign="right" />
+                keyboardType="numeric" placeholder="6500" placeholderTextColor={dirApp.outline} textAlign="right" />
             </Field>
             <Field label="חדרים *" style={{ flex: 1 }}>
               <TextInput style={styles.input} value={rooms} onChangeText={(value) => setRooms(keepDigitsOnly(value))}
-                keyboardType="numeric" placeholder="3" placeholderTextColor={C.textMut} textAlign="right" />
+                keyboardType="numeric" placeholder="3" placeholderTextColor={dirApp.outline} textAlign="right" />
             </Field>
           </View>
 
@@ -274,8 +275,8 @@ export default function EditListingScreen({ route, navigation }: Props) {
                 setStreet('');
                 setStreetSuggestions([]);
               }}
-                placeholder="בחר עיר בישראל" placeholderTextColor={C.textMut} textAlign="right" />
-              {isLoadingCities ? <ActivityIndicator size="small" color={C.navy} style={styles.loader} /> : null}
+                placeholder="בחר עיר בישראל" placeholderTextColor={dirApp.outline} textAlign="right" />
+              {isLoadingCities ? <ActivityIndicator size="small" color={dirApp.secondary} style={styles.loader} /> : null}
               {!!citySuggestions.length && (
                 <View style={styles.suggestionsBox}>
                   {citySuggestions.map((item) => (
@@ -295,8 +296,8 @@ export default function EditListingScreen({ route, navigation }: Props) {
             </Field>
             <Field label="רחוב *" style={{ flex: 1 }}>
               <TextInput style={styles.input} value={street} onChangeText={setStreet}
-                placeholder={canSearchStreet ? 'בחר רחוב לפי העיר' : 'יש לבחור עיר קודם'} placeholderTextColor={C.textMut} textAlign="right" editable={canSearchStreet} />
-              {isLoadingStreets ? <ActivityIndicator size="small" color={C.navy} style={styles.loader} /> : null}
+                placeholder={canSearchStreet ? 'בחר רחוב לפי העיר' : 'יש לבחור עיר קודם'} placeholderTextColor={dirApp.outline} textAlign="right" editable={canSearchStreet} />
+              {isLoadingStreets ? <ActivityIndicator size="small" color={dirApp.secondary} style={styles.loader} /> : null}
               {!!streetSuggestions.length && (
                 <View style={styles.suggestionsBox}>
                   {streetSuggestions.map((item) => (
@@ -319,18 +320,18 @@ export default function EditListingScreen({ route, navigation }: Props) {
           <View style={styles.row}>
             <Field label="קומה" style={{ flex: 1, marginLeft: 8 }}>
               <TextInput style={styles.input} value={floor} onChangeText={(value) => setFloor(keepDigitsOnly(value))}
-                keyboardType="numeric" placeholder="3" placeholderTextColor={C.textMut} textAlign="right" />
+                keyboardType="numeric" placeholder="3" placeholderTextColor={dirApp.outline} textAlign="right" />
             </Field>
             <Field label='גודל מ"ר' style={{ flex: 1 }}>
               <TextInput style={styles.input} value={sizeSqm} onChangeText={(value) => setSizeSqm(keepDigitsOnly(value))}
-                keyboardType="numeric" placeholder="75" placeholderTextColor={C.textMut} textAlign="right" />
+                keyboardType="numeric" placeholder="75" placeholderTextColor={dirApp.outline} textAlign="right" />
             </Field>
           </View>
 
           <Field label="תיאור">
             <TextInput style={[styles.input, styles.textarea]} value={description}
               onChangeText={setDescription} multiline numberOfLines={4}
-              placeholder="תאר את הדירה..." placeholderTextColor={C.textMut} textAlign="right" />
+              placeholder="תאר את הדירה..." placeholderTextColor={dirApp.outline} textAlign="right" />
           </Field>
 
           <Text style={[styles.fieldLabel, dirType.label]}>שירותים</Text>
@@ -352,8 +353,8 @@ export default function EditListingScreen({ route, navigation }: Props) {
             style={[styles.petsRow, petsAllowed && styles.petsRowActive]}
             onPress={() => setPetsAllowed((v) => !v)}
           >
-            <Ionicons name={petsAllowed ? 'checkbox' : 'square-outline'} size={22} color={petsAllowed ? C.navy : C.textMut} />
-            <Text style={[styles.petsLabel, dirType.body, petsAllowed && { color: C.navy }]}>🐾 דירה מאפשרת חיות מחמד</Text>
+            <Ionicons name={petsAllowed ? 'checkbox' : 'square-outline'} size={22} color={petsAllowed ? dirApp.secondary : dirApp.outline} />
+            <Text style={[styles.petsLabel, dirType.body, petsAllowed && { color: dirApp.secondary }]}>🐾 דירה מאפשרת חיות מחמד</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -383,25 +384,30 @@ function Field({ label, children, style }: { label: string; children: React.Reac
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: C.bg },
+  container: { flex: 1, backgroundColor: dirApp.background },
   scroll: { padding: 20, paddingBottom: 40 },
-  header: { fontSize: 22, fontWeight: '800', color: C.text, textAlign: 'right', marginBottom: 20 },
+  header: { fontSize: 22, fontWeight: '800', color: dirApp.primary, textAlign: 'right', marginBottom: 20 },
   row: { flexDirection: 'row', marginBottom: 0, alignItems: 'flex-start' },
-  fieldLabel: { color: C.textSub, fontSize: 12, fontWeight: '600', textAlign: 'right', marginBottom: 6 },
+  fieldLabel: { color: dirApp.outline, fontSize: 12, fontWeight: '600', textAlign: 'right', marginBottom: 6 },
   input: {
-    backgroundColor: C.bgCard, borderRadius: 12, padding: 14,
-    fontSize: 14, color: C.text, borderWidth: 1.5, borderColor: C.border,
+    backgroundColor: dirApp.surfaceContainerLowest,
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 14,
+    color: dirApp.onSurface,
+    borderWidth: 1.5,
+    borderColor: `${dirApp.outlineVariant}AA`,
     marginBottom: 0,
   },
   textarea: { height: 100, textAlignVertical: 'top' },
-  helperText: { marginTop: 4, textAlign: 'right', color: C.textMut, fontSize: 11 },
+  helperText: { marginTop: 4, textAlign: 'right', color: dirApp.outline, fontSize: 11 },
   loader: { marginTop: 6 },
   suggestionsBox: {
     marginTop: 4,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: C.borderLight,
-    backgroundColor: C.bg,
+    borderColor: `${dirApp.outlineVariant}AA`,
+    backgroundColor: dirApp.surfaceContainerLow,
     maxHeight: 180,
     overflow: 'hidden',
     zIndex: 50,
@@ -411,29 +417,45 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderBottomWidth: 1,
-    borderBottomColor: C.borderLight,
+    borderBottomColor: `${dirApp.outlineVariant}44`,
   },
-  suggestionText: { textAlign: 'right', color: C.text, fontSize: 14 },
+  suggestionText: { textAlign: 'right', color: dirApp.onSurface, fontSize: 14 },
   amenitiesGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 },
   amenityChip: {
-    paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10,
-    backgroundColor: C.bg, borderWidth: 1.5, borderColor: C.border,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    backgroundColor: dirApp.surfaceContainerLow,
+    borderWidth: 1.5,
+    borderColor: `${dirApp.outlineVariant}AA`,
   },
-  amenityChipActive: { backgroundColor: C.navy, borderColor: C.navy },
-  amenityText: { color: C.textSub, fontSize: 13 },
-  amenityTextActive: { color: C.onInverse.primary, fontWeight: '600' },
+  amenityChipActive: { backgroundColor: dirApp.secondary, borderColor: dirApp.secondary },
+  amenityText: { color: dirApp.outline, fontSize: 13 },
+  amenityTextActive: { color: dirApp.onSecondary, fontWeight: '600' },
   petsRow: {
-    flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 24,
-    backgroundColor: C.bg, borderRadius: 12, padding: 14,
-    borderWidth: 1.5, borderColor: C.border,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 24,
+    backgroundColor: dirApp.surfaceContainerLowest,
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 1.5,
+    borderColor: `${dirApp.outlineVariant}AA`,
   },
-  petsRowActive: { borderColor: C.navy },
-  petsLabel: { color: C.textSub, fontSize: 14 },
+  petsRowActive: { borderColor: dirApp.secondary },
+  petsLabel: { color: dirApp.outline, fontSize: 14 },
   saveBtn: {
-    backgroundColor: C.navy, borderRadius: 14, paddingVertical: 16,
-    alignItems: 'center', marginTop: 8,
-    shadowColor: C.navy, shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.18, shadowRadius: 8, elevation: 4,
+    backgroundColor: dirApp.primaryContainer,
+    borderRadius: 14,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginTop: 8,
+    shadowColor: dirApp.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 4,
   },
   saveBtnDisabled: { opacity: 0.6 },
   saveBtnText: { color: C.onInverse.primary, fontSize: 16, fontWeight: '800' },

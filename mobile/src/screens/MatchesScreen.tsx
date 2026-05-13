@@ -4,14 +4,14 @@ import {
   SafeAreaView, RefreshControl, ActivityIndicator, Pressable,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useQuery } from '@tanstack/react-query';
 import { matchesApi } from '../services/api';
+import { useQuery } from '@tanstack/react-query';
+import MatchCard from '../components/MatchCard';
 import { useAuthStore } from '../store/useAuthStore';
 import { usePersonaIsLandlord } from '../navigation/AdminAppModeContext';
-import MatchCard from '../components/MatchCard';
-import SwipeHouseLogo from '../components/SwipeHouseLogo';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
-import { C } from '../theme';
+import { dirApp } from '../theme/dirAppTokens';
+import { dirType } from '../theme/textStyles';
 import type { Match } from '../types';
 
 type MatchTab = 'all' | 'active' | 'pending';
@@ -28,8 +28,8 @@ export default function MatchesScreen() {
     refetchInterval: 30_000,
   });
 
-  const accepted = data?.filter((m) => m.status === 'accepted') ?? [];
-  const pending  = data?.filter((m) => m.status === 'pending')  ?? [];
+  const accepted = data?.filter((m: Match) => m.status === 'accepted') ?? [];
+  const pending  = data?.filter((m: Match) => m.status === 'pending')  ?? [];
 
   const listData = useMemo(() => {
     if (tab === 'active') return accepted;
@@ -44,7 +44,7 @@ export default function MatchesScreen() {
   if (isLoading) {
     return (
       <SafeAreaView style={styles.centered}>
-        <ActivityIndicator size="large" color={C.cyan} />
+        <ActivityIndicator size="large" color={dirApp.secondary} />
       </SafeAreaView>
     );
   }
@@ -52,9 +52,11 @@ export default function MatchesScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ResponsiveContainer style={{ flex: 1 }}>
-        <View style={styles.brandHeader}>
-          <SwipeHouseLogo size="sm" />
-          <Text style={styles.header}>{isLandlord ? 'צ׳אטים' : 'התאמות'}</Text>
+        <View style={styles.shellHeader}>
+          <Text style={[styles.headerBrand, dirType.heading, { color: dirApp.primary }]}>DirApp</Text>
+          <Text style={[styles.header, dirType.subhead, { color: dirApp.primary }]}>
+            {isLandlord ? 'צ׳אטים' : 'התאמות'}
+          </Text>
         </View>
 
         <View style={styles.tabRow}>
@@ -85,7 +87,7 @@ export default function MatchesScreen() {
             <RefreshControl
               refreshing={isRefetching}
               onRefresh={refetch}
-              tintColor={C.cyan}
+              tintColor={dirApp.secondary}
             />
           }
           renderItem={({ item, index }) => {
@@ -136,18 +138,26 @@ export default function MatchesScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: C.bg },
-  centered:  { flex: 1, backgroundColor: C.bg, justifyContent: 'center', alignItems: 'center' },
-  brandHeader: {
+  container: { flex: 1, backgroundColor: dirApp.background },
+  centered: {
+    flex: 1,
+    backgroundColor: dirApp.background,
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: 8,
-    paddingBottom: 4,
+  },
+  shellHeader: {
+    alignItems: 'center',
+    paddingTop: 10,
+    paddingBottom: 12,
+    marginBottom: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: `${dirApp.outlineVariant}55`,
     gap: 4,
   },
+  headerBrand: {},
   header: {
-    fontSize: 22, fontWeight: '800', color: C.text,
     alignSelf: 'stretch',
-    textAlign: 'right',
+    textAlign: 'center',
   },
   tabRow: {
     flexDirection: 'row-reverse',
@@ -159,31 +169,36 @@ const styles = StyleSheet.create({
   tabBtn: {
     paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 10,
-    backgroundColor: C.bgCard,
+    borderRadius: 999,
+    backgroundColor: dirApp.surfaceContainerLowest,
     borderWidth: 1,
-    borderColor: C.borderLight,
+    borderColor: `${dirApp.outlineVariant}AA`,
   },
   tabBtnActive: {
-    backgroundColor: C.navy,
-    borderColor: C.navy,
+    backgroundColor: dirApp.secondaryContainer,
+    borderColor: dirApp.secondary,
   },
   tabBtnText: {
     fontSize: 12,
     fontWeight: '700',
-    color: C.textSub,
+    color: dirApp.onSurfaceVariant,
   },
   tabBtnTextActive: {
-    color: C.onInverse.primary,
+    color: dirApp.onSecondaryContainer,
   },
   list: { paddingBottom: 24, paddingTop: 4 },
   sectionLabel: {
-    color: C.textSub, fontSize: 11, fontWeight: '700',
-    textAlign: 'right', marginBottom: 8, marginTop: 4,
-    textTransform: 'uppercase', letterSpacing: 0.5,
+    color: dirApp.outline,
+    fontSize: 11,
+    fontWeight: '700',
+    textAlign: 'right',
+    marginBottom: 8,
+    marginTop: 4,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   empty: { flex: 1, alignItems: 'center', paddingTop: 80, gap: 10 },
   emptyEmoji: { fontSize: 52 },
-  emptyTitle: { fontSize: 18, fontWeight: '700', color: C.text },
-  emptySub:   { fontSize: 13, color: C.textSub },
+  emptyTitle: { fontSize: 18, fontWeight: '700', color: dirApp.primary },
+  emptySub: { fontSize: 13, color: dirApp.outline },
 });

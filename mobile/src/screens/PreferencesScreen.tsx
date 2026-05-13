@@ -9,6 +9,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { recommendationsApi } from '../services/api';
 import type { Amenity, MainStackParamList } from '../types';
 import { C, Dark } from '../theme';
+import { dirApp } from '../theme/dirAppTokens';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
 import { dirType } from '../theme/textStyles';
 
@@ -206,7 +207,7 @@ export default function PreferencesScreen({ navigation }: Props) {
           disabled={saveMutation.isPending}
         >
           {saveMutation.isPending
-            ? <ActivityIndicator color={C.navy} />
+            ? <ActivityIndicator color={dirApp.primary} />
             : <Text style={[styles.saveBtnText, dirType.label]}>שמור העדפות</Text>
           }
         </TouchableOpacity>
@@ -241,5 +242,5 @@ const styles = StyleSheet.create({
   switchLabel: { color: C.onInverse.secondary, fontSize: 14 },
   saveBtn: { backgroundColor: C.cyan, borderRadius: 14, paddingVertical: 16, alignItems: 'center', marginTop: 28 },
   saveBtnDisabled: { opacity: 0.6 },
-  saveBtnText: { color: C.navy, fontSize: 16, fontWeight: '800' },
+  saveBtnText: { color: dirApp.primary, fontSize: 16, fontWeight: '800' },
 });

@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { C, Dark } from '../theme';
+import { dirApp } from '../theme/dirAppTokens';
 
 interface State { hasError: boolean }
 
@@ -51,5 +52,5 @@ const styles = StyleSheet.create({
     backgroundColor: C.cyan, borderRadius: 12,
     paddingVertical: 14, paddingHorizontal: 32, marginTop: 8,
   },
-  btnText: { color: C.navy, fontWeight: '700', fontSize: 15 },
+  btnText: { color: dirApp.primary, fontWeight: '700', fontSize: 15 },
 });

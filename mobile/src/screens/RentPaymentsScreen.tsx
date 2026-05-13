@@ -9,6 +9,7 @@ import { paymentApi, contractsApi } from '../services/api';
 import { useAuthStore } from '../store/useAuthStore';
 import { usePersonaIsLandlord } from '../navigation/AdminAppModeContext';
 import { C, Dark } from '../theme';
+import { dirApp } from '../theme/dirAppTokens';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
 import { dirType } from '../theme/textStyles';
 
@@ -292,7 +293,7 @@ export default function RentPaymentsScreen({ navigation }: any) {
                 disabled={!selectedContract || createMutation.isPending}
               >
                 {createMutation.isPending
-                  ? <ActivityIndicator size="small" color={C.navy} />
+                  ? <ActivityIndicator size="small" color={dirApp.primary} />
                   : <Text style={styles.sendBtnText}>שלח בקשה</Text>}
               </TouchableOpacity>
             </View>
@@ -373,5 +374,5 @@ const styles = StyleSheet.create({
   cancelBtnText: { color: C.textMut, fontWeight: '700' },
   sendBtn:        { flex: 2, padding: 14, borderRadius: 12, backgroundColor: C.cyan, alignItems: 'center' },
   sendBtnDisabled: { opacity: 0.4 },
-  sendBtnText:     { color: C.navy, fontWeight: '800', fontSize: 15 },
+  sendBtnText:     { color: dirApp.primary, fontWeight: '800', fontSize: 15 },
 });

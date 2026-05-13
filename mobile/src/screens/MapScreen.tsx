@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { apartmentsApi } from '../services/api';
 import { C, Dark } from '../theme';
+import { dirApp } from '../theme/dirAppTokens';
 import { resolveMapCoords } from '../constants/cityCenters';
 import SwipeHouseLogo from '../components/SwipeHouseLogo';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
@@ -58,12 +59,12 @@ export function buildHtml(markers: AptMarker[], tama38Url: string): string {
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body, #map { width: 100%; height: 100%; background: ${C.navy}; }
+    html, body, #map { width: 100%; height: 100%; background: ${dirApp.background}; }
     .apt-popup { font-family: sans-serif; text-align: right; direction: rtl; min-width: 140px; }
-    .apt-popup .price { color: ${C.cyan}; font-weight: 700; font-size: 15px; }
+    .apt-popup .price { color: ${dirApp.secondary}; font-weight: 700; font-size: 15px; }
     .apt-popup .meta  { color: ${C.textMut}; font-size: 12px; margin-top: 2px; }
     .apt-popup .title { font-weight: 600; font-size: 13px; margin-bottom: 4px; }
-    .apt-popup .badge { display: inline-block; background: ${C.gold}; color: ${C.navy}; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 6px; margin-bottom: 4px; }
+    .apt-popup .badge { display: inline-block; background: ${C.gold}; color: ${dirApp.primary}; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 6px; margin-bottom: 4px; }
     .apt-popup .approx { color: ${C.gold}; font-size: 11px; margin-top: 4px; }
     .tama-layer { fill: ${C.statusTone.caution}; fill-opacity: 0.18; stroke: ${C.statusTone.caution}; stroke-width: 1.5; }
   </style>
@@ -100,7 +101,7 @@ export function buildHtml(markers: AptMarker[], tama38Url: string): string {
     var label = '₪' + (price >= 1000 ? Math.round(price/1000) + 'K' : price);
     var w = promoted ? 78 : 64;
     var h = promoted ? 32 : 24;
-    var fill = promoted ? '${C.gold}' : '${C.cyan}';
+    var fill = promoted ? '${C.gold}' : '${dirApp.actionTeal}';
     var stroke = promoted ? '${C.onInverse.primary}' : 'none';
     var sw = promoted ? 2.5 : 0;
     var fs = promoted ? 12 : 11;
@@ -110,7 +111,7 @@ export function buildHtml(markers: AptMarker[], tama38Url: string): string {
       + (stroke !== 'none' ? ' stroke="' + stroke + '" stroke-width="' + sw + '"' : '')
       + (promoted ? ' filter="url(#glow)"' : '') + '/>'
       + '<text x="' + (w/2) + '" y="' + (h/2 + 5) + '" font-size="' + fs + '" font-family="sans-serif" font-weight="800" '
-      + 'fill="${C.navy}" text-anchor="middle">' + label + '</text></svg>';
+      + 'fill="${dirApp.primary}" text-anchor="middle">' + label + '</text></svg>';
     return L.divIcon({
       html: svg,
       className: '',
@@ -290,11 +291,11 @@ export default function MapScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ResponsiveContainer>
-        <View style={styles.toolbar}>
+          <View style={styles.toolbar}>
           <View style={styles.toolbarLeft}>
             <SwipeHouseLogo size="xs" />
-            <Ionicons name="map-outline" size={18} color={C.onInverse.primary} />
-            <Text style={[styles.toolbarTitle, dirType.subhead]}>מפת דירות</Text>
+            <Ionicons name="map-outline" size={18} color={dirApp.primary} />
+            <Text style={[styles.toolbarTitle, dirType.subhead, { color: dirApp.primary }]}>מפת דירות</Text>
             {markers.length > 0 && (
               <View style={styles.countBadge}>
                 <Text style={[styles.countText, dirType.micro]}>{markers.length}</Text>
@@ -307,7 +308,7 @@ export default function MapScreen() {
             <Switch
               value={tamaOn}
               onValueChange={handleTamaToggle}
-              trackColor={{ false: Dark.switchTrackOff, true: C.gold }}
+              trackColor={{ false: Dark.switchTrackOff, true: dirApp.secondary }}
               thumbColor={C.onInverse.primary}
               style={{ transform: [{ scaleX: 0.85 }, { scaleY: 0.85 }] }}
             />
@@ -317,7 +318,7 @@ export default function MapScreen() {
 
       {feedLoading ? (
         <View style={styles.loadingWrap}>
-          <ActivityIndicator size="large" color={C.cyan} />
+          <ActivityIndicator size="large" color={dirApp.secondary} />
           <Text style={[styles.loadingText, dirType.body]}>טוען דירות…</Text>
         </View>
       ) : Platform.OS === 'web' ? (
@@ -355,25 +356,35 @@ export default function MapScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Dark.bg },
+  container: { flex: 1, backgroundColor: dirApp.background },
   toolbar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 10,
-    backgroundColor: Dark.surface,
+    backgroundColor: dirApp.surfaceContainerLowest,
     borderBottomWidth: 1,
-    borderBottomColor: Dark.border,
+    borderBottomColor: `${dirApp.outlineVariant}88`,
+    shadowColor: dirApp.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 3,
   },
-  toolbarLeft:  { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  toolbarTitle: { color: C.onInverse.primary, fontSize: 16, fontWeight: '700' },
-  countBadge:   { backgroundColor: C.cyan, borderRadius: 10, paddingHorizontal: 7, paddingVertical: 2 },
-  countText:    { color: C.navy, fontSize: 11, fontWeight: '700' },
+  toolbarLeft: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  toolbarTitle: {},
+  countBadge: {
+    backgroundColor: dirApp.secondaryContainer,
+    borderRadius: 10,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+  },
+  countText: { color: dirApp.onSecondaryContainer, fontSize: 11, fontWeight: '700' },
   toolbarRight: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  tamaLabel:    { color: C.gold, fontSize: 12, fontWeight: '700' },
-  tamaHint:     { color: C.textMut, fontSize: 10, maxWidth: 100, textAlign: 'right' },
-  map:          { flex: 1 },
-  loadingWrap:  { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 16 },
-  loadingText:  { color: C.textMut, fontSize: 14 },
+  tamaLabel: { color: dirApp.secondary, fontSize: 12, fontWeight: '700' },
+  tamaHint: { color: dirApp.outline, fontSize: 10, maxWidth: 100, textAlign: 'right' },
+  map: { flex: 1 },
+  loadingWrap: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 16 },
+  loadingText: { color: dirApp.outline, fontSize: 14 },
 });

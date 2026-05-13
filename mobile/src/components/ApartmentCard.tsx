@@ -4,6 +4,7 @@ import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { C } from '../theme';
+import { dirApp } from '../theme/dirAppTokens';
 import type { Apartment } from '../types';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -97,10 +98,12 @@ const styles = StyleSheet.create({
   card: {
     width: CARD_WIDTH,
     height: CARD_HEIGHT,
-    borderRadius: 24,
+    borderRadius: 12,
     overflow: 'hidden',
-    backgroundColor: C.border,
-    shadowColor: C.navy,
+    backgroundColor: dirApp.surfaceContainer,
+    borderWidth: 1,
+    borderColor: `${dirApp.outlineVariant}55`,
+    shadowColor: dirApp.primary,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.12,
     shadowRadius: 20,

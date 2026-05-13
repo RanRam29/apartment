@@ -11,6 +11,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import { chatApi } from '../services/api';
 import type { Message } from '../types';
 import { C, Dark } from '../theme';
+import { dirApp } from '../theme/dirAppTokens';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
 import { dirType } from '../theme/textStyles';
 
@@ -113,8 +114,8 @@ export default function ChatScreen() {
               accessibilityLabel="שלח הודעה"
             >
               {sending
-                ? <ActivityIndicator size="small" color={C.navy} />
-                : <Ionicons name="send" size={18} color={C.navy} />
+                ? <ActivityIndicator size="small" color={dirApp.primary} />
+                : <Ionicons name="send" size={18} color={dirApp.primary} />
               }
             </TouchableOpacity>
             <TextInput
@@ -211,7 +212,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 4,
   },
   bubbleText: { fontSize: 15, lineHeight: 20 },
-  bubbleTextMe: { color: C.navy },
+  bubbleTextMe: { color: dirApp.primary },
   bubbleTextThem: { color: C.onInverse.secondary },
   bubbleMeta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 3, marginTop: 3 },
   bubbleTime: { fontSize: 10, color: C.onInverse.faint },

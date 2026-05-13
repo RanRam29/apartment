@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { formatDistanceToNow } from 'date-fns';
 import { he } from 'date-fns/locale';
 import { C } from '../theme';
+import { dirApp } from '../theme/dirAppTokens';
 import type { Match } from '../types';
 
 interface Props {
@@ -74,16 +75,16 @@ export default function MatchCard({ match, currentUserId, unreadCount, onPress }
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: C.bgCard,
+    backgroundColor: dirApp.surfaceContainerLowest,
     borderRadius: 16, padding: 12, marginBottom: 10, gap: 12,
-    borderWidth: 1, borderColor: C.border,
-    shadowColor: C.navy,
+    borderWidth: 1, borderColor: `${dirApp.outlineVariant}AA`,
+    shadowColor: dirApp.primary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04, shadowRadius: 6, elevation: 2,
   },
   thumb: { width: 62, height: 62, borderRadius: 12 },
   info:  { flex: 1, gap: 3 },
-  title: { color: C.text, fontSize: 14, fontWeight: '600', textAlign: 'right' },
+  title: { color: dirApp.primary, fontSize: 14, fontWeight: '600', textAlign: 'right' },
   location: { color: C.textSub, fontSize: 12, textAlign: 'right' },
   partyRow: { flexDirection: 'row', alignItems: 'center', gap: 5, justifyContent: 'flex-end' },
   avatar: { width: 16, height: 16, borderRadius: 8 },
@@ -92,13 +93,14 @@ const styles = StyleSheet.create({
   right: { alignItems: 'flex-end', gap: 8 },
   time:  { color: C.textMut, fontSize: 11 },
   pendingBadge: {
-    backgroundColor: C.navyAlpha(0.08),
+    backgroundColor: `${dirApp.secondaryContainer}66`,
     borderRadius: 6, paddingHorizontal: 7, paddingVertical: 3,
   },
-  pendingText: { color: C.navy, fontSize: 10, fontWeight: '600' },
+  pendingText: { color: dirApp.secondary, fontSize: 10, fontWeight: '600' },
   unreadBadge: {
-    backgroundColor: C.cyan, borderRadius: 10,
+    backgroundColor: dirApp.secondary,
+    borderRadius: 10,
     minWidth: 20, height: 20, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 5,
   },
-  unreadText: { color: C.navy, fontSize: 11, fontWeight: '700' },
+  unreadText: { color: dirApp.onSecondary, fontSize: 11, fontWeight: '700' },
 });

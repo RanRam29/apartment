@@ -9,12 +9,12 @@ export const dirType = {
   display: {
     fontFamily: fontFamily.extrabold,
     fontSize: typography.size.display,
-    lineHeight: 32,
+    lineHeight: 48,
   } as TextStyle,
   hero: {
     fontFamily: fontFamily.bold,
     fontSize: typography.size.hero,
-    lineHeight: 28,
+    lineHeight: 32,
   } as TextStyle,
   title: {
     fontFamily: fontFamily.bold,
@@ -34,7 +34,7 @@ export const dirType = {
   body: {
     fontFamily: fontFamily.regular,
     fontSize: typography.size.body,
-    lineHeight: 20,
+    lineHeight: 26,
   } as TextStyle,
   label: {
     fontFamily: fontFamily.medium,

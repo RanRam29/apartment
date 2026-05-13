@@ -3,6 +3,7 @@ import { KeyboardAvoidingView, Platform, SafeAreaView, StyleSheet, Text, Touchab
 import LoginScreen from './LoginScreen';
 import RegisterScreen from './RegisterScreen';
 import { C } from '../theme';
+import { dirApp } from '../theme/dirAppTokens';
 import { fontFamily } from '../theme/fonts';
 import { useDirection } from '../hooks/useDirection';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
@@ -48,22 +49,27 @@ export default function AuthScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: C.bg },
-  kav:  { flex: 1 },
+  safe: { flex: 1, backgroundColor: dirApp.background },
+  kav: { flex: 1 },
   card: {
     flex: 1,
-    backgroundColor: C.bg,
+    backgroundColor: dirApp.background,
     overflow: 'hidden',
     paddingTop: 10,
   },
   tabsWrap: {
     marginHorizontal: 20,
-    backgroundColor: C.bgCard,
+    backgroundColor: dirApp.surfaceContainerLowest,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: C.borderLight,
+    borderColor: `${dirApp.outlineVariant}AA`,
     padding: 4,
     marginBottom: 10,
+    shadowColor: dirApp.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
   },
   tab: {
     flex: 1,
@@ -73,15 +79,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   tabActive: {
-    backgroundColor: C.navy,
+    backgroundColor: dirApp.secondaryContainer,
   },
   tabText: {
-    color: C.textSub,
+    color: dirApp.outline,
     fontFamily: fontFamily.medium,
     fontSize: 14,
   },
   tabTextActive: {
-    color: C.onInverse.primary,
+    color: dirApp.onSecondaryContainer,
     fontFamily: fontFamily.semibold,
   },
 });

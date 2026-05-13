@@ -7,7 +7,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../store/useAuthStore';
 import api from '../services/api';
-import { C, Dark } from '../theme';
+import { C } from '../theme';
+import { dirApp } from '../theme/dirAppTokens';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
 import { dirType } from '../theme/textStyles';
 
@@ -144,7 +145,7 @@ function DetailModal({ lease, isLandlord, onClose, onCamAdd }: {
           <View style={styles.detailHeader}>
             <Text style={styles.detailTitle} numberOfLines={1}>{lease.businessName}</Text>
             <TouchableOpacity onPress={onClose}>
-              <Ionicons name="close" size={22} color={C.onInverse.primary} />
+              <Ionicons name="close" size={22} color={dirApp.primary} />
             </TouchableOpacity>
           </View>
 
@@ -381,7 +382,7 @@ export default function CommercialScreen({ navigation }: any) {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="chevron-back" size={22} color={C.onInverse.primary} />
+          <Ionicons name="chevron-back" size={22} color={dirApp.primary} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, dirType.subhead]}>נדל"ן מסחרי</Text>
         {isLandlord && (
@@ -402,7 +403,7 @@ export default function CommercialScreen({ navigation }: any) {
       <ResponsiveContainer style={{ flex: 1 }}>
         {isLoading ? (
           <View style={styles.center}>
-            <ActivityIndicator size="large" color={C.cyan} />
+            <ActivityIndicator size="large" color={dirApp.secondary} />
           </View>
         ) : leases.length === 0 ? (
           <View style={styles.center}>
@@ -442,97 +443,174 @@ export default function CommercialScreen({ navigation }: any) {
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Dark.bg },
+  container: { flex: 1, backgroundColor: dirApp.background },
   header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 16, paddingVertical: 14,
-    backgroundColor: Dark.surface, borderBottomWidth: 1, borderBottomColor: Dark.border,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    backgroundColor: dirApp.surfaceContainerLowest,
+    borderBottomWidth: 1,
+    borderBottomColor: `${dirApp.outlineVariant}88`,
   },
-  backBtn:     { padding: 4 },
-  headerTitle: { color: C.onInverse.primary, fontSize: 17, fontWeight: '700' },
-  addBtn:      { backgroundColor: C.cyan, borderRadius: 20, padding: 6 },
+  backBtn: { padding: 4 },
+  headerTitle: { color: dirApp.primary, fontSize: 17, fontWeight: '700' },
+  addBtn: { backgroundColor: dirApp.secondary, borderRadius: 20, padding: 6 },
 
-  alertsBar: { backgroundColor: Dark.surface, borderBottomWidth: 1, borderBottomColor: Dark.border },
+  alertsBar: {
+    backgroundColor: dirApp.surfaceContainerLow,
+    borderBottomWidth: 1,
+    borderBottomColor: `${dirApp.outlineVariant}88`,
+  },
   alertBadge: {
-    flexDirection: 'row', alignItems: 'center', gap: 5,
-    borderWidth: 1.5, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 5,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    borderWidth: 1.5,
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
   },
   alertLabel: { fontSize: 11, fontWeight: '600' },
-  alertDays:  { fontSize: 10 },
+  alertDays: { fontSize: 10 },
 
-  center:     { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 },
-  emptyTitle: { color: C.onInverse.primary, fontSize: 16, fontWeight: '700' },
-  emptyHint:  { color: C.textMut, fontSize: 13, textAlign: 'center', paddingHorizontal: 40 },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 },
+  emptyTitle: { color: dirApp.primary, fontSize: 16, fontWeight: '700' },
+  emptyHint: { color: dirApp.outline, fontSize: 13, textAlign: 'center', paddingHorizontal: 40 },
 
   list: { padding: 16, gap: 12 },
 
-  card: { backgroundColor: Dark.surface, borderRadius: 14, padding: 16, gap: 6 },
-  cardRow:  { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-  cardLeft: { flex: 1, gap: 2 },
-  cardRight:{ alignItems: 'flex-end', gap: 4 },
-  bizName:  { color: C.onInverse.primary, fontSize: 15, fontWeight: '700' },
-  bizType:  { color: C.textMut, fontSize: 12 },
-  rent:     { color: C.cyan, fontSize: 17, fontWeight: '800' },
-  rentSub:  { fontSize: 11, color: C.textMut },
-  statusDot:{ width: 8, height: 8, borderRadius: 4 },
-  camLine:  { color: C.statusTone.caution, fontSize: 11 },
-  dates:    { color: C.textMut, fontSize: 11 },
-
-  // Detail modal
-  overlay:   { flex: 1, backgroundColor: 'rgba(0,0,0,0.65)', justifyContent: 'flex-end' },
-  detailBox: { backgroundColor: Dark.bg, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '88%' },
-  detailHeader: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    padding: 20, borderBottomWidth: 1, borderBottomColor: Dark.border,
+  card: {
+    backgroundColor: dirApp.surfaceContainerLowest,
+    borderRadius: 14,
+    padding: 16,
+    gap: 6,
+    borderWidth: 1,
+    borderColor: `${dirApp.outlineVariant}AA`,
+    shadowColor: dirApp.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  detailTitle:  { color: C.onInverse.primary, fontSize: 17, fontWeight: '700', flex: 1 },
+  cardRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+  cardLeft: { flex: 1, gap: 2 },
+  cardRight: { alignItems: 'flex-end', gap: 4 },
+  bizName: { color: dirApp.primary, fontSize: 15, fontWeight: '700' },
+  bizType: { color: dirApp.outline, fontSize: 12 },
+  rent: { color: dirApp.secondary, fontSize: 17, fontWeight: '800' },
+  rentSub: { fontSize: 11, color: dirApp.outline },
+  statusDot: { width: 8, height: 8, borderRadius: 4 },
+  camLine: { color: C.statusTone.caution, fontSize: 11 },
+  dates: { color: dirApp.outline, fontSize: 11 },
+
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.65)', justifyContent: 'flex-end' },
+  detailBox: {
+    backgroundColor: dirApp.background,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    maxHeight: '88%',
+  },
+  detailHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: `${dirApp.outlineVariant}88`,
+    backgroundColor: dirApp.surfaceContainerLowest,
+  },
+  detailTitle: { color: dirApp.primary, fontSize: 17, fontWeight: '700', flex: 1 },
   detailScroll: { padding: 20, gap: 8, paddingBottom: 40 },
 
   figureRow: { flexDirection: 'row', gap: 12, marginBottom: 8 },
-  figure:    { flex: 1, backgroundColor: Dark.surface, borderRadius: 12, padding: 12, alignItems: 'center' },
-  figureVal: { color: C.cyan, fontSize: 16, fontWeight: '800' },
-  figureLabel:{ color: C.textMut, fontSize: 11, marginTop: 2 },
+  figure: {
+    flex: 1,
+    backgroundColor: dirApp.surfaceContainerLow,
+    borderRadius: 12,
+    padding: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: `${dirApp.outlineVariant}66`,
+  },
+  figureVal: { color: dirApp.secondary, fontSize: 16, fontWeight: '800' },
+  figureLabel: { color: dirApp.outline, fontSize: 11, marginTop: 2 },
 
-  sectionTitle: { color: C.textMut, fontSize: 12, fontWeight: '700', marginTop: 12, marginBottom: 4 },
+  sectionTitle: { color: dirApp.outline, fontSize: 12, fontWeight: '700', marginTop: 12, marginBottom: 4 },
 
-  critRow:   { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 6,
-               borderBottomWidth: 1, borderBottomColor: Dark.surface },
-  critLabel: { flex: 1, color: C.onInverse.primary, fontSize: 13 },
-  critVal:   { color: C.textMut, fontSize: 13 },
+  critRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: `${dirApp.outlineVariant}44`,
+  },
+  critLabel: { flex: 1, color: dirApp.primary, fontSize: 13 },
+  critVal: { color: dirApp.outline, fontSize: 13 },
 
-  camRow:   { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 4 },
-  camYear:  { color: C.onInverse.primary, fontWeight: '700', width: 44 },
-  camEst:   { color: C.textMut, fontSize: 12, flex: 1 },
-  camDiff:  { fontSize: 12, fontWeight: '700' },
+  camRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 4 },
+  camYear: { color: dirApp.primary, fontWeight: '700', width: 44 },
+  camEst: { color: dirApp.outline, fontSize: 12, flex: 1 },
+  camDiff: { fontSize: 12, fontWeight: '700' },
 
-  camForm:  { flexDirection: 'row', gap: 8 },
+  camForm: { flexDirection: 'row', gap: 8 },
   camInput: {
-    flex: 1, backgroundColor: Dark.surface, borderRadius: 10,
-    paddingHorizontal: 12, paddingVertical: 8, color: C.onInverse.primary, fontSize: 13,
+    flex: 1,
+    backgroundColor: dirApp.surfaceContainerLowest,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    color: dirApp.onSurface,
+    fontSize: 13,
+    borderWidth: 1,
+    borderColor: `${dirApp.outlineVariant}AA`,
   },
   camSubmitBtn: {
-    backgroundColor: C.statusTone.caution, borderRadius: 10, padding: 12,
-    alignItems: 'center', marginTop: 8,
+    backgroundColor: C.statusTone.caution,
+    borderRadius: 10,
+    padding: 12,
+    alignItems: 'center',
+    marginTop: 8,
   },
   camSubmitText: { color: C.onInverse.primary, fontWeight: '700' },
 
-  notesText: { color: C.textMut, fontSize: 13, lineHeight: 20 },
+  notesText: { color: dirApp.outline, fontSize: 13, lineHeight: 20 },
 
-  // Create modal
   createBox: {
-    backgroundColor: Dark.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24,
-    padding: 24, maxHeight: '90%',
+    backgroundColor: dirApp.surfaceContainerLowest,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    maxHeight: '90%',
+    borderWidth: 1,
+    borderColor: `${dirApp.outlineVariant}AA`,
   },
-  createTitle: { color: C.onInverse.primary, fontSize: 18, fontWeight: '800', marginBottom: 16, textAlign: 'right' },
-  fieldWrap:   { marginBottom: 12 },
-  fieldLabel:  { color: C.textMut, fontSize: 11, marginBottom: 4, textAlign: 'right' },
-  fieldInput:  {
-    backgroundColor: Dark.surface, borderRadius: 10,
-    paddingHorizontal: 12, paddingVertical: 10, color: C.onInverse.primary, fontSize: 14,
+  createTitle: { color: dirApp.primary, fontSize: 18, fontWeight: '800', marginBottom: 16, textAlign: 'right' },
+  fieldWrap: { marginBottom: 12 },
+  fieldLabel: { color: dirApp.outline, fontSize: 11, marginBottom: 4, textAlign: 'right' },
+  fieldInput: {
+    backgroundColor: dirApp.background,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    color: dirApp.onSurface,
+    fontSize: 14,
+    borderWidth: 1,
+    borderColor: `${dirApp.outlineVariant}AA`,
   },
   createActions: { flexDirection: 'row', gap: 12, marginTop: 16 },
-  cancelBtn2:    { flex: 1, padding: 14, borderRadius: 12, backgroundColor: Dark.surface, alignItems: 'center' },
-  cancelBtn2Text:{ color: C.textMut, fontWeight: '700' },
-  createBtn:     { flex: 2, padding: 14, borderRadius: 12, backgroundColor: C.cyan, alignItems: 'center' },
-  createBtnText: { color: C.onInverse.primary, fontWeight: '800', fontSize: 15 },
+  cancelBtn2: {
+    flex: 1,
+    padding: 14,
+    borderRadius: 12,
+    backgroundColor: dirApp.surfaceContainerLow,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: `${dirApp.outlineVariant}AA`,
+  },
+  cancelBtn2Text: { color: dirApp.outline, fontWeight: '700' },
+  createBtn: { flex: 2, padding: 14, borderRadius: 12, backgroundColor: dirApp.secondary, alignItems: 'center' },
+  createBtnText: { color: dirApp.onSecondary, fontWeight: '800', fontSize: 15 },
 });

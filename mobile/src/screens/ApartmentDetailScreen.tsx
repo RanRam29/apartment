@@ -10,6 +10,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { apartmentsApi } from '../services/api';
 import type { MainStackParamList, Amenity } from '../types';
 import { C, Dark } from '../theme';
+import { dirApp } from '../theme/dirAppTokens';
 import SwipeHouseLogo from '../components/SwipeHouseLogo';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
 
@@ -449,7 +450,7 @@ const styles = StyleSheet.create({
   viewerArrowRight: { right: 14 },
   errorText: { color: C.danger, fontSize: 16, marginBottom: 16 },
   backBtn: { backgroundColor: C.cyan, paddingHorizontal: 20, paddingVertical: 10, borderRadius: 10 },
-  backBtnText: { color: C.navy, fontWeight: '700' },
+  backBtnText: { color: dirApp.primary, fontWeight: '700' },
   costCard: { backgroundColor: Dark.surface, borderRadius: 14, padding: 16, marginBottom: 20, borderWidth: 1, borderColor: Dark.border },
   costRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 6 },
   costLabel: { color: C.textMut, fontSize: 14, textAlign: 'right' },

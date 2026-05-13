@@ -10,6 +10,7 @@ import { recommendationsApi } from '../services/api';
 import { useAuthStore } from '../store/useAuthStore';
 import type { MainStackParamList } from '../types';
 import { C, Dark } from '../theme';
+import { dirApp } from '../theme/dirAppTokens';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
 import { dirType } from '../theme/textStyles';
 
@@ -215,7 +216,7 @@ const styles = StyleSheet.create({
     backgroundColor: C.cyan, borderRadius: 14,
     paddingVertical: 16, paddingHorizontal: 32, alignItems: 'center', width: '100%', marginTop: 8,
   },
-  primaryBtnText: { color: C.navy, fontWeight: '800', fontSize: 16 },
+  primaryBtnText: { color: dirApp.primary, fontWeight: '800', fontSize: 16 },
   skipText: { color: C.textMut, fontSize: 13 },
   backBtnWrap: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   row: { flexDirection: 'row', width: '100%' },

@@ -7,7 +7,8 @@ import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { landlordApi } from '../services/api';
 import type { LandlordDashboard as DashboardData } from '../types';
-import { C, Dark } from '../theme';
+import { C } from '../theme';
+import { dirApp } from '../theme/dirAppTokens';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
 import { useResponsive } from '../hooks/useResponsive';
 
@@ -32,7 +33,7 @@ export default function LandlordDashboard() {
   if (isLoading) {
     return (
       <SafeAreaView style={styles.centered}>
-        <ActivityIndicator size="large" color={C.cyan} />
+        <ActivityIndicator size="large" color={dirApp.secondary} />
       </SafeAreaView>
     );
   }
@@ -51,7 +52,7 @@ export default function LandlordDashboard() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
-        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={C.cyan} />}
+        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={dirApp.secondary} />}
         contentContainerStyle={styles.scroll}
       >
         <ResponsiveContainer>
@@ -274,88 +275,125 @@ function MatchStat({ label, value, color }: { label: string; value: number; colo
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Dark.bg },
-  centered: { flex: 1, backgroundColor: Dark.bg, justifyContent: 'center', alignItems: 'center' },
+  container: { flex: 1, backgroundColor: dirApp.background },
+  centered: { flex: 1, backgroundColor: dirApp.background, justifyContent: 'center', alignItems: 'center' },
   scroll: { paddingBottom: 40, paddingTop: 8 },
-  header: { fontSize: 22, fontWeight: '800', color: C.onInverse.primary, marginBottom: 16, textAlign: 'right' },
+  header: { fontSize: 22, fontWeight: '800', color: dirApp.primary, marginBottom: 16, textAlign: 'right' },
 
   kpiRow: { flexDirection: 'row', gap: 8, marginBottom: 12 },
   kpiCard: {
-    flex: 1, backgroundColor: Dark.surface, borderRadius: 12, padding: 10,
-    alignItems: 'center', gap: 4, borderTopWidth: 3,
+    flex: 1,
+    backgroundColor: dirApp.surfaceContainerLowest,
+    borderRadius: 12,
+    padding: 10,
+    alignItems: 'center',
+    gap: 4,
+    borderTopWidth: 3,
     borderWidth: 1,
-    borderColor: Dark.border,
+    borderColor: `${dirApp.outlineVariant}AA`,
+    shadowColor: dirApp.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
   },
-  kpiValue: { fontSize: 18, fontWeight: '800', color: C.onInverse.primary },
-  kpiLabel: { fontSize: 10, color: C.textMut },
+  kpiValue: { fontSize: 18, fontWeight: '800', color: dirApp.primary },
+  kpiLabel: { fontSize: 10, color: dirApp.outline },
 
-  section: { backgroundColor: Dark.surface, borderRadius: 16, padding: 14, marginBottom: 12, borderWidth: 1, borderColor: Dark.border },
-  sectionTitle: { fontSize: 14, fontWeight: '700', color: C.onInverse.primary, textAlign: 'right', marginBottom: 10 },
+  section: {
+    backgroundColor: dirApp.surfaceContainerLow,
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: `${dirApp.outlineVariant}AA`,
+  },
+  sectionTitle: { fontSize: 14, fontWeight: '700', color: dirApp.primary, textAlign: 'right', marginBottom: 10 },
 
   matchRow: { flexDirection: 'row', justifyContent: 'space-around' },
   matchStat: { alignItems: 'center', gap: 4 },
   matchStatValue: { fontSize: 24, fontWeight: '800' },
-  matchStatLabel: { fontSize: 11, color: C.textMut },
+  matchStatLabel: { fontSize: 11, color: dirApp.outline },
 
   chartHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
   periodRow: { flexDirection: 'row', gap: 4 },
   periodBtn: {
-    paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8,
-    backgroundColor: Dark.inset,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    backgroundColor: dirApp.surfaceContainerLowest,
+    borderWidth: 1,
+    borderColor: `${dirApp.outlineVariant}88`,
   },
-  periodBtnActive: { backgroundColor: Dark.periodActive },
-  periodBtnText: { color: C.textMut, fontSize: 10, fontWeight: '600' },
-  periodBtnTextActive: { color: C.cyan },
+  periodBtnActive: { backgroundColor: dirApp.secondaryContainer, borderColor: dirApp.secondary },
+  periodBtnText: { color: dirApp.outline, fontSize: 10, fontWeight: '600' },
+  periodBtnTextActive: { color: dirApp.onSecondaryContainer },
 
   chartSummary: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  chartTotal: { fontSize: 22, fontWeight: '800', color: C.onInverse.primary, textAlign: 'right' },
-  chartTotalLabel: { fontSize: 10, color: C.textMut, textAlign: 'right' },
+  chartTotal: { fontSize: 22, fontWeight: '800', color: dirApp.primary, textAlign: 'right' },
+  chartTotalLabel: { fontSize: 10, color: dirApp.outline, textAlign: 'right' },
   wowBadge: {
-    flexDirection: 'row', alignItems: 'center', gap: 4,
-    paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 10,
   },
   wowBadgeUp: { backgroundColor: C.successAlpha(0.12) },
   wowBadgeDown: { backgroundColor: C.dangerMutedAlpha(0.12) },
   wowText: { fontSize: 11, fontWeight: '700' },
 
   tooltip: {
-    alignSelf: 'center', backgroundColor: Dark.surface,
-    borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6,
-    marginBottom: 6, alignItems: 'center',
+    alignSelf: 'center',
+    backgroundColor: dirApp.surfaceContainerLowest,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    marginBottom: 6,
+    alignItems: 'center',
     borderWidth: 1,
-    borderColor: Dark.border,
+    borderColor: `${dirApp.outlineVariant}AA`,
   },
-  tooltipDate: { color: C.textMut, fontSize: 10 },
-  tooltipCount: { color: C.onInverse.primary, fontSize: 13, fontWeight: '700' },
+  tooltipDate: { color: dirApp.outline, fontSize: 10 },
+  tooltipCount: { color: dirApp.primary, fontSize: 13, fontWeight: '700' },
 
   barsContainer: { flexDirection: 'row', alignItems: 'flex-end', gap: 2 },
   barWrap: { alignItems: 'center', justifyContent: 'flex-end', gap: 3 },
-  bar: { backgroundColor: C.cyan, borderRadius: 3, opacity: 0.85 },
-  barSelected: { backgroundColor: C.cyan, opacity: 1 },
-  barWeekend: { backgroundColor: C.navyMid, opacity: 0.95 },
-  barLabel: { fontSize: 8, color: C.textMut, width: '100%', textAlign: 'center' },
+  bar: { backgroundColor: dirApp.secondary, borderRadius: 3, opacity: 0.85 },
+  barSelected: { backgroundColor: dirApp.secondary, opacity: 1 },
+  barWeekend: { backgroundColor: dirApp.outlineVariant, opacity: 0.95 },
+  barLabel: { fontSize: 8, color: dirApp.outline, width: '100%', textAlign: 'center' },
 
   leadRow: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: Dark.border,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: `${dirApp.outlineVariant}66`,
   },
   leadInfo: { flex: 1 },
-  leadName: { color: C.onInverse.primary, fontSize: 13, fontWeight: '600', textAlign: 'right' },
-  leadApt: { color: C.textMut, fontSize: 11, textAlign: 'right' },
+  leadName: { color: dirApp.primary, fontSize: 13, fontWeight: '600', textAlign: 'right' },
+  leadApt: { color: dirApp.outline, fontSize: 11, textAlign: 'right' },
   pendingTag: { backgroundColor: C.goldAlpha(0.15), borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 },
   pendingTagText: { color: C.statusTone.caution, fontSize: 11, fontWeight: '600' },
 
   listingRow: {
-    flexDirection: 'row', alignItems: 'center', gap: 10,
-    paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: Dark.border,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: `${dirApp.outlineVariant}66`,
   },
   activeIndicator: { width: 8, height: 8, borderRadius: 4 },
   listingInfo: { flex: 1, gap: 3 },
-  listingTitle: { color: C.onInverse.primary, fontSize: 13, fontWeight: '600', textAlign: 'right' },
-  listingMeta: { color: C.textMut, fontSize: 11, textAlign: 'right' },
-  perfBarTrack: { height: 3, backgroundColor: C.navyMidAlpha(0.6), borderRadius: 2, overflow: 'hidden' },
-  perfBarFill: { height: 3, backgroundColor: C.cyan, borderRadius: 2 },
+  listingTitle: { color: dirApp.primary, fontSize: 13, fontWeight: '600', textAlign: 'right' },
+  listingMeta: { color: dirApp.outline, fontSize: 11, textAlign: 'right' },
+  perfBarTrack: { height: 3, backgroundColor: `${dirApp.outlineVariant}55`, borderRadius: 2, overflow: 'hidden' },
+  perfBarFill: { height: 3, backgroundColor: dirApp.secondary, borderRadius: 2 },
   listingStats: { gap: 4, alignItems: 'flex-end' },
   statPill: { flexDirection: 'row', alignItems: 'center', gap: 3 },
-  listingStatText: { color: C.textMut, fontSize: 11 },
+  listingStatText: { color: dirApp.outline, fontSize: 11 },
 });

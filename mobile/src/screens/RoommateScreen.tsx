@@ -9,6 +9,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigation } from '@react-navigation/native';
 import { roommateApi } from '../services/api';
 import { C, Dark } from '../theme';
+import { dirApp } from '../theme/dirAppTokens';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
 import { dirType } from '../theme/textStyles';
 
@@ -319,7 +320,7 @@ const styles = StyleSheet.create({
   tab: { flex: 1, paddingVertical: 9, alignItems: 'center', borderRadius: 10 },
   tabActive: { backgroundColor: C.cyan },
   tabText: { color: C.textMut, fontWeight: '600', fontSize: 14 },
-  tabTextActive: { color: C.navy },
+  tabTextActive: { color: dirApp.primary },
   scroll: { flex: 1 },
   formWrap: { padding: 16, paddingBottom: 40 },
   toggleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: Dark.surface, padding: 16, borderRadius: 14, marginBottom: 12, borderWidth: 1, borderColor: Dark.border },
@@ -330,13 +331,13 @@ const styles = StyleSheet.create({
   optionBtn: { flex: 1, minWidth: 60, paddingVertical: 8, paddingHorizontal: 4, borderRadius: 10, backgroundColor: Dark.inset, alignItems: 'center', borderWidth: 1, borderColor: Dark.border },
   optionBtnActive: { backgroundColor: C.cyan, borderColor: C.cyan },
   optionBtnText: { color: C.textMut, fontSize: 11, fontWeight: '600', textAlign: 'center' },
-  optionBtnTextActive: { color: C.navy },
+  optionBtnTextActive: { color: dirApp.primary },
   boolRow: { flexDirection: 'row', gap: 8, marginBottom: 20 },
   boolItem: { flex: 1, backgroundColor: Dark.surface, borderRadius: 14, padding: 12, alignItems: 'center', gap: 8, borderWidth: 1, borderColor: Dark.border },
   boolLabel: { color: C.textMut, fontSize: 12, fontWeight: '600', textAlign: 'center' },
   saveBtn: { backgroundColor: C.cyan, paddingVertical: 14, borderRadius: 14, alignItems: 'center' },
   saveBtnDisabled: { opacity: 0.6 },
-  saveBtnText: { color: C.navy, fontWeight: '800', fontSize: 15 },
+  saveBtnText: { color: dirApp.primary, fontWeight: '800', fontSize: 15 },
   emptyWrap: { alignItems: 'center', paddingTop: 60, gap: 12 },
   emptyText: { color: C.textMut, fontSize: 16, fontWeight: '600' },
   emptyHint: { color: C.textMut, fontSize: 13, textAlign: 'center', paddingHorizontal: 32 },

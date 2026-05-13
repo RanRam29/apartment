@@ -21,6 +21,7 @@ import { useNavigation } from '@react-navigation/native';
 import { recommendationsApi } from '../services/api';
 import type { Apartment } from '../types';
 import { C } from '../theme';
+import { dirApp } from '../theme/dirAppTokens';
 
 const FILTER_LABEL: Record<string, string> = {
   city: 'עיר',
@@ -183,7 +184,7 @@ export default function ApartmentSearchChatbot() {
         accessibilityLabel="פתח חיפוש דירות בצ׳אט"
         activeOpacity={0.9}
       >
-        <Ionicons name="chatbubbles" size={26} color={C.navy} />
+        <Ionicons name="chatbubbles" size={26} color={dirApp.primary} />
       </TouchableOpacity>
 
       <Modal visible={open} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setOpen(false)}>
@@ -286,7 +287,7 @@ export default function ApartmentSearchChatbot() {
                 accessibilityRole="button"
                 accessibilityLabel="שלח הודעה"
               >
-                <Ionicons name="send" size={20} color={C.navy} />
+                <Ionicons name="send" size={20} color={dirApp.primary} />
               </TouchableOpacity>
               <TextInput
                 style={styles.input}
@@ -323,12 +324,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     zIndex: 50,
     elevation: 12,
-    shadowColor: C.navy,
+    shadowColor: dirApp.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 8,
   },
-  modalRoot: { flex: 1, backgroundColor: C.navy },
+  modalRoot: { flex: 1, backgroundColor: dirApp.primary },
   flex: { flex: 1 },
   modalHeader: {
     flexDirection: 'row',
@@ -357,7 +358,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
   },
   bubbleBot: {
-    backgroundColor: C.navyMid,
+    backgroundColor: dirApp.inverseSurface,
     alignSelf: 'stretch',
     borderWidth: 1,
     borderColor: BORDER,
@@ -368,7 +369,7 @@ const styles = StyleSheet.create({
     lineHeight: 21,
     textAlign: 'right',
   },
-  bubbleTextUser: { color: C.navy, fontWeight: '600' },
+  bubbleTextUser: { color: dirApp.primary, fontWeight: '600' },
   thinking: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -380,7 +381,7 @@ const styles = StyleSheet.create({
   apartmentStripContent: { gap: 10, paddingVertical: 4 },
   miniCard: {
     width: 132,
-    backgroundColor: C.navyMid,
+    backgroundColor: dirApp.inverseSurface,
     borderRadius: 12,
     padding: 8,
     borderWidth: 1,
@@ -397,12 +398,12 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderTopWidth: 1,
     borderTopColor: BORDER,
-    backgroundColor: C.navy,
+    backgroundColor: dirApp.primary,
   },
   input: {
     flex: 1,
     maxHeight: 100,
-    backgroundColor: C.navyMid,
+    backgroundColor: dirApp.surfaceTint,
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 10,

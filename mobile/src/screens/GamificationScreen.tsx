@@ -7,12 +7,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { gamificationApi } from '../services/api';
 import { C, Dark } from '../theme';
+import { dirApp } from '../theme/dirAppTokens';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
 import { dirType } from '../theme/textStyles';
 
 // ─── Theme constants ──────────────────────────────────────────────────────────
 const BG       = Dark.bg;
-const CARD     = C.navyMid;
+const CARD     = dirApp.surfaceTint;
 const ACCENT   = C.cyan;
 const TEXT     = C.onInverse.primary;
 const TEXT_SUB = C.textMut;

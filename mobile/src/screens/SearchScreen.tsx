@@ -11,6 +11,8 @@ import { useNavigation } from '@react-navigation/native';
 import { recommendationsApi, apartmentsApi } from '../services/api';
 import type { Apartment } from '../types';
 import { C } from '../theme';
+import { dirApp } from '../theme/dirAppTokens';
+import { dirType } from '../theme/textStyles';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
 
 const CITIES = [
@@ -103,11 +105,25 @@ export default function SearchScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ResponsiveContainer style={{ flex: 1 }}>
-        <View style={styles.headerRow}>
-          <Text style={styles.header}>חיפוש חכם</Text>
-          <Ionicons name="search" size={22} color={C.cyan} style={styles.headerIcon} />
+        <View style={styles.headerShell}>
+          <View style={styles.headerTop}>
+            <Text style={[styles.pageTitle, dirType.subhead, { color: dirApp.primary }]}>חיפוש דירות</Text>
+            <TouchableOpacity
+              style={styles.mapPill}
+              onPress={() => navigation.navigate('Map')}
+              accessibilityRole="button"
+              accessibilityLabel="פתח מפת דירות"
+            >
+              <Ionicons name="map-outline" size={18} color={dirApp.onSecondaryContainer} />
+              <Text style={[styles.mapPillText, dirType.label, { color: dirApp.onSecondaryContainer }]}>
+                תצוגת מפה
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={[styles.subtitle, dirType.body, { color: dirApp.outline }]}>
+            תאר את הדירה שאתה מחפש בעברית חופשית
+          </Text>
         </View>
-        <Text style={styles.subtitle}>תאר את הדירה שאתה מחפש בעברית חופשית</Text>
 
         {/* Search bar */}
         <View style={styles.searchRow}>
@@ -117,8 +133,8 @@ export default function SearchScreen() {
             disabled={searchMutation.isPending || (!query.trim() && !hasManualFilters)}
           >
             {searchMutation.isPending
-              ? <ActivityIndicator size="small" color={C.navy} />
-              : <Ionicons name="search" size={20} color={C.navy} />
+              ? <ActivityIndicator size="small" color={C.onInverse.primary} />
+              : <Ionicons name="search" size={20} color={C.onInverse.primary} />
             }
           </TouchableOpacity>
           <View style={styles.inputWrap}>
@@ -145,7 +161,7 @@ export default function SearchScreen() {
             <Ionicons
               name="options"
               size={20}
-              color={showFilters || hasManualFilters ? C.navy : C.textMut}
+              color={showFilters || hasManualFilters ? dirApp.secondary : dirApp.outline}
             />
           </TouchableOpacity>
         </View>
@@ -326,41 +342,65 @@ function ResultCard({ apartment, onPress }: { apartment: Apartment; onPress: () 
   );
 }
 
-const BORDER_SUBTLE = 'rgba(0, 229, 255, 0.14)';
+const OUTLINE_BORDER = `${dirApp.outlineVariant}AA`;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: C.navy },
-  headerRow: {
+  container: { flex: 1, backgroundColor: dirApp.background },
+  headerShell: {
+    paddingTop: 12,
+    paddingBottom: 8,
+    marginBottom: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: `${dirApp.outlineVariant}55`,
+  },
+  headerTop: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-end',
-    paddingTop: 20,
-    paddingBottom: 4,
-    gap: 10,
+    justifyContent: 'space-between',
+    marginBottom: 8,
   },
-  header: { fontSize: 22, fontWeight: '800', color: C.onInverse.primary, textAlign: 'right' },
-  headerIcon: { marginTop: 2 },
-  subtitle: { color: C.textMut, fontSize: 13, textAlign: 'right', marginBottom: 12 },
+  pageTitle: { flex: 1, textAlign: 'right' },
+  mapPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: dirApp.secondaryContainer,
+    shadowColor: dirApp.primary,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  mapPillText: {},
+  subtitle: { textAlign: 'right', marginBottom: 8 },
 
   searchRow: { flexDirection: 'row', gap: 8, marginBottom: 8, alignItems: 'center' },
   inputWrap: { flex: 1, position: 'relative', justifyContent: 'center' },
   searchInput: {
-    backgroundColor: C.navyMid,
+    backgroundColor: dirApp.surfaceContainerLowest,
     borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 14,
     paddingLeft: 36,
-    color: C.onInverse.primary,
-    fontSize: 14,
+    color: dirApp.onSurface,
+    fontSize: 16,
     borderWidth: 1,
-    borderColor: BORDER_SUBTLE,
+    borderColor: OUTLINE_BORDER,
+    shadowColor: dirApp.primary,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 1,
   },
   clearBtn: { position: 'absolute', left: 10 },
   searchBtn: {
     width: 48,
     height: 48,
     borderRadius: 12,
-    backgroundColor: C.cyan,
+    backgroundColor: dirApp.secondary,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -369,62 +409,62 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 12,
-    backgroundColor: C.navyMid,
+    backgroundColor: dirApp.surfaceContainerLowest,
     borderWidth: 1,
-    borderColor: BORDER_SUBTLE,
+    borderColor: OUTLINE_BORDER,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  filterToggleBtnActive: { backgroundColor: C.cyan, borderColor: C.cyan },
+  filterToggleBtnActive: { backgroundColor: dirApp.secondaryContainer, borderColor: dirApp.secondary },
 
   filterPanel: {
     marginBottom: 8,
-    backgroundColor: C.navyMid,
+    backgroundColor: dirApp.surfaceContainerLow,
     borderRadius: 14,
     padding: 14,
     gap: 10,
     borderWidth: 1,
-    borderColor: BORDER_SUBTLE,
+    borderColor: OUTLINE_BORDER,
   },
-  filterLabel: { color: C.textMut, fontSize: 11, fontWeight: '600', textAlign: 'right' },
+  filterLabel: { color: dirApp.outline, fontSize: 11, fontWeight: '600', textAlign: 'right' },
   cityScroll: { flexGrow: 0 },
   chip: {
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
-    backgroundColor: C.navy,
+    backgroundColor: dirApp.surfaceContainerLowest,
     borderWidth: 1,
-    borderColor: BORDER_SUBTLE,
+    borderColor: OUTLINE_BORDER,
     marginRight: 6,
   },
-  chipActive: { backgroundColor: C.cyanAlpha(0.18), borderColor: C.cyan },
-  chipText: { color: C.textMut, fontSize: 12 },
-  chipTextActive: { color: C.cyan, fontWeight: '600' },
+  chipActive: { backgroundColor: dirApp.secondary, borderColor: dirApp.secondary },
+  chipText: { color: dirApp.onSurfaceVariant, fontSize: 12 },
+  chipTextActive: { color: dirApp.onSecondary, fontWeight: '600' },
 
   roomsRow: { flexDirection: 'row', gap: 8 },
   roomBtn: {
     flex: 1,
     paddingVertical: 8,
     borderRadius: 10,
-    backgroundColor: C.navy,
+    backgroundColor: dirApp.surfaceContainerLowest,
     borderWidth: 1,
-    borderColor: BORDER_SUBTLE,
+    borderColor: OUTLINE_BORDER,
     alignItems: 'center',
   },
-  roomBtnActive: { backgroundColor: C.cyanAlpha(0.18), borderColor: C.cyan },
-  roomBtnText: { color: C.textMut, fontSize: 13, fontWeight: '600' },
-  roomBtnTextActive: { color: C.cyan },
+  roomBtnActive: { backgroundColor: `${dirApp.secondaryContainer}55`, borderColor: dirApp.secondary },
+  roomBtnText: { color: dirApp.onSurfaceVariant, fontSize: 13, fontWeight: '600' },
+  roomBtnTextActive: { color: dirApp.secondary },
 
   filterRow: { flexDirection: 'row', gap: 10, alignItems: 'flex-end' },
   priceInput: {
-    backgroundColor: C.navy,
+    backgroundColor: dirApp.surfaceContainerLowest,
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    color: C.onInverse.primary,
+    color: dirApp.onSurface,
     fontSize: 13,
     borderWidth: 1,
-    borderColor: BORDER_SUBTLE,
+    borderColor: OUTLINE_BORDER,
     marginTop: 4,
   },
   petsBtn: {
@@ -434,77 +474,82 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 10,
-    backgroundColor: C.navy,
+    backgroundColor: dirApp.surfaceContainerLowest,
     borderWidth: 1,
-    borderColor: BORDER_SUBTLE,
+    borderColor: OUTLINE_BORDER,
   },
-  petsBtnActive: { backgroundColor: C.cyanAlpha(0.18), borderColor: C.cyan },
+  petsBtnActive: { backgroundColor: `${dirApp.secondaryContainer}55`, borderColor: dirApp.secondary },
   petsBtnText: { fontSize: 14 },
-  petsBtnLabel: { color: C.textMut, fontSize: 11 },
-  petsBtnLabelActive: { color: C.cyan },
+  petsBtnLabel: { color: dirApp.outline, fontSize: 11 },
+  petsBtnLabelActive: { color: dirApp.secondary },
   clearFiltersBtn: { alignItems: 'flex-end' },
-  clearFiltersText: { color: C.coral, fontSize: 12 },
+  clearFiltersText: { color: C.danger, fontSize: 12 },
 
   parsedRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 },
   parsedChip: {
-    backgroundColor: C.cyanAlpha(0.12),
+    backgroundColor: `${dirApp.secondaryContainer}44`,
     borderRadius: 8,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderWidth: 1,
-    borderColor: C.cyanAlpha(0.28),
+    borderColor: `${dirApp.secondary}44`,
   },
-  parsedChipText: { color: C.cyan, fontSize: 11, fontWeight: '600' },
+  parsedChipText: { color: dirApp.onSecondaryContainer, fontSize: 11, fontWeight: '600' },
 
   suggestions: { paddingVertical: 16, gap: 8 },
-  suggestionsLabel: { color: C.textMut, fontSize: 12, textAlign: 'right', marginBottom: 4 },
+  suggestionsLabel: { color: dirApp.outline, fontSize: 12, textAlign: 'right', marginBottom: 4 },
   suggestionChip: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: C.navyMid,
+    backgroundColor: dirApp.surfaceContainer,
     borderRadius: 10,
     padding: 12,
     justifyContent: 'flex-end',
     borderWidth: 1,
-    borderColor: BORDER_SUBTLE,
+    borderColor: OUTLINE_BORDER,
   },
-  suggestionText: { color: C.bgCard, fontSize: 13, flex: 1, textAlign: 'right' },
+  suggestionText: { color: dirApp.onSurface, fontSize: 13, flex: 1, textAlign: 'right' },
 
   errorBox: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, padding: 32 },
-  errorText: { color: C.textMut, fontSize: 14, textAlign: 'center' },
+  errorText: { color: dirApp.outline, fontSize: 14, textAlign: 'center' },
   retryBtn: {
-    backgroundColor: C.cyan,
+    backgroundColor: dirApp.secondary,
     borderRadius: 10,
     paddingHorizontal: 24,
     paddingVertical: 10,
   },
-  retryBtnText: { color: C.navy, fontWeight: '700', fontSize: 14 },
+  retryBtnText: { color: dirApp.onSecondary, fontWeight: '700', fontSize: 14 },
 
   loadingBox: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 },
-  loadingText: { color: C.textMut, fontSize: 14 },
+  loadingText: { color: dirApp.outline, fontSize: 14 },
 
   resultsList: { paddingVertical: 12, gap: 10 },
   resultCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: C.navyMid,
+    backgroundColor: dirApp.surfaceContainerLowest,
     borderRadius: 14,
     padding: 10,
     gap: 10,
     borderWidth: 1,
-    borderColor: BORDER_SUBTLE,
+    borderColor: OUTLINE_BORDER,
+    shadowColor: dirApp.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
   },
   resultThumb: { width: 68, height: 68, borderRadius: 10 },
   resultInfo: { flex: 1, gap: 2 },
-  resultTitle: { color: C.onInverse.primary, fontSize: 13, fontWeight: '600', textAlign: 'right' },
-  resultMeta: { color: C.textMut, fontSize: 11, textAlign: 'right' },
-  resultPrice: { color: C.cyan, fontSize: 13, fontWeight: '700', textAlign: 'right' },
-  resultAmenities: { color: C.textMut, fontSize: 10, textAlign: 'right', opacity: 0.85 },
+  resultTitle: { color: dirApp.primary, fontSize: 13, fontWeight: '600', textAlign: 'right' },
+  resultMeta: { color: dirApp.outline, fontSize: 11, textAlign: 'right' },
+  resultPrice: { color: dirApp.secondary, fontSize: 13, fontWeight: '700', textAlign: 'right' },
+  resultAmenities: { color: dirApp.outline, fontSize: 10, textAlign: 'right', opacity: 0.9 },
   verifiedIcon: { marginLeft: 2 },
 
   noResults: { alignItems: 'center', paddingTop: 60, gap: 8 },
   noResultsEmoji: { fontSize: 48 },
-  noResultsText: { fontSize: 16, fontWeight: '700', color: C.onInverse.primary },
-  noResultsSub: { fontSize: 13, color: C.textMut },
+  noResultsText: { fontSize: 16, fontWeight: '700', color: dirApp.primary },
+  noResultsSub: { fontSize: 13, color: dirApp.outline },
 });

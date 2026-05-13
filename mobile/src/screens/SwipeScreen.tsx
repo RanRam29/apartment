@@ -10,8 +10,9 @@ import { useSwipeStore } from '../store/useSwipeStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { usePersonaIsLandlord } from '../navigation/AdminAppModeContext';
 import SwipeableCard from '../components/SwipeableCard';
-import SwipeHouseLogo from '../components/SwipeHouseLogo';
 import { C } from '../theme';
+import { dirApp } from '../theme/dirAppTokens';
+import { dirType } from '../theme/textStyles';
 import type { Apartment, SwipeDirection } from '../types';
 
 const FREE_DAILY_LIMIT = 20;
@@ -152,12 +153,23 @@ export default function SwipeScreen() {
     );
   }
 
+  const quotaFilled = Math.min(
+    5,
+    Math.round((dailyUsed / Math.max(effectiveLimit, 1)) * 5),
+  );
+
   return (
     <SafeAreaView style={styles.container}>
-      {/* ── Header ── */}
+      {/* ── Header (DirApp shell) ── */}
       <View style={styles.header}>
-        <View style={styles.headerSide} />
-        <SwipeHouseLogo size="sm" />
+        <View style={styles.headerLeft}>
+          <TouchableOpacity style={styles.headerIconBtn} onPress={() => navigation.navigate('Profile')} accessibilityRole="button">
+            <Ionicons name="menu-outline" size={22} color={dirApp.primary} />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.headerCenter}>
+          <Text style={[styles.headerBrand, dirType.heading, { color: dirApp.primary }]}>DirApp</Text>
+        </View>
         <View style={styles.headerRight}>
           {!isPremium && (
             <View style={[
@@ -172,6 +184,23 @@ export default function SwipeScreen() {
           </View>
         </View>
       </View>
+
+      {!isPremium && (
+        <View style={styles.quotaStrip}>
+          <Text style={[styles.quotaStripLabel, dirType.label, { color: dirApp.primary }]}>סוויפים יומיים</Text>
+          <View style={styles.quotaSegments}>
+            {Array.from({ length: 5 }, (_, i) => (
+              <View
+                key={i}
+                style={[
+                  styles.quotaSeg,
+                  i < quotaFilled ? styles.quotaSegOn : styles.quotaSegOff,
+                ]}
+              />
+            ))}
+          </View>
+        </View>
+      )}
 
       {/* ── Card stack ── */}
       <View style={styles.deckContainer}>
@@ -192,23 +221,27 @@ export default function SwipeScreen() {
       <View style={styles.actions}>
         <ActionButton
           icon="close"
-          color={C.coral}
-          bgColor={C.coralAlpha(0.08)}
-          size={26}
+          iconColor={C.danger}
+          bgColor={C.bgCard}
+          borderColor={dirApp.errorContainer}
+          size={28}
           onPress={() => handleButtonSwipe('dislike')}
         />
         <ActionButton
           icon="star"
-          color={C.navy}
-          bgColor={C.navyAlpha(0.06)}
-          size={20}
+          iconColor={C.secondaryTeal}
+          bgColor={C.bgCard}
+          borderColor={dirApp.secondaryContainer}
+          size={22}
           onPress={() => handleButtonSwipe('superlike')}
         />
         <ActionButton
           icon="heart"
-          color={C.cyan}
-          bgColor={C.cyanAlpha(0.08)}
-          size={26}
+          iconColor={C.onInverse.primary}
+          bgColor={C.primary}
+          borderColor="transparent"
+          size={28}
+          filled
           onPress={() => handleButtonSwipe('like')}
         />
       </View>
@@ -217,7 +250,7 @@ export default function SwipeScreen() {
       {undoVisible && (
         <Animated.View style={[styles.undoFab, { opacity: undoOpacity }]}>
           <TouchableOpacity onPress={handleUndo} style={styles.undoBtn}>
-            <Ionicons name="arrow-undo" size={16} color={C.navy} />
+            <Ionicons name="arrow-undo" size={16} color={dirApp.primary} />
             <Text style={styles.undoBtnText}>בטל</Text>
           </TouchableOpacity>
         </Animated.View>
@@ -247,8 +280,8 @@ export default function SwipeScreen() {
       <Modal visible={quotaExceeded} transparent animationType="fade">
         <View style={styles.overlay}>
           <View style={styles.modalCard}>
-            <View style={[styles.matchIconRow, { backgroundColor: C.navyAlpha(0.06) }]}>
-              <Ionicons name="flash" size={36} color={C.navy} />
+            <View style={[styles.matchIconRow, { backgroundColor: `${dirApp.primary}0F` }]}>
+              <Ionicons name="flash" size={36} color={dirApp.primary} />
             </View>
             <Text style={styles.matchTitle}>הגעת למגבלה</Text>
             <Text style={styles.matchSub}>
@@ -268,33 +301,47 @@ export default function SwipeScreen() {
   );
 }
 
-function ActionButton({ icon, color, bgColor, size, onPress }: {
+function ActionButton({
+  icon,
+  iconColor,
+  bgColor,
+  borderColor,
+  size,
+  filled,
+  onPress,
+}: {
   icon: keyof typeof Ionicons.glyphMap;
-  color: string;
+  iconColor: string;
   bgColor: string;
+  borderColor: string;
   size: number;
+  filled?: boolean;
   onPress: () => void;
 }) {
   return (
     <TouchableOpacity
-      style={[styles.actionBtn, { borderColor: color, backgroundColor: bgColor }]}
+      style={[
+        styles.actionBtn,
+        filled ? styles.actionBtnFilled : null,
+        { borderColor, backgroundColor: bgColor },
+      ]}
       onPress={onPress}
       activeOpacity={0.75}
     >
-      <Ionicons name={icon} size={size} color={color} />
+      <Ionicons name={icon} size={size} color={iconColor} />
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: C.bg },
-  centered: { flex: 1, backgroundColor: C.bg, justifyContent: 'center', alignItems: 'center', gap: 12 },
+  container: { flex: 1, backgroundColor: dirApp.background },
+  centered: { flex: 1, backgroundColor: dirApp.background, justifyContent: 'center', alignItems: 'center', gap: 12 },
 
   loadingText: { color: C.textSub, fontSize: 15, marginTop: 8 },
   emptyTitle:  { fontSize: 20, fontWeight: '700', color: C.text, marginTop: 8 },
   emptySubtitle: { fontSize: 14, color: C.textSub },
   reloadBtn: {
-    marginTop: 16, backgroundColor: C.navy,
+    marginTop: 16, backgroundColor: dirApp.primaryContainer,
     paddingHorizontal: 28, paddingVertical: 12, borderRadius: 14,
   },
   reloadText: { color: C.onInverse.primary, fontWeight: '700' },
@@ -305,15 +352,40 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 14,
     borderWidth: 2,
-    borderColor: C.navy,
+    borderColor: dirApp.primary,
   },
-  feedErrorOutlineBtnText: { color: C.navy, fontWeight: '700' },
+  feedErrorOutlineBtnText: { color: dirApp.primary, fontWeight: '700' },
   header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 20, paddingTop: 6, paddingBottom: 10,
+    flexDirection: 'row', alignItems: 'center',
+    paddingHorizontal: 16, paddingTop: 6, paddingBottom: 8,
   },
-  headerSide: { flex: 1 },
-  headerRight: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 8 },
+  headerLeft: { flex: 1, alignItems: 'flex-start' },
+  headerCenter: { flex: 2, alignItems: 'center', justifyContent: 'center' },
+  headerBrand: {},
+  headerIconBtn: { padding: 6, borderRadius: 999 },
+  headerRight: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: 8,
+  },
+  quotaStrip: {
+    marginHorizontal: 16,
+    marginBottom: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 12,
+    backgroundColor: dirApp.surfaceContainerLow,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  quotaStripLabel: {},
+  quotaSegments: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  quotaSeg: { width: 16, height: 6, borderRadius: 4 },
+  quotaSegOn: { backgroundColor: dirApp.secondary },
+  quotaSegOff: { backgroundColor: dirApp.outlineVariant },
   quotaBadge: {
     backgroundColor: C.cyanAlpha(0.12), borderRadius: 10,
     paddingHorizontal: 8, paddingVertical: 3,
@@ -342,6 +414,20 @@ const styles = StyleSheet.create({
   actionBtn: {
     width: 58, height: 58, borderRadius: 29,
     borderWidth: 2, justifyContent: 'center', alignItems: 'center',
+    shadowColor: dirApp.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+  actionBtnFilled: {
+    borderWidth: 0,
+    width: 62,
+    height: 62,
+    borderRadius: 31,
+    shadowOpacity: 0.18,
+    shadowRadius: 14,
+    elevation: 8,
   },
 
   // Undo
@@ -351,17 +437,17 @@ const styles = StyleSheet.create({
     backgroundColor: C.bgCard, borderRadius: 20,
     paddingHorizontal: 14, paddingVertical: 9,
     borderWidth: 1, borderColor: C.border,
-    shadowColor: C.navy, shadowOffset: { width: 0, height: 2 },
+    shadowColor: dirApp.primary, shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08, shadowRadius: 6, elevation: 3,
   },
-  undoBtnText: { color: C.navy, fontSize: 13, fontWeight: '600' },
+  undoBtnText: { color: dirApp.primary, fontSize: 13, fontWeight: '600' },
 
   // Modals
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
   modalCard: {
     backgroundColor: C.bgCard, borderRadius: 28, padding: 32,
     alignItems: 'center', width: '84%', gap: 12,
-    shadowColor: C.navy, shadowOffset: { width: 0, height: 20 },
+    shadowColor: dirApp.primary, shadowOffset: { width: 0, height: 20 },
     shadowOpacity: 0.15, shadowRadius: 30, elevation: 10,
   },
   matchIconRow: {
@@ -372,14 +458,14 @@ const styles = StyleSheet.create({
   matchTitle: { fontSize: 24, fontWeight: '800', color: C.text },
   matchSub:   { fontSize: 14, color: C.textSub, textAlign: 'center', lineHeight: 20 },
   primaryBtn: {
-    backgroundColor: C.navy, borderRadius: 14,
+    backgroundColor: dirApp.primaryContainer, borderRadius: 14,
     paddingHorizontal: 32, paddingVertical: 14,
     width: '100%', alignItems: 'center',
   },
   primaryBtnText: { color: C.onInverse.primary, fontWeight: '700', fontSize: 15 },
   premiumBtn: {
     flexDirection: 'row', gap: 8,
-    backgroundColor: C.navy, borderRadius: 14,
+    backgroundColor: dirApp.primaryContainer, borderRadius: 14,
     paddingHorizontal: 24, paddingVertical: 14,
     width: '100%', alignItems: 'center', justifyContent: 'center',
   },
