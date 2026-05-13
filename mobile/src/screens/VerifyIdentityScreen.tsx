@@ -8,6 +8,8 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { useNavigation } from '@react-navigation/native';
 import { screeningApi } from '../services/api';
 import { C, Dark } from '../theme';
+import { ResponsiveContainer } from '../components/ResponsiveContainer';
+import { dirType } from '../theme/textStyles';
 
 type VerifStatus = 'pending' | 'verified' | 'rejected' | null;
 
@@ -74,15 +76,16 @@ export default function VerifyIdentityScreen() {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="chevron-back" size={22} color={C.onInverse.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>אימות זהות</Text>
+        <Text style={[styles.headerTitle, dirType.subhead]}>אימות זהות</Text>
         <View style={{ width: 38 }} />
       </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <ResponsiveContainer>
         {/* Info card */}
         <View style={styles.infoCard}>
           <Ionicons name="shield-checkmark-outline" size={32} color={C.statusTone.positive} style={{ marginBottom: 10 }} />
-          <Text style={styles.infoTitle}>אמת את זהותך</Text>
+          <Text style={[styles.infoTitle, dirType.subhead]}>אמת את זהותך</Text>
           <Text style={styles.infoText}>
             פרופיל מאומת מגביר את האמינות שלך מול בעלי הדירות ומשפר את סיכויי הקבלה שלך.
             הפרטים מוצפנים ומאובטחים.
@@ -114,9 +117,9 @@ export default function VerifyIdentityScreen() {
         {/* Form — only show if not already verified */}
         {!isVerified && (
           <View style={styles.form}>
-            <Text style={styles.sectionTitle}>פרטי זיהוי</Text>
+            <Text style={[styles.sectionTitle, dirType.label]}>פרטי זיהוי</Text>
 
-            <Text style={styles.label}>מספר תעודת זהות</Text>
+            <Text style={[styles.label, dirType.label]}>מספר תעודת זהות</Text>
             <TextInput
               style={styles.input}
               value={idNumber}
@@ -128,7 +131,7 @@ export default function VerifyIdentityScreen() {
               textAlign="right"
             />
 
-            <Text style={styles.label}>שם מלא (כבתעודת הזהות)</Text>
+            <Text style={[styles.label, dirType.label]}>שם מלא (כבתעודת הזהות)</Text>
             <TextInput
               style={styles.input}
               value={fullName}
@@ -138,7 +141,7 @@ export default function VerifyIdentityScreen() {
               textAlign="right"
             />
 
-            <Text style={styles.label}>מספר טלפון</Text>
+            <Text style={[styles.label, dirType.label]}>מספר טלפון</Text>
             <TextInput
               style={styles.input}
               value={phone}
@@ -172,9 +175,10 @@ export default function VerifyIdentityScreen() {
 
         {isVerified && (
           <View style={styles.verifiedCard}>
-            <Text style={styles.verifiedCardText}>הזהות שלך אומתה בהצלחה. תג "מאומת" יופיע על פרופילך.</Text>
+            <Text style={[styles.verifiedCardText, dirType.body]}>הזהות שלך אומתה בהצלחה. תג "מאומת" יופיע על פרופילך.</Text>
           </View>
         )}
+        </ResponsiveContainer>
       </ScrollView>
     </SafeAreaView>
   );

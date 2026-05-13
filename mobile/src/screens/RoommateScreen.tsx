@@ -9,6 +9,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigation } from '@react-navigation/native';
 import { roommateApi } from '../services/api';
 import { C, Dark } from '../theme';
+import { ResponsiveContainer } from '../components/ResponsiveContainer';
+import { dirType } from '../theme/textStyles';
 
 type SleepSchedule   = 'early_bird' | 'night_owl' | 'flexible';
 type NoiseLevel      = 'quiet' | 'moderate' | 'lively';
@@ -147,7 +149,7 @@ export default function RoommateScreen() {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="chevron-back" size={22} color={C.onInverse.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>שותפים לדירה</Text>
+        <Text style={[styles.headerTitle, dirType.subhead]}>שותפים לדירה</Text>
         <View style={{ width: 38 }} />
       </View>
 
@@ -169,6 +171,7 @@ export default function RoommateScreen() {
 
       {tab === 'profile' ? (
         <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
+          <ResponsiveContainer>
           {profileLoading ? (
             <ActivityIndicator color={C.cyan} style={{ marginTop: 40 }} />
           ) : (
@@ -262,16 +265,18 @@ export default function RoommateScreen() {
               </TouchableOpacity>
             </View>
           )}
+          </ResponsiveContainer>
         </ScrollView>
       ) : (
         <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
+          <ResponsiveContainer>
           {matchesLoading ? (
             <ActivityIndicator color={C.cyan} style={{ marginTop: 40 }} />
           ) : matches.length === 0 ? (
             <View style={styles.emptyWrap}>
               <Ionicons name="people-outline" size={56} color={C.textMut} />
-              <Text style={styles.emptyText}>לא נמצאו התאמות כרגע</Text>
-              <Text style={styles.emptyHint}>ודא שהפרופיל שלך מלא ו"מחפש שותף" מופעל</Text>
+              <Text style={[styles.emptyText, dirType.subhead]}>לא נמצאו התאמות כרגע</Text>
+              <Text style={[styles.emptyHint, dirType.caption]}>ודא שהפרופיל שלך מלא ו"מחפש שותף" מופעל</Text>
             </View>
           ) : (
             <View style={styles.matchList}>
@@ -298,6 +303,7 @@ export default function RoommateScreen() {
               ))}
             </View>
           )}
+          </ResponsiveContainer>
         </ScrollView>
       )}
     </SafeAreaView>

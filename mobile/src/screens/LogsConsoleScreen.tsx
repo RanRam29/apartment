@@ -13,6 +13,8 @@ import {
 import { adminLogsApi } from '../services/api';
 import { C } from '../theme';
 import type { AuditLogItem, SystemEventItem } from '../types';
+import { ResponsiveContainer } from '../components/ResponsiveContainer';
+import { dirType } from '../theme/textStyles';
 
 type TabKey = 'audit' | 'system';
 type SourcePreset = 'all' | 'mobile' | 'web' | 'socket' | 'api' | 'server';
@@ -82,10 +84,11 @@ export default function LogsConsoleScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Logs Console</Text>
-        <Text style={styles.subtitle}>Audit + System events</Text>
-      </View>
+      <ResponsiveContainer style={{ flex: 1 }}>
+        <View style={styles.header}>
+          <Text style={[styles.title, dirType.title]}>Logs Console</Text>
+          <Text style={[styles.subtitle, dirType.caption]}>Audit + System events</Text>
+        </View>
 
       <View style={styles.tabs}>
         <TabButton active={tab === 'audit'} label="Audit" onPress={() => setTab('audit')} />
@@ -151,10 +154,11 @@ export default function LogsConsoleScreen() {
                   <Text style={styles.meta}>{new Date(item.createdAt).toLocaleString()}</Text>
                 </View>
               ))}
-          {tab === 'audit' && auditItems.length === 0 && <Text style={styles.empty}>No audit logs</Text>}
-          {tab === 'system' && systemItems.length === 0 && <Text style={styles.empty}>No system events</Text>}
+          {tab === 'audit' && auditItems.length === 0 && <Text style={[styles.empty, dirType.body]}>No audit logs</Text>}
+          {tab === 'system' && systemItems.length === 0 && <Text style={[styles.empty, dirType.body]}>No system events</Text>}
         </ScrollView>
       )}
+      </ResponsiveContainer>
     </SafeAreaView>
   );
 }

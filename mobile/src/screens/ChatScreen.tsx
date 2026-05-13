@@ -11,6 +11,8 @@ import { useAuthStore } from '../store/useAuthStore';
 import { chatApi } from '../services/api';
 import type { Message } from '../types';
 import { C, Dark } from '../theme';
+import { ResponsiveContainer } from '../components/ResponsiveContainer';
+import { dirType } from '../theme/textStyles';
 
 type ChatRoute = RouteProp<{ Chat: { matchId: string; title: string } }, 'Chat'>;
 
@@ -83,48 +85,51 @@ export default function ChatScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={90}
       >
-        <FlatList
-          ref={flatListRef}
-          data={chatMessages}
-          keyExtractor={(m) => m.id}
-          contentContainerStyle={styles.messagesList}
-          renderItem={({ item }) => (
-            <ChatBubble message={item} isMe={item.senderId === user?.id} />
-          )}
-          ListEmptyComponent={
-            <View style={styles.emptyChat}>
-              <Text style={styles.emptyChatText}>שלח הודעה ראשונה 👋</Text>
-            </View>
-          }
-          ListFooterComponent={isOtherTyping ? <TypingDots /> : null}
-        />
-
-        {/* Input bar */}
-        <View style={styles.inputBar}>
-          <TouchableOpacity
-            style={[styles.sendBtn, (!input.trim() || sending) && styles.sendBtnDisabled]}
-            onPress={handleSend}
-            disabled={!input.trim() || sending}
-            accessibilityRole="button"
-            accessibilityLabel="שלח הודעה"
-          >
-            {sending
-              ? <ActivityIndicator size="small" color={C.navy} />
-              : <Ionicons name="send" size={18} color={C.navy} />
+        <ResponsiveContainer style={{ flex: 1 }}>
+          <FlatList
+            style={{ flex: 1 }}
+            ref={flatListRef}
+            data={chatMessages}
+            keyExtractor={(m) => m.id}
+            contentContainerStyle={styles.messagesList}
+            renderItem={({ item }) => (
+              <ChatBubble message={item} isMe={item.senderId === user?.id} />
+            )}
+            ListEmptyComponent={
+              <View style={styles.emptyChat}>
+                <Text style={[styles.emptyChatText, dirType.body]}>שלח הודעה ראשונה 👋</Text>
+              </View>
             }
-          </TouchableOpacity>
-          <TextInput
-            style={styles.input}
-            placeholder="הקלד הודעה..."
-            placeholderTextColor={C.textMut}
-            value={input}
-            onChangeText={handleTyping}
-            multiline
-            maxLength={2000}
-            textAlign="right"
-            onSubmitEditing={handleSend}
+            ListFooterComponent={isOtherTyping ? <TypingDots /> : null}
           />
-        </View>
+
+          {/* Input bar */}
+          <View style={styles.inputBar}>
+            <TouchableOpacity
+              style={[styles.sendBtn, (!input.trim() || sending) && styles.sendBtnDisabled]}
+              onPress={handleSend}
+              disabled={!input.trim() || sending}
+              accessibilityRole="button"
+              accessibilityLabel="שלח הודעה"
+            >
+              {sending
+                ? <ActivityIndicator size="small" color={C.navy} />
+                : <Ionicons name="send" size={18} color={C.navy} />
+              }
+            </TouchableOpacity>
+            <TextInput
+              style={styles.input}
+              placeholder="הקלד הודעה..."
+              placeholderTextColor={C.textMut}
+              value={input}
+              onChangeText={handleTyping}
+              multiline
+              maxLength={2000}
+              textAlign="right"
+              onSubmitEditing={handleSend}
+            />
+          </View>
+        </ResponsiveContainer>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

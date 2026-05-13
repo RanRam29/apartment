@@ -10,6 +10,8 @@ import { apartmentsApi } from '../services/api';
 import { C, Dark } from '../theme';
 import { resolveMapCoords } from '../constants/cityCenters';
 import SwipeHouseLogo from '../components/SwipeHouseLogo';
+import { ResponsiveContainer } from '../components/ResponsiveContainer';
+import { dirType } from '../theme/textStyles';
 
 // TAMA 38 resource IDs from data.gov.il (urban renewal zones)
 const TAMA38_URL =
@@ -287,34 +289,36 @@ export default function MapScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.toolbar}>
-        <View style={styles.toolbarLeft}>
-          <SwipeHouseLogo size="xs" />
-          <Ionicons name="map-outline" size={18} color={C.onInverse.primary} />
-          <Text style={styles.toolbarTitle}>מפת דירות</Text>
-          {markers.length > 0 && (
-            <View style={styles.countBadge}>
-              <Text style={styles.countText}>{markers.length}</Text>
-            </View>
-          )}
+      <ResponsiveContainer>
+        <View style={styles.toolbar}>
+          <View style={styles.toolbarLeft}>
+            <SwipeHouseLogo size="xs" />
+            <Ionicons name="map-outline" size={18} color={C.onInverse.primary} />
+            <Text style={[styles.toolbarTitle, dirType.subhead]}>מפת דירות</Text>
+            {markers.length > 0 && (
+              <View style={styles.countBadge}>
+                <Text style={[styles.countText, dirType.micro]}>{markers.length}</Text>
+              </View>
+            )}
+          </View>
+          <View style={styles.toolbarRight}>
+            {tamaHint ? <Text style={[styles.tamaHint, dirType.micro]}>{tamaHint}</Text> : null}
+            <Text style={[styles.tamaLabel, dirType.micro]}>תמ"א 38</Text>
+            <Switch
+              value={tamaOn}
+              onValueChange={handleTamaToggle}
+              trackColor={{ false: Dark.switchTrackOff, true: C.gold }}
+              thumbColor={C.onInverse.primary}
+              style={{ transform: [{ scaleX: 0.85 }, { scaleY: 0.85 }] }}
+            />
+          </View>
         </View>
-        <View style={styles.toolbarRight}>
-          {tamaHint ? <Text style={styles.tamaHint}>{tamaHint}</Text> : null}
-          <Text style={styles.tamaLabel}>תמ"א 38</Text>
-          <Switch
-            value={tamaOn}
-            onValueChange={handleTamaToggle}
-            trackColor={{ false: Dark.switchTrackOff, true: C.gold }}
-            thumbColor={C.onInverse.primary}
-            style={{ transform: [{ scaleX: 0.85 }, { scaleY: 0.85 }] }}
-          />
-        </View>
-      </View>
+      </ResponsiveContainer>
 
       {feedLoading ? (
         <View style={styles.loadingWrap}>
           <ActivityIndicator size="large" color={C.cyan} />
-          <Text style={styles.loadingText}>טוען דירות…</Text>
+          <Text style={[styles.loadingText, dirType.body]}>טוען דירות…</Text>
         </View>
       ) : Platform.OS === 'web' ? (
         <View style={styles.map}>

@@ -7,6 +7,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { gamificationApi } from '../services/api';
 import { C, Dark } from '../theme';
+import { ResponsiveContainer } from '../components/ResponsiveContainer';
+import { dirType } from '../theme/textStyles';
 
 // ─── Theme constants ──────────────────────────────────────────────────────────
 const BG       = Dark.bg;
@@ -138,11 +140,12 @@ export default function GamificationScreen({ navigation }: any) {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="chevron-back" size={22} color={TEXT} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>הישגים ונקודות</Text>
+        <Text style={[styles.headerTitle, dirType.subhead]}>הישגים ונקודות</Text>
         <View style={styles.backBtn} />
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        <ResponsiveContainer>
         {/* Points & Level */}
         {meLoading ? (
           <View style={styles.center}>
@@ -163,11 +166,11 @@ export default function GamificationScreen({ navigation }: any) {
         )}
 
         {/* Badges */}
-        <Text style={styles.sectionTitle}>התגים שלי</Text>
+        <Text style={[styles.sectionTitle, dirType.label]}>התגים שלי</Text>
         {meLoading ? null : me.badges.length === 0 ? (
           <View style={styles.emptyBadges}>
             <Ionicons name="ribbon-outline" size={36} color={C.textMut} />
-            <Text style={styles.emptyText}>צבור נקודות כדי לקבל תגים</Text>
+            <Text style={[styles.emptyText, dirType.body]}>צבור נקודות כדי לקבל תגים</Text>
           </View>
         ) : (
           <View style={styles.badgesGrid}>
@@ -176,12 +179,12 @@ export default function GamificationScreen({ navigation }: any) {
         )}
 
         {/* Leaderboard */}
-        <Text style={styles.sectionTitle}>לוח מובילים</Text>
+        <Text style={[styles.sectionTitle, dirType.label]}>לוח מובילים</Text>
         {lbLoading ? (
           <ActivityIndicator color={ACCENT} style={{ marginVertical: 20 }} />
         ) : leaderboard.length === 0 ? (
           <View style={styles.emptyBadges}>
-            <Text style={styles.emptyText}>אין נתונים עדיין</Text>
+            <Text style={[styles.emptyText, dirType.body]}>אין נתונים עדיין</Text>
           </View>
         ) : (
           <View style={styles.leaderCard}>
@@ -193,6 +196,7 @@ export default function GamificationScreen({ navigation }: any) {
             ))}
           </View>
         )}
+        </ResponsiveContainer>
       </ScrollView>
     </SafeAreaView>
   );

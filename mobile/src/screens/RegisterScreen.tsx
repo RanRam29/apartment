@@ -8,6 +8,8 @@ import { useAuthStore } from '../store/useAuthStore';
 import { formatLoginError } from '../utils/authErrors';
 import { C } from '../theme';
 import SwipeHouseLogo from '../components/SwipeHouseLogo';
+import { ResponsiveContainer } from '../components/ResponsiveContainer';
+import { dirType } from '../theme/textStyles';
 
 interface Props {
   onSwitch: () => void;
@@ -64,11 +66,12 @@ export default function RegisterScreen({ onSwitch }: Props) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        <ResponsiveContainer>
         <View style={styles.brandRow}>
           <SwipeHouseLogo size="md" />
         </View>
-        <Text style={styles.title}>הרשמה</Text>
-        <Text style={styles.subtitle}>צור חשבון חדש</Text>
+        <Text style={[styles.title, dirType.title]}>הרשמה</Text>
+        <Text style={[styles.subtitle, dirType.body]}>צור חשבון חדש</Text>
 
         {/* Role selector */}
         <View style={styles.roleRow}>
@@ -145,14 +148,15 @@ export default function RegisterScreen({ onSwitch }: Props) {
         >
           {loading
             ? <ActivityIndicator color={C.onInverse.primary} />
-            : <Text style={styles.buttonText}>הרשמה</Text>
+            : <Text style={[styles.buttonText, dirType.label]}>הרשמה</Text>
           }
         </TouchableOpacity>
 
         <TouchableOpacity onPress={onSwitch} style={styles.switchRow}>
-          <Text style={styles.switchText}>כבר יש לך חשבון? </Text>
-          <Text style={[styles.switchText, styles.switchLink]}>התחבר</Text>
+          <Text style={[styles.switchText, dirType.caption]}>כבר יש לך חשבון? </Text>
+          <Text style={[styles.switchText, styles.switchLink, dirType.caption]}>התחבר</Text>
         </TouchableOpacity>
+        </ResponsiveContainer>
       </ScrollView>
     </KeyboardAvoidingView>
   );

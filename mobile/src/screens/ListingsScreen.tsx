@@ -12,6 +12,8 @@ import axios from 'axios';
 import { landlordApi, apartmentsApi } from '../services/api';
 import type { Apartment, MainStackParamList } from '../types';
 import { C, Dark } from '../theme';
+import { ResponsiveContainer } from '../components/ResponsiveContainer';
+import { dirType } from '../theme/textStyles';
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
 type CopyStyle = 'professional' | 'friendly' | 'luxury';
@@ -195,43 +197,46 @@ export default function ListingsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.headerRow}>
-        <Text style={styles.header}>המודעות שלי</Text>
-        <TouchableOpacity
-          style={styles.createBtn}
-          onPress={() => navigation.navigate('CreateListing')}
-        >
-          <Ionicons name="add" size={20} color={C.onInverse.primary} />
-          <Text style={styles.createBtnText}>מודעה חדשה</Text>
-        </TouchableOpacity>
-      </View>
-
-      {isLoading ? (
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color={C.cyan} />
-        </View>
-      ) : listings.length === 0 ? (
-        <View style={styles.center}>
-          <Ionicons name="home-outline" size={56} color={C.textMut} />
-          <Text style={styles.emptyText}>עדיין אין לך מודעות</Text>
+      <ResponsiveContainer style={{ flex: 1 }}>
+        <View style={styles.headerRow}>
+          <Text style={[styles.header, dirType.title]}>המודעות שלי</Text>
           <TouchableOpacity
-            style={styles.createBtnLarge}
+            style={styles.createBtn}
             onPress={() => navigation.navigate('CreateListing')}
           >
-            <Text style={styles.createBtnText}>פרסם את הדירה הראשונה שלך</Text>
+            <Ionicons name="add" size={20} color={C.onInverse.primary} />
+            <Text style={[styles.createBtnText, dirType.label]}>מודעה חדשה</Text>
           </TouchableOpacity>
         </View>
-      ) : (
-        <FlatList
-          data={listings}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-          contentContainerStyle={styles.list}
-          onRefresh={refetch}
-          refreshing={isLoading}
-          keyboardShouldPersistTaps="handled"
-        />
-      )}
+
+        {isLoading ? (
+          <View style={styles.center}>
+            <ActivityIndicator size="large" color={C.cyan} />
+          </View>
+        ) : listings.length === 0 ? (
+          <View style={styles.center}>
+            <Ionicons name="home-outline" size={56} color={C.textMut} />
+            <Text style={[styles.emptyText, dirType.subhead]}>עדיין אין לך מודעות</Text>
+            <TouchableOpacity
+              style={styles.createBtnLarge}
+              onPress={() => navigation.navigate('CreateListing')}
+            >
+              <Text style={[styles.createBtnText, dirType.label]}>פרסם את הדירה הראשונה שלך</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <FlatList
+            style={{ flex: 1 }}
+            data={listings}
+            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+            contentContainerStyle={styles.list}
+            onRefresh={refetch}
+            refreshing={isLoading}
+            keyboardShouldPersistTaps="handled"
+          />
+        )}
+      </ResponsiveContainer>
 
       {/* F7: Marketing Copy Modal */}
       <Modal

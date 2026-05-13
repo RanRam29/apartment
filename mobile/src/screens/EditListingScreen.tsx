@@ -11,6 +11,8 @@ import { apartmentsApi } from '../services/api';
 import { C } from '../theme';
 import type { Amenity, MainStackParamList } from '../types';
 import { CITY_CENTER_BY_NAME } from '../constants/cityCenters';
+import { ResponsiveContainer } from '../components/ResponsiveContainer';
+import { dirType } from '../theme/textStyles';
 
 const AMENITY_OPTIONS: { key: Amenity; label: string }[] = [
   { key: 'parking',      label: '🚗 חניה' },
@@ -245,7 +247,8 @@ export default function EditListingScreen({ route, navigation }: Props) {
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-          <Text style={styles.header}>עריכת מודעה</Text>
+          <ResponsiveContainer>
+          <Text style={[styles.header, dirType.title]}>עריכת מודעה</Text>
 
           <Field label="כותרת *">
             <TextInput style={styles.input} value={title} onChangeText={(value) => setTitle(sanitizeTitleInput(value))}
@@ -330,7 +333,7 @@ export default function EditListingScreen({ route, navigation }: Props) {
               placeholder="תאר את הדירה..." placeholderTextColor={C.textMut} textAlign="right" />
           </Field>
 
-          <Text style={styles.fieldLabel}>שירותים</Text>
+          <Text style={[styles.fieldLabel, dirType.label]}>שירותים</Text>
           <View style={styles.amenitiesGrid}>
             {AMENITY_OPTIONS.map(({ key, label }) => (
               <TouchableOpacity
@@ -338,7 +341,7 @@ export default function EditListingScreen({ route, navigation }: Props) {
                 style={[styles.amenityChip, amenities.includes(key) && styles.amenityChipActive]}
                 onPress={() => toggleAmenity(key)}
               >
-                <Text style={[styles.amenityText, amenities.includes(key) && styles.amenityTextActive]}>
+                <Text style={[styles.amenityText, dirType.label, amenities.includes(key) && styles.amenityTextActive]}>
                   {label}
                 </Text>
               </TouchableOpacity>
@@ -350,7 +353,7 @@ export default function EditListingScreen({ route, navigation }: Props) {
             onPress={() => setPetsAllowed((v) => !v)}
           >
             <Ionicons name={petsAllowed ? 'checkbox' : 'square-outline'} size={22} color={petsAllowed ? C.navy : C.textMut} />
-            <Text style={[styles.petsLabel, petsAllowed && { color: C.navy }]}>🐾 דירה מאפשרת חיות מחמד</Text>
+            <Text style={[styles.petsLabel, dirType.body, petsAllowed && { color: C.navy }]}>🐾 דירה מאפשרת חיות מחמד</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -360,9 +363,10 @@ export default function EditListingScreen({ route, navigation }: Props) {
           >
             {saving
               ? <ActivityIndicator color={C.onInverse.primary} />
-              : <Text style={styles.saveBtnText}>שמור שינויים</Text>
+              : <Text style={[styles.saveBtnText, dirType.label]}>שמור שינויים</Text>
             }
           </TouchableOpacity>
+          </ResponsiveContainer>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -372,7 +376,7 @@ export default function EditListingScreen({ route, navigation }: Props) {
 function Field({ label, children, style }: { label: string; children: React.ReactNode; style?: object }) {
   return (
     <View style={[{ marginBottom: 14 }, style]}>
-      <Text style={styles.fieldLabel}>{label}</Text>
+      <Text style={[styles.fieldLabel, dirType.label]}>{label}</Text>
       {children}
     </View>
   );
