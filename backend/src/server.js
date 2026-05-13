@@ -35,15 +35,7 @@ const PORT = process.env.PORT || 3000;
 async function startServer() {
   try {
     await initPostgres();
-    await logSystemEvent({
-      source: 'server',
-      category: SYSTEM_CATEGORY.APPLICATION,
-      severity: SYSTEM_SEVERITY.INFO,
-      event: 'postgres.connected',
-      message: 'PostgreSQL initialized successfully',
-    });
-    await autoSeed();
-    // MongoDB and Redis are soft dependencies — server starts even if unavailable
+    // MongoDB before first logSystemEvent so system_events does not buffer-timeout at startup
     await initMongoDB().catch((err) =>
       (logSystemEvent({
         source: 'server',
@@ -54,6 +46,14 @@ async function startServer() {
         metadata: { error: err.message },
       }), logger.warn('MongoDB unavailable, document-store features disabled:', err.message))
     );
+    await logSystemEvent({
+      source: 'server',
+      category: SYSTEM_CATEGORY.APPLICATION,
+      severity: SYSTEM_SEVERITY.INFO,
+      event: 'postgres.connected',
+      message: 'PostgreSQL initialized successfully',
+    });
+    await autoSeed();
     await initRedis();
     // Kafka is optional — not available in free-tier deployments (Render, etc.)
     await initKafka().catch((err) =>

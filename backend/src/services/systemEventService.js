@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const logger = require('../utils/logger');
 const { sanitizeObject } = require('../utils/logSanitizer');
 const { SYSTEM_CATEGORY, SYSTEM_SEVERITY } = require('../constants/logging');
@@ -23,6 +24,9 @@ async function logSystemEvent(event = {}) {
   };
 
   if (!SystemEventModel) return;
+
+  // Avoid buffering inserts before mongoose connects (startup race on Render).
+  if (mongoose.connection.readyState !== 1) return;
 
   try {
     await SystemEventModel.create(payload);
