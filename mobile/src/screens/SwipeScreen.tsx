@@ -5,7 +5,9 @@ import {
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { useSwipeStore } from '../store/useSwipeStore';
+import { useAuthStore } from '../store/useAuthStore';
 import SwipeableCard from '../components/SwipeableCard';
 import SwipeHouseLogo from '../components/SwipeHouseLogo';
 import { C } from '../theme';
@@ -14,10 +16,12 @@ import type { Apartment, SwipeDirection } from '../types';
 const FREE_DAILY_LIMIT = 20;
 
 export default function SwipeScreen() {
+  const navigation = useNavigation<any>();
+  const user = useAuthStore((s) => s.user);
   const {
-    deck, currentIndex, isLoading, lastMatch,
+    deck, currentIndex, isLoading, lastMatch, feedError,
     dailyUsed, dailyLimit, quotaExceeded,
-    loadFeed, loadQuota, swipe, undo, resetMatch, dismissQuota,
+    loadFeed, loadQuota, swipe, undo, resetMatch, dismissQuota, clearFeedError,
   } = useSwipeStore();
 
   const undoOpacity = useRef(new Animated.Value(0)).current;
@@ -68,11 +72,51 @@ export default function SwipeScreen() {
   const effectiveLimit = dailyLimit ?? FREE_DAILY_LIMIT;
   const isPremium = dailyLimit === null;
 
-  if (isLoading && deck.length === 0) {
+  if (isLoading && deck.length === 0 && !feedError) {
     return (
       <SafeAreaView style={styles.centered}>
         <ActivityIndicator size="large" color={C.cyan} />
         <Text style={styles.loadingText}>טוען דירות...</Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (feedError) {
+    const { status } = feedError;
+    const isLandlord = user?.role === 'landlord';
+    const title =
+      status === 401
+        ? 'ההתחברות פגה'
+        : status === 403 && isLandlord
+          ? 'ממשק השוכר לחשבונות שוכר בלבד'
+          : status === 403
+            ? 'אין הרשאה לטעון דירות'
+            : 'לא ניתן לטעון את הפיד';
+    const detail =
+      status === 403 && isLandlord
+        ? 'נרשמת כמשכיר. השתמש בדשבורד ובניהול מודעות, או הירשם עם חשבון שוכר נפרד לגלילת דירות.'
+        : status === 403
+          ? 'אם זה חשבון שוכר — התנתק והתחבר מחדש. ודא שקיבלת אימות אימייל אם נדרש.'
+          : feedError.message;
+
+    return (
+      <SafeAreaView style={styles.centered}>
+        <Ionicons name="alert-circle-outline" size={56} color={C.coral} />
+        <Text style={styles.emptyTitle}>{title}</Text>
+        <Text style={[styles.emptySubtitle, styles.feedErrorDetail]}>{detail}</Text>
+        <TouchableOpacity
+          style={styles.reloadBtn}
+          onPress={() => {
+            clearFeedError();
+            loadFeed();
+            loadQuota();
+          }}
+        >
+          <Text style={styles.reloadText}>נסה שוב</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.feedErrorOutlineBtn} onPress={() => navigation.navigate('Profile')}>
+          <Text style={styles.feedErrorOutlineBtnText}>פתח פרופיל</Text>
+        </TouchableOpacity>
       </SafeAreaView>
     );
   }
@@ -236,8 +280,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 28, paddingVertical: 12, borderRadius: 14,
   },
   reloadText: { color: C.onInverse.primary, fontWeight: '700' },
-
-  // Header
+  feedErrorDetail: { textAlign: 'center', paddingHorizontal: 24, lineHeight: 20 },
+  feedErrorOutlineBtn: {
+    marginTop: 10,
+    paddingHorizontal: 28,
+    paddingVertical: 12,
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: C.navy,
+  },
+  feedErrorOutlineBtnText: { color: C.navy, fontWeight: '700' },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 20, paddingTop: 6, paddingBottom: 10,

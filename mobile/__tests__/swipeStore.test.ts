@@ -11,6 +11,7 @@ const reset = () => useSwipeStore.setState({
   deck: [], currentIndex: 0, isLoading: false, hasMore: true,
   lastMatch: null, lastSwipedApartment: null,
   dailyUsed: 0, dailyLimit: 20, quotaExceeded: false,
+  feedError: null,
 });
 
 describe('useSwipeStore', () => {
@@ -23,6 +24,25 @@ describe('useSwipeStore', () => {
     await useSwipeStore.getState().loadFeed({ city: 'Tel Aviv' });
     expect(useSwipeStore.getState().deck).toHaveLength(1);
     expect(useSwipeStore.getState().isLoading).toBe(false);
+    expect(useSwipeStore.getState().feedError).toBeNull();
+  });
+
+  it('loadFeed records feedError on 403 instead of empty-deck success', async () => {
+    (apartmentsApi.getFeed as jest.Mock).mockRejectedValue({
+      response: { status: 403, data: { error: 'Insufficient permissions' } },
+    });
+    await useSwipeStore.getState().loadFeed();
+    expect(useSwipeStore.getState().deck).toHaveLength(0);
+    expect(useSwipeStore.getState().feedError).toEqual({
+      status: 403,
+      message: 'Insufficient permissions',
+    });
+  });
+
+  it('clearFeedError clears feedError', () => {
+    useSwipeStore.setState({ feedError: { status: 403, message: 'Insufficient permissions' } });
+    useSwipeStore.getState().clearFeedError();
+    expect(useSwipeStore.getState().feedError).toBeNull();
   });
 
   it('loadQuota updates daily usage counts', async () => {

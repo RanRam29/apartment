@@ -2,19 +2,31 @@ import { create } from 'zustand';
 import { apartmentsApi, swipeApi } from '../services/api';
 import type { Apartment, SwipeDirection } from '../types';
 
+export interface FeedLoadError {
+  status: number;
+  message: string;
+}
+
+type FeedLoadState = 'pending' | 'loading' | 'success' | 'error';
+
 interface SwipeState {
   deck: Apartment[];
   currentIndex: number;
   isLoading: boolean;
+  /** Until the first feed request finishes, UI must not show the “seen everything” empty state. */
+  feedLoadState: FeedLoadState;
   hasMore: boolean;
   lastMatch: { id: string; status: string } | null;
   lastSwipedApartment: Apartment | null;
   dailyUsed: number;
   dailyLimit: number;
   quotaExceeded: boolean;
+  /** Set when GET /apartments/feed fails (e.g. 403); avoids showing “empty deck” as “seen everything”. */
+  feedError: FeedLoadError | null;
 
   loadFeed: (params?: { city?: string; minPrice?: number; maxPrice?: number }) => Promise<void>;
   loadQuota: () => Promise<void>;
+  clearFeedError: () => void;
   swipe: (apartment: Apartment, direction: SwipeDirection) => Promise<void>;
   undo: () => Promise<void>;
   resetMatch: () => void;
@@ -31,15 +43,31 @@ export const useSwipeStore = create<SwipeState>((set, get) => ({
   dailyUsed: 0,
   dailyLimit: 20,
   quotaExceeded: false,
+  feedError: null,
+
+  clearFeedError: () => set({ feedError: null }),
 
   loadFeed: async (params) => {
-    set({ isLoading: true });
+    set({ isLoading: true, feedError: null });
     try {
       const res = await apartmentsApi.getFeed({ ...params, limit: 20 });
       set({
         deck: res.data.apartments,
         currentIndex: 0,
         hasMore: res.data.totalPages > 1,
+        feedError: null,
+      });
+    } catch (err: unknown) {
+      const ax = err as { response?: { status?: number; data?: { error?: string } } };
+      const status = ax.response?.status ?? 0;
+      const raw = ax.response?.data?.error;
+      const message =
+        typeof raw === 'string' ? raw : ax.response?.statusText || 'Request failed';
+      set({
+        deck: [],
+        currentIndex: 0,
+        hasMore: false,
+        feedError: { status, message },
       });
     } finally {
       set({ isLoading: false });
