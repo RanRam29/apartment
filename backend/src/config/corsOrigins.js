@@ -1,12 +1,34 @@
 /**
  * Shared CORS allowlist for Express and Socket.IO (must stay in sync).
+ *
+ * Merges CLIENT_ORIGIN and CLIENT_ORIGINS (both may be comma-separated). Previously only one
+ * applied, so adding CLIENT_ORIGINS in Render could be ignored if CLIENT_ORIGIN was set.
+ *
+ * On Render production, known production web clients are included so CORS works without
+ * duplicating URLs in the dashboard (RENDER + NODE_ENV=production).
  */
+const RENDER_CANONICAL_CLIENT_ORIGINS = ['https://apartment-olive.vercel.app'];
+
 function parseCorsOrigins() {
-  const raw = process.env.CLIENT_ORIGIN || process.env.CLIENT_ORIGINS || 'http://localhost:3000';
-  const list = String(raw)
-    .split(',')
-    .map((s) => s.trim())
-    .filter(Boolean);
+  const chunks = [];
+  for (const key of ['CLIENT_ORIGIN', 'CLIENT_ORIGINS']) {
+    const v = process.env[key];
+    if (v) {
+      chunks.push(
+        ...String(v)
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean)
+      );
+    }
+  }
+  if (
+    process.env.NODE_ENV === 'production' &&
+    (process.env.RENDER === 'true' || process.env.RENDER === '1')
+  ) {
+    chunks.push(...RENDER_CANONICAL_CLIENT_ORIGINS);
+  }
+  const list = [...new Set(chunks)];
   return list.length ? list : ['http://localhost:3000'];
 }
 

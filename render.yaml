@@ -38,6 +38,9 @@ services:
         generateValue: true
       - key: AI_SERVICE_URL
         sync: false
+      # Browsers may send Origin from the Vercel web build; merge with any CLIENT_ORIGIN in the dashboard
+      - key: CLIENT_ORIGINS
+        value: https://apartment-olive.vercel.app
 
 databases:
   - name: apartmentapp-db
