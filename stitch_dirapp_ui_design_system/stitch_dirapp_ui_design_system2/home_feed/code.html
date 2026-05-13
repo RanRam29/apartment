@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DirApp - Home Feed</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary": "#a43a3d",
+                        "on-surface-variant": "#43474c",
+                        "error-container": "#ffdad6",
+                        "surface-bright": "#fbf9fa",
+                        "primary-container": "#2c3e50",
+                        "on-primary": "#ffffff",
+                        "inverse-on-surface": "#f2f0f2",
+                        "on-tertiary-container": "#c1a17d",
+                        "tertiary-fixed-dim": "#e3c19b",
+                        "surface-variant": "#e4e2e3",
+                        "on-surface": "#1b1c1d",
+                        "error": "#ba1a1a",
+                        "tertiary-fixed": "#ffddb7",
+                        "surface-container-low": "#f5f3f4",
+                        "secondary-fixed-dim": "#ffb3b1",
+                        "secondary-fixed": "#ffdad8",
+                        "on-tertiary-fixed-variant": "#5a4225",
+                        "on-primary-fixed": "#091d2e",
+                        "outline-variant": "#c4c6cd",
+                        "on-background": "#1b1c1d",
+                        "primary-fixed": "#d1e4fb",
+                        "on-error": "#ffffff",
+                        "secondary-container": "#ff7f7f",
+                        "surface-container": "#efedef",
+                        "tertiary-container": "#4e381c",
+                        "primary": "#162839",
+                        "surface-container-highest": "#e4e2e3",
+                        "tertiary": "#362308",
+                        "background": "#fbf9fa",
+                        "surface": "#fbf9fa",
+                        "surface-container-high": "#e9e8e9",
+                        "inverse-surface": "#303032",
+                        "on-secondary-fixed": "#410007",
+                        "on-error-container": "#93000a",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-container": "#96a9be",
+                        "inverse-primary": "#b5c8df",
+                        "on-secondary-fixed-variant": "#842228",
+                        "primary-fixed-dim": "#b5c8df",
+                        "surface-dim": "#dbd9db",
+                        "outline": "#74777d",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#36485b",
+                        "on-secondary-container": "#74161e",
+                        "on-tertiary-fixed": "#291802",
+                        "surface-tint": "#4e6073"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "margin": "24px",
+                        "grid-columns": "4",
+                        "gutter": "20px",
+                        "section-gap": "48px",
+                        "thumb-zone-height": "33%"
+                    },
+                    fontFamily: {
+                        "display-lg": ["Assistant"],
+                        "body-lg": ["Assistant"],
+                        "body-md": ["Assistant"],
+                        "headline-md": ["Assistant"],
+                        "label-bold": ["Assistant"],
+                        "caption": ["Assistant"]
+                    },
+                    fontSize: {
+                        "display-lg": ["32px", { lineHeight: "1.2", letterSpacing: "-0.02em", fontWeight: "300" }],
+                        "body-lg": ["18px", { lineHeight: "1.6", fontWeight: "400" }],
+                        "body-md": ["16px", { lineHeight: "1.5", fontWeight: "400" }],
+                        "headline-md": ["24px", { lineHeight: "1.3", fontWeight: "700" }],
+                        "label-bold": ["14px", { lineHeight: "1.2", fontWeight: "700" }],
+                        "caption": ["12px", { lineHeight: "1.4", letterSpacing: "0.05em", fontWeight: "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md text-body-md min-h-screen overflow-hidden selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-white/30 dark:bg-slate-950/30 backdrop-blur-md border-b border-white/10 dark:border-slate-800/50 flex justify-between items-center px-6 py-4 w-full text-slate-900 dark:text-slate-50 font-sans tracking-tight text-sm uppercase font-semibold">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-xl" data-icon="menu">menu</span>
+</div>
+<div class="text-lg font-bold tracking-widest text-slate-900 dark:text-white">
+            DirApp
+        </div>
+<div class="w-8 h-8 rounded-full overflow-hidden bg-surface-variant flex-shrink-0">
+<img alt="User profile portrait" class="w-full h-full object-cover" data-alt="A sophisticated headshot of a young professional woman with subtle, natural makeup and styled hair. She is framed against a bright, minimalist white background bathed in soft, high-key studio lighting. The aesthetic is clean, opulent, and editorial, matching a premium light-mode UI style with crisp details and an airy atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDzuCrhJCzDJXt-p-050nWy_5RmscUxB1B9BM7rq2HMzr0u2cycjHybEf1xIfp9D0-iZ-4UjLUkHFI9jezpp1kYzsjvyYqjHx7kCf1bRxD1IC39KNBtekR4cjGEkyZWyw1tVeRMwgpA1xMukQO9vB2TbNdbukuBTg3XcNnKxMC6T4HRlR-4sSDrT7dXpd7MjOgWAYujSdzfd3NDebwo_iHbdNZMuA4wztalZLpZdkCxJQLPhVG-90C4k7Vk4hLlIRIwlF3SiCH_hw2x"/>
+</div>
+</header>
+<!-- Main Canvas / Feed -->
+<main class="h-screen w-full pt-[80px] pb-[100px] px-margin relative flex flex-col justify-center">
+<!-- Property Card -->
+<div class="relative w-full max-w-lg mx-auto h-[618px] rounded-xl overflow-hidden bg-surface shadow-[0_4px_20px_rgba(0,0,0,0.05)]">
+<img alt="Luxury property" class="absolute inset-0 w-full h-full object-cover" data-alt="A breathtaking view of a modern luxury mansion's exterior during golden hour, featuring expansive floor-to-ceiling glass windows and a pristine infinity pool reflecting the sky. The architecture is ultra-contemporary with clean, minimalist geometric lines and lush, manicured landscaping. The lighting is warm and inviting yet highly polished, exuding a sense of effortless opulence and high-end editorial real estate photography fitting a premium digital interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAnAlGcphTYVvOD-Xu3m2iya8QnLqR6FhO8amfegCJn68NLlnT5jMWYjDqbNqBYUE-X5Cvn03cGhh-tUA0zsysLVCWfdTIJ78-YV9k5QTM0VX9CvF_wmqOzyLrYcry37vPl5lNThLWbt84uCr5C2WWZZ91AIN6k0LNqznbRZQqVlpv4dAhYQmCYugwGENQYmwCsgAob0Z9yDqU69VL6acGXRhg_UsICscJoEhfKidoLpGFIiJaFba27FEgUUvVamwI83AizoQaACWw"/>
+<!-- Photo Stack Indicator -->
+<div class="absolute top-4 left-0 w-full px-4 flex gap-1 z-10">
+<div class="h-1 flex-1 bg-white rounded-full opacity-100"></div>
+<div class="h-1 flex-1 bg-white/40 rounded-full"></div>
+<div class="h-1 flex-1 bg-white/40 rounded-full"></div>
+<div class="h-1 flex-1 bg-white/40 rounded-full"></div>
+</div>
+<!-- Gradient Overlay -->
+<div class="absolute inset-0 bg-gradient-to-t from-[#162839]/80 via-transparent to-transparent pointer-events-none"></div>
+<!-- Property Details (Glassmorphism layer) -->
+<div class="absolute bottom-0 left-0 w-full p-6 text-on-primary">
+<div class="flex flex-col gap-2">
+<h2 class="font-headline-md text-headline-md font-bold tracking-tight">$8,450,000</h2>
+<p class="font-body-lg text-body-lg text-inverse-on-surface opacity-90">1441 Beverly Estate Dr, CA</p>
+<!-- Property Chips -->
+<div class="flex gap-2 mt-2">
+<span class="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 font-caption text-caption">5 Beds</span>
+<span class="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 font-caption text-caption">6 Baths</span>
+<span class="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 font-caption text-caption">Infinity Pool</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Buttons (Thumb Zone) -->
+<div class="absolute bottom-[130px] left-0 w-full flex justify-center items-center gap-10 px-margin z-40 pointer-events-none">
+<!-- Dismiss Button -->
+<button class="pointer-events-auto w-16 h-16 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center shadow-[0_8px_20px_rgba(22,40,57,0.12)] hover:scale-95 transition-transform">
+<span class="material-symbols-outlined text-3xl" data-icon="close">close</span>
+</button>
+<!-- Save/Favorite Button -->
+<button class="pointer-events-auto w-16 h-16 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-[0_8px_20px_rgba(22,40,57,0.12)] hover:scale-95 transition-transform">
+<span class="material-symbols-outlined text-3xl" data-icon="favorite" data-weight="fill" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</button>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-md rounded-full border border-white/20 bg-white/15 dark:bg-black/20 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] flex justify-around items-center px-4 py-2 z-50 font-sans text-[10px] tracking-widest text-blue-500 dark:text-blue-400">
+<!-- Active Tab: Home -->
+<div class="flex flex-col items-center justify-center cursor-pointer bg-white/20 dark:bg-white/10 rounded-full p-3 text-blue-500 shadow-sm hover:opacity-80 transition-opacity active:scale-90 duration-200 ease-out">
+<span class="material-symbols-outlined text-2xl" data-icon="home_max" data-weight="fill" style="font-variation-settings: 'FILL' 1;">home_max</span>
+</div>
+<!-- Inactive Tab: Favorite -->
+<div class="flex flex-col items-center justify-center cursor-pointer text-slate-500 dark:text-slate-400 p-3 hover:bg-white/10 dark:hover:bg-slate-800/50 transition-all">
+<span class="material-symbols-outlined text-2xl" data-icon="favorite">favorite</span>
+</div>
+<!-- Inactive Tab: Chat -->
+<div class="flex flex-col items-center justify-center cursor-pointer text-slate-500 dark:text-slate-400 p-3 hover:bg-white/10 dark:hover:bg-slate-800/50 transition-all">
+<span class="material-symbols-outlined text-2xl" data-icon="chat_bubble">chat_bubble</span>
+</div>
+<!-- Inactive Tab: Person -->
+<div class="flex flex-col items-center justify-center cursor-pointer text-slate-500 dark:text-slate-400 p-3 hover:bg-white/10 dark:hover:bg-slate-800/50 transition-all">
+<span class="material-symbols-outlined text-2xl" data-icon="person">person</span>
+</div>
+</nav>
+</body></html>

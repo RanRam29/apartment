@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { matchesApi } from '../services/api';
 import type { Match } from '../types';
 import { C, Dark } from '../theme';
+import { dirApp } from '../theme/dirAppTokens';
 
 const STATUS_TABS = ['pending', 'accepted', 'rejected'] as const;
 type StatusTab = typeof STATUS_TABS[number];
@@ -161,14 +162,14 @@ function LeadRow({ match, onAccept, onReject, showActions, onOpenChat }: {
             <Text style={styles.rejectText}>דחה</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.acceptBtn} onPress={onAccept}>
-            <Ionicons name="checkmark" size={18} color={C.navy} />
+            <Ionicons name="checkmark" size={18} color={dirApp.primary} />
             <Text style={styles.acceptText}>אשר</Text>
           </TouchableOpacity>
         </View>
       )}
       {isAcceptedChatRow && (
         <TouchableOpacity style={styles.chatBtn} onPress={onOpenChat}>
-          <Ionicons name="chatbubble-ellipses-outline" size={18} color={C.navy} />
+          <Ionicons name="chatbubble-ellipses-outline" size={18} color={dirApp.primary} />
           <Text style={styles.chatText}>פתח צ׳אט</Text>
         </TouchableOpacity>
       )}
@@ -186,7 +187,7 @@ const styles = StyleSheet.create({
   },
   tabActive: { backgroundColor: C.cyan },
   tabText: { color: C.textMut, fontSize: 13, fontWeight: '600' },
-  tabTextActive: { color: C.navy },
+  tabTextActive: { color: dirApp.primary },
   list: { padding: 16, gap: 10 },
   leadCard: { backgroundColor: Dark.surface, borderRadius: 16, padding: 14, gap: 12, borderWidth: 1, borderColor: Dark.border },
   leadTop: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
@@ -207,7 +208,7 @@ const styles = StyleSheet.create({
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: 6, paddingVertical: 10, borderRadius: 10, backgroundColor: C.cyan,
   },
-  acceptText: { color: C.navy, fontWeight: '600' },
+  acceptText: { color: dirApp.primary, fontWeight: '600' },
   chatBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -217,7 +218,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: C.cyan,
   },
-  chatText: { color: C.navy, fontWeight: '600' },
+  chatText: { color: dirApp.primary, fontWeight: '600' },
   empty: { alignItems: 'center', paddingTop: 60 },
   emptyText: { color: C.textMut, fontSize: 14 },
 });

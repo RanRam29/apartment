@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Who am I?</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="../../tokens/tailwind.browser.js"></script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen antialiased selection:bg-primary-container selection:text-on-primary-container flex flex-col justify-center">
+<!-- Main Content Canvas -->
+<main class="w-full max-w-lg mx-auto px-margin py-section-gap flex flex-col">
+<!-- Header Section -->
+<header class="mb-section-gap text-center flex flex-col items-center">
+<div class="w-12 h-1 bg-outline-variant/30 rounded-full mb-8"></div>
+<h1 class="font-display-lg text-display-lg text-primary">Who am I?</h1>
+</header>
+<!-- Selection Cards (Bento-style layout) -->
+<div class="flex flex-col gap-gutter">
+<!-- Seeker Card -->
+<button class="group relative w-full bg-surface-container-lowest border border-outline-variant/20 rounded-xl p-8 flex flex-col items-center justify-center gap-4 shadow-[0_8px_20px_rgba(44,62,80,0.03)] hover:shadow-[0_8px_20px_rgba(22,40,57,0.12)] hover:border-primary/20 transition-all duration-300 ease-out overflow-hidden" type="button">
+<!-- Hover subtle gradient -->
+<div class="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+<span class="material-symbols-outlined text-[48px] text-primary transition-transform duration-300 group-hover:scale-110" style="font-variation-settings: 'FILL' 0, 'wght' 100;">
+                    explore
+                </span>
+<div class="text-center mt-2 z-10">
+<h2 class="font-headline-md text-headline-md text-primary mb-2">I am a Seeker</h2>
+<p class="font-body-md text-body-md text-surface-tint">Looking for long or short term rentals</p>
+</div>
+</button>
+<!-- Owner Card -->
+<button class="group relative w-full bg-surface-container-lowest border border-outline-variant/20 rounded-xl p-8 flex flex-col items-center justify-center gap-4 shadow-[0_8px_20px_rgba(44,62,80,0.03)] hover:shadow-[0_8px_20px_rgba(22,40,57,0.12)] hover:border-primary/20 transition-all duration-300 ease-out overflow-hidden" type="button">
+<!-- Hover subtle gradient -->
+<div class="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+<span class="material-symbols-outlined text-[48px] text-primary transition-transform duration-300 group-hover:scale-110" style="font-variation-settings: 'FILL' 0, 'wght' 100;">
+                    key
+                </span>
+<div class="text-center mt-2 z-10">
+<h2 class="font-headline-md text-headline-md text-primary mb-2">I am an Owner</h2>
+<p class="font-body-md text-body-md text-surface-tint">Looking to lease my property</p>
+</div>
+</button>
+</div>
+</main>
+</body></html>

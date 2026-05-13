@@ -7,7 +7,10 @@ import {
 import { useAuthStore } from '../store/useAuthStore';
 import { formatLoginError } from '../utils/authErrors';
 import { C } from '../theme';
+import { dirApp } from '../theme/dirAppTokens';
 import SwipeHouseLogo from '../components/SwipeHouseLogo';
+import { ResponsiveContainer } from '../components/ResponsiveContainer';
+import { dirType } from '../theme/textStyles';
 
 interface Props {
   onSwitch: () => void;
@@ -64,11 +67,12 @@ export default function RegisterScreen({ onSwitch }: Props) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        <ResponsiveContainer>
         <View style={styles.brandRow}>
           <SwipeHouseLogo size="md" />
         </View>
-        <Text style={styles.title}>הרשמה</Text>
-        <Text style={styles.subtitle}>צור חשבון חדש</Text>
+        <Text style={[styles.title, dirType.title]}>הרשמה</Text>
+        <Text style={[styles.subtitle, dirType.body]}>צור חשבון חדש</Text>
 
         {/* Role selector */}
         <View style={styles.roleRow}>
@@ -145,14 +149,15 @@ export default function RegisterScreen({ onSwitch }: Props) {
         >
           {loading
             ? <ActivityIndicator color={C.onInverse.primary} />
-            : <Text style={styles.buttonText}>הרשמה</Text>
+            : <Text style={[styles.buttonText, dirType.label]}>הרשמה</Text>
           }
         </TouchableOpacity>
 
         <TouchableOpacity onPress={onSwitch} style={styles.switchRow}>
-          <Text style={styles.switchText}>כבר יש לך חשבון? </Text>
-          <Text style={[styles.switchText, styles.switchLink]}>התחבר</Text>
+          <Text style={[styles.switchText, dirType.caption]}>כבר יש לך חשבון? </Text>
+          <Text style={[styles.switchText, styles.switchLink, dirType.caption]}>התחבר</Text>
         </TouchableOpacity>
+        </ResponsiveContainer>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -161,47 +166,51 @@ export default function RegisterScreen({ onSwitch }: Props) {
 const styles = StyleSheet.create({
   container: { flexGrow: 1, justifyContent: 'center', padding: 28 },
   brandRow: { alignItems: 'center', marginBottom: 16 },
-  title:    { fontSize: 26, fontWeight: '700', color: C.text, textAlign: 'right', marginBottom: 4 },
-  subtitle: { fontSize: 14, color: C.textSub, textAlign: 'right', marginBottom: 24 },
+  title: { fontSize: 26, fontWeight: '700', color: dirApp.primary, textAlign: 'right', marginBottom: 4 },
+  subtitle: { fontSize: 14, color: dirApp.outline, textAlign: 'right', marginBottom: 24 },
 
   roleRow: { flexDirection: 'row', marginBottom: 20, gap: 10 },
   roleBtn: {
-    flex: 1, paddingVertical: 13, borderRadius: 12,
-    backgroundColor: C.bg, borderWidth: 1.5, borderColor: C.border,
+    flex: 1,
+    paddingVertical: 13,
+    borderRadius: 12,
+    backgroundColor: dirApp.surfaceContainerLowest,
+    borderWidth: 1.5,
+    borderColor: `${dirApp.outlineVariant}AA`,
     alignItems: 'center',
   },
-  roleBtnActive: { backgroundColor: C.navy, borderColor: C.navy },
-  roleBtnText:       { color: C.textSub, fontWeight: '600', fontSize: 14 },
-  roleBtnTextActive: { color: C.onInverse.primary },
+  roleBtnActive: { backgroundColor: dirApp.secondaryContainer, borderColor: dirApp.secondary },
+  roleBtnText: { color: dirApp.outline, fontWeight: '600', fontSize: 14 },
+  roleBtnTextActive: { color: dirApp.onSecondaryContainer },
 
   row: { flexDirection: 'row', marginBottom: 0 },
   input: {
-    backgroundColor: C.bg,
+    backgroundColor: dirApp.surfaceContainerLowest,
     borderRadius: 14,
     padding: 16,
     fontSize: 15,
-    color: C.text,
+    color: dirApp.onSurface,
     marginBottom: 12,
     borderWidth: 1.5,
-    borderColor: C.border,
+    borderColor: `${dirApp.outlineVariant}AA`,
   },
   button: {
-    backgroundColor: C.navy,
+    backgroundColor: dirApp.primaryContainer,
     borderRadius: 14,
     padding: 16,
     alignItems: 'center',
     marginTop: 8,
-    shadowColor: C.navy,
+    shadowColor: dirApp.primary,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.18,
+    shadowOpacity: 0.12,
     shadowRadius: 8,
     elevation: 4,
   },
   buttonDisabled: { opacity: 0.6 },
   buttonText: { color: C.onInverse.primary, fontSize: 16, fontWeight: '700' },
-  errorText:   { color: C.danger, fontSize: 13, textAlign: 'right', marginBottom: 10, lineHeight: 20 },
+  errorText: { color: C.danger, fontSize: 13, textAlign: 'right', marginBottom: 10, lineHeight: 20 },
   successText: { color: C.success, fontSize: 13, textAlign: 'right', marginBottom: 10, lineHeight: 20 },
   switchRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 24 },
-  switchText: { color: C.textSub, fontSize: 14 },
-  switchLink: { color: C.navy, fontWeight: '700' },
+  switchText: { color: dirApp.outline, fontSize: 14 },
+  switchLink: { color: dirApp.secondary, fontWeight: '700' },
 });

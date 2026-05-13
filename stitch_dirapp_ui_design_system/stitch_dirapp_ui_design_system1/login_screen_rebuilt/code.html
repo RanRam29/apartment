@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DirApp - Login</title>
+<!-- Google Fonts: Assistant -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script src="../../tokens/tailwind.browser.js"></script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface-container-lowest text-on-background min-h-screen flex flex-col antialiased selection:bg-primary-container selection:text-on-primary-container">
+<main class="flex-1 flex flex-col justify-center px-margin max-w-md w-full mx-auto pb-thumb-zone-height md:pb-margin relative z-10">
+<!-- Header / Brand -->
+<header class="mb-section-gap text-center pt-12">
+<h1 class="font-display-lg text-display-lg text-primary font-bold tracking-tighter mb-2">DirApp</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Sign in to continue your journey.</p>
+</header>
+<!-- Traditional Login Form -->
+<form action="#" class="flex flex-col gap-gutter" method="POST">
+<div class="flex flex-col gap-1.5">
+<label class="sr-only" for="email">Email address</label>
+<input class="w-full bg-surface-container-low border border-outline-variant/30 text-on-surface font-body-md text-body-md rounded-xl px-5 py-4 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all placeholder:text-on-surface-variant/60" id="email" name="email" placeholder="Email address" required="" type="email"/>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="sr-only" for="password">Password</label>
+<div class="relative">
+<input class="w-full bg-surface-container-low border border-outline-variant/30 text-on-surface font-body-md text-body-md rounded-xl px-5 py-4 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all placeholder:text-on-surface-variant/60" id="password" name="password" placeholder="Password" required="" type="password"/>
+<button aria-label="Toggle password visibility" class="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors focus:outline-none" type="button">
+<span class="material-symbols-outlined text-[20px]">visibility_off</span>
+</button>
+</div>
+<div class="text-right mt-2">
+<a class="font-caption text-caption text-primary hover:text-primary-container transition-colors" href="#">Forgot password?</a>
+</div>
+</div>
+<button class="w-full bg-primary text-on-primary font-label-bold text-label-bold rounded-full py-4 mt-2 shadow-[0_8px_20px_rgba(22,40,57,0.15)] hover:opacity-90 active:scale-[0.98] transition-all flex justify-center items-center gap-2" type="submit">
+                Sign In
+                <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</form>
+<!-- Divider -->
+<div class="flex items-center gap-4 my-8">
+<div class="h-px bg-outline-variant/30 flex-1"></div>
+<span class="font-caption text-caption text-on-surface-variant uppercase tracking-widest">Or continue with</span>
+<div class="h-px bg-outline-variant/30 flex-1"></div>
+</div>
+<!-- Quick Login Options -->
+<div class="flex flex-col gap-3">
+<button class="w-full bg-surface-container-lowest border border-outline-variant/50 text-on-surface font-label-bold text-label-bold rounded-full py-3.5 px-6 flex items-center justify-center gap-3 hover:bg-surface-container-low transition-colors group" type="button">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">mail</span>
+                Continue with Google
+            </button>
+<button class="w-full bg-surface-container-lowest border border-outline-variant/50 text-on-surface font-label-bold text-label-bold rounded-full py-3.5 px-6 flex items-center justify-center gap-3 hover:bg-surface-container-low transition-colors group" type="button">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">laptop_mac</span>
+                Continue with Apple
+            </button>
+<button class="w-full bg-surface-container-lowest border border-outline-variant/50 text-on-surface font-label-bold text-label-bold rounded-full py-3.5 px-6 flex items-center justify-center gap-3 hover:bg-surface-container-low transition-colors group" type="button">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">smartphone</span>
+                Continue with Phone
+            </button>
+</div>
+<!-- Footer Link -->
+<p class="text-center font-body-md text-body-md text-on-surface-variant mt-12 mb-8">
+            Don't have an account? 
+            <a class="text-primary font-bold hover:underline underline-offset-4 decoration-primary/30" href="#">Sign up</a>
+</p>
+</main>
+</body></html>

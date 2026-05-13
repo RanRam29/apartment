@@ -13,6 +13,7 @@
     "test:coverage": "jest --coverage --runInBand"
   },
   "dependencies": {
+    "@expo-google-fonts/rubik": "^0.4.2",
     "@expo/metro-runtime": "~5.0.5",
     "@expo/vector-icons": "^14.0.2",
     "@react-navigation/bottom-tabs": "^6.5.20",

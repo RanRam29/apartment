@@ -9,6 +9,9 @@ import { paymentApi, contractsApi } from '../services/api';
 import { useAuthStore } from '../store/useAuthStore';
 import { usePersonaIsLandlord } from '../navigation/AdminAppModeContext';
 import { C, Dark } from '../theme';
+import { dirApp } from '../theme/dirAppTokens';
+import { ResponsiveContainer } from '../components/ResponsiveContainer';
+import { dirType } from '../theme/textStyles';
 
 type PaymentStatus = 'pending' | 'initiated' | 'paid' | 'overdue' | 'cancelled';
 
@@ -204,7 +207,7 @@ export default function RentPaymentsScreen({ navigation }: any) {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="chevron-back" size={22} color={C.onInverse.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>תשלומי שכירות</Text>
+        <Text style={[styles.headerTitle, dirType.subhead]}>תשלומי שכירות</Text>
         {isLandlord && (
           <TouchableOpacity style={styles.addBtn} onPress={() => setRequestModal(true)}>
             <Ionicons name="add" size={20} color={C.onInverse.primary} />
@@ -212,33 +215,36 @@ export default function RentPaymentsScreen({ navigation }: any) {
         )}
       </View>
 
-      {isLoading ? (
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color={C.cyan} />
-        </View>
-      ) : payments.length === 0 ? (
-        <View style={styles.center}>
-          <Ionicons name="cash-outline" size={48} color={C.textMut} />
-          <Text style={styles.emptyTitle}>אין תשלומים עדיין</Text>
-          <Text style={styles.emptyHint}>
-            {isLandlord ? 'לחץ + כדי לשלוח בקשת תשלום לשוכר' : 'תשלומי שכירות יופיעו כאן'}
-          </Text>
-        </View>
-      ) : (
-        <FlatList
-          data={payments}
-          keyExtractor={(p) => p._id}
-          contentContainerStyle={styles.list}
-          renderItem={({ item }) => (
-            <PaymentCard
-              payment={item}
-              isLandlord={isLandlord}
-              onPay={handlePay}
-              onMarkPaid={handleMarkPaid}
-            />
-          )}
-        />
-      )}
+      <ResponsiveContainer style={{ flex: 1 }}>
+        {isLoading ? (
+          <View style={styles.center}>
+            <ActivityIndicator size="large" color={C.cyan} />
+          </View>
+        ) : payments.length === 0 ? (
+          <View style={styles.center}>
+            <Ionicons name="cash-outline" size={48} color={C.textMut} />
+            <Text style={[styles.emptyTitle, dirType.subhead]}>אין תשלומים עדיין</Text>
+            <Text style={[styles.emptyHint, dirType.caption]}>
+              {isLandlord ? 'לחץ + כדי לשלוח בקשת תשלום לשוכר' : 'תשלומי שכירות יופיעו כאן'}
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            style={{ flex: 1 }}
+            data={payments}
+            keyExtractor={(p) => p._id}
+            contentContainerStyle={styles.list}
+            renderItem={({ item }) => (
+              <PaymentCard
+                payment={item}
+                isLandlord={isLandlord}
+                onPay={handlePay}
+                onMarkPaid={handleMarkPaid}
+              />
+            )}
+          />
+        )}
+      </ResponsiveContainer>
 
       {/* Request payment modal (landlord only) */}
       <Modal visible={requestModal} transparent animationType="slide">
@@ -287,7 +293,7 @@ export default function RentPaymentsScreen({ navigation }: any) {
                 disabled={!selectedContract || createMutation.isPending}
               >
                 {createMutation.isPending
-                  ? <ActivityIndicator size="small" color={C.navy} />
+                  ? <ActivityIndicator size="small" color={dirApp.primary} />
                   : <Text style={styles.sendBtnText}>שלח בקשה</Text>}
               </TouchableOpacity>
             </View>
@@ -368,5 +374,5 @@ const styles = StyleSheet.create({
   cancelBtnText: { color: C.textMut, fontWeight: '700' },
   sendBtn:        { flex: 2, padding: 14, borderRadius: 12, backgroundColor: C.cyan, alignItems: 'center' },
   sendBtnDisabled: { opacity: 0.4 },
-  sendBtnText:     { color: C.navy, fontWeight: '800', fontSize: 15 },
+  sendBtnText:     { color: dirApp.primary, fontWeight: '800', fontSize: 15 },
 });

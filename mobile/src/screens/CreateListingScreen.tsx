@@ -11,7 +11,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import { apartmentsApi } from '../services/api';
 import type { Amenity } from '../types';
 import { C } from '../theme';
+import { dirApp } from '../theme/dirAppTokens';
 import { CITY_CENTER_BY_NAME } from '../constants/cityCenters';
+import { ResponsiveContainer } from '../components/ResponsiveContainer';
 
 const AMENITY_OPTIONS: { key: Amenity; label: string }[] = [
   { key: 'parking',     label: '🚗 חניה' },
@@ -251,6 +253,7 @@ export default function CreateListingScreen({ navigation }: any) {
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+          <ResponsiveContainer>
           <View style={styles.formCard}>
             <Text style={styles.header}>פרסם מודעה חדשה</Text>
 
@@ -260,7 +263,7 @@ export default function CreateListingScreen({ navigation }: any) {
                 value={title}
                 onChangeText={(value) => setTitle(sanitizeTitleInput(value))}
                 placeholder="לדוג׳: דירת 3 חדרים מרוהטת בלב תל אביב"
-                placeholderTextColor={C.textMut}
+                placeholderTextColor={dirApp.outline}
                 textAlign="right"
                 maxLength={100}
               />
@@ -275,7 +278,7 @@ export default function CreateListingScreen({ navigation }: any) {
                   onChangeText={(value) => setPrice(keepDigitsOnly(value))}
                   keyboardType="numeric"
                   placeholder="6500"
-                  placeholderTextColor={C.textMut}
+                  placeholderTextColor={dirApp.outline}
                   textAlign="right"
                 />
               </Field>
@@ -286,7 +289,7 @@ export default function CreateListingScreen({ navigation }: any) {
                   onChangeText={(value) => setRooms(keepDigitsOnly(value))}
                   keyboardType="numeric"
                   placeholder="3"
-                  placeholderTextColor={C.textMut}
+                  placeholderTextColor={dirApp.outline}
                   textAlign="right"
                 />
               </Field>
@@ -303,10 +306,10 @@ export default function CreateListingScreen({ navigation }: any) {
                     setStreetSuggestions([]);
                   }}
                   placeholder="בחר עיר בישראל"
-                  placeholderTextColor={C.textMut}
+                  placeholderTextColor={dirApp.outline}
                   textAlign="right"
                 />
-                {isLoadingCities ? <ActivityIndicator size="small" color={C.navy} style={styles.loader} /> : null}
+                {isLoadingCities ? <ActivityIndicator size="small" color={dirApp.secondary} style={styles.loader} /> : null}
                 {!!citySuggestions.length && (
                   <View style={styles.suggestionsBox}>
                     {citySuggestions.map((item) => (
@@ -330,11 +333,11 @@ export default function CreateListingScreen({ navigation }: any) {
                   value={street}
                   onChangeText={setStreet}
                   placeholder={canSearchStreet ? 'בחר רחוב לפי העיר' : 'יש לבחור עיר קודם'}
-                  placeholderTextColor={C.textMut}
+                  placeholderTextColor={dirApp.outline}
                   textAlign="right"
                   editable={canSearchStreet}
                 />
-                {isLoadingStreets ? <ActivityIndicator size="small" color={C.navy} style={styles.loader} /> : null}
+                {isLoadingStreets ? <ActivityIndicator size="small" color={dirApp.secondary} style={styles.loader} /> : null}
                 {!!streetSuggestions.length && (
                   <View style={styles.suggestionsBox}>
                     {streetSuggestions.map((item) => (
@@ -362,7 +365,7 @@ export default function CreateListingScreen({ navigation }: any) {
                   onChangeText={(value) => setFloor(keepDigitsOnly(value))}
                   keyboardType="numeric"
                   placeholder="3"
-                  placeholderTextColor={C.textMut}
+                  placeholderTextColor={dirApp.outline}
                   textAlign="right"
                 />
               </Field>
@@ -373,7 +376,7 @@ export default function CreateListingScreen({ navigation }: any) {
                   onChangeText={(value) => setSizeSqm(keepDigitsOnly(value))}
                   keyboardType="numeric"
                   placeholder="75"
-                  placeholderTextColor={C.textMut}
+                  placeholderTextColor={dirApp.outline}
                   textAlign="right"
                 />
               </Field>
@@ -387,7 +390,7 @@ export default function CreateListingScreen({ navigation }: any) {
                 multiline
                 numberOfLines={4}
                 placeholder="תאר את הדירה..."
-                placeholderTextColor={C.textMut}
+                placeholderTextColor={dirApp.outline}
                 textAlign="right"
               />
             </Field>
@@ -410,7 +413,7 @@ export default function CreateListingScreen({ navigation }: any) {
             <Text style={styles.fieldLabel}>תמונות ({images.length}/10)</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imagesRow} contentContainerStyle={styles.imagesRowContent}>
               <TouchableOpacity style={styles.addImageBtn} onPress={pickImages}>
-                <Ionicons name="camera-outline" size={28} color={C.navy} />
+                <Ionicons name="camera-outline" size={28} color={dirApp.secondary} />
                 <Text style={styles.addImageText}>הוסף</Text>
               </TouchableOpacity>
               {images.map((img, i) => (
@@ -437,6 +440,7 @@ export default function CreateListingScreen({ navigation }: any) {
               }
             </TouchableOpacity>
           </View>
+          </ResponsiveContainer>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -453,44 +457,44 @@ function Field({ label, children, style }: { label: string; children: React.Reac
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: C.bg },
-  scroll: { padding: 16, paddingBottom: 40, alignItems: 'center' },
+  container: { flex: 1, backgroundColor: dirApp.background },
+  scroll: { paddingVertical: 16, paddingBottom: 40, alignItems: 'center' },
   formCard: {
     width: '100%',
     maxWidth: 720,
-    backgroundColor: C.bgCard,
+    backgroundColor: dirApp.surfaceContainerLowest,
     borderRadius: 18,
     borderWidth: 1.5,
-    borderColor: C.borderLight,
+    borderColor: `${dirApp.outlineVariant}AA`,
     padding: 16,
-    shadowColor: C.navy,
+    shadowColor: dirApp.primary,
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.06,
     shadowRadius: 16,
     elevation: 4,
   },
-  header: { fontSize: 22, fontWeight: '800', color: C.text, textAlign: 'right', marginBottom: 20 },
+  header: { fontSize: 22, fontWeight: '800', color: dirApp.primary, textAlign: 'right', marginBottom: 20 },
   row: { flexDirection: 'row-reverse', marginBottom: 0, columnGap: 8, alignItems: 'flex-start' },
-  fieldLabel: { color: C.textSub, fontSize: 12, fontWeight: '600', textAlign: 'right', marginBottom: 6 },
+  fieldLabel: { color: dirApp.outline, fontSize: 12, fontWeight: '600', textAlign: 'right', marginBottom: 6 },
   input: {
-    backgroundColor: C.bgCard,
+    backgroundColor: dirApp.background,
     borderRadius: 12,
     padding: 14,
     fontSize: 14,
-    color: C.text,
+    color: dirApp.onSurface,
     borderWidth: 1.5,
-    borderColor: C.border,
+    borderColor: `${dirApp.outlineVariant}AA`,
     writingDirection: 'rtl',
   },
   textarea: { height: 100, textAlignVertical: 'top' },
-  helperText: { marginTop: 4, textAlign: 'right', color: C.textMut, fontSize: 11 },
+  helperText: { marginTop: 4, textAlign: 'right', color: dirApp.outline, fontSize: 11 },
   loader: { marginTop: 6 },
   suggestionsBox: {
     marginTop: 4,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: C.borderLight,
-    backgroundColor: C.bg,
+    borderColor: `${dirApp.outlineVariant}AA`,
+    backgroundColor: dirApp.surfaceContainerLow,
     maxHeight: 180,
     overflow: 'hidden',
     zIndex: 50,
@@ -500,32 +504,45 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderBottomWidth: 1,
-    borderBottomColor: C.borderLight,
+    borderBottomColor: `${dirApp.outlineVariant}44`,
   },
-  suggestionText: { textAlign: 'right', color: C.text, fontSize: 14 },
+  suggestionText: { textAlign: 'right', color: dirApp.onSurface, fontSize: 14 },
   amenitiesGrid: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: 8, marginBottom: 20, justifyContent: 'flex-start' },
   amenityChip: {
-    paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10,
-    backgroundColor: C.bg, borderWidth: 1.5, borderColor: C.border,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    backgroundColor: dirApp.surfaceContainerLow,
+    borderWidth: 1.5,
+    borderColor: `${dirApp.outlineVariant}AA`,
   },
-  amenityChipActive: { backgroundColor: C.navy, borderColor: C.navy },
-  amenityText: { color: C.textSub, fontSize: 13, textAlign: 'right' },
-  amenityTextActive: { color: C.onInverse.primary, fontWeight: '600' },
+  amenityChipActive: { backgroundColor: dirApp.secondary, borderColor: dirApp.secondary },
+  amenityText: { color: dirApp.outline, fontSize: 13, textAlign: 'right' },
+  amenityTextActive: { color: dirApp.onSecondary, fontWeight: '600' },
   imagesRow: { marginBottom: 24 },
   imagesRowContent: { flexDirection: 'row-reverse', alignItems: 'center' },
   addImageBtn: {
-    width: 80, height: 80, borderRadius: 12, borderWidth: 2,
-    borderColor: C.navy, borderStyle: 'dashed',
-    justifyContent: 'center', alignItems: 'center',
-    marginLeft: 8, backgroundColor: C.navyAlpha(0.05),
+    width: 80,
+    height: 80,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: dirApp.secondary,
+    borderStyle: 'dashed',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 8,
+    backgroundColor: `${dirApp.secondaryContainer}33`,
   },
-  addImageText: { color: C.navy, fontSize: 11, marginTop: 2 },
+  addImageText: { color: dirApp.secondary, fontSize: 11, marginTop: 2 },
   imageThumb: { width: 80, height: 80, borderRadius: 12, marginLeft: 8, position: 'relative' },
   imageThumbImg: { width: 80, height: 80, borderRadius: 12 },
   removeImageBtn: { position: 'absolute', top: -6, left: -6 },
   submitBtn: {
-    backgroundColor: C.navy, borderRadius: 14,
-    paddingVertical: 16, alignItems: 'center', marginTop: 8,
+    backgroundColor: dirApp.primaryContainer,
+    borderRadius: 14,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginTop: 8,
   },
   submitBtnDisabled: { opacity: 0.6 },
   submitText: { color: C.onInverse.primary, fontSize: 16, fontWeight: '800' },

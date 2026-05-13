@@ -11,6 +11,7 @@ import Animated, {
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import ApartmentCard, { CARD_WIDTH, CARD_HEIGHT } from './ApartmentCard';
 import { C } from '../theme';
+import { dirApp } from '../theme/dirAppTokens';
 import type { Apartment, SwipeDirection } from '../types';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -143,9 +144,9 @@ const styles = StyleSheet.create({
 
   labelSuper: {
     position: 'absolute', bottom: 110, alignSelf: 'center',
-    borderWidth: 3, borderColor: C.navy, borderRadius: 10,
+    borderWidth: 3, borderColor: dirApp.primary, borderRadius: 10,
     paddingHorizontal: 14, paddingVertical: 7,
-    backgroundColor: C.navyAlpha(0.08),
+    backgroundColor: `${dirApp.primary}14`,
   },
-  labelSuperText: { color: C.navy, fontSize: 22, fontWeight: '800' },
+  labelSuperText: { color: dirApp.primary, fontSize: 22, fontWeight: '800' },
 });

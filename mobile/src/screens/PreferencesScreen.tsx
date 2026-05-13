@@ -9,6 +9,9 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { recommendationsApi } from '../services/api';
 import type { Amenity, MainStackParamList } from '../types';
 import { C, Dark } from '../theme';
+import { dirApp } from '../theme/dirAppTokens';
+import { ResponsiveContainer } from '../components/ResponsiveContainer';
+import { dirType } from '../theme/textStyles';
 
 const CITIES = ['תל אביב', 'ירושלים', 'חיפה', 'ראשון לציון', 'פתח תקווה', 'אשדוד', 'נתניה', 'באר שבע', 'בני ברק', 'רמת גן', 'גבעתיים', 'חולון', 'בת ים', 'הרצליה', 'כפר סבא', 'רעננה', 'מודיעין', 'אשקלון', 'רחובות', 'לוד'];
 
@@ -112,21 +115,22 @@ export default function PreferencesScreen({ navigation }: Props) {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-        <Text style={styles.header}>העדפות חיפוש</Text>
-        <Text style={styles.subtitle}>נשתמש בהעדפות אלו כדי להתאים לך דירות</Text>
+        <ResponsiveContainer>
+        <Text style={[styles.header, dirType.title]}>העדפות חיפוש</Text>
+        <Text style={[styles.subtitle, dirType.caption]}>נשתמש בהעדפות אלו כדי להתאים לך דירות</Text>
 
         {/* Budget */}
-        <Text style={styles.sectionTitle}>תקציב חודשי ₪</Text>
+        <Text style={[styles.sectionTitle, dirType.subhead]}>תקציב חודשי ₪</Text>
         <View style={styles.row}>
           <View style={{ flex: 1, marginLeft: 8 }}>
-            <Text style={styles.fieldLabel}>מינימום</Text>
+            <Text style={[styles.fieldLabel, dirType.label]}>מינימום</Text>
             <TextInput
               style={styles.input} value={minBudget} onChangeText={setMinBudget}
               keyboardType="numeric" placeholder="3000" placeholderTextColor={C.textMut} textAlign="right"
             />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={styles.fieldLabel}>מקסימום</Text>
+            <Text style={[styles.fieldLabel, dirType.label]}>מקסימום</Text>
             <TextInput
               style={styles.input} value={maxBudget} onChangeText={setMaxBudget}
               keyboardType="numeric" placeholder="9000" placeholderTextColor={C.textMut} textAlign="right"
@@ -135,17 +139,17 @@ export default function PreferencesScreen({ navigation }: Props) {
         </View>
 
         {/* Rooms */}
-        <Text style={styles.sectionTitle}>מספר חדרים</Text>
+        <Text style={[styles.sectionTitle, dirType.subhead]}>מספר חדרים</Text>
         <View style={styles.row}>
           <View style={{ flex: 1, marginLeft: 8 }}>
-            <Text style={styles.fieldLabel}>מינימום</Text>
+            <Text style={[styles.fieldLabel, dirType.label]}>מינימום</Text>
             <TextInput
               style={styles.input} value={minRooms} onChangeText={setMinRooms}
               keyboardType="decimal-pad" placeholder="2" placeholderTextColor={C.textMut} textAlign="right"
             />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={styles.fieldLabel}>מקסימום</Text>
+            <Text style={[styles.fieldLabel, dirType.label]}>מקסימום</Text>
             <TextInput
               style={styles.input} value={maxRooms} onChangeText={setMaxRooms}
               keyboardType="decimal-pad" placeholder="5" placeholderTextColor={C.textMut} textAlign="right"
@@ -154,8 +158,8 @@ export default function PreferencesScreen({ navigation }: Props) {
         </View>
 
         {/* Cities */}
-        <Text style={styles.sectionTitle}>ערים מועדפות</Text>
-        <Text style={styles.hint}>בחר אחת או יותר — ריק = כל הארץ</Text>
+        <Text style={[styles.sectionTitle, dirType.subhead]}>ערים מועדפות</Text>
+        <Text style={[styles.hint, dirType.micro]}>בחר אחת או יותר — ריק = כל הארץ</Text>
         <View style={styles.chipGrid}>
           {CITIES.map((city) => (
             <TouchableOpacity
@@ -163,7 +167,7 @@ export default function PreferencesScreen({ navigation }: Props) {
               style={[styles.chip, cities.includes(city) && styles.chipActive]}
               onPress={() => toggleCity(city)}
             >
-              <Text style={[styles.chipText, cities.includes(city) && styles.chipTextActive]}>
+              <Text style={[styles.chipText, dirType.label, cities.includes(city) && styles.chipTextActive]}>
                 {city}
               </Text>
             </TouchableOpacity>
@@ -171,7 +175,7 @@ export default function PreferencesScreen({ navigation }: Props) {
         </View>
 
         {/* Amenities */}
-        <Text style={styles.sectionTitle}>שירותים נדרשים</Text>
+        <Text style={[styles.sectionTitle, dirType.subhead]}>שירותים נדרשים</Text>
         <View style={styles.chipGrid}>
           {AMENITY_OPTIONS.map(({ key, label }) => (
             <TouchableOpacity
@@ -179,7 +183,7 @@ export default function PreferencesScreen({ navigation }: Props) {
               style={[styles.chip, amenities.includes(key) && styles.chipActive]}
               onPress={() => toggleAmenity(key)}
             >
-              <Text style={[styles.chipText, amenities.includes(key) && styles.chipTextActive]}>
+              <Text style={[styles.chipText, dirType.label, amenities.includes(key) && styles.chipTextActive]}>
                 {label}
               </Text>
             </TouchableOpacity>
@@ -194,7 +198,7 @@ export default function PreferencesScreen({ navigation }: Props) {
             trackColor={{ false: Dark.switchTrackOff, true: Dark.switchTrackOn }}
             thumbColor={petsAllowed ? C.cyan : C.textMut}
           />
-          <Text style={styles.switchLabel}>🐾 מחפש/ת דירה שמאפשרת חיות מחמד</Text>
+          <Text style={[styles.switchLabel, dirType.body]}>🐾 מחפש/ת דירה שמאפשרת חיות מחמד</Text>
         </View>
 
         <TouchableOpacity
@@ -203,10 +207,11 @@ export default function PreferencesScreen({ navigation }: Props) {
           disabled={saveMutation.isPending}
         >
           {saveMutation.isPending
-            ? <ActivityIndicator color={C.navy} />
-            : <Text style={styles.saveBtnText}>שמור העדפות</Text>
+            ? <ActivityIndicator color={dirApp.primary} />
+            : <Text style={[styles.saveBtnText, dirType.label]}>שמור העדפות</Text>
           }
         </TouchableOpacity>
+        </ResponsiveContainer>
       </ScrollView>
     </SafeAreaView>
   );
@@ -237,5 +242,5 @@ const styles = StyleSheet.create({
   switchLabel: { color: C.onInverse.secondary, fontSize: 14 },
   saveBtn: { backgroundColor: C.cyan, borderRadius: 14, paddingVertical: 16, alignItems: 'center', marginTop: 28 },
   saveBtnDisabled: { opacity: 0.6 },
-  saveBtnText: { color: C.navy, fontSize: 16, fontWeight: '800' },
+  saveBtnText: { color: dirApp.primary, fontSize: 16, fontWeight: '800' },
 });

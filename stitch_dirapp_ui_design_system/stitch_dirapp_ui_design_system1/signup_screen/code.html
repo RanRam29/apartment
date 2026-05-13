@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DirApp - Create Account</title>
+<!-- Google Fonts: Assistant & Material Symbols -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS Setup -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="../../tokens/tailwind.browser.js"></script>
+<style>
+        /* Custom floating label utility */
+        .peer-focus-float:focus ~ label,
+        .peer-valid-float:not(:placeholder-shown) ~ label {
+            top: -16px;
+            font-size: 12px;
+            line-height: 1.4;
+            letter-spacing: 0.05em;
+            color: #162839; /* primary */
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen flex flex-col items-center antialiased selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- Main Container: Suppressed Navigation (Transactional Screen), High-Density Margins -->
+<main class="w-full max-w-md flex-1 flex flex-col px-[24px] py-[48px] justify-between">
+<!-- Header Section -->
+<header class="space-y-[20px] mb-[48px]">
+<h1 class="font-display-lg text-display-lg text-on-background tracking-tight">Create Account</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Enter your details to begin your journey with DirApp.</p>
+</header>
+<!-- Form Section -->
+<form class="flex-1 flex flex-col space-y-[32px]">
+<!-- Name Input -->
+<div class="relative group">
+<input class="peer peer-focus-float peer-valid-float w-full bg-transparent border-0 border-b border-outline-variant py-2 px-0 font-body-lg text-body-lg text-on-background focus:ring-0 focus:border-primary transition-colors" id="name" placeholder=" " required="" type="text"/>
+<label class="absolute left-0 top-2 font-body-lg text-body-lg text-outline transition-all duration-200 pointer-events-none group-hover:text-on-surface-variant" for="name">Full Name</label>
+</div>
+<!-- Email Input -->
+<div class="relative group">
+<input class="peer peer-focus-float peer-valid-float w-full bg-transparent border-0 border-b border-outline-variant py-2 px-0 font-body-lg text-body-lg text-on-background focus:ring-0 focus:border-primary transition-colors" id="email" placeholder=" " required="" type="email"/>
+<label class="absolute left-0 top-2 font-body-lg text-body-lg text-outline transition-all duration-200 pointer-events-none group-hover:text-on-surface-variant" for="email">Email Address</label>
+</div>
+<!-- Phone Input -->
+<div class="relative group">
+<input class="peer peer-focus-float peer-valid-float w-full bg-transparent border-0 border-b border-outline-variant py-2 px-0 font-body-lg text-body-lg text-on-background focus:ring-0 focus:border-primary transition-colors" id="phone" placeholder=" " required="" type="tel"/>
+<label class="absolute left-0 top-2 font-body-lg text-body-lg text-outline transition-all duration-200 pointer-events-none group-hover:text-on-surface-variant" for="phone">Phone Number</label>
+</div>
+<!-- Terms Checkbox -->
+<div class="flex items-start gap-[16px] pt-[16px]">
+<div class="flex items-center h-6">
+<input class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary focus:ring-2 focus:ring-offset-2 bg-transparent cursor-pointer transition-colors" id="terms" required="" type="checkbox"/>
+</div>
+<label class="font-body-md text-body-md text-on-surface-variant cursor-pointer" for="terms">
+                    I agree to the <a class="text-primary font-label-bold text-label-bold hover:underline decoration-primary/50 underline-offset-4 transition-all" href="#">Terms of Service</a> and <a class="text-primary font-label-bold text-label-bold hover:underline decoration-primary/50 underline-offset-4 transition-all" href="#">Privacy Policy</a>.
+                </label>
+</div>
+</form>
+<!-- Thumb Zone / Bottom Actions -->
+<div class="mt-[48px] w-full pb-8">
+<button class="w-full bg-primary text-on-primary font-label-bold text-label-bold py-[16px] rounded-full shadow-[0_8px_20px_rgba(22,40,57,0.12)] flex items-center justify-center gap-[8px] hover:bg-primary/90 active:scale-[0.98] transition-all duration-200" type="submit">
+                Create Account
+                <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 0;">arrow_forward</span>
+</button>
+<p class="mt-[24px] text-center font-body-md text-body-md text-on-surface-variant">
+                Already have an account? <a class="text-primary font-label-bold text-label-bold hover:underline decoration-primary/50 underline-offset-4 transition-all" href="#">Log in</a>
+</p>
+</div>
+</main>
+</body></html>

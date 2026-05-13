@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DirApp - Effortless Opulence</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="../../tokens/tailwind.browser.js"></script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .splash-gradient {
+            background: radial-gradient(circle at center, #ffffff 0%, #f5f3f4 100%);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md overflow-hidden splash-gradient">
+<!-- Splash Screen Container -->
+<!-- The Splash Screen is a task-focused, linear screen, so navigation bars are suppressed per instructions -->
+<main class="relative h-screen w-full flex flex-col items-center justify-center px-margin">
+<!-- Center Brand Cluster -->
+<div class="flex flex-col items-center gap-8">
+<!-- Scaled Brand Logo -->
+<!-- Note: Using the provided DataStore placeholder string exactly -->
+<div class="relative w-48 h-48 md:w-64 md:h-64 flex items-center justify-center">
+<img alt="DirApp Logo" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida/ADBb0uhQ64l5T-65lQtSkf9xXie3oZPPQUwa4biUzZ3YNhWdKnXMStgXj_rDrQqt2AzkCxQG_Xl8JUdDMSHu0NTH6-kaykDQHRQ8Dcc63DxggomIneVk7TB8CT2bTcgi6Flwmilx-IL3V8-dOfVsOpjtEVprKouYFr1pNGiKqRKqjLt-0G9vtSLGJNNFkrgRH3b9WsuvPv4kxaOgUG_1HQ0AEGKvpc_5MisSj2z_FZ0y1DEZWJEm87U8_5B9_VSIEwJuKB9agKFHFXwYPQ"/>
+</div>
+<!-- Brand Name Typography -->
+<div class="flex flex-col items-center text-center">
+<h1 class="font-display-lg text-display-lg text-primary tracking-tighter">
+                    DirApp
+                </h1>
+<!-- Subtle luxury descriptor -->
+<p class="font-caption text-caption text-outline uppercase tracking-[0.2em] mt-4 opacity-60">
+                    Effortless Opulence
+                </p>
+</div>
+</div>
+<!-- Ambient Depth Layers -->
+<div class="absolute inset-0 pointer-events-none z-[-1] overflow-hidden">
+<!-- Subtle glass orb for depth -->
+<div class="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-primary-fixed/20 blur-[120px] rounded-full"></div>
+<div class="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-secondary-fixed/30 blur-[120px] rounded-full"></div>
+</div>
+<!-- Loading / Status (Subtle Aesthetic Detail) -->
+<div class="absolute bottom-16 flex flex-col items-center gap-4">
+<div class="w-12 h-[1px] bg-outline-variant relative overflow-hidden">
+<div class="absolute inset-0 bg-primary/40 translate-x-[-100%] animate-pulse"></div>
+</div>
+<span class="font-label-bold text-label-bold text-on-surface-variant/40 tracking-widest">
+                EST. 2024
+            </span>
+</div>
+</main>
+<!-- Visual Polish Overlay -->
+<!-- Applying a very faint noise texture or grain could be suggested here, but keeping it minimalist for this design -->
+</body></html>

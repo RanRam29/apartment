@@ -12,7 +12,10 @@ import {
 } from 'react-native';
 import { adminLogsApi } from '../services/api';
 import { C } from '../theme';
+import { dirApp } from '../theme/dirAppTokens';
 import type { AuditLogItem, SystemEventItem } from '../types';
+import { ResponsiveContainer } from '../components/ResponsiveContainer';
+import { dirType } from '../theme/textStyles';
 
 type TabKey = 'audit' | 'system';
 type SourcePreset = 'all' | 'mobile' | 'web' | 'socket' | 'api' | 'server';
@@ -82,10 +85,11 @@ export default function LogsConsoleScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Logs Console</Text>
-        <Text style={styles.subtitle}>Audit + System events</Text>
-      </View>
+      <ResponsiveContainer style={{ flex: 1 }}>
+        <View style={styles.header}>
+          <Text style={[styles.title, dirType.title]}>Logs Console</Text>
+          <Text style={[styles.subtitle, dirType.caption]}>Audit + System events</Text>
+        </View>
 
       <View style={styles.tabs}>
         <TabButton active={tab === 'audit'} label="Audit" onPress={() => setTab('audit')} />
@@ -97,7 +101,7 @@ export default function LogsConsoleScreen() {
           value={search}
           onChangeText={setSearch}
           placeholder="Search requestId / action / event / message"
-          placeholderTextColor={C.textMut}
+          placeholderTextColor={dirApp.outline}
           autoCapitalize="none"
           autoCorrect={false}
           onSubmitEditing={load}
@@ -120,7 +124,7 @@ export default function LogsConsoleScreen() {
 
       {loading ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color={C.navy} />
+          <ActivityIndicator size="large" color={dirApp.secondary} />
         </View>
       ) : (
         <ScrollView
@@ -151,10 +155,11 @@ export default function LogsConsoleScreen() {
                   <Text style={styles.meta}>{new Date(item.createdAt).toLocaleString()}</Text>
                 </View>
               ))}
-          {tab === 'audit' && auditItems.length === 0 && <Text style={styles.empty}>No audit logs</Text>}
-          {tab === 'system' && systemItems.length === 0 && <Text style={styles.empty}>No system events</Text>}
+          {tab === 'audit' && auditItems.length === 0 && <Text style={[styles.empty, dirType.body]}>No audit logs</Text>}
+          {tab === 'system' && systemItems.length === 0 && <Text style={[styles.empty, dirType.body]}>No system events</Text>}
         </ScrollView>
       )}
+      </ResponsiveContainer>
     </SafeAreaView>
   );
 }
@@ -198,18 +203,18 @@ function HighlightText({ text, query, style }: { text: string; query: string; st
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: C.bg },
+  container: { flex: 1, backgroundColor: dirApp.background },
   header: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12 },
-  title: { fontSize: 22, fontWeight: '800', color: C.text },
-  subtitle: { color: C.textMut, marginTop: 4 },
+  title: { fontSize: 22, fontWeight: '800', color: dirApp.primary },
+  subtitle: { color: dirApp.outline, marginTop: 4 },
   tabs: { flexDirection: 'row', paddingHorizontal: 16, gap: 8, marginBottom: 10 },
   searchWrap: { paddingHorizontal: 16, marginBottom: 10 },
   searchInput: {
     borderWidth: 1,
-    borderColor: C.border,
+    borderColor: `${dirApp.outlineVariant}AA`,
     borderRadius: 10,
-    backgroundColor: C.bgCard,
-    color: C.text,
+    backgroundColor: dirApp.surfaceContainerLowest,
+    color: dirApp.onSurface,
     paddingHorizontal: 12,
     paddingVertical: 10,
   },
@@ -218,11 +223,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: C.border,
-    backgroundColor: C.bgCard,
+    borderColor: `${dirApp.outlineVariant}AA`,
+    backgroundColor: dirApp.surfaceContainerLowest,
   },
-  tabButtonActive: { backgroundColor: C.navy },
-  tabText: { color: C.text, fontWeight: '600' },
+  tabButtonActive: { backgroundColor: dirApp.primaryContainer },
+  tabText: { color: dirApp.outline, fontWeight: '600' },
   tabTextActive: { color: C.onInverse.primary },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   sourcePresets: { paddingHorizontal: 16, paddingBottom: 8, gap: 8 },
@@ -231,31 +236,31 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: C.border,
-    backgroundColor: C.bgCard,
+    borderColor: `${dirApp.outlineVariant}AA`,
+    backgroundColor: dirApp.surfaceContainerLowest,
   },
   presetChipActive: {
-    borderColor: C.navy,
-    backgroundColor: C.navy,
+    borderColor: dirApp.primaryContainer,
+    backgroundColor: dirApp.primaryContainer,
   },
-  presetChipText: { color: C.text, fontWeight: '600' },
+  presetChipText: { color: dirApp.outline, fontWeight: '600' },
   presetChipTextActive: { color: C.onInverse.primary },
   list: { padding: 16, gap: 10 },
   card: {
-    backgroundColor: C.bgCard,
+    backgroundColor: dirApp.surfaceContainerLowest,
     borderWidth: 1,
-    borderColor: C.border,
+    borderColor: `${dirApp.outlineVariant}AA`,
     borderRadius: 12,
     padding: 12,
   },
-  primary: { color: C.text, fontWeight: '700' },
-  secondary: { color: C.textSub, marginTop: 4 },
-  meta: { color: C.textMut, marginTop: 4, fontSize: 12 },
+  primary: { color: dirApp.primary, fontWeight: '700' },
+  secondary: { color: dirApp.onSurfaceVariant, marginTop: 4 },
+  meta: { color: dirApp.outline, marginTop: 4, fontSize: 12 },
   highlight: {
     backgroundColor: 'rgba(245, 158, 11, 0.28)',
-    color: C.text,
+    color: dirApp.primary,
     fontWeight: '700',
   },
-  empty: { color: C.textMut, textAlign: 'center', marginTop: 20 },
+  empty: { color: dirApp.outline, textAlign: 'center', marginTop: 20 },
   error: { color: C.danger, marginBottom: 8 },
 });

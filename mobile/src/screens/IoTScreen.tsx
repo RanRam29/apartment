@@ -7,9 +7,10 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../store/useAuthStore';
-import { usePersonaIsLandlord } from '../navigation/AdminAppModeContext';
 import { iotApi } from '../services/api';
 import { C, Dark } from '../theme';
+import { ResponsiveContainer } from '../components/ResponsiveContainer';
+import { dirType } from '../theme/textStyles';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -396,7 +397,7 @@ function UpdateTicketModal({ ticket, onClose, onUpdate }: {
 
 export default function IoTScreen({ navigation }: any) {
   const { user } = useAuthStore();
-  const isLandlord = usePersonaIsLandlord();
+  const isLandlord = user?.role === 'landlord';
   const queryClient = useQueryClient();
 
   const [activeTab, setActiveTab]         = useState<'devices' | 'tickets'>('devices');
@@ -491,7 +492,7 @@ export default function IoTScreen({ navigation }: any) {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="chevron-back" size={22} color={C.onInverse.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>ניהול IoT ומתקנים</Text>
+        <Text style={[styles.headerTitle, dirType.subhead]}>ניהול IoT ומתקנים</Text>
         <TouchableOpacity
           style={styles.addBtn}
           onPress={() => activeTab === 'devices' ? setRegisterVisible(true) : setCreateTicketVisible(true)}
@@ -517,52 +518,56 @@ export default function IoTScreen({ navigation }: any) {
       </View>
 
       {/* Content */}
-      {isLoading ? (
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color={C.cyan} />
-        </View>
-      ) : activeTab === 'devices' ? (
-        devices.length === 0 ? (
+      <ResponsiveContainer style={{ flex: 1 }}>
+        {isLoading ? (
           <View style={styles.center}>
-            <Ionicons name="hardware-chip-outline" size={48} color={C.textMut} />
-            <Text style={styles.emptyTitle}>אין מכשירים רשומים</Text>
-            <Text style={styles.emptyHint}>
-              {isLandlord ? 'לחץ + כדי להוסיף מכשיר IoT' : 'מכשירים יופיעו כאן'}
-            </Text>
+            <ActivityIndicator size="large" color={C.cyan} />
           </View>
+        ) : activeTab === 'devices' ? (
+          devices.length === 0 ? (
+            <View style={styles.center}>
+              <Ionicons name="hardware-chip-outline" size={48} color={C.textMut} />
+              <Text style={[styles.emptyTitle, dirType.subhead]}>אין מכשירים רשומים</Text>
+              <Text style={[styles.emptyHint, dirType.caption]}>
+                {isLandlord ? 'לחץ + כדי להוסיף מכשיר IoT' : 'מכשירים יופיעו כאן'}
+              </Text>
+            </View>
+          ) : (
+            <FlatList
+              style={{ flex: 1 }}
+              data={devices}
+              keyExtractor={(d) => d._id}
+              contentContainerStyle={styles.list}
+              renderItem={({ item }) => (
+                <DeviceCard device={item} onPress={() => handleDeviceTap(item)} />
+              )}
+            />
+          )
         ) : (
-          <FlatList
-            data={devices}
-            keyExtractor={(d) => d._id}
-            contentContainerStyle={styles.list}
-            renderItem={({ item }) => (
-              <DeviceCard device={item} onPress={() => handleDeviceTap(item)} />
-            )}
-          />
-        )
-      ) : (
-        tickets.length === 0 ? (
-          <View style={styles.center}>
-            <Ionicons name="construct-outline" size={48} color={C.textMut} />
-            <Text style={styles.emptyTitle}>אין תקלות פתוחות</Text>
-            <Text style={styles.emptyHint}>לחץ + כדי לדווח על תקלה</Text>
-          </View>
-        ) : (
-          <FlatList
-            data={tickets}
-            keyExtractor={(t) => t._id}
-            contentContainerStyle={styles.list}
-            renderItem={({ item }) => (
-              <TicketCard
-                ticket={item}
-                onPress={() => {
-                  if (isLandlord) setSelectedTicket(item);
-                }}
-              />
-            )}
-          />
-        )
-      )}
+          tickets.length === 0 ? (
+            <View style={styles.center}>
+              <Ionicons name="construct-outline" size={48} color={C.textMut} />
+              <Text style={[styles.emptyTitle, dirType.subhead]}>אין תקלות פתוחות</Text>
+              <Text style={[styles.emptyHint, dirType.caption]}>לחץ + כדי לדווח על תקלה</Text>
+            </View>
+          ) : (
+            <FlatList
+              style={{ flex: 1 }}
+              data={tickets}
+              keyExtractor={(t) => t._id}
+              contentContainerStyle={styles.list}
+              renderItem={({ item }) => (
+                <TicketCard
+                  ticket={item}
+                  onPress={() => {
+                    if (isLandlord) setSelectedTicket(item);
+                  }}
+                />
+              )}
+            />
+          )
+        )}
+      </ResponsiveContainer>
 
       {/* Register device modal (landlord) */}
       <RegisterDeviceModal

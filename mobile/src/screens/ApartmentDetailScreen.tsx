@@ -10,7 +10,9 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { apartmentsApi } from '../services/api';
 import type { MainStackParamList, Amenity } from '../types';
 import { C, Dark } from '../theme';
+import { dirApp } from '../theme/dirAppTokens';
 import SwipeHouseLogo from '../components/SwipeHouseLogo';
+import { ResponsiveContainer } from '../components/ResponsiveContainer';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -190,6 +192,7 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
           <Ionicons name="chevron-back" size={24} color={C.onInverse.primary} />
         </TouchableOpacity>
 
+        <ResponsiveContainer>
         <View style={styles.content}>
           {/* Price + verified badge */}
           <View style={styles.titleRow}>
@@ -303,6 +306,7 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
             </>
           )}
         </View>
+        </ResponsiveContainer>
       </ScrollView>
 
       <Modal
@@ -403,7 +407,7 @@ const styles = StyleSheet.create({
   dotRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 10, marginBottom: 4, gap: 8 },
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: C.navyMidAlpha(0.5) },
   dotActive: { backgroundColor: C.cyan, width: 20, borderRadius: 4 },
-  content: { padding: 20 },
+  content: { paddingVertical: 20 },
   titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
   price: { fontSize: 24, fontWeight: '800', color: C.cyan },
   verifiedBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: C.cyanAlpha(0.12), paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
@@ -446,7 +450,7 @@ const styles = StyleSheet.create({
   viewerArrowRight: { right: 14 },
   errorText: { color: C.danger, fontSize: 16, marginBottom: 16 },
   backBtn: { backgroundColor: C.cyan, paddingHorizontal: 20, paddingVertical: 10, borderRadius: 10 },
-  backBtnText: { color: C.navy, fontWeight: '700' },
+  backBtnText: { color: dirApp.primary, fontWeight: '700' },
   costCard: { backgroundColor: Dark.surface, borderRadius: 14, padding: 16, marginBottom: 20, borderWidth: 1, borderColor: Dark.border },
   costRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 6 },
   costLabel: { color: C.textMut, fontSize: 14, textAlign: 'right' },

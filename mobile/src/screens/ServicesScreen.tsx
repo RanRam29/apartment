@@ -9,6 +9,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { servicesApi } from '../services/api';
 import { useAuthStore } from '../store/useAuthStore';
 import { C, Dark } from '../theme';
+import { ResponsiveContainer } from '../components/ResponsiveContainer';
+import { dirType } from '../theme/textStyles';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -505,7 +507,7 @@ export default function ServicesScreen({ navigation }: any) {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="chevron-back" size={22} color={C.onInverse.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>שירותים לדירה</Text>
+        <Text style={[styles.headerTitle, dirType.subhead]}>שירותים לדירה</Text>
         <View style={{ width: 36 }} />
       </View>
 
@@ -534,26 +536,29 @@ export default function ServicesScreen({ navigation }: any) {
         ))}
       </ScrollView>
 
-      {isLoading ? (
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color={C.cyan} />
-        </View>
-      ) : services.length === 0 ? (
-        <View style={styles.center}>
-          <Ionicons name="construct-outline" size={48} color={C.textMut} />
-          <Text style={styles.emptyTitle}>אין שירותים בקטגוריה זו</Text>
-          <Text style={styles.emptyHint}>לחץ + כדי להוסיף שירות חדש</Text>
-        </View>
-      ) : (
-        <FlatList
-          data={services}
-          keyExtractor={(s) => s._id}
-          contentContainerStyle={styles.list}
-          renderItem={({ item }) => (
-            <ServiceCard service={item} onPress={() => openDetail(item)} />
-          )}
-        />
-      )}
+      <ResponsiveContainer style={{ flex: 1 }}>
+        {isLoading ? (
+          <View style={styles.center}>
+            <ActivityIndicator size="large" color={C.cyan} />
+          </View>
+        ) : services.length === 0 ? (
+          <View style={styles.center}>
+            <Ionicons name="construct-outline" size={48} color={C.textMut} />
+            <Text style={[styles.emptyTitle, dirType.subhead]}>אין שירותים בקטגוריה זו</Text>
+            <Text style={[styles.emptyHint, dirType.caption]}>לחץ + כדי להוסיף שירות חדש</Text>
+          </View>
+        ) : (
+          <FlatList
+            style={{ flex: 1 }}
+            data={services}
+            keyExtractor={(s) => s._id}
+            contentContainerStyle={styles.list}
+            renderItem={({ item }) => (
+              <ServiceCard service={item} onPress={() => openDetail(item)} />
+            )}
+          />
+        )}
+      </ResponsiveContainer>
 
       {/* FAB */}
       <TouchableOpacity style={styles.fab} onPress={() => setCreateVisible(true)}>

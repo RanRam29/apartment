@@ -12,6 +12,9 @@ import axios from 'axios';
 import { landlordApi, apartmentsApi } from '../services/api';
 import type { Apartment, MainStackParamList } from '../types';
 import { C, Dark } from '../theme';
+import { dirApp } from '../theme/dirAppTokens';
+import { ResponsiveContainer } from '../components/ResponsiveContainer';
+import { dirType } from '../theme/textStyles';
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
 type CopyStyle = 'professional' | 'friendly' | 'luxury';
@@ -195,43 +198,46 @@ export default function ListingsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.headerRow}>
-        <Text style={styles.header}>המודעות שלי</Text>
-        <TouchableOpacity
-          style={styles.createBtn}
-          onPress={() => navigation.navigate('CreateListing')}
-        >
-          <Ionicons name="add" size={20} color={C.onInverse.primary} />
-          <Text style={styles.createBtnText}>מודעה חדשה</Text>
-        </TouchableOpacity>
-      </View>
-
-      {isLoading ? (
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color={C.cyan} />
-        </View>
-      ) : listings.length === 0 ? (
-        <View style={styles.center}>
-          <Ionicons name="home-outline" size={56} color={C.textMut} />
-          <Text style={styles.emptyText}>עדיין אין לך מודעות</Text>
+      <ResponsiveContainer style={{ flex: 1 }}>
+        <View style={styles.headerRow}>
+          <Text style={[styles.header, dirType.title]}>המודעות שלי</Text>
           <TouchableOpacity
-            style={styles.createBtnLarge}
+            style={styles.createBtn}
             onPress={() => navigation.navigate('CreateListing')}
           >
-            <Text style={styles.createBtnText}>פרסם את הדירה הראשונה שלך</Text>
+            <Ionicons name="add" size={20} color={C.onInverse.primary} />
+            <Text style={[styles.createBtnText, dirType.label]}>מודעה חדשה</Text>
           </TouchableOpacity>
         </View>
-      ) : (
-        <FlatList
-          data={listings}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-          contentContainerStyle={styles.list}
-          onRefresh={refetch}
-          refreshing={isLoading}
-          keyboardShouldPersistTaps="handled"
-        />
-      )}
+
+        {isLoading ? (
+          <View style={styles.center}>
+            <ActivityIndicator size="large" color={C.cyan} />
+          </View>
+        ) : listings.length === 0 ? (
+          <View style={styles.center}>
+            <Ionicons name="home-outline" size={56} color={C.textMut} />
+            <Text style={[styles.emptyText, dirType.subhead]}>עדיין אין לך מודעות</Text>
+            <TouchableOpacity
+              style={styles.createBtnLarge}
+              onPress={() => navigation.navigate('CreateListing')}
+            >
+              <Text style={[styles.createBtnText, dirType.label]}>פרסם את הדירה הראשונה שלך</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <FlatList
+            style={{ flex: 1 }}
+            data={listings}
+            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+            contentContainerStyle={styles.list}
+            onRefresh={refetch}
+            refreshing={isLoading}
+            keyboardShouldPersistTaps="handled"
+          />
+        )}
+      </ResponsiveContainer>
 
       {/* F7: Marketing Copy Modal */}
       <Modal
@@ -313,7 +319,7 @@ const styles = StyleSheet.create({
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, paddingBottom: 12 },
   header: { fontSize: 22, fontWeight: '800', color: C.onInverse.primary },
   createBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: C.cyan, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10 },
-  createBtnText: { color: C.navy, fontWeight: '700', fontSize: 13 },
+  createBtnText: { color: dirApp.primary, fontWeight: '700', fontSize: 13 },
   createBtnLarge: { backgroundColor: C.cyan, paddingHorizontal: 20, paddingVertical: 12, borderRadius: 12 },
   list: { paddingHorizontal: 16, paddingBottom: 24 },
   card: { flexDirection: 'row', backgroundColor: Dark.surface, borderRadius: 14, marginBottom: 12, overflow: 'hidden', alignItems: 'stretch', borderWidth: 1, borderColor: Dark.border },
@@ -352,7 +358,7 @@ const styles = StyleSheet.create({
   styleBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5, backgroundColor: Dark.inset, paddingVertical: 9, borderRadius: 10, borderWidth: 1, borderColor: Dark.border },
   styleBtnActive: { backgroundColor: C.cyan, borderColor: C.cyan },
   styleBtnText: { color: C.textMut, fontSize: 12, fontWeight: '600' },
-  styleBtnTextActive: { color: C.navy },
+  styleBtnTextActive: { color: dirApp.primary },
   generateBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: C.gold, paddingVertical: 12, borderRadius: 12, marginBottom: 14 },
   generateBtnDisabled: { opacity: 0.6 },
   generateBtnText: { color: C.onInverse.primary, fontWeight: '700', fontSize: 14 },

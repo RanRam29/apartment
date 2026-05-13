@@ -13,9 +13,11 @@ import { addYears, format } from 'date-fns';
 import { contractsApi, matchesApi } from '../services/api';
 import { getApiBaseUrl } from '../services/apiConfig';
 import { useAuthStore } from '../store/useAuthStore';
-import { usePersonaIsLandlord } from '../navigation/AdminAppModeContext';
 import type { MainStackParamList, Match } from '../types';
-import { C, Dark } from '../theme';
+import { C } from '../theme';
+import { dirApp } from '../theme/dirAppTokens';
+import { ResponsiveContainer } from '../components/ResponsiveContainer';
+import { dirType } from '../theme/textStyles';
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
 
@@ -57,7 +59,7 @@ const STATUS_META: Record<ContractStatus, { label: string; color: string; icon: 
 
 const DEPOSIT_META: Record<DepositStatus, { label: string; color: string }> = {
   pending:   { label: 'פיקדון: טרם שולם', color: C.textMut },
-  held:      { label: 'פיקדון: נמצא בנאמנות', color: C.cyan },
+  held:      { label: 'פיקדון: נמצא בנאמנות', color: dirApp.secondary },
   released:  { label: 'פיקדון: הוחזר', color: C.statusTone.positive },
   forfeited: { label: 'פיקדון: חולט', color: C.statusTone.negativeSoft },
 };
@@ -72,7 +74,7 @@ function ContractCard({ contract, onPress }: { contract: Contract; onPress: () =
         <View style={styles.cardBadges}>
           {contract.hasUploadedDocument && (
             <View style={styles.fileBadge}>
-              <Ionicons name="attach" size={11} color={C.cyan} />
+              <Ionicons name="attach" size={11} color={dirApp.secondary} />
               <Text style={styles.fileBadgeText}>קובץ</Text>
             </View>
           )}
@@ -177,7 +179,7 @@ function ContractDetailModal({
         <SafeAreaView style={styles.modalContainer}>
           <View style={styles.modalHeader}>
             <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-              <Ionicons name="close" size={22} color={C.onInverse.primary} />
+              <Ionicons name="close" size={22} color={dirApp.primary} />
             </TouchableOpacity>
             <Text style={styles.modalTitle}>חוזה שכירות</Text>
             <View style={{ width: 38 }} />
@@ -190,7 +192,7 @@ function ContractDetailModal({
                 onPress={() => setDocViewerOpen(true)}
                 activeOpacity={0.85}
               >
-                <Ionicons name="document-attach" size={18} color={C.onInverse.primary} />
+                <Ionicons name="document-attach" size={18} color={dirApp.primary} />
                 <Text style={styles.openDocBtnText}>
                   צפה במסמך ({contract.uploadedDocumentOriginalName ?? 'PDF / Word'})
                 </Text>
@@ -208,7 +210,7 @@ function ContractDetailModal({
               >
                 {signing
                   ? <ActivityIndicator color={C.onInverse.primary} />
-                  : <><Ionicons name="pencil" size={16} color={C.navy} /><Text style={styles.signBtnText}>חתום על החוזה</Text></>
+                  : <><Ionicons name="pencil" size={16} color={dirApp.onSecondary} /><Text style={styles.signBtnText}>חתום על החוזה</Text></>
                 }
               </TouchableOpacity>
             )}
@@ -262,7 +264,7 @@ function ContractDetailModal({
         <SafeAreaView style={styles.docViewerWrap}>
           <View style={styles.modalHeader}>
             <TouchableOpacity onPress={() => setDocViewerOpen(false)} style={styles.closeBtn}>
-              <Ionicons name="close" size={22} color={C.onInverse.primary} />
+              <Ionicons name="close" size={22} color={dirApp.primary} />
             </TouchableOpacity>
             <Text style={styles.modalTitle}>מסמך חוזה</Text>
             <View style={{ width: 38 }} />
@@ -271,7 +273,7 @@ function ContractDetailModal({
             Platform.OS === 'web' ? (
               webDocLoading ? (
                 <View style={styles.webViewCenter}>
-                  <ActivityIndicator size="large" color={C.cyan} />
+                  <ActivityIndicator size="large" color={dirApp.secondary} />
                   <Text style={styles.docViewerFallback}>טוען מסמך…</Text>
                 </View>
               ) : webBlobUrl ? (
@@ -424,7 +426,7 @@ function AddContractUploadModal({
       <SafeAreaView style={styles.modalContainer}>
         <View style={styles.modalHeader}>
           <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-            <Ionicons name="close" size={22} color={C.onInverse.primary} />
+            <Ionicons name="close" size={22} color={dirApp.primary} />
           </TouchableOpacity>
           <Text style={styles.modalTitle}>הוספת חוזה מקובץ</Text>
           <View style={{ width: 38 }} />
@@ -436,7 +438,7 @@ function AddContractUploadModal({
           </Text>
 
           {matchesLoading ? (
-            <ActivityIndicator color={C.cyan} style={{ marginVertical: 24 }} />
+            <ActivityIndicator color={dirApp.secondary} style={{ marginVertical: 24 }} />
           ) : accepted.length === 0 ? (
             <Text style={styles.fieldHint}>אין לידים מאושרים — אשר ליד תחילה מדף הלידים.</Text>
           ) : (
@@ -498,7 +500,7 @@ function AddContractUploadModal({
               />
 
               <TouchableOpacity style={styles.pickFileBtn} onPress={pickFile} activeOpacity={0.85}>
-                <Ionicons name="cloud-upload-outline" size={20} color={C.onInverse.primary} />
+                <Ionicons name="cloud-upload-outline" size={20} color={dirApp.primary} />
                 <Text style={styles.pickFileBtnText}>
                   {pickedFile ? pickedFile.name : 'בחר קובץ PDF או Word'}
                 </Text>
@@ -527,7 +529,7 @@ export default function ContractsScreen() {
   const navigation = useNavigation<Nav>();
   const queryClient = useQueryClient();
   const { user, token } = useAuthStore();
-  const isLandlord = usePersonaIsLandlord();
+  const isLandlord = user?.role === 'landlord';
 
   const [selected, setSelected] = React.useState<{ contract: Contract; text: string } | null>(null);
   const [addUploadOpen, setAddUploadOpen] = React.useState(false);
@@ -574,9 +576,9 @@ export default function ContractsScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="chevron-back" size={22} color={C.onInverse.primary} />
+          <Ionicons name="chevron-back" size={22} color={dirApp.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>חוזים</Text>
+        <Text style={[styles.headerTitle, dirType.subhead]}>חוזים</Text>
         {isLandlord ? (
           <TouchableOpacity onPress={() => setAddUploadOpen(true)} style={styles.addHeaderBtn} accessibilityLabel="הוסף חוזה מקובץ">
             <Ionicons name="add" size={26} color={C.onInverse.primary} />
@@ -586,36 +588,39 @@ export default function ContractsScreen() {
         )}
       </View>
 
-      {isLoading ? (
-        <ActivityIndicator color={C.cyan} style={{ marginTop: 40 }} />
-      ) : contracts.length === 0 ? (
-        <View style={styles.empty}>
-          <Ionicons name="document-text-outline" size={56} color={C.textMut} />
-          <Text style={styles.emptyText}>אין חוזים עדיין</Text>
-          {isLandlord ? (
-            <>
-              <Text style={styles.emptyHint}>הוסף חוזה מהתבנית מדף ההתאמות, או העלה קובץ PDF / Word.</Text>
-              <TouchableOpacity style={styles.emptyAddBtn} onPress={() => setAddUploadOpen(true)}>
-                <Ionicons name="cloud-upload-outline" size={18} color={C.onInverse.primary} />
-                <Text style={styles.emptyAddBtnText}>העלה חוזה מקובץ</Text>
-              </TouchableOpacity>
-            </>
-          ) : (
-            <Text style={styles.emptyHint}>חוזים שסוכמו עם המשכיר יופיעו כאן</Text>
-          )}
-        </View>
-      ) : (
-        <FlatList
-          data={contracts}
-          keyExtractor={(c) => c._id}
-          renderItem={({ item }) => (
-            <ContractCard contract={item} onPress={() => openContract(item)} />
-          )}
-          contentContainerStyle={styles.list}
-          onRefresh={refetch}
-          refreshing={isLoading}
-        />
-      )}
+      <ResponsiveContainer style={{ flex: 1 }}>
+        {isLoading ? (
+          <ActivityIndicator color={dirApp.secondary} style={{ marginTop: 40 }} />
+        ) : contracts.length === 0 ? (
+          <View style={styles.empty}>
+            <Ionicons name="document-text-outline" size={56} color={dirApp.outline} />
+            <Text style={[styles.emptyText, dirType.subhead]}>אין חוזים עדיין</Text>
+            {isLandlord ? (
+              <>
+                <Text style={[styles.emptyHint, dirType.caption]}>הוסף חוזה מהתבנית מדף ההתאמות, או העלה קובץ PDF / Word.</Text>
+                <TouchableOpacity style={styles.emptyAddBtn} onPress={() => setAddUploadOpen(true)}>
+                  <Ionicons name="cloud-upload-outline" size={18} color={C.onInverse.primary} />
+                  <Text style={[styles.emptyAddBtnText, dirType.label]}>העלה חוזה מקובץ</Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <Text style={[styles.emptyHint, dirType.caption]}>חוזים שסוכמו עם המשכיר יופיעו כאן</Text>
+            )}
+          </View>
+        ) : (
+          <FlatList
+            style={{ flex: 1 }}
+            data={contracts}
+            keyExtractor={(c) => c._id}
+            renderItem={({ item }) => (
+              <ContractCard contract={item} onPress={() => openContract(item)} />
+            )}
+            contentContainerStyle={styles.list}
+            onRefresh={refetch}
+            refreshing={isLoading}
+          />
+        )}
+      </ResponsiveContainer>
 
       {selected && (
         <ContractDetailModal
@@ -645,80 +650,187 @@ export default function ContractsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Dark.bg },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14 },
-  backBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: Dark.surface, justifyContent: 'center', alignItems: 'center' },
-  addHeaderBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: C.cyan, justifyContent: 'center', alignItems: 'center' },
-  headerTitle: { color: C.onInverse.primary, fontSize: 18, fontWeight: '800' },
+  container: { flex: 1, backgroundColor: dirApp.background },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    backgroundColor: dirApp.surfaceContainerLowest,
+    borderBottomWidth: 1,
+    borderBottomColor: `${dirApp.outlineVariant}88`,
+  },
+  backBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: dirApp.surfaceContainerLow,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  addHeaderBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: dirApp.secondary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerTitle: { color: dirApp.primary, fontSize: 18, fontWeight: '800' },
   list: { padding: 16, paddingBottom: 32 },
-  card: { backgroundColor: Dark.surface, borderRadius: 14, padding: 16, marginBottom: 12 },
+  card: {
+    backgroundColor: dirApp.surfaceContainerLowest,
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: `${dirApp.outlineVariant}AA`,
+    shadowColor: dirApp.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
   cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 },
   cardBadges: { flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 0 },
-  cardTitle: { color: C.onInverse.primary, fontWeight: '700', fontSize: 15, flex: 1, textAlign: 'right', marginLeft: 8 },
-  fileBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 6, paddingVertical: 3, borderRadius: 6, backgroundColor: C.cyanAlpha(0.14) },
-  fileBadgeText: { color: C.cyan, fontSize: 10, fontWeight: '700' },
+  cardTitle: { color: dirApp.primary, fontWeight: '700', fontSize: 15, flex: 1, textAlign: 'right', marginLeft: 8 },
+  fileBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 6,
+    backgroundColor: `${dirApp.secondaryContainer}44`,
+  },
+  fileBadgeText: { color: dirApp.secondary, fontSize: 10, fontWeight: '700' },
   statusBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
   statusText: { fontSize: 11, fontWeight: '700' },
-  cardSub: { color: C.textMut, fontSize: 12, textAlign: 'right', marginBottom: 4 },
-  cardRent: { color: C.cyan, fontWeight: '800', fontSize: 15, textAlign: 'right', marginBottom: 8 },
+  cardSub: { color: dirApp.outline, fontSize: 12, textAlign: 'right', marginBottom: 4 },
+  cardRent: { color: dirApp.secondary, fontWeight: '800', fontSize: 15, textAlign: 'right', marginBottom: 8 },
   cardBottom: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   depositText: { fontSize: 11, fontWeight: '600' },
-  cardDate: { color: C.textMut, fontSize: 11 },
+  cardDate: { color: dirApp.outline, fontSize: 11 },
   empty: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 },
-  emptyText: { color: C.textMut, fontSize: 16, fontWeight: '600' },
-  emptyHint: { color: C.textMut, fontSize: 13, textAlign: 'center', paddingHorizontal: 32 },
+  emptyText: { color: dirApp.outline, fontSize: 16, fontWeight: '600' },
+  emptyHint: { color: dirApp.outline, fontSize: 13, textAlign: 'center', paddingHorizontal: 32 },
   emptyAddBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 8,
-    marginTop: 8, paddingHorizontal: 20, paddingVertical: 12, borderRadius: 12, backgroundColor: C.cyan,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 12,
+    backgroundColor: dirApp.secondary,
   },
-  emptyAddBtnText: { color: C.onInverse.primary, fontWeight: '700', fontSize: 15 },
-  // Modal
-  modalContainer: { flex: 1, backgroundColor: Dark.bg },
-  modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: Dark.border },
-  closeBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: Dark.surface, justifyContent: 'center', alignItems: 'center' },
-  modalTitle: { color: C.onInverse.primary, fontSize: 17, fontWeight: '800' },
+  emptyAddBtnText: { color: dirApp.onSecondary, fontWeight: '700', fontSize: 15 },
+  modalContainer: { flex: 1, backgroundColor: dirApp.background },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: `${dirApp.outlineVariant}88`,
+    backgroundColor: dirApp.surfaceContainerLowest,
+  },
+  closeBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: dirApp.surfaceContainerLow,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalTitle: { color: dirApp.primary, fontSize: 17, fontWeight: '800' },
   contractScroll: { flex: 1 },
   openDocBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: Dark.surface, paddingVertical: 12, paddingHorizontal: 14, borderRadius: 12, marginBottom: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: dirApp.surfaceContainerLow,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: `${dirApp.outlineVariant}AA`,
   },
-  openDocBtnText: { color: C.onInverse.primary, fontWeight: '700', fontSize: 14, textAlign: 'center', flex: 1 },
-  contractText: { color: C.onInverse.tertiary, fontSize: 13, lineHeight: 22, fontFamily: 'monospace', textAlign: 'right' },
-  modalActions: { padding: 16, borderTopWidth: 1, borderTopColor: Dark.border, gap: 10 },
-  signBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: C.cyan, paddingVertical: 14, borderRadius: 14 },
-  signBtnText: { color: C.navy, fontWeight: '800', fontSize: 15 },
+  openDocBtnText: { color: dirApp.primary, fontWeight: '700', fontSize: 14, textAlign: 'center', flex: 1 },
+  contractText: { color: dirApp.onSurfaceVariant, fontSize: 13, lineHeight: 22, fontFamily: 'monospace', textAlign: 'right' },
+  modalActions: { padding: 16, borderTopWidth: 1, borderTopColor: `${dirApp.outlineVariant}88`, gap: 10, backgroundColor: dirApp.surfaceContainerLowest },
+  signBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: dirApp.secondary,
+    paddingVertical: 14,
+    borderRadius: 14,
+  },
+  signBtnText: { color: dirApp.onSecondary, fontWeight: '800', fontSize: 15 },
   signedNote: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
   signedNoteText: { color: C.statusTone.positive, fontWeight: '700', fontSize: 14 },
   depositRow: { flexDirection: 'row', gap: 8 },
   depositBtn: { flex: 1, paddingVertical: 12, borderRadius: 12, alignItems: 'center' },
-  depositBtnHold:    { backgroundColor: C.cyan },
+  depositBtnHold: { backgroundColor: dirApp.secondary },
   depositBtnRelease: { backgroundColor: C.statusTone.positive },
   depositBtnForfeit: { backgroundColor: C.statusTone.negativeSoft },
-  depositBtnText: { color: C.onInverse.primary, fontWeight: '700', fontSize: 13 },
+  depositBtnText: { color: dirApp.onSecondary, fontWeight: '700', fontSize: 13 },
   btnDisabled: { opacity: 0.6 },
-  docViewerWrap: { flex: 1, backgroundColor: Dark.bg },
-  webView: { flex: 1, backgroundColor: Dark.surface },
+  docViewerWrap: { flex: 1, backgroundColor: dirApp.background },
+  webView: { flex: 1, backgroundColor: dirApp.surfaceContainerLowest },
   webViewCenter: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 },
-  docViewerFallback: { color: C.textMut, padding: 24, textAlign: 'center' },
+  docViewerFallback: { color: dirApp.outline, padding: 24, textAlign: 'center' },
   addScroll: { flex: 1 },
   addScrollInner: { padding: 16, paddingBottom: 40 },
-  fieldHint: { color: C.textMut, fontSize: 13, textAlign: 'right', marginBottom: 16, lineHeight: 20 },
-  fieldLabel: { color: C.textMut, fontSize: 12, fontWeight: '600', textAlign: 'right', marginBottom: 6 },
+  fieldHint: { color: dirApp.outline, fontSize: 13, textAlign: 'right', marginBottom: 16, lineHeight: 20 },
+  fieldLabel: { color: dirApp.outline, fontSize: 12, fontWeight: '600', textAlign: 'right', marginBottom: 6 },
   fieldInput: {
-    backgroundColor: Dark.surface, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12,
-    color: C.onInverse.primary, fontSize: 15, marginBottom: 14, textAlign: 'right',
+    backgroundColor: dirApp.surfaceContainerLowest,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    color: dirApp.onSurface,
+    fontSize: 15,
+    marginBottom: 14,
+    textAlign: 'right',
+    borderWidth: 1,
+    borderColor: `${dirApp.outlineVariant}AA`,
   },
   matchPick: { gap: 8, marginBottom: 8 },
-  matchChip: { backgroundColor: Dark.surface, borderRadius: 12, padding: 12, borderWidth: 2, borderColor: 'transparent' },
-  matchChipSel: { borderColor: C.cyan },
-  matchChipText: { color: C.onInverse.primary, fontSize: 14, textAlign: 'right' },
+  matchChip: {
+    backgroundColor: dirApp.surfaceContainerLowest,
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  matchChipSel: { borderColor: dirApp.secondary },
+  matchChipText: { color: dirApp.onSurface, fontSize: 14, textAlign: 'right' },
   pickFileBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: Dark.surface, paddingVertical: 14, borderRadius: 12, marginTop: 8, marginBottom: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: dirApp.surfaceContainerLow,
+    paddingVertical: 14,
+    borderRadius: 12,
+    marginTop: 8,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: `${dirApp.outlineVariant}AA`,
   },
-  pickFileBtnText: { color: C.onInverse.primary, fontWeight: '600', fontSize: 14, flex: 1, textAlign: 'center' },
+  pickFileBtnText: { color: dirApp.primary, fontWeight: '600', fontSize: 14, flex: 1, textAlign: 'center' },
   submitUploadBtn: {
-    backgroundColor: C.cyan, paddingVertical: 14, borderRadius: 14, alignItems: 'center',
+    backgroundColor: dirApp.secondary,
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: 'center',
   },
-  submitUploadBtnText: { color: C.onInverse.primary, fontWeight: '800', fontSize: 16 },
+  submitUploadBtnText: { color: dirApp.onSecondary, fontWeight: '800', fontSize: 16 },
 });

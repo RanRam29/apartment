@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DirApp - My Matches</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed": "#ffddb7",
+                        "surface-dim": "#dbd9db",
+                        "on-primary-fixed-variant": "#36485b",
+                        "inverse-surface": "#303032",
+                        "on-error-container": "#93000a",
+                        "secondary-fixed-dim": "#ffb3b1",
+                        "secondary-container": "#ff7f7f",
+                        "on-surface-variant": "#43474c",
+                        "error-container": "#ffdad6",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-container": "#2c3e50",
+                        "on-error": "#ffffff",
+                        "outline-variant": "#c4c6cd",
+                        "on-secondary": "#ffffff",
+                        "on-primary-container": "#96a9be",
+                        "surface-container": "#efedef",
+                        "surface-bright": "#fbf9fa",
+                        "surface-variant": "#e4e2e3",
+                        "primary-fixed": "#d1e4fb",
+                        "inverse-on-surface": "#f2f0f2",
+                        "on-tertiary-fixed-variant": "#5a4225",
+                        "on-background": "#1b1c1d",
+                        "secondary-fixed": "#ffdad8",
+                        "surface-container-highest": "#e4e2e3",
+                        "on-tertiary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "background": "#fbf9fa",
+                        "primary-fixed-dim": "#b5c8df",
+                        "on-surface": "#1b1c1d",
+                        "tertiary-container": "#4e381c",
+                        "surface": "#fbf9fa",
+                        "secondary": "#a43a3d",
+                        "on-secondary-container": "#74161e",
+                        "on-primary-fixed": "#091d2e",
+                        "on-secondary-fixed": "#410007",
+                        "surface-container-high": "#e9e8e9",
+                        "on-tertiary-container": "#c1a17d",
+                        "on-tertiary-fixed": "#291802",
+                        "on-secondary-fixed-variant": "#842228",
+                        "primary": "#162839",
+                        "inverse-primary": "#b5c8df",
+                        "surface-tint": "#4e6073",
+                        "surface-container-low": "#f5f3f4",
+                        "tertiary-fixed-dim": "#e3c19b",
+                        "tertiary": "#362308",
+                        "outline": "#74777d",
+                        "error": "#ba1a1a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin": "24px",
+                        "gutter": "20px",
+                        "thumb-zone-height": "33%",
+                        "section-gap": "48px",
+                        "grid-columns": "4"
+                    },
+                    "fontFamily": {
+                        "caption": ["Assistant"],
+                        "headline-md": ["Assistant"],
+                        "label-bold": ["Assistant"],
+                        "display-lg": ["Assistant"],
+                        "body-md": ["Assistant"],
+                        "body-lg": ["Assistant"]
+                    },
+                    "fontSize": {
+                        "caption": ["12px", { "lineHeight": "1.4", "letterSpacing": "0.05em", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "1.3", "fontWeight": "700" }],
+                        "label-bold": ["14px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "display-lg": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "300" }],
+                        "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .soft-shadow {
+            box-shadow: 0 8px 24px rgba(22, 40, 57, 0.08);
+        }
+        body {
+            background-color: #fbf9fa;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background antialiased min-h-screen flex flex-col font-body-md text-body-md pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 right-0 z-40 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-white/10 dark:border-slate-800/50 flex justify-between items-center w-full px-6 py-4">
+<div class="flex items-center gap-4">
+<div class="w-8 h-8 rounded-full bg-surface-container-high overflow-hidden shrink-0">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A close up portrait photo of a sophisticated person. High-key lighting, minimalist luxury editorial style. Neutral tones, soft focus background, crisp subject details. Effortless opulence aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDadOWjzfv8v6V9lHOFnqWZS-enM_8_M0LTEA2wTrWocYrAMCsV4JHbei79n7S-1xia4R1YTNYwl1NEsiKKkzggNqrHE7o0y25-xUOuNADjyyFceyd_hbTSYLA0u2sIR3zAw7-QFI6tspPE0SH5IzjOZgp2dAvuWky1XFcVyqMUz9kAccc7s85-c9X1GsTVJG2lNC6nrKbnzOQo5j5GZgSkyVSUbbExNxDDMmZ0LQbMzpPdqjFvQo-mKDIDiQyqGFMQqiOupxcaR8cF"/>
+</div>
+<h1 class="font-headline-md text-headline-md text-slate-900 dark:text-slate-50 text-xl font-medium tracking-widest uppercase">DirApp</h1>
+</div>
+<button aria-label="Settings" class="text-slate-900 dark:text-slate-50 hover:opacity-70 transition-opacity">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">tune</span>
+</button>
+</header>
+<main class="flex-grow pt-24 px-margin max-w-4xl mx-auto w-full">
+<div class="mb-8">
+<h2 class="font-display-lg text-display-lg text-primary mb-2">My Matches</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Properties you've expressed interest in.</p>
+</div>
+<!-- Tabs -->
+<div class="flex gap-8 border-b border-outline-variant/30 mb-8 px-2">
+<button class="pb-3 border-b-2 border-primary font-label-bold text-label-bold text-primary px-2 transition-colors">Pending</button>
+<button class="pb-3 border-b-2 border-transparent font-label-bold text-label-bold text-on-surface-variant hover:text-primary px-2 transition-colors">Matches</button>
+</div>
+<!-- Grid -->
+<div class="grid grid-cols-2 md:grid-cols-3 gap-gutter">
+<!-- Item 1 -->
+<div class="group relative rounded-xl overflow-hidden aspect-[4/5] bg-surface-container-low soft-shadow cursor-pointer">
+<img alt="Modern Apartment" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A bright, minimalist interior of a luxury modern apartment. Large floor-to-ceiling windows letting in ample natural light. Hardwood floors, sparse but elegant modern furniture. Clean lines, editorial architectural photography style, high-end opulence." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAYB871i_Btv1FQypz6yOuvlRsgKsb008clHYcMUWlK5DGfEBZrFhWp5_Lvh20Kl8xcQiJVaLAF4R9fZBW0I_yYdDp29plM_s1Mzo6pVBGIuNhUl1uUjcEl6pZexYf6dQadMMcAdMR0mV9i8n_64S9rpl1zf8FiTZzmchZhx6rQnoPLaso0dPzkb9QQxoNjsbumU-QxrjCsN5fU6LiL4D2b66sOh__5I7adK0NpaZ8hQ-sGU4D_QkCTTmr_RWuV4SuUawFBcNe1v67R"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>
+<div class="absolute top-3 left-3">
+<span class="glass-panel text-primary px-2 py-1 rounded-full font-caption text-caption flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-[14px]">schedule</span> Pending
+                    </span>
+</div>
+<div class="absolute bottom-4 left-4 right-4 text-white">
+<p class="font-label-bold text-label-bold truncate drop-shadow-md">The Lumina Penthouse</p>
+<p class="font-caption text-caption opacity-90 drop-shadow-md truncate">West Village, NY</p>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="group relative rounded-xl overflow-hidden aspect-[4/5] bg-surface-container-low soft-shadow cursor-pointer">
+<img alt="Minimalist Loft" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="An expansive, open-plan minimalist loft space. Exposed brick painted white, concrete floors, massive industrial windows. Flooded with soft, diffused daylight. A single iconic designer chair in the foreground. High contrast, luxury editorial style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQzXlRdTe0ZTbTbnZIpFgA2wXCykAomIITN5xqTLZRzdIZwluqgwbmlLL49u0_FIYyE0k5VylMO88Xdqf4KwNy3E3Y6r0_VjA4ObxkLQHme25US1WVlNrMUL-dAYWLvNm_oD-lot15lF4_WQS70KF-xgB6jXoRsKgwQSvy8C84kGw8fs509ngfhQwfTXG775vnirVfGvcX7uT9rQrEoikG_z4zYhy56nCu27dwUxwcmgaStS-97MXwtLi1s-ORYDbPUq0C7jMQ7ajh"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>
+<div class="absolute top-3 left-3">
+<span class="glass-panel text-primary px-2 py-1 rounded-full font-caption text-caption flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-[14px]">schedule</span> Pending
+                    </span>
+</div>
+<div class="absolute bottom-4 left-4 right-4 text-white">
+<p class="font-label-bold text-label-bold truncate drop-shadow-md">Tribeca Art Loft</p>
+<p class="font-caption text-caption opacity-90 drop-shadow-md truncate">Tribeca, NY</p>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="group relative rounded-xl overflow-hidden aspect-[4/5] bg-surface-container-low soft-shadow cursor-pointer">
+<img alt="Glasshouse" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A serene modern glasshouse interior overlooking a minimalist garden. Sleek dark metal frames against pristine white walls. Sparse, high-end decor. Soft, ambient lighting creating a calm, opulent atmosphere. Editorial architectural photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNyrlm0s4Lxj-ly-IsHBeEnXxIriIx_oqj_ZN2ijg05_Iif_A4ebCxOz26Ikzy69myb4N1Bys01KfFOAYWW5n6Jl3LQVid06q31cNwHFdSzbiAGloDBZHhrplUyRaWk1q6JapC_yj9XS_HIkOQ7988tYNhSJE01OG4hGYJIokOeRwWhqpe8AiAzE9cGQe3FVj5RrDypoLxvKx2qmQkFNh4K1Xo4PmvyEopl0mXAb-vw3Q1Y0tEJH3bHHiZjle6c6A-xUoXd6Kxftt1"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>
+<div class="absolute top-3 left-3">
+<span class="glass-panel text-primary px-2 py-1 rounded-full font-caption text-caption flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-[14px]">schedule</span> Pending
+                    </span>
+</div>
+<div class="absolute bottom-4 left-4 right-4 text-white">
+<p class="font-label-bold text-label-bold truncate drop-shadow-md">Glasshouse Sanctuary</p>
+<p class="font-caption text-caption opacity-90 drop-shadow-md truncate">SoHo, NY</p>
+</div>
+</div>
+<!-- Item 4 -->
+<div class="group relative rounded-xl overflow-hidden aspect-[4/5] bg-surface-container-low soft-shadow cursor-pointer">
+<img alt="Classic Brownstone" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="Interior of a renovated classic brownstone. Blending historic architectural details with ultra-modern minimalist furnishings. Herringbone wood floors, stark white walls, large windows. Bright, airy, and sophisticated. Luxury real estate photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8KR8c01m9ZmWnj-VRi5NKsi0zEuLIvg_mELUuWYfl23zRKCxb2bvx6jMb9Vn2UrNX-7Z_u8X7hlsa5ksYsSNB-Yu0umyWzPqHlc4l8APBllEHLgjmw-g02xBUhreKDx-8u8CXed5dF5Apb_pqYumWvt9f9cUMUDrkOUwbEp9ZkiQ0HptBou9_rJt06QWYb9mtRqAn2MdKJzmgdFoJ9f6UYM3g60Jm9I1VvqywZxa_g4BDvNAgchsOTXLKBL_XPKMeEN8hFZtpWNUO"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>
+<div class="absolute top-3 left-3">
+<span class="glass-panel text-primary px-2 py-1 rounded-full font-caption text-caption flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-[14px]">schedule</span> Pending
+                    </span>
+</div>
+<div class="absolute bottom-4 left-4 right-4 text-white">
+<p class="font-label-bold text-label-bold truncate drop-shadow-md">Heritage Brownstone</p>
+<p class="font-caption text-caption opacity-90 drop-shadow-md truncate">Brooklyn Heights, NY</p>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md z-50 flex justify-around items-center py-4 bg-white/15 dark:bg-slate-900/20 backdrop-blur-xl rounded-full border border-white/20 shadow-[0_8px_20px_rgba(44,62,80,0.12)]">
+<button aria-label="explore" class="flex flex-col items-center justify-center w-12 h-12 text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 0;">explore</span>
+</button>
+<button aria-label="favorite" class="flex flex-col items-center justify-center w-12 h-12 text-cyan-500 dark:text-cyan-400 scale-110 transition-all duration-300 ease-out">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</button>
+<button aria-label="chat" class="flex flex-col items-center justify-center w-12 h-12 text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 0;">chat</span>
+</button>
+<button aria-label="person" class="flex flex-col items-center justify-center w-12 h-12 text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 0;">person</span>
+</button>
+</nav>
+</body></html>

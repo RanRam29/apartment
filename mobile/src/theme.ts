@@ -1,22 +1,29 @@
 import type { ColorSchemeName } from 'react-native';
+import { dirApp } from './theme/dirAppTokens';
 
 /**
  * DirApp — global palette (tier 1).
- * Use semantic exports (`onInverse`, `overlay`, `statusTone`) in UI instead of raw hex.
+ * Anchored to `dirApp` tokens (DESIGN.md). Use semantic exports in UI instead of raw hex.
  */
 export const C = {
   // ── Brand palette (DirApp) ────────────────────────────
-  navy: '#162839',
+  /** Trust Blue — headings / chrome (alias: primary container) */
+  navy: dirApp.primaryContainer,
   navyMid: '#2C3E50',
-  cyan: '#00E5FF',
+  /** Deep primary — large surfaces, swipe-like CTA fill */
+  primary: dirApp.primary,
+  primaryContainer: dirApp.primaryContainer,
+  secondaryTeal: dirApp.secondary,
+  /** Action Teal — tabs, links, conversion accents (replaces neon cyan) */
+  cyan: dirApp.actionTeal,
   coral: '#FF7F7F',
-  bg: '#FBFAFA',
-  bgCard: '#FFFFFF',
+  bg: dirApp.background,
+  bgCard: dirApp.surfaceContainerLowest,
 
   // ── Text ─────────────────────────────────────────────
-  text: '#1B1C1D',
-  textSub: '#43474C',
-  textMut: '#74777D',
+  text: dirApp.onBackground,
+  textSub: dirApp.onSurfaceVariant,
+  textMut: dirApp.outline,
 
   // ── Borders / dividers ───────────────────────────────
   border: '#C4C6CD',
@@ -73,8 +80,8 @@ export const C = {
 
   /** Tab bar / chrome (ties to shell background) */
   chrome: {
-    tabBarLight: 'rgba(251, 250, 250, 0.88)',
-    tabBarDark: 'rgba(22, 40, 57, 0.92)',
+    tabBarLight: 'rgba(248, 249, 255, 0.94)',
+    tabBarDark: 'rgba(33, 49, 69, 0.94)',
   },
 
   // ── Glass surface tokens (for React Native) ──────────
@@ -85,23 +92,23 @@ export const C = {
     navyBorder: 'rgba(22, 40, 57, 0.15)',
     surfaceBg: 'rgba(22, 40, 57, 0.05)',
     surfaceBorder: 'rgba(22, 40, 57, 0.10)',
-    shadowColor: '#162839',
+    shadowColor: dirApp.primary,
     shadowLight: {
-      shadowColor: '#162839',
+      shadowColor: dirApp.primary,
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.08,
       shadowRadius: 16,
       elevation: 4,
     },
     shadowMedium: {
-      shadowColor: '#162839',
+      shadowColor: dirApp.primary,
       shadowOffset: { width: 0, height: 8 },
       shadowOpacity: 0.12,
       shadowRadius: 24,
       elevation: 8,
     },
     shadowStrong: {
-      shadowColor: '#162839',
+      shadowColor: dirApp.primary,
       shadowOffset: { width: 0, height: 12 },
       shadowOpacity: 0.18,
       shadowRadius: 32,
@@ -116,9 +123,9 @@ export const C = {
     spring: { tension: 100, friction: 10 },
   },
 
-  navyAlpha: (opacity: number) => `rgba(22,40,57,${opacity})`,
+  navyAlpha: (opacity: number) => `rgba(26,54,93,${opacity})`,
   navyMidAlpha: (opacity: number) => `rgba(44,62,80,${opacity})`,
-  cyanAlpha: (opacity: number) => `rgba(0,229,255,${opacity})`,
+  cyanAlpha: (opacity: number) => `rgba(0,203,169,${opacity})`,
   coralAlpha: (opacity: number) => `rgba(255,127,127,${opacity})`,
   violetAlpha: (opacity: number) => `rgba(124,58,237,${opacity})`,
   successAlpha: (opacity: number) => `rgba(16,185,129,${opacity})`,
@@ -127,9 +134,22 @@ export const C = {
   dangerMutedAlpha: (opacity: number) => `rgba(186,26,26,${opacity})`,
 } as const;
 
-/** Typography scale (use for new / refactored UI) */
+/** Typography scale — Rubik; aligns with DESIGN.md type ramp */
 export const typography = {
-  size: { xs: 10, sm: 11, md: 12, base: 13, body: 14, lg: 15, xl: 16, '2xl': 17, '3xl': 18, title: 20, hero: 22, display: 26 },
+  size: {
+    xs: 10,
+    sm: 12,
+    md: 14,
+    base: 13,
+    body: 16,
+    lg: 18,
+    xl: 16,
+    '2xl': 17,
+    '3xl': 24,
+    title: 20,
+    hero: 26,
+    display: 40,
+  },
   weight: { normal: '400' as const, medium: '500' as const, semibold: '600' as const, bold: '700' as const, extrabold: '800' as const },
   lineHeight: { tight: 16, normal: 20, relaxed: 22 },
 } as const;
@@ -152,9 +172,9 @@ export const space = {
  * Dark screens (navy + cyan). Replaces legacy purple (#6C5CE7) + violet-gray surfaces.
  */
 export const Dark = {
-  bg: C.navy,
+  bg: dirApp.inverseSurface,
   surface: C.navyMid,
-  inset: C.navy,
+  inset: dirApp.inverseSurface,
   border: C.cyanAlpha(0.14),
   borderStrong: C.cyanAlpha(0.22),
   chipActive: C.cyanAlpha(0.18),
@@ -188,7 +208,7 @@ export function buildAppTheme(scheme: ColorSchemeName | null | undefined): AppTh
       colors: {
         shellBackground: Dark.bg,
         tabBarBackground: C.chrome.tabBarDark,
-        tabBarShadow: C.navy,
+        tabBarShadow: dirApp.inverseSurface,
         headerBackground: Dark.surface,
         headerTint: C.onInverse.primary,
       },
@@ -197,11 +217,11 @@ export function buildAppTheme(scheme: ColorSchemeName | null | undefined): AppTh
   return {
     colorScheme,
     colors: {
-      shellBackground: C.bg,
+      shellBackground: dirApp.background,
       tabBarBackground: C.chrome.tabBarLight,
-      tabBarShadow: C.navy,
-      headerBackground: C.bgCard,
-      headerTint: C.navy,
+      tabBarShadow: dirApp.primary,
+      headerBackground: dirApp.surfaceContainerLowest,
+      headerTint: dirApp.primaryContainer,
     },
   };
 }

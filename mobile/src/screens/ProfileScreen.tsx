@@ -12,6 +12,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import { usePersonaIsLandlord } from '../navigation/AdminAppModeContext';
 import { paymentApi, authApi } from '../services/api';
 import { C } from '../theme';
+import { dirApp } from '../theme/dirAppTokens';
 import type { MainStackParamList } from '../types';
 import SwipeHouseLogo from '../components/SwipeHouseLogo';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
@@ -153,7 +154,7 @@ export default function ProfileScreen() {
           <Ionicons
             name={personaLandlord ? 'home-outline' : 'person-outline'}
             size={13}
-            color={C.navy}
+            color={dirApp.primary}
           />
           <Text style={styles.roleText}>
             {user?.role === 'admin'
@@ -284,14 +285,14 @@ function MenuItem({ icon, label, onPress, last = false }: {
       <Ionicons name="chevron-back" size={15} color={C.textMut} />
       <Text style={styles.menuLabel}>{label}</Text>
       <View style={styles.menuIconWrap}>
-        <Ionicons name={icon} size={18} color={C.navy} />
+        <Ionicons name={icon} size={18} color={dirApp.primary} />
       </View>
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: C.bg },
+  container: { flex: 1, backgroundColor: dirApp.background },
   scroll:    { alignItems: 'center', paddingVertical: 24, paddingBottom: 40 },
   profileInner: { alignItems: 'center', width: '100%' },
   brandRow:  { marginBottom: 8 },
@@ -299,16 +300,16 @@ const styles = StyleSheet.create({
   avatarContainer: { alignItems: 'center', marginBottom: 10, marginTop: 8, position: 'relative' },
   avatar: {
     width: 88, height: 88, borderRadius: 44,
-    backgroundColor: C.navy, justifyContent: 'center', alignItems: 'center',
-    borderWidth: 3, borderColor: C.cyanAlpha(0.4),
+    backgroundColor: dirApp.primaryContainer, justifyContent: 'center', alignItems: 'center',
+    borderWidth: 3, borderColor: `${dirApp.secondaryContainer}DD`,
   },
-  avatarImg: { width: 88, height: 88, borderRadius: 44, borderWidth: 3, borderColor: C.cyanAlpha(0.4) },
+  avatarImg: { width: 88, height: 88, borderRadius: 44, borderWidth: 3, borderColor: `${dirApp.secondaryContainer}DD` },
   initials:  { fontSize: 30, fontWeight: '800', color: C.onInverse.primary },
   cameraOverlay: {
     position: 'absolute', bottom: 0, right: 0,
     width: 28, height: 28, borderRadius: 14,
-    backgroundColor: C.navy, justifyContent: 'center', alignItems: 'center',
-    borderWidth: 2, borderColor: C.bg,
+    backgroundColor: dirApp.secondary, justifyContent: 'center', alignItems: 'center',
+    borderWidth: 2, borderColor: dirApp.background,
   },
 
   verifiedBadge: {
@@ -317,18 +318,18 @@ const styles = StyleSheet.create({
     borderRadius: 10, marginBottom: 6,
     borderWidth: 1, borderColor: C.cyanAlpha(0.25),
   },
-  verifiedText: { color: C.navy, fontSize: 11, fontWeight: '600' },
+  verifiedText: { color: dirApp.primary, fontSize: 11, fontWeight: '600' },
 
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
-  name:    { fontSize: 22, fontWeight: '800', color: C.text },
+  name:    { fontSize: 22, fontWeight: '800', color: dirApp.primary },
   email:   { fontSize: 13, color: C.textSub, marginBottom: 10 },
 
   roleBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
-    backgroundColor: C.navyAlpha(0.06), paddingHorizontal: 14, paddingVertical: 6,
-    borderRadius: 20, borderWidth: 1, borderColor: C.navyAlpha(0.12), marginBottom: 20,
+    backgroundColor: `${dirApp.primary}0F`, paddingHorizontal: 14, paddingVertical: 6,
+    borderRadius: 20, borderWidth: 1, borderColor: `${dirApp.primary}26`, marginBottom: 20,
   },
-  roleText: { color: C.navy, fontWeight: '600', fontSize: 13 },
+  roleText: { color: dirApp.primary, fontWeight: '600', fontSize: 13 },
 
   premiumBanner: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
@@ -343,7 +344,7 @@ const styles = StyleSheet.create({
     backgroundColor: C.bgCard, borderRadius: 14, padding: 16,
     borderWidth: 1, borderColor: 'rgba(245,158,11,0.25)',
     marginBottom: 20, width: '100%',
-    shadowColor: C.navy, shadowOffset: { width: 0, height: 2 },
+    shadowColor: dirApp.primary, shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05, shadowRadius: 6, elevation: 2,
   },
   upgradeBtnTextBox: { flex: 1 },
@@ -351,11 +352,11 @@ const styles = StyleSheet.create({
   upgradeBtnSub:   { color: C.textSub, fontSize: 11, textAlign: 'right', marginTop: 2 },
 
   menuCard: {
-    width: '100%', backgroundColor: C.bgCard, borderRadius: 16,
+    width: '100%', backgroundColor: dirApp.surfaceContainerLowest, borderRadius: 16,
     overflow: 'hidden', marginBottom: 20,
-    borderWidth: 1, borderColor: C.border,
-    shadowColor: C.navy, shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04, shadowRadius: 8, elevation: 2,
+    borderWidth: 1, borderColor: `${dirApp.outlineVariant}AA`,
+    shadowColor: dirApp.primary, shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05, shadowRadius: 8, elevation: 2,
   },
   menuItem: {
     flexDirection: 'row', alignItems: 'center',
@@ -364,7 +365,7 @@ const styles = StyleSheet.create({
   menuItemBorder: { borderBottomWidth: 1, borderBottomColor: C.borderLight },
   menuIconWrap: {
     width: 34, height: 34, borderRadius: 9,
-    backgroundColor: C.navyAlpha(0.06), justifyContent: 'center', alignItems: 'center',
+    backgroundColor: `${dirApp.secondaryContainer}44`, justifyContent: 'center', alignItems: 'center',
     marginLeft: 12,
   },
   menuLabel: { flex: 1, color: C.text, fontSize: 14, textAlign: 'right', marginRight: 10 },
@@ -398,7 +399,7 @@ const styles = StyleSheet.create({
   cancelBtnText: { color: C.textSub, fontWeight: '600', fontSize: 15 },
   saveBtn: {
     flex: 2, borderRadius: 12, paddingVertical: 13, alignItems: 'center',
-    backgroundColor: C.navy,
+    backgroundColor: dirApp.primaryContainer,
   },
   saveBtnText: { color: C.onInverse.primary, fontWeight: '700', fontSize: 15 },
 });
