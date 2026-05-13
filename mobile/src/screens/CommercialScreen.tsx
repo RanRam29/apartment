@@ -6,6 +6,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../store/useAuthStore';
+import { usePersonaIsLandlord } from '../navigation/AdminAppModeContext';
 import api from '../services/api';
 import { C, Dark } from '../theme';
 
@@ -332,7 +333,7 @@ function CreateModal({ visible, onClose, onCreate }: {
 
 export default function CommercialScreen({ navigation }: any) {
   const { user } = useAuthStore();
-  const isLandlord = user?.role === 'landlord';
+  const isLandlord = usePersonaIsLandlord();
   const queryClient = useQueryClient();
 
   const [selected, setSelected] = React.useState<CommercialLease | null>(null);

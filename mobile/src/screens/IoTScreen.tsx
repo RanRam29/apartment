@@ -7,6 +7,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../store/useAuthStore';
+import { usePersonaIsLandlord } from '../navigation/AdminAppModeContext';
 import { iotApi } from '../services/api';
 import { C, Dark } from '../theme';
 
@@ -395,7 +396,7 @@ function UpdateTicketModal({ ticket, onClose, onUpdate }: {
 
 export default function IoTScreen({ navigation }: any) {
   const { user } = useAuthStore();
-  const isLandlord = user?.role === 'landlord';
+  const isLandlord = usePersonaIsLandlord();
   const queryClient = useQueryClient();
 
   const [activeTab, setActiveTab]         = useState<'devices' | 'tickets'>('devices');

@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useSwipeStore } from '../store/useSwipeStore';
 import { useAuthStore } from '../store/useAuthStore';
+import { usePersonaIsLandlord } from '../navigation/AdminAppModeContext';
 import SwipeableCard from '../components/SwipeableCard';
 import SwipeHouseLogo from '../components/SwipeHouseLogo';
 import { C } from '../theme';
@@ -18,6 +19,7 @@ const FREE_DAILY_LIMIT = 20;
 export default function SwipeScreen() {
   const navigation = useNavigation<any>();
   const user = useAuthStore((s) => s.user);
+  const personaLandlord = usePersonaIsLandlord();
   const {
     deck, currentIndex, isLoading, lastMatch, feedError, feedLoadState,
     dailyUsed, dailyLimit, quotaExceeded,
@@ -29,10 +31,10 @@ export default function SwipeScreen() {
   const [undoVisible, setUndoVisible] = useState(false);
 
   useEffect(() => {
-    if (user?.role === 'landlord') return;
+    if (personaLandlord) return;
     loadFeed();
     loadQuota();
-  }, [user?.id, user?.role]);
+  }, [user?.id, personaLandlord]);
 
   function showUndoFab() {
     setUndoVisible(true);
@@ -73,13 +75,13 @@ export default function SwipeScreen() {
   const effectiveLimit = dailyLimit ?? FREE_DAILY_LIMIT;
   const isPremium = dailyLimit === null;
 
-  if (user?.role === 'landlord') {
+  if (personaLandlord) {
     return (
       <SafeAreaView style={styles.centered}>
         <Ionicons name="business-outline" size={56} color={C.border} />
         <Text style={styles.emptyTitle}>ממשק השוכרים</Text>
         <Text style={[styles.emptySubtitle, styles.feedErrorDetail]}>
-          חשבון משכיר משתמש בדשבורד ובניהול מודעות. התחבר כשוכר כדי לגלול דירות, או השתמש בטאבים דשבורד / מודעות.
+          גלילת דירות זמינה בממשק שוכר. עבור לשורת הבחירה למעלה ובחר “ממשק שוכר”, או השתמש בחשבון שוכר.
         </Text>
         <TouchableOpacity style={styles.reloadBtn} onPress={() => navigation.navigate('Home')}>
           <Text style={styles.reloadText}>חזרה לדף הבית</Text>
@@ -104,21 +106,16 @@ export default function SwipeScreen() {
 
   if (feedError) {
     const { status } = feedError;
-    const isLandlord = user?.role === 'landlord';
     const title =
       status === 401
         ? 'ההתחברות פגה'
-        : status === 403 && isLandlord
-          ? 'ממשק השוכר לחשבונות שוכר בלבד'
-          : status === 403
-            ? 'אין הרשאה לטעון דירות'
-            : 'לא ניתן לטעון את הפיד';
-    const detail =
-      status === 403 && isLandlord
-        ? 'נרשמת כמשכיר. השתמש בדשבורד ובניהול מודעות, או הירשם עם חשבון שוכר נפרד לגלילת דירות.'
         : status === 403
-          ? 'אם זה חשבון שוכר — התנתק והתחבר מחדש. ודא שקיבלת אימות אימייל אם נדרש.'
-          : feedError.message;
+          ? 'אין הרשאה לטעון דירות'
+          : 'לא ניתן לטעון את הפיד';
+    const detail =
+      status === 403
+        ? 'אם זה חשבון שוכר — התנתק והתחבר מחדש. ודא שקיבלת אימות אימייל אם נדרש.'
+        : feedError.message;
 
     return (
       <SafeAreaView style={styles.centered}>

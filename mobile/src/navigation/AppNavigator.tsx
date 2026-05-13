@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import ApartmentSearchChatbot from '../components/ApartmentSearchChatbot';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -11,7 +11,17 @@ import { useChatStore } from '../store/useChatStore';
 import { clientLogsApi } from '../services/api';
 import { C } from '../theme';
 import { useAppTheme } from '../hooks/useAppTheme';
-import type { RootStackParamList, TenantTabParamList, LandlordTabParamList, MainStackParamList } from '../types';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import type {
+  RootStackParamList,
+  TenantTabParamList,
+  LandlordTabParamList,
+  MainStackParamList,
+} from '../types';
+import {
+  AdminTenantShellProvider,
+  AdminLandlordShellProvider,
+} from './AdminAppModeContext';
 
 import AuthScreen from '../screens/AuthScreen';
 import SwipeScreen from '../screens/SwipeScreen';
@@ -43,6 +53,113 @@ const RootStack  = createNativeStackNavigator<RootStackParamList>();
 const TenantTab  = createBottomTabNavigator<TenantTabParamList>();
 const LandlordTab = createBottomTabNavigator<LandlordTabParamList>();
 const MainStack  = createNativeStackNavigator<MainStackParamList>();
+
+function TenantTabsForAdmin() {
+  return (
+    <AdminTenantShellProvider>
+      <TenantTabs />
+    </AdminTenantShellProvider>
+  );
+}
+
+function LandlordTabsForAdmin() {
+  return (
+    <AdminLandlordShellProvider>
+      <LandlordTabs />
+    </AdminLandlordShellProvider>
+  );
+}
+
+/** Admin: pick tenant UI shell or landlord UI shell (each is the full existing tab navigator). */
+function AdminTabs() {
+  const insets = useSafeAreaInsets();
+  const appTheme = useAppTheme();
+  const [mode, setMode] = useState<'tenant' | 'landlord'>('tenant');
+
+  return (
+    <View style={{ flex: 1, backgroundColor: appTheme.colors.shellBackground }}>
+      <View
+        style={[
+          adminShellStyles.bar,
+          {
+            paddingTop: Math.max(insets.top, 8),
+            backgroundColor: appTheme.colors.tabBarBackground,
+            borderBottomColor: C.border,
+          },
+        ]}
+      >
+        <TouchableOpacity
+          style={[adminShellStyles.seg, mode === 'tenant' && adminShellStyles.segOn]}
+          onPress={() => setMode('tenant')}
+          accessibilityRole="tab"
+          accessibilityState={{ selected: mode === 'tenant' }}
+        >
+          <Ionicons
+            name="person-outline"
+            size={18}
+            color={mode === 'tenant' ? C.onInverse.primary : C.navy}
+          />
+          <Text style={[adminShellStyles.segText, mode === 'tenant' && adminShellStyles.segTextOn]}>
+            ממשק שוכר
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[adminShellStyles.seg, mode === 'landlord' && adminShellStyles.segOn]}
+          onPress={() => setMode('landlord')}
+          accessibilityRole="tab"
+          accessibilityState={{ selected: mode === 'landlord' }}
+        >
+          <Ionicons
+            name="business-outline"
+            size={18}
+            color={mode === 'landlord' ? C.onInverse.primary : C.navy}
+          />
+          <Text style={[adminShellStyles.segText, mode === 'landlord' && adminShellStyles.segTextOn]}>
+            ממשק משכיר
+          </Text>
+        </TouchableOpacity>
+      </View>
+      <View style={{ flex: 1 }}>
+        {mode === 'tenant' ? <TenantTabsForAdmin /> : <LandlordTabsForAdmin />}
+      </View>
+    </View>
+  );
+}
+
+const adminShellStyles = StyleSheet.create({
+  bar: {
+    flexDirection: 'row',
+    gap: 10,
+    paddingHorizontal: 12,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    alignItems: 'center',
+  },
+  seg: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: C.border,
+    backgroundColor: 'transparent',
+  },
+  segOn: {
+    backgroundColor: C.navy,
+    borderColor: C.navy,
+  },
+  segText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: C.navy,
+  },
+  segTextOn: {
+    color: C.onInverse.primary,
+  },
+});
 
 function TenantTabs() {
   const appTheme = useAppTheme();
@@ -157,7 +274,16 @@ function MainNavigator() {
       screenOptions={{ headerShown: false }}
       initialRouteName={needsOnboarding ? 'Onboarding' : 'Tabs'}
     >
-      <MainStack.Screen name="Tabs" component={user?.role === 'landlord' ? LandlordTabs : TenantTabs} />
+      <MainStack.Screen
+        name="Tabs"
+        component={
+          user?.role === 'landlord'
+            ? LandlordTabs
+            : user?.role === 'admin'
+              ? AdminTabs
+              : TenantTabs
+        }
+      />
       <MainStack.Screen name="Onboarding" component={OnboardingScreen} />
       <MainStack.Screen
         name="Chat"

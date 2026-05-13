@@ -7,6 +7,7 @@ import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useAuthStore } from '../store/useAuthStore';
+import { usePersonaIsLandlord } from '../navigation/AdminAppModeContext';
 import { C } from '../theme';
 import SwipeHouseLogo from '../components/SwipeHouseLogo';
 
@@ -109,7 +110,7 @@ function ServiceTile({ service, onPress }: { service: ServiceItem; onPress: () =
 export default function HomeScreen() {
   const { user } = useAuthStore();
   const navigation = useNavigation<any>();
-  const isLandlord = user?.role === 'landlord';
+  const isLandlord = usePersonaIsLandlord();
   const services = isLandlord ? LANDLORD_SERVICES : TENANT_SERVICES;
   const greeting = getGreeting();
 

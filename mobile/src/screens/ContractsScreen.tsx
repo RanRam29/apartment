@@ -13,6 +13,7 @@ import { addYears, format } from 'date-fns';
 import { contractsApi, matchesApi } from '../services/api';
 import { getApiBaseUrl } from '../services/apiConfig';
 import { useAuthStore } from '../store/useAuthStore';
+import { usePersonaIsLandlord } from '../navigation/AdminAppModeContext';
 import type { MainStackParamList, Match } from '../types';
 import { C, Dark } from '../theme';
 
@@ -526,7 +527,7 @@ export default function ContractsScreen() {
   const navigation = useNavigation<Nav>();
   const queryClient = useQueryClient();
   const { user, token } = useAuthStore();
-  const isLandlord = user?.role === 'landlord';
+  const isLandlord = usePersonaIsLandlord();
 
   const [selected, setSelected] = React.useState<{ contract: Contract; text: string } | null>(null);
   const [addUploadOpen, setAddUploadOpen] = React.useState(false);

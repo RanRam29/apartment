@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { paymentApi, contractsApi } from '../services/api';
 import { useAuthStore } from '../store/useAuthStore';
+import { usePersonaIsLandlord } from '../navigation/AdminAppModeContext';
 import { C, Dark } from '../theme';
 
 type PaymentStatus = 'pending' | 'initiated' | 'paid' | 'overdue' | 'cancelled';
@@ -107,7 +108,7 @@ function PaymentCard({ payment, isLandlord, onPay, onMarkPaid }: {
 
 export default function RentPaymentsScreen({ navigation }: any) {
   const { user } = useAuthStore();
-  const isLandlord = user?.role === 'landlord';
+  const isLandlord = usePersonaIsLandlord();
   const queryClient = useQueryClient();
 
   const [requestModal, setRequestModal] = React.useState(false);

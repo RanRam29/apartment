@@ -9,10 +9,12 @@ import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuthStore } from '../store/useAuthStore';
+import { usePersonaIsLandlord } from '../navigation/AdminAppModeContext';
 import { paymentApi, authApi } from '../services/api';
 import { C } from '../theme';
 import type { MainStackParamList } from '../types';
 import SwipeHouseLogo from '../components/SwipeHouseLogo';
+import { ResponsiveContainer } from '../components/ResponsiveContainer';
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
 
@@ -26,7 +28,8 @@ export default function ProfileScreen() {
   const [savingProfile, setSavingProfile]     = useState(false);
 
   const initials = `${user?.firstName?.[0] ?? ''}${user?.lastName?.[0] ?? ''}`.toUpperCase();
-  const isTenant = user?.role === 'tenant';
+  const personaLandlord = usePersonaIsLandlord();
+  const showTenantQuickLinks = !personaLandlord;
   const isAdmin = user?.role === 'admin';
 
   async function pickAndUploadAvatar() {
@@ -102,6 +105,8 @@ export default function ProfileScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        <ResponsiveContainer>
+        <View style={styles.profileInner}>
 
         <View style={styles.brandRow}>
           <SwipeHouseLogo size="sm" />
@@ -145,8 +150,20 @@ export default function ProfileScreen() {
         <Text style={styles.email}>{user?.email}</Text>
 
         <View style={styles.roleBadge}>
-          <Ionicons name={isTenant ? 'person-outline' : 'home-outline'} size={13} color={C.navy} />
-          <Text style={styles.roleText}>{isTenant ? 'שוכר' : 'משכיר'}</Text>
+          <Ionicons
+            name={personaLandlord ? 'home-outline' : 'person-outline'}
+            size={13}
+            color={C.navy}
+          />
+          <Text style={styles.roleText}>
+            {user?.role === 'admin'
+              ? personaLandlord
+                ? 'מנהל · ממשק משכיר'
+                : 'מנהל · ממשק שוכר'
+              : personaLandlord
+                ? 'משכיר'
+                : 'שוכר'}
+          </Text>
         </View>
 
         {/* Premium */}
@@ -169,13 +186,13 @@ export default function ProfileScreen() {
 
         {/* Menu */}
         <View style={styles.menuCard}>
-          {isTenant && (
+          {showTenantQuickLinks && (
             <MenuItem icon="options-outline" label="העדפות חיפוש" onPress={() => navigation.navigate('Preferences')} />
           )}
-          {isTenant && (
+          {showTenantQuickLinks && (
             <MenuItem icon="people-outline" label="מציאת שותפ/ה לדירה" onPress={() => navigation.navigate('Roommate')} />
           )}
-          {isTenant && (
+          {showTenantQuickLinks && (
             <MenuItem icon="shield-checkmark-outline" label="אימות זהות" onPress={() => navigation.navigate('VerifyIdentity')} />
           )}
           <MenuItem icon="document-text-outline" label="החוזים שלי" onPress={() => navigation.navigate('Contracts')} />
@@ -201,6 +218,8 @@ export default function ProfileScreen() {
         </TouchableOpacity>
 
         <Text style={styles.version}>DirApp v1.0.0</Text>
+        </View>
+        </ResponsiveContainer>
       </ScrollView>
 
       {/* Edit modal */}
@@ -273,7 +292,8 @@ function MenuItem({ icon, label, onPress, last = false }: {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.bg },
-  scroll:    { alignItems: 'center', padding: 24, paddingBottom: 40 },
+  scroll:    { alignItems: 'center', paddingVertical: 24, paddingBottom: 40 },
+  profileInner: { alignItems: 'center', width: '100%' },
   brandRow:  { marginBottom: 8 },
 
   avatarContainer: { alignItems: 'center', marginBottom: 10, marginTop: 8, position: 'relative' },
