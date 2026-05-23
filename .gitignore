@@ -36,6 +36,9 @@ mobile/dist/
 # Nested clone accidentally committed as submodule (see git history); keep untracked locally
 apartment/
 
+# GitHub account recovery codes — never commit
+*recovery-codes*
+
 # Stitch / local HTML+PNG design dumps under .cursor/<n>/ (~MB). Runtime tokens live in
 # mobile/src/theme/dirAppTokens.ts — commit code + docs, not exports.
 .cursor/1/
