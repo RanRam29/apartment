@@ -1,8 +1,9 @@
+# Disabled automatic deploy on push to avoid GitHub Actions quota limits.
+# Run manually from Actions → Deploy to Production → Run workflow.
 name: Deploy to Production
 
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
 
 # GHCR push uses the default GITHUB_TOKEN (no Docker Hub secrets required).
 permissions:

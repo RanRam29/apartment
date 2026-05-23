@@ -1,13 +1,9 @@
+# Disabled automatic runs to avoid GitHub Actions quota limits.
+# Run manually from Actions → CI → Run workflow when needed.
 name: CI
 
 on:
-  push:
-    branches: [main, "claude/**"]
-  pull_request:
-    branches: [main]
   workflow_dispatch:
-  schedule:
-    - cron: "0 3 * * *"
 
 jobs:
   backend-lint:
