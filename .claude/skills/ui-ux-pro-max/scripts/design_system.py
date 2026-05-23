@@ -104,7 +104,8 @@ class DesignSystemGenerator:
         # Parse decision rules JSON
         decision_rules = {}
         try:
-            decision_rules = json.loads(rule.get("Decision_Rules", "{}"))
+            rules_str = rule.get("Decision_Rules")
+            decision_rules = json.loads(rules_str) if rules_str else {}
         except json.JSONDecodeError:
             pass
 
@@ -440,8 +441,10 @@ def format_markdown(design_system: dict) -> str:
     # Anti-patterns section
     if anti_patterns:
         lines.append("### Avoid (Anti-patterns)")
-        newline_bullet = '\n- '
-        lines.append(f"- {anti_patterns.replace(' + ', newline_bullet)}")
+        anti_list = [a.strip() for a in anti_patterns.split("+")]
+        for anti in anti_list:
+            if anti:
+                lines.append(f"- ❌ {anti}")
         lines.append("")
 
     # Pre-Delivery Checklist section
@@ -918,8 +921,6 @@ def _generate_intelligent_overrides(page_name: str, page_query: str, design_syst
     Uses the existing search infrastructure to find relevant style, UX, and layout
     data instead of hardcoded page types.
     """
-    from core import search
-    
     page_lower = page_name.lower()
     query_lower = (page_query or "").lower()
     combined_context = f"{page_lower} {query_lower}"

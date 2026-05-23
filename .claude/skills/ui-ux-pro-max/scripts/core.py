@@ -9,6 +9,7 @@ import re
 from pathlib import Path
 from math import log
 from collections import defaultdict
+from functools import lru_cache
 
 # ============ CONFIGURATION ============
 DATA_DIR = Path(__file__).parent.parent / "data"
@@ -105,6 +106,8 @@ class BM25:
         self.idf = {}
         self.doc_freqs = defaultdict(int)
         self.N = 0
+        self.raw_documents = []
+        self.doc_term_freqs = []
 
     def tokenize(self, text):
         """Lowercase, split, remove punctuation, filter short words"""
@@ -113,19 +116,28 @@ class BM25:
 
     def fit(self, documents):
         """Build BM25 index from documents"""
+        self.raw_documents = [str(doc).lower() for doc in documents]
         self.corpus = [self.tokenize(doc) for doc in documents]
         self.N = len(self.corpus)
         if self.N == 0:
             return
         self.doc_lengths = [len(doc) for doc in self.corpus]
         self.avgdl = sum(self.doc_lengths) / self.N
+        
+        # Prevent division by zero
+        if self.avgdl == 0:
+            self.avgdl = 1e-6
 
+        self.doc_term_freqs = []
         for doc in self.corpus:
+            tf = defaultdict(int)
             seen = set()
             for word in doc:
+                tf[word] += 1
                 if word not in seen:
                     self.doc_freqs[word] += 1
                     seen.add(word)
+            self.doc_term_freqs.append(tf)
 
         for word, freq in self.doc_freqs.items():
             self.idf[word] = log((self.N - freq + 0.5) / (freq + 0.5) + 1)
@@ -133,14 +145,13 @@ class BM25:
     def score(self, query):
         """Score all documents against query"""
         query_tokens = self.tokenize(query)
+        query_exact = str(query).lower().strip()
         scores = []
 
         for idx, doc in enumerate(self.corpus):
             score = 0
             doc_len = self.doc_lengths[idx]
-            term_freqs = defaultdict(int)
-            for word in doc:
-                term_freqs[word] += 1
+            term_freqs = self.doc_term_freqs[idx]
 
             for token in query_tokens:
                 if token in self.idf:
@@ -150,12 +161,17 @@ class BM25:
                     denominator = tf + self.k1 * (1 - self.b + self.b * doc_len / self.avgdl)
                     score += idf * numerator / denominator
 
+            # Exact phrase/keyword match boost
+            if query_exact and query_exact in self.raw_documents[idx]:
+                score += 5.0
+
             scores.append((idx, score))
 
         return sorted(scores, key=lambda x: x[1], reverse=True)
 
 
 # ============ SEARCH FUNCTIONS ============
+@lru_cache(maxsize=32)
 def _load_csv(filepath):
     """Load CSV and return list of dicts"""
     with open(filepath, 'r', encoding='utf-8') as f:
@@ -218,7 +234,7 @@ def search(query, domain=None, max_results=MAX_RESULTS):
     filepath = DATA_DIR / config["file"]
 
     if not filepath.exists():
-        return {"error": f"File not found: {filepath}", "domain": domain}
+        return {"error": f"File not found: {filepath}", "domain": domain, "results": []}
 
     results = _search_csv(filepath, config["search_cols"], config["output_cols"], query, max_results)
 
@@ -234,12 +250,12 @@ def search(query, domain=None, max_results=MAX_RESULTS):
 def search_stack(query, stack, max_results=MAX_RESULTS):
     """Search stack-specific guidelines"""
     if stack not in STACK_CONFIG:
-        return {"error": f"Unknown stack: {stack}. Available: {', '.join(AVAILABLE_STACKS)}"}
+        return {"error": f"Unknown stack: {stack}. Available: {', '.join(AVAILABLE_STACKS)}", "results": []}
 
     filepath = DATA_DIR / STACK_CONFIG[stack]["file"]
 
     if not filepath.exists():
-        return {"error": f"Stack file not found: {filepath}", "stack": stack}
+        return {"error": f"Stack file not found: {filepath}", "stack": stack, "results": []}
 
     results = _search_csv(filepath, _STACK_COLS["search_cols"], _STACK_COLS["output_cols"], query, max_results)
 
