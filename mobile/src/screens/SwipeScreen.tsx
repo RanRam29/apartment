@@ -260,10 +260,20 @@ export default function SwipeScreen() {
       <Modal visible={!!lastMatch} transparent animationType="fade">
         <View style={styles.overlay}>
           <View style={styles.modalCard}>
-            <View style={styles.matchIconRow}>
-              <Ionicons name="heart" size={36} color={C.coral} />
+            <View style={styles.matchHeartsRow}>
+              <Ionicons name="heart" size={28} color={C.coral} style={{ opacity: 0.45, marginRight: -6 }} />
+              <View style={styles.matchIconRow}>
+                <Ionicons name="heart" size={40} color={C.coral} />
+              </View>
+              <Ionicons name="heart" size={28} color={C.coral} style={{ opacity: 0.45, marginLeft: -6 }} />
             </View>
-            <Text style={styles.matchTitle}>יש התאמה!</Text>
+            <Text style={styles.matchTitle}>יש התאמה! 🎉</Text>
+            {(lastMatch as any)?.apartment?.title ? (
+              <View style={styles.matchAptRow}>
+                <Ionicons name="home-outline" size={13} color={C.textSub} />
+                <Text style={styles.matchAptName} numberOfLines={1}>{(lastMatch as any).apartment.title}</Text>
+              </View>
+            ) : null}
             <Text style={styles.matchSub}>
               {lastMatch?.status === 'accepted'
                 ? 'המשכיר אישר — תוכלו לדבר עכשיו!'
@@ -271,6 +281,9 @@ export default function SwipeScreen() {
             </Text>
             <TouchableOpacity style={styles.primaryBtn} onPress={resetMatch}>
               <Text style={styles.primaryBtnText}>המשך לחפש</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.secondaryBtn} onPress={resetMatch}>
+              <Text style={styles.secondaryBtnText}>סגור</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -450,6 +463,14 @@ const styles = StyleSheet.create({
     shadowColor: dirApp.primary, shadowOffset: { width: 0, height: 20 },
     shadowOpacity: 0.15, shadowRadius: 30, elevation: 10,
   },
+  matchHeartsRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
+  matchAptRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    backgroundColor: C.bgCard, borderRadius: 10,
+    paddingHorizontal: 12, paddingVertical: 6,
+    borderWidth: 1, borderColor: C.border,
+  },
+  matchAptName: { color: C.textSub, fontSize: 13, maxWidth: 200 },
   matchIconRow: {
     width: 72, height: 72, borderRadius: 36,
     backgroundColor: C.coralAlpha(0.1),

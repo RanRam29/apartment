@@ -50,10 +50,16 @@ export default function OnboardingScreen({ navigation }: Props) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Progress dots */}
+      {/* DirApp logo header */}
+      <View style={styles.logoHeader}>
+        <View style={styles.logoDot} />
+        <Text style={styles.logoText}>DirApp</Text>
+      </View>
+
+      {/* Progress pills */}
       <View style={styles.dotsRow}>
         {STEPS.map((_, i) => (
-          <View key={i} style={[styles.dot, i === step && styles.dotActive]} />
+          <View key={i} style={[styles.dot, i === step && styles.dotActive, i < step && styles.dotDone]} />
         ))}
       </View>
 
@@ -201,9 +207,13 @@ function NavButtons({ onNext, onBack }: { onNext: () => void; onBack: () => void
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Dark.bg },
-  dotsRow: { flexDirection: 'row', justifyContent: 'center', gap: 8, paddingTop: 16 },
-  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: C.navyMidAlpha(0.5) },
-  dotActive: { backgroundColor: C.cyan, width: 20 },
+  logoHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingTop: 16 },
+  logoDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: C.cyan },
+  logoText: { fontSize: 18, fontWeight: '800', color: C.onInverse.primary, letterSpacing: 1 },
+  dotsRow: { flexDirection: 'row', justifyContent: 'center', gap: 6, paddingTop: 12 },
+  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.15)' },
+  dotActive: { backgroundColor: C.cyan, width: 24, borderRadius: 4 },
+  dotDone: { backgroundColor: C.cyanAlpha(0.45) },
   scroll: { padding: 24, paddingBottom: 40 },
   step: { alignItems: 'center', gap: 16 },
   emoji: { fontSize: 64, marginBottom: 4 },
