@@ -5,7 +5,7 @@ Use this file to track roadmap delivery. Update each row only after evidence exi
 Status flow:
 - `planned` -> `in_progress` -> `merged` -> `approved`
 
-Last updated: 2026-05-10 (all 15 features approved after roadmap review)
+Last updated: 2026-05-24
 
 | ID | Phase | Feature | Owner | PR/Link | Status | Merged Date | Approved Date | Notes |
 |---|---|---|---|---|---|---|---|---|
@@ -24,6 +24,9 @@ Last updated: 2026-05-10 (all 15 features approved after roadmap review)
 | F13 | Phase 4 (Year 2+) | Gamification Layer | mobile-team | #46 | approved | 2026-05-09 | 2026-05-10 | UserPoints model; /api/gamification (award/me/leaderboard); auto-badges; GamificationScreen with progress bar + leaderboard. Approved in roadmap review; evidence: grouped F12-F15 implementation + tests commit `76e0532`. |
 | F14 | Phase 4 (Year 2+) | Services Marketplace | backend-team | #46 | approved | 2026-05-09 | 2026-05-10 | ServiceListing + ServiceReview models; /api/services CRUD + review + avg-rating; ServicesScreen with category filters + phone-to-call + star picker. Approved in roadmap review; evidence: grouped F12-F15 implementation + tests commit `76e0532`. |
 | F15 | Phase 4 (Year 2+) | IoT for Commercial Tenants | backend-team | #46 | approved | 2026-05-09 | 2026-05-10 | IoTDevice + MaintenanceTicket models; /api/iot devices + access + tickets; IoTScreen tabbed UI. Approved in roadmap review; evidence: grouped F12-F15 implementation + tests commit `76e0532`. |
+| F16 | Cross-cutting | DirApp Design System + Figma UI Polish | mobile-team | #71, #72 | approved | 2026-05-24 | 2026-05-24 | `dirAppTokens.ts`, `textStyles.ts`, `ResponsiveContainer`; Figma design applied to SwipeScreen (enlarged action buttons, match modal), ApartmentDetailScreen (carousel 380px, luxury badge, sticky CTA bar), OnboardingScreen (DirApp logo header, progress pills). |
+| F17 | Cross-cutting | Full Dark Mode Support | mobile-team | #73 | approved | 2026-05-24 | 2026-05-24 | `ThemeContext.tsx` with light/dark/system modes; `useColors()` hook; `App.tsx` wrapped with `ThemeProvider`; 12 screens updated with inline style overrides; ProfileScreen dark mode toggle (moon/sun icon, Hebrew label). |
+| F18 | Cross-cutting | Security: Backend Dep Hardening | backend-team | #74 | in_progress | — | — | Express 4.18.2→4.22.2, ws 8.18.3→8.20.1; path-traversal hardening for contract file uploads via `resolveUploadFilePath` / `safeUnlinkUpload`; unit tests added. PR open, pending merge. |
 
 ## Update Rules
 
