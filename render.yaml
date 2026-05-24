@@ -43,6 +43,9 @@ services:
       # Browsers may send Origin from the Vercel web build; merge with any CLIENT_ORIGIN in the dashboard
       - key: CLIENT_ORIGINS
         value: https://apartment-olive.vercel.app
+      # Enable demo seed on first deploy (auto-seeds 22 listings + demo accounts)
+      - key: DEMO_SEED_ENABLED
+        value: "true"
 
 databases:
   - name: apartmentapp-db
