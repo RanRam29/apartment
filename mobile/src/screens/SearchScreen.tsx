@@ -37,8 +37,24 @@ const SUGGESTIONS = [
 const FILTER_LABEL: Record<string, string> = {
   city: 'עיר', street: 'רחוב', neighborhood: 'רחוב', minPrice: 'מחיר מ',
   maxPrice: 'מחיר עד', minRooms: 'חד׳ מ', maxRooms: 'חד׳ עד',
-  petsAllowed: 'חיות', availableFrom: 'פנוי מ',
+  petsAllowed: 'חיות', availableFrom: 'פנוי מ', amenities: 'מתקנים',
 };
+
+function formatFilterValue(val: unknown): string {
+  if (val === true) return 'כן';
+  if (val === false) return 'לא';
+  if (Array.isArray(val)) return val.join(', ');
+  return String(val);
+}
+
+function visibleParsedFilters(filters: Record<string, unknown> | null): [string, unknown][] {
+  if (!filters) return [];
+  return Object.entries(filters).filter(([, val]) => {
+    if (val === null || val === undefined || val === '') return false;
+    if (Array.isArray(val) && val.length === 0) return false;
+    return true;
+  });
+}
 
 export default function SearchScreen() {
   const navigation = useNavigation<any>();
@@ -50,6 +66,8 @@ export default function SearchScreen() {
   const [filterPets, setFilterPets] = useState(false);
   const [results, setResults] = useState<Apartment[]>([]);
   const [parsedFilters, setParsedFilters] = useState<Record<string, any> | null>(null);
+
+  const parsedEntries = visibleParsedFilters(parsedFilters);
 
   const hasManualFilters = !!(filterCity || filterMaxPrice || filterRooms || filterPets);
 
@@ -232,16 +250,25 @@ export default function SearchScreen() {
           </View>
         )}
 
-        {/* Active parsed-filter chips */}
-        {parsedFilters && Object.keys(parsedFilters).length > 0 && (
-          <View style={styles.parsedRow}>
-            {Object.entries(parsedFilters).map(([key, val]) => (
-              <View key={key} style={styles.parsedChip}>
-                <Text style={styles.parsedChipText}>
-                  {FILTER_LABEL[key] ?? key}: {String(val)}
-                </Text>
+        {/* Active parsed-filter chips (UX-030) */}
+        {searchMutation.isSuccess && query.trim().length > 0 && (
+          <View style={styles.parsedSection}>
+            <Text style={styles.parsedTitle}>מה שה-AI הבין מהחיפוש</Text>
+            {parsedEntries.length > 0 ? (
+              <View style={styles.parsedRow}>
+                {parsedEntries.map(([key, val]) => (
+                  <View key={key} style={styles.parsedChip}>
+                    <Text style={styles.parsedChipText}>
+                      {FILTER_LABEL[key] ?? key}: {formatFilterValue(val)}
+                    </Text>
+                  </View>
+                ))}
               </View>
-            ))}
+            ) : (
+              <Text style={styles.parsedEmpty}>
+                לא זוהו מגבלות ספציפיות — מוצגות דירות לפי החיפוש והפילטרים הידניים.
+              </Text>
+            )}
           </View>
         )}
 
@@ -485,7 +512,20 @@ const styles = StyleSheet.create({
   clearFiltersBtn: { alignItems: 'flex-end' },
   clearFiltersText: { color: C.danger, fontSize: 12 },
 
-  parsedRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 },
+  parsedSection: { marginBottom: 8, gap: 6 },
+  parsedTitle: {
+    color: dirApp.onSurfaceVariant,
+    fontSize: 12,
+    fontWeight: '700',
+    textAlign: 'right',
+  },
+  parsedEmpty: {
+    color: dirApp.outline,
+    fontSize: 12,
+    textAlign: 'right',
+    lineHeight: 18,
+  },
+  parsedRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   parsedChip: {
     backgroundColor: `${dirApp.secondaryContainer}44`,
     borderRadius: 8,

@@ -13,6 +13,7 @@ import { landlordApi, apartmentsApi } from '../services/api';
 import type { Apartment, MainStackParamList } from '../types';
 import { C, Dark } from '../theme';
 import { dirApp } from '../theme/dirAppTokens';
+import { moderateMarketingCopy } from '../utils/marketingCopyModeration';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
 import { dirType } from '../theme/textStyles';
 
@@ -87,6 +88,12 @@ export default function ListingsScreen() {
     setCopyModal((prev) => ({ ...prev, style, copy: '', loading: true }));
     try {
       const res = await apartmentsApi.generateMarketingCopy(apt.id, style);
+      const moderation = moderateMarketingCopy(res.data.copy ?? '');
+      if (!moderation.ok) {
+        setCopyModal((prev) => ({ ...prev, copy: '', loading: false }));
+        Alert.alert('תוכן לא מאושר', moderation.reason ?? 'נסה ליצור מחדש.');
+        return;
+      }
       setCopyModal((prev) => ({ ...prev, copy: res.data.copy, loading: false }));
     } catch {
       setCopyModal((prev) => ({ ...prev, loading: false }));
@@ -95,6 +102,11 @@ export default function ListingsScreen() {
   }
 
   async function shareCopy(text: string) {
+    const moderation = moderateMarketingCopy(text);
+    if (!moderation.ok) {
+      Alert.alert('תוכן לא מאושר', moderation.reason ?? 'נסה ליצור מחדש.');
+      return;
+    }
     try {
       await Share.share({ message: text });
     } catch {

@@ -7,7 +7,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Image } from 'expo-image';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
-import { matchesApi } from '../services/api';
+import { landlordApi, matchesApi } from '../services/api';
 import type { Match } from '../types';
 import { C, Dark } from '../theme';
 import { dirApp } from '../theme/dirAppTokens';
@@ -21,6 +21,14 @@ const STATUS_LABEL: Record<StatusTab, string> = {
   rejected: 'נדחה',
 };
 
+function leadScoreStyle(score: number | null | undefined) {
+  if (score == null) return { bg: `${dirApp.outlineVariant}44`, color: dirApp.outline, label: '—' };
+  const pct = Math.min(100, Math.round(score));
+  if (pct >= 80) return { bg: `${C.statusTone.positive}22`, color: C.statusTone.positive, label: `${pct}%` };
+  if (pct >= 60) return { bg: `${dirApp.secondary}33`, color: dirApp.secondary, label: `${pct}%` };
+  return { bg: `${C.statusTone.caution}22`, color: C.statusTone.caution, label: `${pct}%` };
+}
+
 export default function LeadsScreen() {
   const [activeTab, setActiveTab] = useState<StatusTab>('pending');
   const navigation = useNavigation<any>();
@@ -29,9 +37,7 @@ export default function LeadsScreen() {
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['leads', activeTab],
     queryFn: () =>
-      matchesApi.list().then((r) =>
-        (r.data.matches as Match[]).filter((m) => m.status === activeTab)
-      ),
+      landlordApi.leads({ status: activeTab }).then((r) => r.data.leads as Match[]),
   });
 
   const acceptMutation = useMutation({
@@ -56,7 +62,7 @@ export default function LeadsScreen() {
         {
           text: action === 'accept' ? 'אשר' : 'דחה',
           style: action === 'reject' ? 'destructive' : 'default',
-          onPress: () => action === 'accept' ? acceptMutation.mutate(id) : rejectMutation.mutate(id),
+          onPress: () => (action === 'accept' ? acceptMutation.mutate(id) : rejectMutation.mutate(id)),
         },
       ]
     );
@@ -72,9 +78,14 @@ export default function LeadsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.header}>לידים</Text>
+      <View style={styles.headerRow}>
+        <Text style={styles.header}>לידים</Text>
+        <View style={styles.aiBadge}>
+          <Ionicons name="sparkles" size={14} color={dirApp.secondary} />
+          <Text style={styles.aiBadgeText}>AI Score</Text>
+        </View>
+      </View>
 
-      {/* Status tabs */}
       <View style={styles.tabs}>
         {STATUS_TABS.map((tab) => (
           <TouchableOpacity
@@ -126,6 +137,7 @@ function LeadRow({ match, onAccept, onReject, showActions, onOpenChat }: {
   onOpenChat: () => void;
 }) {
   const isAcceptedChatRow = !showActions && match.status === 'accepted';
+  const score = leadScoreStyle(match.leadScore);
 
   return (
     <TouchableOpacity
@@ -143,9 +155,14 @@ function LeadRow({ match, onAccept, onReject, showActions, onOpenChat }: {
           </View>
         )}
         <View style={styles.leadInfo}>
-          <Text style={styles.tenantName}>
-            {match.tenant?.firstName} {match.tenant?.lastName}
-          </Text>
+          <View style={styles.nameRow}>
+            <View style={[styles.scoreBadge, { backgroundColor: score.bg }]}>
+              <Text style={[styles.scoreText, { color: score.color }]}>{score.label}</Text>
+            </View>
+            <Text style={styles.tenantName}>
+              {match.tenant?.firstName} {match.tenant?.lastName}
+            </Text>
+          </View>
           <Text style={styles.aptName} numberOfLines={1}>
             {match.apartment?.title}
           </Text>
@@ -179,7 +196,25 @@ function LeadRow({ match, onAccept, onReject, showActions, onOpenChat }: {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Dark.bg },
-  header: { fontSize: 22, fontWeight: '800', color: C.onInverse.primary, padding: 20, paddingBottom: 12, textAlign: 'right' },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 12,
+  },
+  header: { fontSize: 22, fontWeight: '800', color: C.onInverse.primary, textAlign: 'right', flex: 1 },
+  aiBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: `${dirApp.secondaryContainer}55`,
+  },
+  aiBadgeText: { color: dirApp.secondary, fontSize: 11, fontWeight: '700' },
   tabs: { flexDirection: 'row', paddingHorizontal: 16, gap: 8, marginBottom: 8 },
   tab: {
     flex: 1, paddingVertical: 8, borderRadius: 10,
@@ -194,6 +229,9 @@ const styles = StyleSheet.create({
   avatar: { width: 48, height: 48, borderRadius: 24 },
   avatarPlaceholder: { backgroundColor: C.navyMidAlpha(0.7), justifyContent: 'center', alignItems: 'center' },
   leadInfo: { flex: 1 },
+  nameRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 8 },
+  scoreBadge: { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 },
+  scoreText: { fontSize: 11, fontWeight: '800' },
   tenantName: { color: C.onInverse.primary, fontSize: 15, fontWeight: '700', textAlign: 'right' },
   aptName: { color: C.textMut, fontSize: 13, textAlign: 'right', marginTop: 2 },
   aptMeta: { color: C.cyan, fontSize: 12, textAlign: 'right', marginTop: 2 },

@@ -48,7 +48,7 @@ Use **`dirApp`** in screens for Trust Blue (`primary` / `primaryContainer`) and 
 - [x] **Auth shell** — `AuthScreen.tsx`
 - [x] **Login / Register** — `LoginScreen.tsx`, `RegisterScreen.tsx`
 - [x] **Onboarding** — `OnboardingScreen.tsx` (primary CTA label: `dirApp.primary`)
-- [ ] **Verify identity** — `VerifyIdentityScreen.tsx` (optional token pass)
+- [x] **Verify identity** — `VerifyIdentityScreen.tsx` (header `dirApp.primary`)
 
 ### Chat, leads, roommates
 
@@ -60,8 +60,8 @@ Use **`dirApp`** in screens for Trust Blue (`primary` / `primaryContainer`) and 
 
 - [x] **Preferences** — `PreferencesScreen.tsx`
 - [x] **Gamification** — `GamificationScreen.tsx` (`CARD` → `dirApp.surfaceTint`)
-- [ ] **Services** — `ServicesScreen.tsx` (optional)
-- [ ] **IoT** — `IoTScreen.tsx` (optional)
+- [x] **Services** — `ServicesScreen.tsx` (header `dirApp.primary`)
+- [x] **IoT** — `IoTScreen.tsx` (header `dirApp.primary`)
 - [x] **Logs console** — `LogsConsoleScreen.tsx` (light DirApp panels + tabs)
 
 ### Navigation & shared UI
@@ -69,7 +69,7 @@ Use **`dirApp`** in screens for Trust Blue (`primary` / `primaryContainer`) and 
 - [x] **App navigator** — `AppNavigator.tsx` (admin tenant/landlord segment: `dirApp.primary` / `primaryContainer`)
 - [x] **Apartment search chatbot** — `ApartmentSearchChatbot.tsx` (modal shell `dirApp.primary`, panels `inverseSurface` / `surfaceTint`)
 - [x] **Error boundary** — `ErrorBoundary.tsx` (retry on mint: `dirApp.primary`)
-- [ ] **Startup intro** — `StartupIntroGate.*` (optional)
+- [x] **Startup intro** — `StartupIntroGate.*` (skip hint `dirApp.secondary`)
 
 ---
 

@@ -18,21 +18,27 @@ flowchart LR
     Apt[apartments routes]
   end
   subgraph llm [Google Gemini API]
-    Flash[gemini-1.5-flash]
+    Flash[gemini-flash-latest]
+  end
+  subgraph scoring [Node scoring default]
+    LeadScore[leadScoringService]
+    RecScore[recommendationEngineService]
   end
   subgraph optional [Python ai-service optional]
     FastAPI[FastAPI /api/nlp /api/recommendations]
     Heuristics[sklearn heuristics no LLM]
   end
-  Search --> Rec --> GeminiSvc --> Flash
+  Search -->   Rec --> GeminiSvc --> Flash
+  Rec --> LeadScore
+  Rec --> RecScore
   Chatbot --> Rec --> GeminiSvc
   Listings --> Apt --> GeminiSvc
   FastAPI --> Flash
   Heuristics -.-> FastAPI
 ```
 
-- **נתיב ייצור ראשי לאפליקציה**: ה-Backend ב-[`backend/src/services/geminiService.js`](../backend/src/services/geminiService.js) קורא ישירות ל-**Google Gemini 1.5 Flash** (`generateContent`). תלות: משתנה סביבה **`GEMINI_API_KEY`**.
-- **מיקרו־שירות Python** [`ai-service/`](../ai-service/) (FastAPI): מכיל אותה לוגיקת NLP/summary דרך Gemini **ומנועי דירוג נומריים** (לא LLM). בקוד ה-Backend **לא נמצאה** קריאה HTTP ל-`AI_SERVICE_URL` — המפתח מופיע ב-[`backend/.env.example`](../backend/.env.example) כהכנה לעתיד, אך האינטגרציה הפעילה למובייל עוברת דרך Node.
+- **נתיב ייצור ראשי לאפליקציה**: ה-Backend ב-[`backend/src/services/geminiService.js`](../backend/src/services/geminiService.js) קורא ישירות ל-**Google Gemini** (`gemini-flash-latest` default). תלות: **`GEMINI_API_KEY`**.
+- **דירוג נומרי (ללא LLM)**: Node ב-[`leadScoringService.js`](../backend/src/services/leadScoringService.js) / [`recommendationEngineService.js`](../backend/src/services/recommendationEngineService.js), עם proxy אופציונלי ל-`ai-service` ([`aiServiceClient.js`](../backend/src/services/aiServiceClient.js)).
 
 ---
 
@@ -41,13 +47,13 @@ flowchart LR
 | רכיב | תיאור |
 |------|--------|
 | **מה עושה** | הופך שאילתת טקסט חופשי (עברית/אנגלית) ל-**JSON מסונן**: עיר, שכונה, טווח מחירים, חדרים, amenities מוגדרים, חיות, תאריך כניסה. |
-| **מודל** | Gemini 1.5 Flash, `temperature: 0.1`, עד 256 טוקנים. |
+| **מודל** | Gemini Flash (`gemini-flash-latest`), `temperature: 0.1`, עד 256 טוקנים. |
 | **כשל, JSON לא תקין או ללא מפתח** | **שכבת היוריסטיקה** (`inferFiltersFromQuery` ב-[`geminiService.js`](../backend/src/services/geminiService.js)): זיהוי ערים נפוצות, דפוסי חדרים/מחיר בעברית, מילות מפתח ל-amenities וחיות. התוצאה **ממוזגת** עם פלט Gemini (`mergeParsedFilters`) — ערכי LLM גוברים על קונפליקטים; חסרים משלימים מההיוריסטיקה. ללא מפתח: חיפוש עדיין מסונן לפי מה שניתן לחלץ מהטקסט. |
 | **API** | `POST /api/recommendations/search` — דורש tenant מאומת; **הגבלת קצב** (`geminiSearchLimiter`); מיזוג overrides מה-body (city, maxPrice וכו'); **Redis cache** לפילטרים לפי שאילתה (מפתח עם גרסה, למשל `nlp:v3:…`, TTL ~5 דק'); שמירת היסטוריה ב-**MongoDB** `UserPreferences.nlpSearchHistory` (fire-and-forget); שאילתת Postgres על דירות פעילות, **לא כולל** דירות שכבר נוצפו ב-swipe. |
 | **קוד** | [`backend/src/routes/recommendations.js`](../backend/src/routes/recommendations.js), [`backend/src/services/geminiService.js`](../backend/src/services/geminiService.js) — `parseSearchQuery`, `inferFiltersFromQuery`, `mergeParsedFilters`. |
 | **מובייל** | [`mobile/src/screens/SearchScreen.tsx`](../mobile/src/screens/SearchScreen.tsx) — `recommendationsApi.nlpSearch`, ממשק "מחפש עם AI"; [`mobile/src/components/ApartmentSearchChatbot.tsx`](../mobile/src/components/ApartmentSearchChatbot.tsx) — אותו API בצ'אט צף לשוכרים. |
 
-**הערה**: ההמלצות ה"מותאמות אישית" ב-`GET /api/recommendations/personalized` **אינן מבוססות LLM** — הן מסננות לפי העדפות שמורות ב-Mongo + swipe history, עם מיון/מגבלות ב-Sequelize ([`recommendations.js`](../backend/src/routes/recommendations.js)).
+**הערה**: `GET /api/recommendations/personalized` משתמש במנוע דירוג Node ([`recommendationEngineService.js`](../backend/src/services/recommendationEngineService.js)); proxy ל-`ai-service` כש-`AI_SERVICE_URL` מוגדר.
 
 ---
 
@@ -80,9 +86,11 @@ flowchart LR
 | `POST /api/nlp/parse` | אותו רעיון כמו `parseSearchQuery` — Gemini + Redis cache. |
 | `POST /api/nlp/summary` | סיכום שיווקי בעברית — מקביל ל-`generate_listing_summary` ב-[`nlp_search.py`](../ai-service/src/nlp_search.py). |
 | `POST /api/recommendations/score` | **דירוג נומרי** של רשימת דירות: numpy + התאמה להעדפות + boost התנהגותי לפי swipe — **לא מודל שפה** ([`recommendation_engine.py`](../ai-service/src/recommendation_engine.py)). |
-| `POST /api/leads/score` (ראה [`lead_scoring.py`](../ai-service/src/lead_scoring.py)) | ציון לידים של משכירים לפי תקציב, סוג swipe, זמן צפייה, אימות, עיר — **כללי ניקוד**, לא LLM. |
+| `POST /api/leads/score` | ציון לידים — כללי ניקוד, לא LLM. |
 
-עד כה ה-Backend הראשי **לא מפנה** אליו בקוד המקור שנסרק — כלומר השימוש בפועל באפליקציה הנוכחית הוא דרך **Node + Gemini** לעיל.
+**Backend (ייצור):** [`leads.js`](../backend/src/routes/leads.js), [`recommendations.js`](../backend/src/routes/recommendations.js) (`POST /score`), [`landlord.js`](../backend/src/routes/landlord.js) (`leadScore` ב-`GET /leads`). **Mobile:** [`LeadsScreen.tsx`](../mobile/src/screens/LeadsScreen.tsx) מציג `leadScore`.
+
+NLP ו-marketing copy **לא** מופנים ל-Python — רק Gemini דרך Node.
 
 ---
 
@@ -98,7 +106,7 @@ flowchart LR
 | יכולת | LLM? | איפה בפועל (אפליקציה) |
 |--------|------|-------------------------|
 | חיפוש בשפה טבעית | כן (Gemini) + היוריסטיקה | Backend `recommendations/search`; מובייל Search + Chatbot |
-| המלצות מותאמות אישית | לא | Mongo prefs + SQL |
-| טקסט שיווקי למודעה | כן (Gemini) | Backend `apartments/.../marketing-copy` |
-| דירוג דירות מתקדם (numpy) | לא | רק ב-`ai-service` אם מופעל בנפרד |
-| ציון לידים | לא | רק ב-`ai-service` |
+| המלצות מותאמות אישית | לא (מנוע ניקוד Node) | Backend `recommendations/personalized`; `_score` ב-API |
+| טקסט שיווקי למודעה | כן (Gemini) | Backend + moderation בסיסי ב-[`ListingsScreen.tsx`](../mobile/src/screens/ListingsScreen.tsx) |
+| דירוג דירות מתקדם | לא | Node default; Python דרך `AI_SERVICE_URL` אופציונלי |
+| ציון לידים | לא | Node + [`LeadsScreen.tsx`](../mobile/src/screens/LeadsScreen.tsx) |

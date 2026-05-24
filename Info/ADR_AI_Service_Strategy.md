@@ -9,7 +9,7 @@
 
 קיימים שני מימושים הקשורים ל־Gemini ולמערכת ההמלצות:
 
-1. **Backend (Node.js)** — [`backend/src/services/geminiService.js`](../backend/src/services/geminiService.js) קורא ישירות ל־Google Gemini (`gemini-1.5-flash`) עבור NLP וטקסט שיווקי.
+1. **Backend (Node.js)** — [`backend/src/services/geminiService.js`](../backend/src/services/geminiService.js) קורא ישירות ל־Google Gemini (**`gemini-flash-latest`** by default, override via `GEMINI_MODEL`) עבור NLP וטקסט שיווקי.
 2. **מיקרו־שירות Python** — [`ai-service/`](../ai-service/) (FastAPI) עם NLP דומה, סיכום דירה, דירוג דירות (`recommendation_engine`) וציון לידים (`lead_scoring`) — ללא LLM בחלק מהיכולות.
 
 ## החלטה

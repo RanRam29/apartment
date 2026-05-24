@@ -8,6 +8,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { useNavigation } from '@react-navigation/native';
 import { screeningApi } from '../services/api';
 import { C, Dark } from '../theme';
+import { dirApp } from '../theme/dirAppTokens';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
 import { dirType } from '../theme/textStyles';
 
@@ -188,7 +189,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Dark.bg },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14 },
   backBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: Dark.surface, justifyContent: 'center', alignItems: 'center' },
-  headerTitle: { color: C.onInverse.primary, fontSize: 18, fontWeight: '800' },
+  headerTitle: { color: dirApp.primary, fontSize: 18, fontWeight: '800' },
   scroll: { flex: 1 },
   content: { padding: 16, paddingBottom: 48 },
   infoCard: { backgroundColor: Dark.surface, borderRadius: 16, padding: 20, alignItems: 'center', marginBottom: 20, borderWidth: 1, borderColor: Dark.border },

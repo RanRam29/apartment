@@ -240,7 +240,12 @@
 | AI-020 | בוצע — [`backend/src/middleware/geminiRateLimit.js`](../backend/src/middleware/geminiRateLimit.js), משתני סביבה ב-[`backend/.env.example`](../backend/.env.example) |
 | AI-021 | בוצע — לוגי משך וסוג ב-[`backend/src/services/geminiService.js`](../backend/src/services/geminiService.js) |
 | AI-022 | בוצע — `extractJsonObject`, `sanitizeParsedFilters`, בדיקות ב-[`backend/tests/geminiService.test.js`](../backend/tests/geminiService.test.js) |
-| AI-011, UX-030, PROD-040, PROD-041, QA-050, UX-031 | לא בוצעו במסגרת ריצה זו |
+| AI-011 | בוצע — Node scoring + optional proxy ([`aiServiceClient.js`](../backend/src/services/aiServiceClient.js)) |
+| UX-030 | בוצע — שקיפות פילטרים NLP ב-[`SearchScreen.tsx`](../mobile/src/screens/SearchScreen.tsx) |
+| PROD-040 | בוצע — `leadScore` ב-[`LeadsScreen.tsx`](../mobile/src/screens/LeadsScreen.tsx) + `GET /api/landlord/leads` |
+| PROD-041 | בוצע — מנוע דירוג ב-`GET /api/recommendations/personalized` + `POST /api/recommendations/score` |
+| QA-050 | בוצע — [`backend/scripts/ai-smoke.js`](../backend/scripts/ai-smoke.js), `npm run smoke:ai` |
+| UX-031 | בוצע — [`marketingCopyModeration.ts`](../mobile/src/utils/marketingCopyModeration.ts) + [`ListingsScreen.tsx`](../mobile/src/screens/ListingsScreen.tsx) |
 
 ---
 
@@ -249,4 +254,4 @@
 | שדה | ערך |
 |-----|-----|
 | מסמך | Tasks_Backlog_Specified.md |
-| עדכון | 2026-05-10 |
+| עדכון | 2026-05-23 |

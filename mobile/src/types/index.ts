@@ -102,6 +102,7 @@ export interface Match {
   landlordLikedAt: string | null;
   lastMessageAt: string | null;
   unreadCount?: number;
+  leadScore?: number | null;
   createdAt: string;
 }
 

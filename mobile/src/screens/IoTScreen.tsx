@@ -9,6 +9,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../store/useAuthStore';
 import { iotApi } from '../services/api';
 import { C, Dark } from '../theme';
+import { dirApp } from '../theme/dirAppTokens';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
 import { dirType } from '../theme/textStyles';
 
@@ -604,7 +605,7 @@ const styles = StyleSheet.create({
     backgroundColor: Dark.surface, borderBottomWidth: 1, borderBottomColor: Dark.border,
   },
   backBtn:     { padding: 4 },
-  headerTitle: { color: C.onInverse.primary, fontSize: 17, fontWeight: '700', flex: 1, textAlign: 'center' },
+  headerTitle: { color: dirApp.primary, fontSize: 17, fontWeight: '700', flex: 1, textAlign: 'center' },
   addBtn:      { backgroundColor: C.cyan, borderRadius: 20, padding: 6 },
 
   tabBar: {

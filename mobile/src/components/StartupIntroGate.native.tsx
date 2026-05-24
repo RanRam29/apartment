@@ -4,6 +4,7 @@ import * as SecureStore from 'expo-secure-store';
 import { useEventListener } from 'expo';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { C } from '../theme';
+import { dirApp } from '../theme/dirAppTokens';
 
 const SOURCE = require('../../assets/startup/StartUpLogo.mp4');
 const STORAGE_KEY = 'dirapp_startup_intro_seen';
@@ -148,7 +149,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 36,
     zIndex: 3,
-    color: 'rgba(255,255,255,0.62)',
+    color: dirApp.secondary,
     fontSize: 13,
     fontWeight: '600',
   },

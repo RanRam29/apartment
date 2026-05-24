@@ -21,7 +21,8 @@
    - **לא נדרש** מיקרו־שירות Python כדי שהמובייל ישתמש בתכונות AI אלו.
 
 4. **AI Service (Python, FastAPI)** — [`ai-service/`](../ai-service/) — **אופציונלי**:
-   - מציע נקודות קצה מקבילות (NLP, סיכום דירה, דירוג דירות, ציון לידים). בשלב הנוכחי **אין קריאות יוצאות** מה־Backend אל `AI_SERVICE_URL` בקוד המקור (ראה [`ADR_AI_Service_Strategy.md`](ADR_AI_Service_Strategy.md)).
+   - מציע נקודות קצה מקבילות (NLP, סיכום דירה, דירוג דירות, ציון לידים).
+   - ה-Backend **מנסה proxy** לדירוג נומרי כש־`AI_SERVICE_URL` מוגדר, עם **fallback Node** ([`aiServiceClient.js`](../backend/src/services/aiServiceClient.js)). NLP ו-marketing copy נשארים ב-Node + Gemini (ראה [`ADR_AI_Service_Strategy.md`](ADR_AI_Service_Strategy.md)).
    - יכול לרוץ כשירות נפרד בפריסת Docker/Kubernetes כשמחברים אותו במפורש.
 
 5. **Kafka** — **אופציונלי**:
