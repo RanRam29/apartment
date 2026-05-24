@@ -6,7 +6,7 @@
 require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const { initPostgres } = require('../config/database');
-const { User, Apartment } = require('../models');
+const { User, Apartment, Swipe, Match } = require('../models');
 const { buildAdmin1Apartments, SEED_COUNT } = require('./testApartmentData');
 
 function resolveDemoPassword() {
@@ -85,6 +85,10 @@ async function seed() {
   }
 
   console.log(`\n🏠 ${created} apartments created for admin1 (${SEED_COUNT - created} titles already existed)`);
+
+  // Seed pre-made match for investor demo: admin2 (tenant) ↔ admin1's first apartment
+  await seedDemoMatch(admin1);
+
   console.log('\n📋 Admin accounts (password: Admin1234!):');
   ADMIN_ACCOUNTS.forEach((a) => {
     const label = a.role === 'landlord' ? 'Landlord' : 'Tenant ';
@@ -143,10 +147,49 @@ async function autoSeed(queryInterface) {
         });
       }
     }
+    if (admin1) await seedDemoMatch(admin1);
     console.log('Initial seed complete. admin1@dirapp.com / Admin1234! (22 listings); admin@dirapp.com for empty-landlord tests.');
   } catch (err) {
     console.warn('Auto-seed skipped:', err.message);
   }
+}
+
+/**
+ * Seed one accepted match between admin2 (tenant) and admin1's first apartment.
+ * Gives the investor demo a ready-made match → chat → contract flow.
+ */
+async function seedDemoMatch(admin1) {
+  const tenant = await User.findOne({ where: { email: 'admin2@dirapp.com' } });
+  if (!tenant) return;
+
+  const apartment = await Apartment.findOne({ where: { landlordId: admin1.id }, order: [['createdAt', 'ASC']] });
+  if (!apartment) return;
+
+  // Swipe record so the match looks organic
+  await Swipe.findOrCreate({
+    where: { tenantId: tenant.id, apartmentId: apartment.id },
+    defaults: {
+      tenantId: tenant.id,
+      apartmentId: apartment.id,
+      direction: 'right',
+      isSuperlike: false,
+    },
+  });
+
+  const now = new Date();
+  await Match.findOrCreate({
+    where: { tenantId: tenant.id, apartmentId: apartment.id },
+    defaults: {
+      tenantId: tenant.id,
+      landlordId: admin1.id,
+      apartmentId: apartment.id,
+      status: 'accepted',
+      tenantLikedAt: now,
+      landlordLikedAt: now,
+    },
+  });
+
+  console.log(`\n🤝 Demo match seeded: admin2@dirapp.com ↔ "${apartment.title}"`);
 }
 
 function shouldAutoSeedOnStartup(env = process.env) {

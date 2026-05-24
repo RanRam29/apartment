@@ -1,6 +1,6 @@
 /**
- * Data for admin1 test apartment bulk seed — 22+ varied listings (cities, prices, images).
- * Images use deterministic Picsum seeds (no upload); clients read .url like Cloudinary objects.
+ * Demo apartment data — 22 realistic Israeli rental listings for admin1.
+ * Images use curated Unsplash apartment/interior photos.
  */
 
 const SEED_COUNT = 22;
@@ -32,6 +32,42 @@ const CITIES = [
 
 const AMENITY_POOL = ['parking', 'balcony', 'elevator', 'ac', 'storage', 'furnished', 'sun_boiler'];
 
+// Curated Unsplash apartment/interior photos — stable IDs, no auth required
+const PHOTO_POOL = [
+  '1502672023488-203a3bb6e526', // bright living room
+  '1555041469-db819a8be170',   // modern sofa living room
+  '1484154218962-a197022b5858', // open kitchen
+  '1560448204-e02f11c3d0e2',   // airy bedroom
+  '1522708323590-d24dbb6b0267', // kitchen dining
+  '1493809842364-78817add7ffb', // cozy living room
+  '1600585154340-be6161a56a0c', // modern apartment exterior
+  '1580587771525-78b9dba3b914', // villa / house
+  '1512917774080-9991f1c4c750', // house facade
+  '1570129477492-45c003edd2be', // apartment building
+  '1558618666-fcd25c85cd64',   // balcony view city
+  '1574362848149-11496d93a7c7', // minimalist bedroom
+];
+
+const TITLE_TEMPLATES = [
+  (rooms, city, hood) => `דירת ${rooms} חדרים מרווחת ב${hood}, ${city}`,
+  (rooms, city, hood) => `דירה יפה ומוארת — ${rooms} חד׳ ב${city}`,
+  (rooms, city, hood) => `${rooms} חדרים בלב ${hood} — ${city}`,
+  (rooms, city, hood) => `דירה משופצת ${rooms} חדרים, ${city} — ${hood}`,
+  (rooms, city, hood) => `להשכרה: ${rooms} חד׳ + מרפסת ב${city}`,
+  (rooms, city, hood) => `דירה חדשה ב${hood} — ${rooms} חדרים, ${city}`,
+];
+
+const DESC_EXTRAS = [
+  'הדירה ממוקמת בבניין מטופח עם לובי.',
+  'נוף פתוח ושקט — מתאים לזוג או לגר יחיד.',
+  'קרוב לתחבורה ציבורית, מרכזי קניות ובתי קפה.',
+  'חניה פרטית מובטחת בחוזה השכירות.',
+  'בניין עם ממ"ד ומחסן בקומת קרקע.',
+  'שכונה שקטה ובטוחה, מתאים למשפחות.',
+  'אחרי שיפוץ מלא — מטבח ואמבטיה חדשים.',
+  'גג משותף עם נוף לים / לעיר.',
+];
+
 function pick(i, mod) {
   return i % mod;
 }
@@ -51,10 +87,10 @@ function makeImages(aptIndex) {
   const k = 2 + (aptIndex % 3);
   const images = [];
   for (let s = 0; s < k; s += 1) {
-    const seed = `dirapp-admin1-apt${aptIndex}-img${s}`;
+    const photoId = PHOTO_POOL[(aptIndex + s) % PHOTO_POOL.length];
     images.push({
-      url: `https://picsum.photos/seed/${encodeURIComponent(seed)}/800/600`,
-      publicId: `seed-${seed}`,
+      url: `https://images.unsplash.com/photo-${photoId}?auto=format&fit=crop&w=800&h=600&q=80`,
+      publicId: `unsplash-${photoId}`,
       width: 800,
       height: 600,
     });
@@ -62,15 +98,11 @@ function makeImages(aptIndex) {
   return images;
 }
 
-/**
- * @returns {Array<object>} apartment field objects (no landlordId) for Apartment.create / findOrCreate defaults
- */
 function buildAdmin1Apartments() {
   const out = [];
   for (let i = 0; i < SEED_COUNT; i += 1) {
-    const n = i + 1;
     const { city, hoods } = CITIES[i % CITIES.length];
-    const street = hoods[pick(i, hoods.length)];
+    const hood = hoods[pick(i, hoods.length)];
 
     const rooms = [1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5][i % 9];
     const base = 2200 + (i * 631) % 13000;
@@ -80,13 +112,14 @@ function buildAdmin1Apartments() {
     const totalFloors = Math.max(floor + pick(i, 5), floor + 1);
     const sizeSqm = Math.round(rooms * 22 + (i % 7) * 5);
 
-    const title = `דירת בדיקות #${String(n).padStart(2, '0')} — ${city}`;
+    const titleFn = TITLE_TEMPLATES[i % TITLE_TEMPLATES.length];
+    const title = titleFn(rooms, city, hood);
 
-    const petNote = pick(i, 3) === 0 ? 'מותרות חיות מחמד בכפוף לפרט.' : 'ללא חיות מחמד.';
+    const petNote = pick(i, 3) === 0 ? 'מותרות חיות מחמד בכפוף לאישור.' : 'ללא חיות מחמד.';
+    const extra = DESC_EXTRAS[i % DESC_EXTRAS.length];
     const description = [
-      `דירה להדגמה ובדיקות — ${street}, ${city}.`,
-      `חדרים: ${rooms}, קומה ${floor} מתוך ${totalFloors}, כ-${sizeSqm} מ״ר.`,
-      pick(i, 2) === 0 ? 'מתאימה לזוגות ומשפחות קטנות.' : 'מיקום נוח לתחבורה ושירותים.',
+      `דירה ב${hood}, ${city} — ${rooms} חדרים, קומה ${floor} מתוך ${totalFloors}, כ-${sizeSqm} מ"ר.`,
+      extra,
       petNote,
     ].join(' ');
 
@@ -99,8 +132,8 @@ function buildAdmin1Apartments() {
       totalFloors,
       sizeSqm,
       city,
-      street,
-      address: `רחוב הדגמה ${10 + (i % 90)}`,
+      street: hood,
+      address: `רחוב ${hood} ${10 + (i % 90)}`,
       latitude: 31.5 + (i % 50) * 0.01,
       longitude: 34.8 + (i % 40) * 0.01,
       amenities: pickAmenities(i),
@@ -108,7 +141,7 @@ function buildAdmin1Apartments() {
       minLeasePeriod: pick(i, 2) === 0 ? 12 : 6,
       petsAllowed: pick(i, 3) === 0,
       isActive: true,
-      images: makeImages(n),
+      images: makeImages(i),
     });
   }
   return out;
