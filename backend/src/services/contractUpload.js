@@ -3,10 +3,46 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 
-const UPLOAD_DIR = path.join(__dirname, '../../uploads/contracts');
+const UPLOAD_DIR = path.resolve(path.join(__dirname, '../../uploads/contracts'));
+
+/** Stored filenames must be a single path segment (multer-generated). */
+const SAFE_FILENAME = /^[\w.-]+$/;
 
 function ensureDir() {
   fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+}
+
+function isSafeStoredFilename(name) {
+  if (typeof name !== 'string' || !name) return false;
+  const base = path.basename(name);
+  if (base !== name || base.includes('..')) return false;
+  return SAFE_FILENAME.test(base);
+}
+
+/** Resolve a DB-stored filename to an absolute path confined to UPLOAD_DIR. */
+function resolveUploadFilePath(storedFilename) {
+  if (!isSafeStoredFilename(storedFilename)) return null;
+  const resolved = path.resolve(UPLOAD_DIR, storedFilename);
+  const uploadRoot = path.resolve(UPLOAD_DIR);
+  if (resolved !== uploadRoot && !resolved.startsWith(`${uploadRoot}${path.sep}`)) {
+    return null;
+  }
+  return resolved;
+}
+
+/** Delete a file only when it lives under UPLOAD_DIR (blocks path traversal). */
+function safeUnlinkUpload(filePath) {
+  if (!filePath) return;
+  const resolved = path.resolve(filePath);
+  const uploadRoot = path.resolve(UPLOAD_DIR);
+  if (resolved !== uploadRoot && !resolved.startsWith(`${uploadRoot}${path.sep}`)) {
+    return;
+  }
+  try {
+    fs.unlinkSync(resolved);
+  } catch {
+    /* ignore missing file */
+  }
 }
 
 const ALLOWED_MIME = new Set([
@@ -38,4 +74,10 @@ const contractDocumentUpload = multer({
   },
 });
 
-module.exports = { contractDocumentUpload, UPLOAD_DIR };
+module.exports = {
+  contractDocumentUpload,
+  UPLOAD_DIR,
+  isSafeStoredFilename,
+  resolveUploadFilePath,
+  safeUnlinkUpload,
+};

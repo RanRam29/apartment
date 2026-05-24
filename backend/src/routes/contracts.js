@@ -1,11 +1,10 @@
 const express = require('express');
-const path = require('path');
 const fs = require('fs');
 const { body, validationResult } = require('express-validator');
 const { authenticate, requireRole } = require('../middleware/auth');
 const { Match, Apartment, User } = require('../models');
 const RentalContract = require('../models/mongo/RentalContract');
-const { contractDocumentUpload, UPLOAD_DIR } = require('../services/contractUpload');
+const { contractDocumentUpload, resolveUploadFilePath, safeUnlinkUpload } = require('../services/contractUpload');
 const logger = require('../utils/logger');
 
 const router = express.Router();
@@ -190,7 +189,7 @@ router.post(
 
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        try { fs.unlinkSync(req.file.path); } catch { /* ignore */ }
+        safeUnlinkUpload(req.file.path);
         return res.status(422).json({ errors: errors.array() });
       }
 
@@ -204,13 +203,13 @@ router.post(
         ],
       });
       if (!match) {
-        try { fs.unlinkSync(req.file.path); } catch { /* ignore */ }
+        safeUnlinkUpload(req.file.path);
         return res.status(404).json({ error: 'Accepted match not found' });
       }
 
       const existing = await RentalContract.findOne({ matchId, status: { $nin: ['terminated'] } });
       if (existing) {
-        try { fs.unlinkSync(req.file.path); } catch { /* ignore */ }
+        safeUnlinkUpload(req.file.path);
         return res.status(409).json({ error: 'Contract already exists for this match', contractId: existing._id });
       }
 
@@ -247,7 +246,7 @@ router.post(
       });
     } catch (err) {
       if (req.file?.path) {
-        try { fs.unlinkSync(req.file.path); } catch { /* ignore */ }
+        safeUnlinkUpload(req.file.path);
       }
       next(err);
     }
@@ -265,8 +264,8 @@ router.get('/:id/attachment', authenticate, async (req, res, next) => {
     const isParty = contract.tenantId === req.user.id || contract.landlordId === req.user.id;
     if (!isParty) return res.status(403).json({ error: 'Access denied' });
 
-    const filePath = path.join(UPLOAD_DIR, contract.uploadedDocumentFilename);
-    if (!fs.existsSync(filePath)) {
+    const filePath = resolveUploadFilePath(contract.uploadedDocumentFilename);
+    if (!filePath || !fs.existsSync(filePath)) {
       return res.status(404).json({ error: 'File missing on server' });
     }
 
@@ -274,7 +273,7 @@ router.get('/:id/attachment', authenticate, async (req, res, next) => {
     const original = contract.uploadedDocumentOriginalName || 'contract.pdf';
     res.setHeader('Content-Type', mime);
     res.setHeader('Content-Disposition', `inline; filename*=UTF-8''${encodeURIComponent(original)}`);
-    return res.sendFile(path.resolve(filePath));
+    return res.sendFile(filePath);
   } catch (err) {
     next(err);
   }
