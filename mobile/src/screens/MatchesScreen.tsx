@@ -13,10 +13,12 @@ import { ResponsiveContainer } from '../components/ResponsiveContainer';
 import { dirApp } from '../theme/dirAppTokens';
 import { dirType } from '../theme/textStyles';
 import type { Match } from '../types';
+import { useColors } from '../context/ThemeContext';
 
 type MatchTab = 'all' | 'active' | 'pending';
 
 export default function MatchesScreen() {
+  const colors = useColors();
   const navigation = useNavigation<any>();
   const { user } = useAuthStore();
   const isLandlord = usePersonaIsLandlord();
@@ -43,14 +45,14 @@ export default function MatchesScreen() {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.centered}>
+      <SafeAreaView style={[styles.centered, { backgroundColor: colors.bg }]}>
         <ActivityIndicator size="large" color={dirApp.secondary} />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
       <ResponsiveContainer style={{ flex: 1 }}>
         <View style={styles.shellHeader}>
           <Text style={[styles.headerBrand, dirType.heading, { color: dirApp.primary }]}>DirApp</Text>
@@ -70,7 +72,7 @@ export default function MatchesScreen() {
               <Pressable
                 key={key}
                 onPress={() => setTab(key)}
-                style={[styles.tabBtn, active && styles.tabBtnActive]}
+                style={[styles.tabBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }, active && styles.tabBtnActive]}
               >
                 <Text style={[styles.tabBtnText, active && styles.tabBtnTextActive]}>{label}</Text>
               </Pressable>

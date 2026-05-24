@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  SafeAreaView, ScrollView, Alert, ActivityIndicator, TextInput, Modal, Linking, Platform,
+  SafeAreaView, ScrollView, Alert, ActivityIndicator, TextInput, Modal, Linking, Platform, Switch,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,10 +16,13 @@ import { dirApp } from '../theme/dirAppTokens';
 import type { MainStackParamList } from '../types';
 import SwipeHouseLogo from '../components/SwipeHouseLogo';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
+import { useColors, useTheme } from '../context/ThemeContext';
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
 
 export default function ProfileScreen() {
+  const colors = useColors();
+  const { isDark, toggleTheme } = useTheme();
   const { user, logout, updateUser } = useAuthStore();
   const navigation = useNavigation<Nav>();
   const [avatarUploading, setAvatarUploading] = useState(false);
@@ -104,7 +107,7 @@ export default function ProfileScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <ResponsiveContainer>
         <View style={styles.profileInner}>
@@ -148,7 +151,7 @@ export default function ProfileScreen() {
           <Text style={styles.name}>{user?.firstName} {user?.lastName}</Text>
           <Ionicons name="pencil-outline" size={14} color={C.textMut} />
         </TouchableOpacity>
-        <Text style={styles.email}>{user?.email}</Text>
+        <Text style={[styles.email, { color: colors.textSub }]}>{user?.email}</Text>
 
         <View style={styles.roleBadge}>
           <Ionicons
@@ -175,18 +178,18 @@ export default function ProfileScreen() {
             <Ionicons name="star" size={16} color={C.gold} />
           </View>
         ) : (
-          <TouchableOpacity style={styles.upgradeBtn} onPress={handleUpgrade} activeOpacity={0.85}>
+          <TouchableOpacity style={[styles.upgradeBtn, { backgroundColor: colors.bgCard }]} onPress={handleUpgrade} activeOpacity={0.85}>
             <Ionicons name="star-outline" size={18} color={C.gold} />
             <View style={styles.upgradeBtnTextBox}>
               <Text style={styles.upgradeBtnTitle}>שדרג לפרמיום ⚡</Text>
-              <Text style={styles.upgradeBtnSub}>₪29/חודש · ללא הגבלת זמות ועוד</Text>
+              <Text style={[styles.upgradeBtnSub, { color: colors.textSub }]}>₪29/חודש · ללא הגבלת זמות ועוד</Text>
             </View>
-            <Ionicons name="chevron-forward" size={15} color={C.textMut} />
+            <Ionicons name="chevron-forward" size={15} color={colors.textMut} />
           </TouchableOpacity>
         )}
 
         {/* Menu */}
-        <View style={styles.menuCard}>
+        <View style={[styles.menuCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
           {showTenantQuickLinks && (
             <MenuItem icon="options-outline" label="העדפות חיפוש" onPress={() => navigation.navigate('Preferences')} />
           )}
@@ -210,15 +213,29 @@ export default function ProfileScreen() {
           <MenuItem icon="shield-checkmark-outline" label="פרטיות ואבטחה"
             onPress={() => Platform.OS === 'web' ? window.alert('בקרוב\nהגדרות פרטיות יתווספו בקרוב') : Alert.alert('בקרוב', 'הגדרות פרטיות יתווספו בקרוב')} />
           <MenuItem icon="help-circle-outline" label="עזרה ותמיכה"
-            onPress={() => Platform.OS === 'web' ? window.alert('תמיכה\nsupport@dirapp.co.il') : Alert.alert('תמיכה', 'support@dirapp.co.il')} last />
+            onPress={() => Platform.OS === 'web' ? window.alert('תמיכה\nsupport@dirapp.co.il') : Alert.alert('תמיכה', 'support@dirapp.co.il')} />
         </View>
+
+        {/* Dark mode toggle */}
+        <TouchableOpacity style={[styles.darkModeRow, { backgroundColor: colors.bgCard, borderColor: colors.border }]} onPress={toggleTheme} activeOpacity={0.8}>
+          <Ionicons name={isDark ? 'moon' : 'sunny-outline'} size={20} color={C.cyan} />
+          <Text style={[styles.darkModeLabel, { color: colors.text }]}>
+            {isDark ? 'מצב לילה פעיל' : 'מצב לילה'}
+          </Text>
+          <Switch
+            value={isDark}
+            onValueChange={toggleTheme}
+            trackColor={{ false: colors.border, true: C.cyanAlpha(0.5) }}
+            thumbColor={isDark ? C.cyan : colors.bgCard}
+          />
+        </TouchableOpacity>
 
         <TouchableOpacity style={styles.logoutBtn} onPress={confirmLogout} activeOpacity={0.8}>
           <Ionicons name="log-out-outline" size={17} color={C.danger} />
           <Text style={styles.logoutText}>התנתקות</Text>
         </TouchableOpacity>
 
-        <Text style={styles.version}>DirApp v1.0.0</Text>
+        <Text style={[styles.version, { color: colors.textMut }]}>DirApp v1.0.0</Text>
         </View>
         </ResponsiveContainer>
       </ScrollView>
@@ -226,31 +243,31 @@ export default function ProfileScreen() {
       {/* Edit modal */}
       <Modal visible={editVisible} transparent animationType="slide">
         <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>עריכת פרופיל</Text>
+          <View style={[styles.modalCard, { backgroundColor: colors.bgCard }]}>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>עריכת פרופיל</Text>
 
-            <Text style={styles.fieldLabel}>שם פרטי</Text>
+            <Text style={[styles.fieldLabel, { color: colors.textSub }]}>שם פרטי</Text>
             <TextInput
-              style={styles.fieldInput}
+              style={[styles.fieldInput, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
               value={firstName}
               onChangeText={setFirstName}
               textAlign="right"
               placeholder="שם פרטי"
-              placeholderTextColor={C.textMut}
+              placeholderTextColor={colors.textMut}
             />
-            <Text style={styles.fieldLabel}>שם משפחה</Text>
+            <Text style={[styles.fieldLabel, { color: colors.textSub }]}>שם משפחה</Text>
             <TextInput
-              style={styles.fieldInput}
+              style={[styles.fieldInput, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
               value={lastName}
               onChangeText={setLastName}
               textAlign="right"
               placeholder="שם משפחה"
-              placeholderTextColor={C.textMut}
+              placeholderTextColor={colors.textMut}
             />
 
             <View style={styles.modalActions}>
-              <TouchableOpacity style={styles.cancelBtn} onPress={() => setEditVisible(false)}>
-                <Text style={styles.cancelBtnText}>ביטול</Text>
+              <TouchableOpacity style={[styles.cancelBtn, { backgroundColor: colors.bg, borderColor: colors.border }]} onPress={() => setEditVisible(false)}>
+                <Text style={[styles.cancelBtnText, { color: colors.textSub }]}>ביטול</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.saveBtn, savingProfile && { opacity: 0.6 }]}
@@ -276,14 +293,15 @@ function MenuItem({ icon, label, onPress, last = false }: {
   onPress: () => void;
   last?: boolean;
 }) {
+  const colors = useColors();
   return (
     <TouchableOpacity
       style={[styles.menuItem, !last && styles.menuItemBorder]}
       onPress={onPress}
       activeOpacity={0.7}
     >
-      <Ionicons name="chevron-back" size={15} color={C.textMut} />
-      <Text style={styles.menuLabel}>{label}</Text>
+      <Ionicons name="chevron-back" size={15} color={colors.textMut} />
+      <Text style={[styles.menuLabel, { color: colors.text }]}>{label}</Text>
       <View style={styles.menuIconWrap}>
         <Ionicons name={icon} size={18} color={dirApp.primary} />
       </View>
@@ -369,6 +387,13 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   menuLabel: { flex: 1, color: C.text, fontSize: 14, textAlign: 'right', marginRight: 10 },
+
+  darkModeRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    borderRadius: 14, padding: 16, marginBottom: 16, width: '100%',
+    borderWidth: 1,
+  },
+  darkModeLabel: { flex: 1, fontSize: 14, fontWeight: '600', textAlign: 'right' },
 
   logoutBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 8,

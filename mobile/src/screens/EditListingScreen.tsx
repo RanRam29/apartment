@@ -14,6 +14,7 @@ import type { Amenity, MainStackParamList } from '../types';
 import { CITY_CENTER_BY_NAME } from '../constants/cityCenters';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
 import { dirType } from '../theme/textStyles';
+import { useColors } from '../context/ThemeContext';
 
 const AMENITY_OPTIONS: { key: Amenity; label: string }[] = [
   { key: 'parking',      label: '🚗 חניה' },
@@ -30,6 +31,7 @@ const ISRAELI_CITIES = Object.keys(CITY_CENTER_BY_NAME).sort((a, b) => a.localeC
 type Props = NativeStackScreenProps<MainStackParamList, 'EditListing'>;
 
 export default function EditListingScreen({ route, navigation }: Props) {
+  const colors = useColors();
   const { apartmentId } = route.params;
   const queryClient = useQueryClient();
 
@@ -238,47 +240,47 @@ export default function EditListingScreen({ route, navigation }: Props) {
 
   if (isLoading || !hydrated) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
         <ActivityIndicator style={{ marginTop: 80 }} size="large" color={dirApp.secondary} />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
           <ResponsiveContainer>
           <Text style={styles.header}>עריכת מודעה</Text>
 
           <Field label="כותרת *">
-            <TextInput style={styles.input} value={title} onChangeText={(value) => setTitle(sanitizeTitleInput(value))}
-              placeholder="כותרת המודעה" placeholderTextColor={dirApp.outline} textAlign="right" />
+            <TextInput style={[styles.input, { backgroundColor: colors.bgCard, color: colors.text, borderColor: colors.border }]} value={title} onChangeText={(value) => setTitle(sanitizeTitleInput(value))}
+              placeholder="כותרת המודעה" placeholderTextColor={colors.textMut} textAlign="right" />
             <Text style={styles.helperText}>{title.length}/100</Text>
           </Field>
 
           <View style={styles.row}>
             <Field label="מחיר ₪ *" style={{ flex: 1, marginLeft: 8 }}>
-              <TextInput style={styles.input} value={price} onChangeText={(value) => setPrice(keepDigitsOnly(value))}
-                keyboardType="numeric" placeholder="6500" placeholderTextColor={dirApp.outline} textAlign="right" />
+              <TextInput style={[styles.input, { backgroundColor: colors.bgCard, color: colors.text, borderColor: colors.border }]} value={price} onChangeText={(value) => setPrice(keepDigitsOnly(value))}
+                keyboardType="numeric" placeholder="6500" placeholderTextColor={colors.textMut} textAlign="right" />
             </Field>
             <Field label="חדרים *" style={{ flex: 1 }}>
-              <TextInput style={styles.input} value={rooms} onChangeText={(value) => setRooms(keepDigitsOnly(value))}
-                keyboardType="numeric" placeholder="3" placeholderTextColor={dirApp.outline} textAlign="right" />
+              <TextInput style={[styles.input, { backgroundColor: colors.bgCard, color: colors.text, borderColor: colors.border }]} value={rooms} onChangeText={(value) => setRooms(keepDigitsOnly(value))}
+                keyboardType="numeric" placeholder="3" placeholderTextColor={colors.textMut} textAlign="right" />
             </Field>
           </View>
 
           <View style={styles.row}>
             <Field label="עיר *" style={{ flex: 1, marginLeft: 8 }}>
-              <TextInput style={styles.input} value={city} onChangeText={(value) => {
+              <TextInput style={[styles.input, { backgroundColor: colors.bgCard, color: colors.text, borderColor: colors.border }]} value={city} onChangeText={(value) => {
                 setCity(value);
                 setStreet('');
                 setStreetSuggestions([]);
               }}
-                placeholder="בחר עיר בישראל" placeholderTextColor={dirApp.outline} textAlign="right" />
+                placeholder="בחר עיר בישראל" placeholderTextColor={colors.textMut} textAlign="right" />
               {isLoadingCities ? <ActivityIndicator size="small" color={dirApp.secondary} style={styles.loader} /> : null}
               {!!citySuggestions.length && (
-                <View style={styles.suggestionsBox}>
+                <View style={[styles.suggestionsBox, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                   {citySuggestions.map((item) => (
                     <TouchableOpacity
                       key={item}
@@ -295,11 +297,11 @@ export default function EditListingScreen({ route, navigation }: Props) {
               )}
             </Field>
             <Field label="רחוב *" style={{ flex: 1 }}>
-              <TextInput style={styles.input} value={street} onChangeText={setStreet}
-                placeholder={canSearchStreet ? 'בחר רחוב לפי העיר' : 'יש לבחור עיר קודם'} placeholderTextColor={dirApp.outline} textAlign="right" editable={canSearchStreet} />
+              <TextInput style={[styles.input, { backgroundColor: colors.bgCard, color: colors.text, borderColor: colors.border }]} value={street} onChangeText={setStreet}
+                placeholder={canSearchStreet ? 'בחר רחוב לפי העיר' : 'יש לבחור עיר קודם'} placeholderTextColor={colors.textMut} textAlign="right" editable={canSearchStreet} />
               {isLoadingStreets ? <ActivityIndicator size="small" color={dirApp.secondary} style={styles.loader} /> : null}
               {!!streetSuggestions.length && (
-                <View style={styles.suggestionsBox}>
+                <View style={[styles.suggestionsBox, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                   {streetSuggestions.map((item) => (
                     <TouchableOpacity
                       key={item}
@@ -319,19 +321,19 @@ export default function EditListingScreen({ route, navigation }: Props) {
 
           <View style={styles.row}>
             <Field label="קומה" style={{ flex: 1, marginLeft: 8 }}>
-              <TextInput style={styles.input} value={floor} onChangeText={(value) => setFloor(keepDigitsOnly(value))}
-                keyboardType="numeric" placeholder="3" placeholderTextColor={dirApp.outline} textAlign="right" />
+              <TextInput style={[styles.input, { backgroundColor: colors.bgCard, color: colors.text, borderColor: colors.border }]} value={floor} onChangeText={(value) => setFloor(keepDigitsOnly(value))}
+                keyboardType="numeric" placeholder="3" placeholderTextColor={colors.textMut} textAlign="right" />
             </Field>
             <Field label='גודל מ"ר' style={{ flex: 1 }}>
-              <TextInput style={styles.input} value={sizeSqm} onChangeText={(value) => setSizeSqm(keepDigitsOnly(value))}
-                keyboardType="numeric" placeholder="75" placeholderTextColor={dirApp.outline} textAlign="right" />
+              <TextInput style={[styles.input, { backgroundColor: colors.bgCard, color: colors.text, borderColor: colors.border }]} value={sizeSqm} onChangeText={(value) => setSizeSqm(keepDigitsOnly(value))}
+                keyboardType="numeric" placeholder="75" placeholderTextColor={colors.textMut} textAlign="right" />
             </Field>
           </View>
 
           <Field label="תיאור">
             <TextInput style={[styles.input, styles.textarea]} value={description}
               onChangeText={setDescription} multiline numberOfLines={4}
-              placeholder="תאר את הדירה..." placeholderTextColor={dirApp.outline} textAlign="right" />
+              placeholder="תאר את הדירה..." placeholderTextColor={colors.textMut} textAlign="right" />
           </Field>
 
           <Text style={[styles.fieldLabel, dirType.label]}>שירותים</Text>

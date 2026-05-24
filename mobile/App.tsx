@@ -10,6 +10,7 @@ import { ErrorBoundary } from './src/components/ErrorBoundary';
 import StartupIntroGate from './src/components/StartupIntroGate';
 import { extractVerificationToken } from './src/services/verification';
 import { useAuthStore } from './src/store/useAuthStore';
+import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -20,6 +21,7 @@ const queryClient = new QueryClient({
 function AppInner() {
   usePushNotifications();
   const verifyEmail = useAuthStore((s) => s.verifyEmail);
+  const { isDark } = useTheme();
 
   useEffect(() => {
     const handleUrl = async (url: string | null | undefined) => {
@@ -42,7 +44,7 @@ function AppInner() {
 
   return (
     <>
-      <StatusBar style="light" />
+      <StatusBar style={isDark ? 'light' : 'dark'} />
       <AppNavigator />
     </>
   );
@@ -55,13 +57,15 @@ export default function App() {
   return (
     <ErrorBoundary>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        {!startupDone ? (
-          <StartupIntroGate onFinish={finishStartup} />
-        ) : (
-          <QueryClientProvider client={queryClient}>
-            <AppInner />
-          </QueryClientProvider>
-        )}
+        <ThemeProvider>
+          {!startupDone ? (
+            <StartupIntroGate onFinish={finishStartup} />
+          ) : (
+            <QueryClientProvider client={queryClient}>
+              <AppInner />
+            </QueryClientProvider>
+          )}
+        </ThemeProvider>
       </GestureHandlerRootView>
     </ErrorBoundary>
   );

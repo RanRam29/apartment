@@ -21,6 +21,7 @@ import { dirType } from '../theme/textStyles';
 import { useDirection } from '../hooks/useDirection';
 import { dirApp } from '../theme/dirAppTokens';
 import SwipeHouseLogo from '../components/SwipeHouseLogo';
+import { useColors } from '../context/ThemeContext';
 
 const { width: W } = Dimensions.get('window');
 const PAD = 16;
@@ -40,7 +41,7 @@ const LANDLORD_SERVICES = [
 
 type LandlordService = (typeof LANDLORD_SERVICES)[number];
 
-function ServiceTile({ service, onPress }: { service: LandlordService; onPress: () => void }) {
+function ServiceTile({ service, onPress, colors }: { service: LandlordService; onPress: () => void; colors: import('../context/ThemeContext').AppColors }) {
   const scale = useRef(new Animated.Value(1)).current;
   const iconFloat = useRef(new Animated.Value(0)).current;
   const floatLoop = useRef<Animated.CompositeAnimation | null>(null);
@@ -74,7 +75,7 @@ function ServiceTile({ service, onPress }: { service: LandlordService; onPress: 
   return (
     <Animated.View style={[landlordStyles.tileWrapper, { transform: [{ scale }] }]}>
       <TouchableOpacity
-        style={landlordStyles.tile}
+        style={[landlordStyles.tile, { backgroundColor: colors.bgCard }]}
         onPress={onPress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
@@ -92,8 +93,8 @@ function ServiceTile({ service, onPress }: { service: LandlordService; onPress: 
           <View style={[landlordStyles.iconGlow, { backgroundColor: service.glow }]} />
           <Ionicons name={service.icon} size={28} color={C.onInverse.primary} />
         </Animated.View>
-        <Text style={landlordStyles.tileLabel}>{service.label}</Text>
-        <Text style={landlordStyles.tileSubLabel}>{service.subLabel}</Text>
+        <Text style={[landlordStyles.tileLabel, { color: colors.text }]}>{service.label}</Text>
+        <Text style={[landlordStyles.tileSubLabel, { color: colors.textMut }]}>{service.subLabel}</Text>
       </TouchableOpacity>
     </Animated.View>
   );
@@ -121,6 +122,7 @@ const DEMO_SAVED = [
 ] as const;
 
 function TenantHome() {
+  const colors = useColors();
   const { user } = useAuthStore();
   const navigation = useNavigation<any>();
   const { flexRow, textAlign } = useDirection();
@@ -133,7 +135,7 @@ function TenantHome() {
 
   return (
     <ScrollView
-      contentContainerStyle={tenantStyles.scrollContent}
+      contentContainerStyle={[tenantStyles.scrollContent, { backgroundColor: colors.bg }]}
       showsVerticalScrollIndicator={false}
     >
       {/* Top bar — סטיקי מובנה דרך SafeArea; צל קל */}
@@ -256,7 +258,7 @@ function TenantHome() {
         {DEMO_SAVED.map((item) => (
           <TouchableOpacity
             key={item.id}
-            style={[tenantStyles.savedCard, { width: 280 }]}
+            style={[tenantStyles.savedCard, { width: 280, backgroundColor: colors.bgCard, borderColor: colors.border }]}
             activeOpacity={0.9}
             onPress={() => go('Search')}
           >
@@ -309,6 +311,7 @@ function TenantHome() {
 }
 
 export default function HomeScreen() {
+  const colors = useColors();
   const { user } = useAuthStore();
   const navigation = useNavigation<any>();
   const isLandlord = usePersonaIsLandlord();
@@ -321,19 +324,19 @@ export default function HomeScreen() {
 
   if (!isLandlord) {
     return (
-      <SafeAreaView style={tenantStyles.safe}>
+      <SafeAreaView style={[tenantStyles.safe, { backgroundColor: colors.bg }]}>
         <TenantHome />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={landlordStyles.container}>
+    <SafeAreaView style={[landlordStyles.container, { backgroundColor: colors.bg }]}>
       <ScrollView contentContainerStyle={landlordStyles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={landlordStyles.header}>
           <SwipeHouseLogo size="sm" />
           <View style={landlordStyles.headerTextBlock}>
-            <Text style={landlordStyles.greeting}>{greeting}</Text>
+            <Text style={[landlordStyles.greeting, { color: colors.textMut }]}>{greeting}</Text>
             <Text style={landlordStyles.username}>{user?.firstName ?? 'Landlord'} 👋</Text>
           </View>
           <View style={landlordStyles.headerBadge}>
@@ -341,26 +344,26 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        <View style={landlordStyles.heroCard}>
+        <View style={[landlordStyles.heroCard, { backgroundColor: colors.bgCard }]}>
           <Text style={landlordStyles.heroTitle}>Manage your properties</Text>
-          <Text style={landlordStyles.heroSub}>Track leads, manage listings, and connect with tenants.</Text>
+          <Text style={[landlordStyles.heroSub, { color: colors.textSub }]}>Track leads, manage listings, and connect with tenants.</Text>
           <View style={landlordStyles.heroPill}>
             <View style={[landlordStyles.heroDot, { backgroundColor: C.cyan }]} />
             <Text style={landlordStyles.heroPillText}>Landlord Dashboard</Text>
           </View>
         </View>
 
-        <Text style={landlordStyles.sectionLabel}>Services</Text>
+        <Text style={[landlordStyles.sectionLabel, { color: colors.textMut }]}>Services</Text>
 
         <View style={landlordStyles.grid}>
           {LANDLORD_SERVICES.map((service) => (
-            <ServiceTile key={service.id} service={service} onPress={() => handleServicePress(service.id)} />
+            <ServiceTile key={service.id} service={service} onPress={() => handleServicePress(service.id)} colors={colors} />
           ))}
         </View>
 
         <View style={landlordStyles.tipCard}>
           <Ionicons name="information-circle-outline" size={18} color={C.cyan} />
-          <Text style={landlordStyles.tipText}>Tip: Verified listings get 3× more views.</Text>
+          <Text style={[landlordStyles.tipText, { color: colors.textSub }]}>Tip: Verified listings get 3× more views.</Text>
         </View>
       </ScrollView>
     </SafeAreaView>

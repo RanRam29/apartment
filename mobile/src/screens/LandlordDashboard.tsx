@@ -11,6 +11,7 @@ import { C } from '../theme';
 import { dirApp } from '../theme/dirAppTokens';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
 import { useResponsive } from '../hooks/useResponsive';
+import { useColors } from '../context/ThemeContext';
 
 const PERIODS: { label: string; days: number }[] = [
   { label: '7 ימים', days: 7 },
@@ -19,6 +20,7 @@ const PERIODS: { label: string; days: number }[] = [
 ];
 
 export default function LandlordDashboard() {
+  const colors = useColors();
   const { contentMaxWidth } = useResponsive();
   const chartWidth = Math.max(220, contentMaxWidth - 28);
 
@@ -32,7 +34,7 @@ export default function LandlordDashboard() {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.centered}>
+      <SafeAreaView style={[styles.centered, { backgroundColor: colors.bg }]}>
         <ActivityIndicator size="large" color={dirApp.secondary} />
       </SafeAreaView>
     );
@@ -50,7 +52,7 @@ export default function LandlordDashboard() {
   const maxLikes = Math.max(...listings.map((l) => l.likeCount ?? 0), 1);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
       <ScrollView
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={dirApp.secondary} />}
         contentContainerStyle={styles.scroll}
@@ -67,7 +69,7 @@ export default function LandlordDashboard() {
         </View>
 
         {/* Match status */}
-        <View style={styles.section}>
+        <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <Text style={styles.sectionTitle}>סטטוס התאמות</Text>
           <View style={styles.matchRow}>
             <MatchStat label="ממתין"  value={summary.matches.pending}  color={C.statusTone.caution} />
@@ -78,7 +80,7 @@ export default function LandlordDashboard() {
 
         {/* Swipe trend chart */}
         {swipeTrend.length > 0 && (
-          <View style={styles.section}>
+          <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <View style={styles.chartHeader}>
               <PeriodToggle period={period} onChange={setPeriod} />
               <Text style={styles.sectionTitle}>לייקים לפי תאריך</Text>
@@ -89,7 +91,7 @@ export default function LandlordDashboard() {
 
         {/* Recent leads */}
         {recentPendingMatches.length > 0 && (
-          <View style={styles.section}>
+          <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <Text style={styles.sectionTitle}>לידים אחרונים</Text>
             {recentPendingMatches.map((match) => (
               <View key={match.id} style={styles.leadRow}>
@@ -108,7 +110,7 @@ export default function LandlordDashboard() {
         )}
 
         {/* Listings with performance bars */}
-        <View style={styles.section}>
+        <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <Text style={styles.sectionTitle}>המודעות שלי ({listings.length})</Text>
           {listings.map((apt) => {
             const likeRatio = (apt.likeCount ?? 0) / maxLikes;
@@ -254,11 +256,12 @@ function SwipeTrendChart({
 }
 
 function KPICard({ icon, label, value, color }: { icon: any; label: string; value: any; color: string }) {
+  const colors = useColors();
   return (
-    <View style={[styles.kpiCard, { borderTopColor: color }]}>
+    <View style={[styles.kpiCard, { borderTopColor: color, backgroundColor: colors.bgCard, borderColor: colors.border }]}>
       <Ionicons name={icon} size={20} color={color} />
       <Text style={styles.kpiValue}>{value}</Text>
-      <Text style={styles.kpiLabel}>{label}</Text>
+      <Text style={[styles.kpiLabel, { color: colors.textMut }]}>{label}</Text>
     </View>
   );
 }
