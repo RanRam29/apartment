@@ -16,11 +16,13 @@ import { dirApp } from '../theme/dirAppTokens';
 import type { AuditLogItem, SystemEventItem } from '../types';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
 import { dirType } from '../theme/textStyles';
+import { useColors } from '../context/ThemeContext';
 
 type TabKey = 'audit' | 'system';
 type SourcePreset = 'all' | 'mobile' | 'web' | 'socket' | 'api' | 'server';
 
 export default function LogsConsoleScreen() {
+  const colors = useColors();
   const [tab, setTab] = useState<TabKey>('audit');
   const [auditItems, setAuditItems] = useState<AuditLogItem[]>([]);
   const [systemItems, setSystemItems] = useState<SystemEventItem[]>([]);
@@ -84,7 +86,7 @@ export default function LogsConsoleScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
       <ResponsiveContainer style={{ flex: 1 }}>
         <View style={styles.header}>
           <Text style={[styles.title, dirType.title]}>Logs Console</Text>
@@ -97,11 +99,11 @@ export default function LogsConsoleScreen() {
       </View>
       <View style={styles.searchWrap}>
         <TextInput
-          style={styles.searchInput}
+          style={[styles.searchInput, { backgroundColor: colors.bgCard, borderColor: colors.border, color: colors.text }]}
           value={search}
           onChangeText={setSearch}
           placeholder="Search requestId / action / event / message"
-          placeholderTextColor={dirApp.outline}
+          placeholderTextColor={colors.textMut}
           autoCapitalize="none"
           autoCorrect={false}
           onSubmitEditing={load}
@@ -134,25 +136,25 @@ export default function LogsConsoleScreen() {
           {error && <Text style={styles.error}>{error}</Text>}
           {tab === 'audit'
             ? auditItems.map((item) => (
-                <View style={styles.card} key={item.id}>
-                  <HighlightText text={item.action} query={debouncedSearch} style={styles.primary} />
+                <View style={[styles.card, { backgroundColor: colors.bgCard, borderColor: colors.border }]} key={item.id}>
+                  <HighlightText text={item.action} query={debouncedSearch} style={[styles.primary, { color: colors.text }]} />
                   <HighlightText
                     text={`${item.resourceType || 'resource'} #${item.resourceId || '-'}`}
                     query={debouncedSearch}
-                    style={styles.secondary}
+                    style={[styles.secondary, { color: colors.textSub }]}
                   />
-                  <Text style={styles.meta}>{item.outcome} · {item.statusCode || '-'}</Text>
-                  <HighlightText text={item.requestId || '-'} query={debouncedSearch} style={styles.meta} />
-                  <Text style={styles.meta}>{new Date(item.createdAt).toLocaleString()}</Text>
+                  <Text style={[styles.meta, { color: colors.textMut }]}>{item.outcome} · {item.statusCode || '-'}</Text>
+                  <HighlightText text={item.requestId || '-'} query={debouncedSearch} style={[styles.meta, { color: colors.textMut }]} />
+                  <Text style={[styles.meta, { color: colors.textMut }]}>{new Date(item.createdAt).toLocaleString()}</Text>
                 </View>
               ))
             : systemItems.map((item) => (
-                <View style={styles.card} key={item._id}>
-                  <HighlightText text={item.event} query={debouncedSearch} style={styles.primary} />
-                  <HighlightText text={item.message} query={debouncedSearch} style={styles.secondary} />
-                  <Text style={styles.meta}>{item.category} · {item.severity}</Text>
-                  <HighlightText text={item.requestId || '-'} query={debouncedSearch} style={styles.meta} />
-                  <Text style={styles.meta}>{new Date(item.createdAt).toLocaleString()}</Text>
+                <View style={[styles.card, { backgroundColor: colors.bgCard, borderColor: colors.border }]} key={item._id}>
+                  <HighlightText text={item.event} query={debouncedSearch} style={[styles.primary, { color: colors.text }]} />
+                  <HighlightText text={item.message} query={debouncedSearch} style={[styles.secondary, { color: colors.textSub }]} />
+                  <Text style={[styles.meta, { color: colors.textMut }]}>{item.category} · {item.severity}</Text>
+                  <HighlightText text={item.requestId || '-'} query={debouncedSearch} style={[styles.meta, { color: colors.textMut }]} />
+                  <Text style={[styles.meta, { color: colors.textMut }]}>{new Date(item.createdAt).toLocaleString()}</Text>
                 </View>
               ))}
           {tab === 'audit' && auditItems.length === 0 && <Text style={[styles.empty, dirType.body]}>No audit logs</Text>}
@@ -165,9 +167,10 @@ export default function LogsConsoleScreen() {
 }
 
 function TabButton({ active, label, onPress }: { active: boolean; label: string; onPress: () => void }) {
+  const colors = useColors();
   return (
-    <TouchableOpacity style={[styles.tabButton, active && styles.tabButtonActive]} onPress={onPress}>
-      <Text style={[styles.tabText, active && styles.tabTextActive]}>{label}</Text>
+    <TouchableOpacity style={[styles.tabButton, { backgroundColor: colors.bgCard, borderColor: colors.border }, active && styles.tabButtonActive]} onPress={onPress}>
+      <Text style={[styles.tabText, { color: colors.textMut }, active && styles.tabTextActive]}>{label}</Text>
     </TouchableOpacity>
   );
 }

@@ -14,6 +14,7 @@ import { C } from '../theme';
 import { dirApp } from '../theme/dirAppTokens';
 import { dirType } from '../theme/textStyles';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
+import { useColors } from '../context/ThemeContext';
 
 const CITIES = [
   'תל אביב', 'ירושלים', 'חיפה', 'ראשון לציון', 'פתח תקווה',
@@ -41,6 +42,7 @@ const FILTER_LABEL: Record<string, string> = {
 };
 
 export default function SearchScreen() {
+  const colors = useColors();
   const navigation = useNavigation<any>();
   const [query, setQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
@@ -99,7 +101,7 @@ export default function SearchScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -139,9 +141,9 @@ export default function SearchScreen() {
           </TouchableOpacity>
           <View style={styles.inputWrap}>
             <TextInput
-              style={styles.searchInput}
+              style={[styles.searchInput, { backgroundColor: colors.bgCard, borderColor: colors.border, color: colors.text }]}
               placeholder="לדוג׳: 3 חדרים בת״א עד 7000 עם חניה..."
-              placeholderTextColor={C.textMut}
+              placeholderTextColor={colors.textMut}
               value={query}
               onChangeText={setQuery}
               onSubmitEditing={() => handleSearch()}
@@ -150,7 +152,7 @@ export default function SearchScreen() {
             />
             {(query.length > 0 || results.length > 0) && (
               <TouchableOpacity style={styles.clearBtn} onPress={clearSearch}>
-                <Ionicons name="close-circle" size={18} color={C.textMut} />
+                <Ionicons name="close-circle" size={18} color={colors.textMut} />
               </TouchableOpacity>
             )}
           </View>
@@ -168,7 +170,7 @@ export default function SearchScreen() {
 
         {/* Filter panel */}
         {showFilters && (
-          <View style={styles.filterPanel}>
+          <View style={[styles.filterPanel, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             {/* City chips */}
             <Text style={styles.filterLabel}>עיר</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.cityScroll}>
@@ -204,9 +206,9 @@ export default function SearchScreen() {
               <View style={{ flex: 1 }}>
                 <Text style={styles.filterLabel}>מחיר מקסימום ₪</Text>
                 <TextInput
-                  style={styles.priceInput}
+                  style={[styles.priceInput, { backgroundColor: colors.bgCard, borderColor: colors.border, color: colors.text }]}
                   placeholder="ללא הגבלה"
-                  placeholderTextColor={C.textMut}
+                  placeholderTextColor={colors.textMut}
                   value={filterMaxPrice}
                   onChangeText={setFilterMaxPrice}
                   keyboardType="numeric"
@@ -313,10 +315,11 @@ export default function SearchScreen() {
 }
 
 function ResultCard({ apartment, onPress }: { apartment: Apartment; onPress: () => void }) {
+  const colors = useColors();
   const image = apartment.images?.[0]?.url;
   const street = apartment.street ?? apartment.neighborhood;
   return (
-    <TouchableOpacity style={styles.resultCard} onPress={onPress} activeOpacity={0.85}>
+    <TouchableOpacity style={[styles.resultCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]} onPress={onPress} activeOpacity={0.85}>
       <Image
         source={{ uri: image || 'https://via.placeholder.com/80x80' }}
         style={styles.resultThumb}
@@ -337,7 +340,7 @@ function ResultCard({ apartment, onPress }: { apartment: Apartment; onPress: () 
       {apartment.landlord?.isVerified && (
         <Ionicons name="checkmark-circle" size={18} color={C.cyan} style={styles.verifiedIcon} />
       )}
-      <Ionicons name="chevron-back" size={18} color={C.textMut} />
+      <Ionicons name="chevron-back" size={18} color={colors.textMut} />
     </TouchableOpacity>
   );
 }

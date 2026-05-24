@@ -13,6 +13,7 @@ import { resolveMapCoords } from '../constants/cityCenters';
 import SwipeHouseLogo from '../components/SwipeHouseLogo';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
 import { dirType } from '../theme/textStyles';
+import { useColors } from '../context/ThemeContext';
 
 // TAMA 38 resource IDs from data.gov.il (urban renewal zones)
 const TAMA38_URL =
@@ -200,6 +201,7 @@ export function buildHtml(markers: AptMarker[], tama38Url: string): string {
 }
 
 export default function MapScreen() {
+  const colors = useColors();
   const webRef = React.useRef<WebView>(null);
   const iframeRef = React.useRef<HTMLIFrameElement | null>(null);
   const [tamaOn, setTamaOn] = React.useState(false);
@@ -289,9 +291,9 @@ export default function MapScreen() {
     tamaStatus === 'error'   ? 'שגיאה בטעינת תמ"א 38' : '';
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
       <ResponsiveContainer>
-          <View style={styles.toolbar}>
+          <View style={[styles.toolbar, { backgroundColor: colors.bgCard, borderBottomColor: colors.border }]}>
           <View style={styles.toolbarLeft}>
             <SwipeHouseLogo size="xs" />
             <Ionicons name="map-outline" size={18} color={dirApp.primary} />

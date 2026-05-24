@@ -75,7 +75,7 @@ function ServiceTile({ service, onPress, colors }: { service: LandlordService; o
   return (
     <Animated.View style={[landlordStyles.tileWrapper, { transform: [{ scale }] }]}>
       <TouchableOpacity
-        style={landlordStyles.tile}
+        style={[landlordStyles.tile, { backgroundColor: colors.bgCard }]}
         onPress={onPress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
@@ -93,8 +93,8 @@ function ServiceTile({ service, onPress, colors }: { service: LandlordService; o
           <View style={[landlordStyles.iconGlow, { backgroundColor: service.glow }]} />
           <Ionicons name={service.icon} size={28} color={C.onInverse.primary} />
         </Animated.View>
-        <Text style={landlordStyles.tileLabel}>{service.label}</Text>
-        <Text style={landlordStyles.tileSubLabel}>{service.subLabel}</Text>
+        <Text style={[landlordStyles.tileLabel, { color: colors.text }]}>{service.label}</Text>
+        <Text style={[landlordStyles.tileSubLabel, { color: colors.textMut }]}>{service.subLabel}</Text>
       </TouchableOpacity>
     </Animated.View>
   );
@@ -336,7 +336,7 @@ export default function HomeScreen() {
         <View style={landlordStyles.header}>
           <SwipeHouseLogo size="sm" />
           <View style={landlordStyles.headerTextBlock}>
-            <Text style={landlordStyles.greeting}>{greeting}</Text>
+            <Text style={[landlordStyles.greeting, { color: colors.textMut }]}>{greeting}</Text>
             <Text style={landlordStyles.username}>{user?.firstName ?? 'Landlord'} 👋</Text>
           </View>
           <View style={landlordStyles.headerBadge}>
@@ -344,9 +344,9 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        <View style={landlordStyles.heroCard}>
+        <View style={[landlordStyles.heroCard, { backgroundColor: colors.bgCard }]}>
           <Text style={landlordStyles.heroTitle}>Manage your properties</Text>
-          <Text style={landlordStyles.heroSub}>Track leads, manage listings, and connect with tenants.</Text>
+          <Text style={[landlordStyles.heroSub, { color: colors.textSub }]}>Track leads, manage listings, and connect with tenants.</Text>
           <View style={landlordStyles.heroPill}>
             <View style={[landlordStyles.heroDot, { backgroundColor: C.cyan }]} />
             <Text style={landlordStyles.heroPillText}>Landlord Dashboard</Text>
@@ -363,7 +363,7 @@ export default function HomeScreen() {
 
         <View style={landlordStyles.tipCard}>
           <Ionicons name="information-circle-outline" size={18} color={C.cyan} />
-          <Text style={landlordStyles.tipText}>Tip: Verified listings get 3× more views.</Text>
+          <Text style={[landlordStyles.tipText, { color: colors.textSub }]}>Tip: Verified listings get 3× more views.</Text>
         </View>
       </ScrollView>
     </SafeAreaView>

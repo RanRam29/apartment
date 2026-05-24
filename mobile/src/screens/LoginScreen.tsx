@@ -9,12 +9,14 @@ import { formatLoginError } from '../utils/authErrors';
 import { C } from '../theme';
 import { dirApp } from '../theme/dirAppTokens';
 import SwipeHouseLogo from '../components/SwipeHouseLogo';
+import { useColors } from '../context/ThemeContext';
 
 interface Props {
   onSwitch: () => void;
 }
 
 export default function LoginScreen({ onSwitch }: Props) {
+  const colors = useColors();
   const { login, resendVerification } = useAuthStore();
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
@@ -58,9 +60,9 @@ export default function LoginScreen({ onSwitch }: Props) {
       <Text style={styles.subtitle}>התחבר לחשבונך</Text>
 
       <TextInput
-        style={styles.input}
+        style={[styles.input, { backgroundColor: colors.bgCard, color: colors.text, borderColor: colors.border }]}
         placeholder="אימייל"
-        placeholderTextColor={C.textMut}
+        placeholderTextColor={colors.textMut}
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
@@ -68,9 +70,9 @@ export default function LoginScreen({ onSwitch }: Props) {
         textAlign="right"
       />
       <TextInput
-        style={styles.input}
+        style={[styles.input, { backgroundColor: colors.bgCard, color: colors.text, borderColor: colors.border }]}
         placeholder="סיסמה"
-        placeholderTextColor={C.textMut}
+        placeholderTextColor={colors.textMut}
         value={password}
         onChangeText={setPassword}
         secureTextEntry
@@ -93,7 +95,7 @@ export default function LoginScreen({ onSwitch }: Props) {
       </TouchableOpacity>
 
       <TouchableOpacity onPress={onSwitch} style={styles.switchRow}>
-        <Text style={styles.switchText}>אין לך חשבון? </Text>
+        <Text style={[styles.switchText, { color: colors.textMut }]}>אין לך חשבון? </Text>
         <Text style={[styles.switchText, styles.switchLink]}>הרשם עכשיו</Text>
       </TouchableOpacity>
     </ScrollView>

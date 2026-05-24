@@ -14,6 +14,7 @@ import { C } from '../theme';
 import { dirApp } from '../theme/dirAppTokens';
 import { CITY_CENTER_BY_NAME } from '../constants/cityCenters';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
+import { useColors } from '../context/ThemeContext';
 
 const AMENITY_OPTIONS: { key: Amenity; label: string }[] = [
   { key: 'parking',     label: '🚗 חניה' },
@@ -28,6 +29,7 @@ const AMENITY_OPTIONS: { key: Amenity; label: string }[] = [
 const ISRAELI_CITIES = Object.keys(CITY_CENTER_BY_NAME).sort((a, b) => a.localeCompare(b, 'he'));
 
 export default function CreateListingScreen({ navigation }: any) {
+  const colors = useColors();
   const queryClient = useQueryClient();
 
   const [title, setTitle]             = useState('');
@@ -250,20 +252,20 @@ export default function CreateListingScreen({ navigation }: any) {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
           <ResponsiveContainer>
-          <View style={styles.formCard}>
+          <View style={[styles.formCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
             <Text style={styles.header}>פרסם מודעה חדשה</Text>
 
             <Field label="כותרת *">
               <TextInput
-                style={styles.input}
+                style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
                 value={title}
                 onChangeText={(value) => setTitle(sanitizeTitleInput(value))}
                 placeholder="לדוג׳: דירת 3 חדרים מרוהטת בלב תל אביב"
-                placeholderTextColor={dirApp.outline}
+                placeholderTextColor={colors.textMut}
                 textAlign="right"
                 maxLength={100}
               />
@@ -273,23 +275,23 @@ export default function CreateListingScreen({ navigation }: any) {
             <View style={styles.row}>
               <Field label="מחיר ₪ *" style={{ flex: 1 }}>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
                   value={price}
                   onChangeText={(value) => setPrice(keepDigitsOnly(value))}
                   keyboardType="numeric"
                   placeholder="6500"
-                  placeholderTextColor={dirApp.outline}
+                  placeholderTextColor={colors.textMut}
                   textAlign="right"
                 />
               </Field>
               <Field label="חדרים *" style={{ flex: 1 }}>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
                   value={rooms}
                   onChangeText={(value) => setRooms(keepDigitsOnly(value))}
                   keyboardType="numeric"
                   placeholder="3"
-                  placeholderTextColor={dirApp.outline}
+                  placeholderTextColor={colors.textMut}
                   textAlign="right"
                 />
               </Field>
@@ -298,7 +300,7 @@ export default function CreateListingScreen({ navigation }: any) {
             <View style={styles.row}>
               <Field label="עיר *" style={{ flex: 1 }}>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
                   value={city}
                   onChangeText={(value) => {
                     setCity(value);
@@ -306,12 +308,12 @@ export default function CreateListingScreen({ navigation }: any) {
                     setStreetSuggestions([]);
                   }}
                   placeholder="בחר עיר בישראל"
-                  placeholderTextColor={dirApp.outline}
+                  placeholderTextColor={colors.textMut}
                   textAlign="right"
                 />
                 {isLoadingCities ? <ActivityIndicator size="small" color={dirApp.secondary} style={styles.loader} /> : null}
                 {!!citySuggestions.length && (
-                  <View style={styles.suggestionsBox}>
+                  <View style={[styles.suggestionsBox, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                     {citySuggestions.map((item) => (
                       <TouchableOpacity
                         key={item}
@@ -329,17 +331,17 @@ export default function CreateListingScreen({ navigation }: any) {
               </Field>
               <Field label="רחוב *" style={{ flex: 1 }}>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
                   value={street}
                   onChangeText={setStreet}
                   placeholder={canSearchStreet ? 'בחר רחוב לפי העיר' : 'יש לבחור עיר קודם'}
-                  placeholderTextColor={dirApp.outline}
+                  placeholderTextColor={colors.textMut}
                   textAlign="right"
                   editable={canSearchStreet}
                 />
                 {isLoadingStreets ? <ActivityIndicator size="small" color={dirApp.secondary} style={styles.loader} /> : null}
                 {!!streetSuggestions.length && (
-                  <View style={styles.suggestionsBox}>
+                  <View style={[styles.suggestionsBox, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                     {streetSuggestions.map((item) => (
                       <TouchableOpacity
                         key={item}
@@ -360,23 +362,23 @@ export default function CreateListingScreen({ navigation }: any) {
             <View style={styles.row}>
               <Field label="קומה" style={{ flex: 1 }}>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
                   value={floor}
                   onChangeText={(value) => setFloor(keepDigitsOnly(value))}
                   keyboardType="numeric"
                   placeholder="3"
-                  placeholderTextColor={dirApp.outline}
+                  placeholderTextColor={colors.textMut}
                   textAlign="right"
                 />
               </Field>
               <Field label='גודל מ"ר' style={{ flex: 1 }}>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
                   value={sizeSqm}
                   onChangeText={(value) => setSizeSqm(keepDigitsOnly(value))}
                   keyboardType="numeric"
                   placeholder="75"
-                  placeholderTextColor={dirApp.outline}
+                  placeholderTextColor={colors.textMut}
                   textAlign="right"
                 />
               </Field>
@@ -384,13 +386,13 @@ export default function CreateListingScreen({ navigation }: any) {
 
             <Field label="תיאור">
               <TextInput
-                style={[styles.input, styles.textarea]}
+                style={[styles.input, styles.textarea, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
                 value={description}
                 onChangeText={setDescription}
                 multiline
                 numberOfLines={4}
                 placeholder="תאר את הדירה..."
-                placeholderTextColor={dirApp.outline}
+                placeholderTextColor={colors.textMut}
                 textAlign="right"
               />
             </Field>

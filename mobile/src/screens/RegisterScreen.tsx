@@ -11,6 +11,7 @@ import { dirApp } from '../theme/dirAppTokens';
 import SwipeHouseLogo from '../components/SwipeHouseLogo';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
 import { dirType } from '../theme/textStyles';
+import { useColors } from '../context/ThemeContext';
 
 interface Props {
   onSwitch: () => void;
@@ -19,6 +20,7 @@ interface Props {
 type Role = 'tenant' | 'landlord';
 
 export default function RegisterScreen({ onSwitch }: Props) {
+  const colors = useColors();
   const { register } = useAuthStore();
   const [firstName, setFirstName] = useState('');
   const [lastName,  setLastName]  = useState('');
@@ -92,17 +94,17 @@ export default function RegisterScreen({ onSwitch }: Props) {
 
         <View style={styles.row}>
           <TextInput
-            style={[styles.input, { flex: 1, marginLeft: 8 }]}
+            style={[styles.input, { flex: 1, marginLeft: 8, backgroundColor: colors.bgCard, color: colors.text, borderColor: colors.border }]}
             placeholder="שם פרטי"
-            placeholderTextColor={C.textMut}
+            placeholderTextColor={colors.textMut}
             value={firstName}
             onChangeText={setFirstName}
             textAlign="right"
           />
           <TextInput
-            style={[styles.input, { flex: 1 }]}
+            style={[styles.input, { flex: 1, backgroundColor: colors.bgCard, color: colors.text, borderColor: colors.border }]}
             placeholder="שם משפחה"
-            placeholderTextColor={C.textMut}
+            placeholderTextColor={colors.textMut}
             value={lastName}
             onChangeText={setLastName}
             textAlign="right"
@@ -110,9 +112,9 @@ export default function RegisterScreen({ onSwitch }: Props) {
         </View>
 
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: colors.bgCard, color: colors.text, borderColor: colors.border }]}
           placeholder="אימייל *"
-          placeholderTextColor={C.textMut}
+          placeholderTextColor={colors.textMut}
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
@@ -120,18 +122,18 @@ export default function RegisterScreen({ onSwitch }: Props) {
           textAlign="right"
         />
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: colors.bgCard, color: colors.text, borderColor: colors.border }]}
           placeholder="טלפון (050-0000000)"
-          placeholderTextColor={C.textMut}
+          placeholderTextColor={colors.textMut}
           value={phone}
           onChangeText={setPhone}
           keyboardType="phone-pad"
           textAlign="right"
         />
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: colors.bgCard, color: colors.text, borderColor: colors.border }]}
           placeholder="סיסמה (מינימום 8 תווים) *"
-          placeholderTextColor={C.textMut}
+          placeholderTextColor={colors.textMut}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
@@ -154,7 +156,7 @@ export default function RegisterScreen({ onSwitch }: Props) {
         </TouchableOpacity>
 
         <TouchableOpacity onPress={onSwitch} style={styles.switchRow}>
-          <Text style={[styles.switchText, dirType.caption]}>כבר יש לך חשבון? </Text>
+          <Text style={[styles.switchText, dirType.caption, { color: colors.textMut }]}>כבר יש לך חשבון? </Text>
           <Text style={[styles.switchText, styles.switchLink, dirType.caption]}>התחבר</Text>
         </TouchableOpacity>
         </ResponsiveContainer>

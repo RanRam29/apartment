@@ -7,20 +7,22 @@ import { dirApp } from '../theme/dirAppTokens';
 import { fontFamily } from '../theme/fonts';
 import { useDirection } from '../hooks/useDirection';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
+import { useColors } from '../context/ThemeContext';
 
 export default function AuthScreen() {
+  const colors = useColors();
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const { flexRow } = useDirection();
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]}>
       <KeyboardAvoidingView
         style={styles.kav}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ResponsiveContainer style={{ flex: 1 }}>
-          <View style={styles.card}>
-            <View style={[styles.tabsWrap, { flexDirection: flexRow }]}>
+          <View style={[styles.card, { backgroundColor: colors.bg }]}>
+            <View style={[styles.tabsWrap, { flexDirection: flexRow, backgroundColor: colors.bgCard }]}>
               <TouchableOpacity
                 style={[styles.tab, mode === 'login' && styles.tabActive]}
                 onPress={() => setMode('login')}
