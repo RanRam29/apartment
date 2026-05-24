@@ -62,6 +62,9 @@
       "expo-video"
     ],
     "scheme": "dirapp",
+    "updates": {
+      "enabled": false
+    },
     "extra": {
       "eas": {
         "projectId": "3573e171-6f0f-4a4a-9d02-e75e65602f33"
