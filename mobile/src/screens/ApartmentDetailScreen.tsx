@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { apartmentsApi } from '../services/api';
 import type { MainStackParamList, Amenity } from '../types';
+import { LinearGradient } from 'expo-linear-gradient';
 import { C, Dark } from '../theme';
 import { dirApp } from '../theme/dirAppTokens';
 import SwipeHouseLogo from '../components/SwipeHouseLogo';
@@ -107,6 +108,7 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
   const viewCount = apt.viewCount != null ? Number(apt.viewCount) : 0;
   const minLease = apt.minLeasePeriod != null ? Number(apt.minLeasePeriod) : null;
   const hasMultipleImages = images.length > 1;
+  const isLuxury = price > 15000;
 
   function scrollToImage(index: number) {
     if (!images.length) return;
@@ -126,7 +128,7 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false} style={{ marginBottom: 80 }}>
         {/* Image carousel */}
         {images.length > 0 ? (
           <View>
@@ -150,7 +152,11 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
                       setImageViewerOpen(true);
                     }}
                   >
-                    <Image source={{ uri }} style={styles.carouselImage} contentFit="contain" />
+                    <Image source={{ uri }} style={styles.carouselImage} contentFit="cover" />
+                    <LinearGradient
+                      colors={['transparent', 'rgba(0,0,0,0.5)']}
+                      style={styles.carouselGradient}
+                    />
                   </TouchableOpacity>
                 </View>
               ))}
@@ -178,6 +184,12 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
                     activeOpacity={0.7}
                   />
                 ))}
+              </View>
+            )}
+            {isLuxury && (
+              <View style={styles.luxuryBadge}>
+                <Ionicons name="diamond-outline" size={11} color={C.navy} />
+                <Text style={styles.luxuryBadgeText}>יוקרה</Text>
               </View>
             )}
           </View>
@@ -309,6 +321,18 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
         </ResponsiveContainer>
       </ScrollView>
 
+      {/* ── Sticky bottom CTA ── */}
+      <View style={styles.ctaBar}>
+        <View style={styles.ctaPrice}>
+          <Text style={styles.ctaPriceAmount}>₪{price.toLocaleString()}</Text>
+          <Text style={styles.ctaPriceLabel}>/חודש</Text>
+        </View>
+        <TouchableOpacity style={styles.ctaMainBtn}>
+          <Ionicons name="calendar-outline" size={16} color={Dark.bg} />
+          <Text style={styles.ctaMainBtnText}>קבע ביקור</Text>
+        </TouchableOpacity>
+      </View>
+
       <Modal
         visible={isImageViewerOpen}
         animationType="fade"
@@ -384,11 +408,33 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Dark.bg },
   headerLogoWrap: { alignItems: 'center', justifyContent: 'center' },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Dark.bg },
-  carouselSlide: { width: SCREEN_WIDTH, height: 320, backgroundColor: C.surface.imageCarousel, justifyContent: 'center', alignItems: 'center' },
-  carouselImage: { width: SCREEN_WIDTH, height: 320 },
+  carouselSlide: { width: SCREEN_WIDTH, height: 380, backgroundColor: C.surface.imageCarousel, justifyContent: 'center', alignItems: 'center' },
+  carouselImage: { width: SCREEN_WIDTH, height: 380 },
+  carouselGradient: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 120 },
+  luxuryBadge: {
+    position: 'absolute', top: 16, left: 16,
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    backgroundColor: C.cyan, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10,
+  },
+  luxuryBadgeText: { color: C.navy, fontSize: 11, fontWeight: '700' },
+  ctaBar: {
+    position: 'absolute', bottom: 0, left: 0, right: 0,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    backgroundColor: Dark.surface, paddingHorizontal: 20, paddingVertical: 14,
+    borderTopWidth: 1, borderTopColor: Dark.border,
+  },
+  ctaPrice: { flexDirection: 'row', alignItems: 'baseline', gap: 3 },
+  ctaPriceAmount: { fontSize: 20, fontWeight: '800', color: C.cyan },
+  ctaPriceLabel: { fontSize: 12, color: C.textMut },
+  ctaMainBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    backgroundColor: C.cyan, borderRadius: 12,
+    paddingHorizontal: 18, paddingVertical: 12,
+  },
+  ctaMainBtnText: { color: Dark.bg, fontWeight: '700', fontSize: 14 },
   carouselArrow: {
     position: 'absolute',
-    top: 145,
+    top: 178,
     width: 34,
     height: 34,
     borderRadius: 17,
