@@ -487,6 +487,29 @@ describe('F11 — Rent payments routes', () => {
     expect(res.status).toBe(401);
   });
 
+  it('POST /api/payments/webhook — rejects unsigned production webhooks when WEBHOOK_SECRET is missing', async () => {
+    const previousNodeEnv = process.env.NODE_ENV;
+    const previousRender = process.env.RENDER;
+    const previousWebhookSecret = process.env.WEBHOOK_SECRET;
+    try {
+      process.env.NODE_ENV = 'production';
+      delete process.env.RENDER;
+      delete process.env.WEBHOOK_SECRET;
+
+      const res = await request(app)
+        .post('/api/payments/webhook')
+        .send({ transactionId: 'tx-prod-missing-secret', status: 'success', rentPaymentId: 'rp-pay-1' });
+
+      expect(res.status).toBe(401);
+    } finally {
+      process.env.NODE_ENV = previousNodeEnv;
+      if (previousRender === undefined) delete process.env.RENDER;
+      else process.env.RENDER = previousRender;
+      if (previousWebhookSecret === undefined) delete process.env.WEBHOOK_SECRET;
+      else process.env.WEBHOOK_SECRET = previousWebhookSecret;
+    }
+  });
+
   it('POST /api/payments/webhook — rejects malformed signatures without throwing', async () => {
     process.env.WEBHOOK_SECRET = 'test-secret';
     const res = await request(app)

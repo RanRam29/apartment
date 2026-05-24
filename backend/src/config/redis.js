@@ -5,31 +5,67 @@ let redisClient;
 
 function createInMemoryRedis() {
   const store = new Map();
+
+  const getRecord = (key) => {
+    const record = store.get(key);
+    if (!record) return undefined;
+    if (record.expiresAt !== undefined && record.expiresAt <= Date.now()) {
+      store.delete(key);
+      return undefined;
+    }
+    return record;
+  };
+
+  const setRecord = (key, value, expiresAt) => {
+    store.set(key, { value, expiresAt });
+  };
+
   return {
     disconnect: () => {},
     get: async (key) => {
-      const value = store.get(key);
-      return value === undefined ? null : String(value);
+      const record = getRecord(key);
+      return record === undefined ? null : String(record.value);
     },
-    setex: async (key, _ttl, value) => {
-      store.set(key, value);
+    setex: async (key, ttl, value) => {
+      const ttlSeconds = Number(ttl);
+      const expiresAt = Date.now() + ttlSeconds * 1000;
+      if (!Number.isFinite(expiresAt) || ttlSeconds <= 0) {
+        store.delete(key);
+        return 'OK';
+      }
+      setRecord(key, value, expiresAt);
       return 'OK';
     },
     del: async (key) => {
-      store.delete(key);
-      return 1;
+      getRecord(key);
+      return store.delete(key) ? 1 : 0;
     },
     incr: async (key) => {
-      const current = Number(store.get(key) || 0) + 1;
-      store.set(key, current);
+      const record = getRecord(key);
+      const current = Number(record?.value || 0) + 1;
+      setRecord(key, current, record?.expiresAt);
       return current;
     },
     decr: async (key) => {
-      const current = Math.max(0, Number(store.get(key) || 0) - 1);
-      store.set(key, current);
+      const record = getRecord(key);
+      const current = Math.max(0, Number(record?.value || 0) - 1);
+      setRecord(key, current, record?.expiresAt);
       return current;
     },
-    expireat: async () => 1,
+    expireat: async (key, timestampSeconds) => {
+      const record = getRecord(key);
+      if (!record) return 0;
+
+      const expiresAt = Number(timestampSeconds) * 1000;
+      if (!Number.isFinite(expiresAt)) return 0;
+      if (expiresAt <= Date.now()) {
+        store.delete(key);
+        return 1;
+      }
+
+      record.expiresAt = expiresAt;
+      return 1;
+    },
   };
 }
 

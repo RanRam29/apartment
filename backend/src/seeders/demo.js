@@ -15,6 +15,7 @@ function resolveDemoPassword() {
 }
 
 const DEMO_PASSWORD = resolveDemoPassword();
+const DEMO_SEED_ENABLED_VALUE = 'true';
 
 const ADMIN_ACCOUNTS = [
   { email: 'admin1@dirapp.com', firstName: 'Admin', lastName: 'One', password: 'Admin1234!', role: 'landlord' },
@@ -112,6 +113,11 @@ async function autoSeed(queryInterface) {
       });
     }
 
+    if (!shouldAutoSeedOnStartup()) {
+      console.log('Demo seed disabled in production. Set DEMO_SEED_ENABLED=true to enable demo data.');
+      return;
+    }
+
     const count = await User.count();
     if (count > ADMIN_ACCOUNTS.length) return;
     console.log('Empty database detected — running initial seed…');
@@ -143,7 +149,13 @@ async function autoSeed(queryInterface) {
   }
 }
 
-module.exports = { autoSeed };
+function shouldAutoSeedOnStartup(env = process.env) {
+  if (env.DEMO_SEED_ENABLED === DEMO_SEED_ENABLED_VALUE) return true;
+  if (env.NODE_ENV === 'production' || env.RENDER === 'true') return false;
+  return true;
+}
+
+module.exports = { autoSeed, shouldAutoSeedOnStartup };
 
 if (require.main === module) {
   seed().catch((err) => {
