@@ -1,7 +1,23 @@
 const axios = require('axios');
 const logger = require('../utils/logger');
 
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+const DEFAULT_GEMINI_MODEL = 'gemini-flash-latest';
+const GEMINI_MODEL = (process.env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL).trim();
+const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
+
+function geminiGenerateUrl() {
+  return `${GEMINI_API_BASE}/${GEMINI_MODEL}:generateContent`;
+}
+
+function geminiRequestConfig(apiKey) {
+  return {
+    headers: {
+      'Content-Type': 'application/json',
+      'X-goog-api-key': apiKey,
+    },
+    timeout: 10000,
+  };
+}
 
 const PARSE_SYSTEM_PROMPT = `You are a real estate search assistant for an Israeli apartment rental app.
 Parse free-text in Hebrew or English into a JSON filter object.
@@ -294,7 +310,7 @@ async function parseSearchQuery(query) {
   const t0 = Date.now();
   try {
     const response = await axios.post(
-      `${GEMINI_API_URL}?key=${apiKey}`,
+      geminiGenerateUrl(),
       {
         contents: [
           {
@@ -309,7 +325,7 @@ async function parseSearchQuery(query) {
           maxOutputTokens: 256,
         },
       },
-      { timeout: 10000 }
+      geminiRequestConfig(apiKey)
     );
 
     const rawText = response.data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
@@ -370,12 +386,12 @@ Output only the description text, no labels or formatting.`;
   const t0 = Date.now();
   try {
     const response = await axios.post(
-      `${GEMINI_API_URL}?key=${apiKey}`,
+      geminiGenerateUrl(),
       {
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: { temperature: 0.75, maxOutputTokens: 160 },
       },
-      { timeout: 10000 }
+      geminiRequestConfig(apiKey)
     );
 
     const text = response.data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
@@ -396,4 +412,6 @@ module.exports = {
   extractJsonObject,
   inferFiltersFromQuery,
   mergeParsedFilters,
+  geminiGenerateUrl,
+  GEMINI_MODEL,
 };

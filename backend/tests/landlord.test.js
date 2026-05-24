@@ -138,6 +138,16 @@ describe('GET /api/landlord/leads', () => {
     expect(res.body.total).toBeGreaterThanOrEqual(1);
   });
 
+  it('returns leadScore on ranked leads', async () => {
+    const res = await request(app)
+      .get('/api/landlord/leads?status=pending')
+      .set('Authorization', `Bearer ${landlordToken}`);
+    expect(res.status).toBe(200);
+    if (res.body.leads.length) {
+      expect(res.body.leads[0]).toHaveProperty('leadScore');
+    }
+  });
+
   it('supports status filter', async () => {
     const res = await request(app)
       .get('/api/landlord/leads?status=accepted')

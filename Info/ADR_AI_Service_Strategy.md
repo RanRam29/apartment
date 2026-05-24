@@ -27,3 +27,14 @@
 
 - תיעוד ארכיטקטורה חייב להבהיר ש־HTTP ל־`ai-service` **אינו** חלק מהזרימה הנוכחית אלא אופציה.
 - שינוי אסטרטגיה (למשל כל הקריאות דרך Python) ידרוש ADR חדש ועדכון [`AI_Capabilities_Current_State.md`](AI_Capabilities_Current_State.md).
+
+## מימוש (AI-011, 2026-05-23)
+
+- **Gemini / NLP / marketing copy** — ללא שינוי; Node + `GEMINI_API_KEY`.
+- **דירוג נומרי** — מימוש Node ב-[`backend/src/services/leadScoringService.js`](../backend/src/services/leadScoringService.js) ו-[`recommendationEngineService.js`](../backend/src/services/recommendationEngineService.js).
+- **Proxy אופציונלי** — [`backend/src/services/aiServiceClient.js`](../backend/src/services/aiServiceClient.js) מנסה `AI_SERVICE_URL` לנתיבי `/api/leads/score` ו-`/api/recommendations/score`; בכשל — fallback ל-Node.
+- **API חדש/מורחב ב-Backend**:
+  - `POST /api/leads/score` (landlord)
+  - `POST /api/recommendations/score` (tenant)
+  - `GET /api/landlord/leads` — מחזיר `leadScore` וממיין לפי ציון
+  - `GET /api/recommendations/personalized` — משתמש במנוע דירוג Node (או proxy)

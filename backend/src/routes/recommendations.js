@@ -6,6 +6,7 @@ const { UserPreferences } = require('../models');
 const { authenticate, requireRole } = require('../middleware/auth');
 const { geminiSearchLimiter } = require('../middleware/geminiRateLimit');
 const { parseSearchQuery } = require('../services/geminiService');
+const { scoreApartmentsForUser } = require('../services/aiServiceClient');
 const { cacheGet, cacheSet } = require('../config/redis');
 const logger = require('../utils/logger');
 
@@ -120,12 +121,16 @@ router.get('/personalized', authenticate, requireRole('tenant'), async (req, res
       where.id = { [Op.notIn]: swipedIds };
     }
 
-    const apartments = await Apartment.findAll({
+    const apartmentsRaw = await Apartment.findAll({
       where,
       include: [{ model: User, as: 'landlord', attributes: ['id', 'firstName', 'lastName', 'avatarUrl', 'isVerified'] }],
       order: [['likeCount', 'DESC'], ['createdAt', 'DESC']],
-      limit: 20,
+      limit: 40,
     });
+
+    const apartmentsPlain = apartmentsRaw.map((a) => a.toJSON());
+    const ranked = await scoreApartmentsForUser(tenantId, apartmentsPlain);
+    const apartments = ranked.length ? ranked.slice(0, 20) : apartmentsPlain.slice(0, 20);
 
     const payload = { apartments, total: apartments.length };
     await cacheSet(cacheKey, payload, 300);
@@ -135,6 +140,27 @@ router.get('/personalized', authenticate, requireRole('tenant'), async (req, res
     next(err);
   }
 });
+
+// POST /api/recommendations/score — numeric ranking for a tenant (Node default; optional ai-service proxy)
+router.post(
+  '/score',
+  authenticate,
+  requireRole('tenant'),
+  [body('apartments').isArray({ min: 1 }).withMessage('apartments array is required')],
+  async (req, res, next) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+      }
+
+      const ranked = await scoreApartmentsForUser(req.user.id, req.body.apartments);
+      res.json({ apartments: ranked, total: ranked.length });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
 
 // GET /api/recommendations/preferences — fetch current tenant preferences
 router.get('/preferences', authenticate, requireRole('tenant'), async (req, res, next) => {

@@ -32,6 +32,8 @@ services:
       # AI / Payment keys — set manually in Render dashboard
       - key: GEMINI_API_KEY
         sync: false
+      - key: GEMINI_MODEL
+        value: gemini-flash-latest
       - key: MESHULAM_API_KEY
         sync: false
       - key: WEBHOOK_SECRET

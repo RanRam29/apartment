@@ -3,6 +3,7 @@ const { Op, fn, col, literal } = require('sequelize');
 const { Apartment, Match, Swipe, User } = require('../models');
 const { authenticate, requireRole } = require('../middleware/auth');
 const { cacheGet, cacheSet } = require('../config/redis');
+const { rankLandlordLeads } = require('../services/landlordLeadRanking');
 
 const router = express.Router();
 
@@ -113,8 +114,10 @@ router.get('/leads', authenticate, requireRole('landlord'), async (req, res, nex
       offset,
     });
 
+    const rankedLeads = await rankLandlordLeads(leads);
+
     res.json({
-      leads,
+      leads: rankedLeads,
       total: count,
       page: parseInt(page),
       totalPages: Math.ceil(count / parseInt(limit)),

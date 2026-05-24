@@ -3,6 +3,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     gemini_api_key: str = ""
+    gemini_model: str = "gemini-flash-latest"
     mongo_uri: str = "mongodb://localhost:27017/apartment_preferences"
     redis_url: str = ""
     redis_host: str = "localhost"

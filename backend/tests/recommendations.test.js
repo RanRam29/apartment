@@ -24,9 +24,32 @@ jest.mock('../src/config/redis', () => ({
   getRedisClient: jest.fn(),
 }));
 
+jest.mock('../src/services/aiServiceClient', () => ({
+  scoreApartmentsForUser: jest.fn(async (_userId, apartments) =>
+    apartments.map((apt, index) => ({ ...apt, _score: 100 - index }))
+  ),
+}));
+
 jest.mock('../src/models', () => ({
   Apartment: {
-    findAll: jest.fn(async () => [{ id: 'apt-1', title: 'Apt' }]),
+    findAll: jest.fn(async () => [{
+      id: 'apt-1',
+      title: 'Apt',
+      price: 5000,
+      city: 'תל אביב',
+      rooms: 3,
+      amenities: [],
+      toJSON() {
+        return {
+          id: this.id,
+          title: this.title,
+          price: this.price,
+          city: this.city,
+          rooms: this.rooms,
+          amenities: this.amenities,
+        };
+      },
+    }]),
   },
   Swipe: {
     findAll: jest.fn(async () => []),
@@ -77,6 +100,17 @@ describe('Recommendations routes', () => {
 
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body.apartments)).toBe(true);
+    expect(res.body.apartments[0]._score).toBeDefined();
+  });
+
+  it('scores apartments via POST /score', async () => {
+    const res = await request(app)
+      .post('/api/recommendations/score')
+      .set('Authorization', 'Bearer token')
+      .send({ apartments: [{ id: 'apt-1', price: 5000, city: 'תל אביב', rooms: 3, amenities: [] }] });
+
+    expect(res.status).toBe(200);
+    expect(res.body.apartments[0]._score).toBe(100);
   });
 
   it('saves and retrieves preferences', async () => {

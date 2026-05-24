@@ -3,10 +3,11 @@ import re
 import httpx
 from src.config import settings
 
-GEMINI_URL = (
-    "https://generativelanguage.googleapis.com/v1beta/models/"
-    "gemini-1.5-flash:generateContent"
-)
+GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models"
+
+
+def _gemini_generate_url() -> str:
+    return f"{GEMINI_API_BASE}/{settings.gemini_model}:generateContent"
 
 SYSTEM_PROMPT = """You are a real estate search assistant for an Israeli apartment rental app.
 Parse the free-text query (Hebrew or English) into a structured JSON filter object.
@@ -43,11 +44,13 @@ async def parse_query(query: str) -> dict:
         "generationConfig": {"temperature": 0.1, "maxOutputTokens": 256},
     }
 
+    headers = {
+        "Content-Type": "application/json",
+        "X-goog-api-key": settings.gemini_api_key,
+    }
+
     async with httpx.AsyncClient(timeout=10) as client:
-        res = await client.post(
-            f"{GEMINI_URL}?key={settings.gemini_api_key}",
-            json=payload,
-        )
+        res = await client.post(_gemini_generate_url(), json=payload, headers=headers)
         res.raise_for_status()
 
     raw = res.json()["candidates"][0]["content"]["parts"][0]["text"]
@@ -73,11 +76,13 @@ async def generate_listing_summary(apartment: dict) -> str | None:
         "generationConfig": {"temperature": 0.7, "maxOutputTokens": 128},
     }
 
+    headers = {
+        "Content-Type": "application/json",
+        "X-goog-api-key": settings.gemini_api_key,
+    }
+
     async with httpx.AsyncClient(timeout=10) as client:
-        res = await client.post(
-            f"{GEMINI_URL}?key={settings.gemini_api_key}",
-            json=payload,
-        )
+        res = await client.post(_gemini_generate_url(), json=payload, headers=headers)
         res.raise_for_status()
 
     return res.json()["candidates"][0]["content"]["parts"][0]["text"].strip()
