@@ -120,8 +120,8 @@ router.delete('/:id', authenticate, async (req, res, next) => {
       return res.status(403).json({ error: 'Not your listing' });
     }
 
-    await ServiceReview.deleteMany({ serviceId: service._id });
     await service.deleteOne();
+    await ServiceReview.deleteMany({ serviceId: service._id });
 
     res.json({ message: 'Service deleted' });
   } catch (err) {

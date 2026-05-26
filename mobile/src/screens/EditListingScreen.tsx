@@ -11,6 +11,11 @@ import { apartmentsApi } from '../services/api';
 import { C } from '../theme';
 import type { Amenity, MainStackParamList } from '../types';
 import { CITY_CENTER_BY_NAME } from '../constants/cityCenters';
+import {
+  cityMatches,
+  getNominatimAddressCity,
+  normalizeAddressText,
+} from '../utils/addressValidation';
 
 const AMENITY_OPTIONS: { key: Amenity; label: string }[] = [
   { key: 'parking',      label: '🚗 חניה' },
@@ -82,16 +87,12 @@ export default function EditListingScreen({ route, navigation }: Props) {
     return withoutCodeChars.slice(0, 100);
   }
 
-  function normalizeText(value: string) {
-    return value.trim().toLowerCase();
-  }
-
   function getCityMatches(query: string) {
-    const q = normalizeText(query);
+    const q = normalizeAddressText(query);
     if (q.length < 2) return [];
-    const startsWith = ISRAELI_CITIES.filter((name) => normalizeText(name).startsWith(q));
+    const startsWith = ISRAELI_CITIES.filter((name) => normalizeAddressText(name).startsWith(q));
     const contains = ISRAELI_CITIES.filter((name) => {
-      const norm = normalizeText(name);
+      const norm = normalizeAddressText(name);
       return !norm.startsWith(q) && norm.includes(q);
     });
     return [...startsWith, ...contains].slice(0, 8);
@@ -100,8 +101,7 @@ export default function EditListingScreen({ route, navigation }: Props) {
   const canSearchStreet = useMemo(() => city.trim().length > 0, [city]);
 
   async function validateIsraeliCity(cityName: string) {
-    const cityNorm = normalizeText(cityName);
-    return ISRAELI_CITIES.some((candidate) => normalizeText(candidate) === cityNorm);
+    return ISRAELI_CITIES.some((candidate) => cityMatches(candidate, cityName));
   }
 
   async function validateStreetInCity(cityName: string, streetName: string) {
@@ -112,13 +112,11 @@ export default function EditListingScreen({ route, navigation }: Props) {
       );
       const data = await res.json();
       if (!Array.isArray(data)) return false;
-      const cityNorm = normalizeText(cityName);
-      const streetNorm = normalizeText(streetName);
+      const streetNorm = normalizeAddressText(streetName);
       return data.some((item: any) => {
         const address = item?.address || {};
-        const candidateCity = normalizeText(address.city || address.town || address.village || address.municipality || '');
-        const candidateStreet = normalizeText(address.road || '');
-        return candidateCity === cityNorm && candidateStreet === streetNorm;
+        const candidateStreet = normalizeAddressText(address.road || '');
+        return cityMatches(getNominatimAddressCity(address), cityName) && candidateStreet === streetNorm;
       });
     } catch {
       return false;
@@ -155,9 +153,11 @@ export default function EditListingScreen({ route, navigation }: Props) {
               .map((item: any) => item?.address)
               .filter(Boolean)
               .filter((address: any) => {
-                const addressCity = normalizeText(address?.city || address?.town || address?.village || address?.municipality || '');
-                const streetName = normalizeText(address?.road || '');
-                return addressCity === normalizeText(selectedCity) && streetName.startsWith(normalizeText(q));
+                const streetName = normalizeAddressText(address?.road || '');
+                return (
+                  cityMatches(getNominatimAddressCity(address), selectedCity) &&
+                  streetName.startsWith(normalizeAddressText(q))
+                );
               })
               .map((address: any) => address?.road)
               .filter(Boolean)
