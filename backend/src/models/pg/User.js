@@ -79,8 +79,9 @@ const User = sequelize.define('User', {
     defaultValue: false,
   },
   activeRole: {
-    type: DataTypes.ENUM('tenant', 'landlord'),
+    type: DataTypes.STRING(20),
     defaultValue: 'tenant',
+    validate: { isIn: [['tenant', 'landlord']] },
   },
 }, {
   tableName: 'users',
