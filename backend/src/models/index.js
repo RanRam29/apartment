@@ -42,12 +42,13 @@ TicketInvoice.belongsTo(MaintenanceTicket, { foreignKey: 'ticketId', as: 'ticket
 const AgreementGuarantor = require('./pg/AgreementGuarantor');
 
 const RentalAgreement = require('./pg/RentalAgreement');
-const LedgerRow = require('./pg/LedgerRow');
-const AppConfig = require('./pg/AppConfig');
-
 const AgreementParty = require('./pg/AgreementParty');
 const AgreementRoom = require('./pg/AgreementRoom');
 const OwnershipVerification = require('./pg/OwnershipVerification');
+
+// v3.0 Financial + Admin Models
+const LedgerRow = require('./pg/LedgerRow');
+const AppConfig = require('./pg/AppConfig');
 
 RentalAgreement.hasMany(LedgerRow, { foreignKey: 'agreementId', as: 'ledgerRows' });
 LedgerRow.belongsTo(RentalAgreement, { foreignKey: 'agreementId', as: 'agreement' });
@@ -69,6 +70,8 @@ module.exports = {
   Swipe,
   Match,
   AuditLog,
+  LedgerRow,
+  AppConfig,
   UserPreferences,
   Message,
   SystemEvent,
@@ -77,10 +80,7 @@ module.exports = {
   TicketInvoice,
   AgreementGuarantor,
   RentalAgreement,
-  LedgerRow,
-  AppConfig,
   AgreementParty,
   AgreementRoom,
   OwnershipVerification,
 };
-

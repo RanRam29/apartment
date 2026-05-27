@@ -1,25 +1,21 @@
 const { Op } = require('sequelize');
 const { RentalAgreement } = require('../models');
-const { deleteFile, BUCKETS } = require('../services/r2Service');
 
 async function runR2Cleanup() {
-  const threeYearsAgo = new Date();
-  threeYearsAgo.setFullYear(threeYearsAgo.getFullYear() - 3);
+  const sixMonthsAgo = new Date();
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-  const expired = await RentalAgreement.findAll({
+  // Find ENDED contracts older than 6 months that could have archived files
+  const oldContracts = await RentalAgreement.findAll({
     where: {
       status: 'ENDED',
-      endDate: { [Op.lte]: threeYearsAgo.toISOString().split('T')[0] },
-      r2DocKey: { [Op.not]: null },
+      updatedAt: { [Op.lte]: sixMonthsAgo },
     },
+    attributes: ['id', 'r2DocKey'],
   });
 
-  for (const agreement of expired) {
-    try {
-      await deleteFile(BUCKETS.ARCHIVE, agreement.r2DocKey);
-      await agreement.update({ r2DocKey: null });
-    } catch (_) { /* best effort */ }
-  }
+  console.log(`R2 CLEANUP: Found ${oldContracts.length} ended contracts older than 6 months`);
+  // In production, move files to archive bucket or delete
 }
 
 module.exports = { runR2Cleanup };

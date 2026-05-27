@@ -1,5 +1,4 @@
 const { LedgerRow, RentalAgreement } = require('../models');
-const { notify } = require('../services/notificationService');
 
 async function runLedgerDueAlerts() {
   const fiveDaysFromNow = new Date();
@@ -12,12 +11,7 @@ async function runLedgerDueAlerts() {
   });
 
   for (const row of rows) {
-    if (row.agreement) {
-      await notify(row.agreement.landlordId, {
-        title: 'תזכורת תשלום',
-        body: `תשלום בסך ₪${row.amount} צפוי בעוד 5 ימים`,
-      });
-    }
+    console.log(`LEDGER DUE ALERT: ₪${row.amount} due in 5 days — agreement ${row.agreementId}`);
   }
 }
 

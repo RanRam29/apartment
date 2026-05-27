@@ -10,6 +10,7 @@ const LedgerRow = sequelize.define('LedgerRow', {
   agreementId: {
     type: DataTypes.UUID,
     allowNull: false,
+    references: { model: 'rental_agreements', key: 'id' },
     onDelete: 'CASCADE',
   },
   period: {
@@ -51,6 +52,11 @@ const LedgerRow = sequelize.define('LedgerRow', {
   },
 }, {
   tableName: 'ledger_rows',
+  indexes: [
+    { fields: ['agreement_id'] },
+    { fields: ['due_date'] },
+    { fields: ['status'] },
+  ],
 });
 
 module.exports = LedgerRow;

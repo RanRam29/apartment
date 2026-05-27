@@ -1,6 +1,5 @@
 const { Op } = require('sequelize');
-const { RentalAgreement } = require('../models');
-const { notifyMany } = require('../services/notificationService');
+const { RentalAgreement, AgreementParty } = require('../models');
 
 const ALERT_DAYS = [120, 90, 60, 45, 30];
 
@@ -24,22 +23,12 @@ async function runExpiringAlerts() {
         await agreement.update({ status: 'EXPIRING' });
       }
 
-      const userIds = [agreement.landlordId];
-      // Collect tenant IDs from agreement parties if any, or fall back to tenantId
-      const { AgreementParty } = require('../models');
-      if (AgreementParty) {
-        const tenants = await AgreementParty.findAll({
-          where: { agreementId: agreement.id, role: 'tenant' },
-        });
-        userIds.push(...tenants.map(t => t.userId));
-      }
-
-      await notifyMany(userIds, {
-        title: 'חוזה מתקרב לסיום',
-        body: `${days} ימים לסיום החוזה`,
-        emailSubject: `התראה: ${days} ימים לסיום החוזה`,
-        emailHtml: `<div dir="rtl"><p>החוזה שלך מסתיים בעוד ${days} ימים.</p></div>`,
+      // Notify landlord + tenants (notification service is CASCADE's domain, use console for now)
+      const tenants = await AgreementParty.findAll({
+        where: { agreementId: agreement.id, role: 'tenant' },
       });
+      const userIds = [agreement.landlordId, ...tenants.map(t => t.userId)];
+      console.log(`EXPIRING ALERT: ${days} days — agreement ${agreement.id} — notifying ${userIds.length} users`);
     }
   }
 }

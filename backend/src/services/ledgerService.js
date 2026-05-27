@@ -9,7 +9,7 @@ async function generateLedger(agreementId) {
   const start = new Date(agreement.startDate);
   const end = new Date(agreement.endDate);
   const paymentDay = agreement.paymentDueDay || 1;
-  const monthlyRent = parseFloat(agreement.monthlyRentIls || agreement.monthlyRent || 0);
+  const monthlyRent = parseFloat(agreement.monthlyRentIls);
 
   const rows = [];
   const d = new Date(start);

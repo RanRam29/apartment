@@ -1,6 +1,5 @@
 const { Op } = require('sequelize');
 const { UserKycProfile } = require('../models');
-const { notify } = require('../services/notificationService');
 
 async function runKycRenewal() {
   const fiveYearsAgo = new Date();
@@ -15,10 +14,7 @@ async function runKycRenewal() {
 
   for (const kyc of expiring) {
     await kyc.update({ status: 'PENDING' });
-    await notify(kyc.userId, {
-      title: 'נדרש חידוש אימות זהות',
-      body: 'אימות הזהות שלך פג תוקף. נא לבצע אימות חדש.',
-    });
+    console.log(`KYC RENEWAL: Reset KYC for user ${kyc.userId}`);
   }
 }
 

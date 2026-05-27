@@ -4,18 +4,18 @@ const BUCKETS = {
   PROPERTY_IMAGES: 'property-images',
   CONTRACT_DOCS: 'contract-docs',
   CHECKIN_PHOTOS: 'checkin-photos',
+  CHECKOUT_PHOTOS: 'checkout-photos',
   PAYMENT_RECEIPTS: 'payment-receipts',
   ARCHIVE: 'archive',
 };
 
 function createR2Client() {
-  const accountId = process.env.R2_ACCOUNT_ID || 'dummy';
   return new S3Client({
     region: 'auto',
-    endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
+    endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
     credentials: {
-      accessKeyId: process.env.R2_ACCESS_KEY_ID || 'dummy',
-      secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || 'dummy',
+      accessKeyId: process.env.R2_ACCESS_KEY_ID,
+      secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
     },
   });
 }

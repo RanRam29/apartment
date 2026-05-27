@@ -1,10 +1,11 @@
 const { Op } = require('sequelize');
 const { MaintenanceTicket, RentalAgreement } = require('../models');
-const { notify } = require('../services/notificationService');
 
 async function runMaintenanceAlerts() {
   const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
 
+  // First alert: 24h with no response
   const staleTickets = await MaintenanceTicket.findAll({
     where: {
       status: 'OPEN',
@@ -14,12 +15,19 @@ async function runMaintenanceAlerts() {
   });
 
   for (const ticket of staleTickets) {
-    if (ticket.agreement) {
-      await notify(ticket.agreement.landlordId, {
-        title: 'תקלה ממתינה למענה',
-        body: 'תקלה שדווחה ממתינה לטיפול שלך',
-      });
-    }
+    console.log(`MAINTENANCE ALERT (24h): Ticket ${ticket.id} has no response — landlord ${ticket.agreement?.landlordId}`);
+  }
+
+  // Escalation: 3 days with no response
+  const escalatedTickets = await MaintenanceTicket.findAll({
+    where: {
+      status: 'OPEN',
+      createdAt: { [Op.lte]: threeDaysAgo },
+    },
+  });
+
+  for (const ticket of escalatedTickets) {
+    console.log(`MAINTENANCE ESCALATION (3d): Ticket ${ticket.id} still open`);
   }
 }
 

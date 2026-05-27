@@ -1,6 +1,6 @@
 const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
-const { uploadFile, getPresignedUrl, BUCKETS } = require('./r2Service');
+const { uploadFile, BUCKETS } = require('./r2Service');
 const logger = require('../utils/logger');
 
 // Store files in memory — send directly to R2
@@ -15,29 +15,23 @@ const upload = multer({
   },
 });
 
-async function uploadToR2(file, folder = 'apartments') {
-  const originalName = file.originalname || 'upload.jpg';
-  const key = `${folder}/${uuidv4()}-${originalName}`;
-  const contentType = file.mimetype || 'image/jpeg';
-
-  await uploadFile(BUCKETS.PROPERTY_IMAGES, key, file.buffer, contentType);
-  const presignedUrl = await getPresignedUrl(BUCKETS.PROPERTY_IMAGES, key);
+async function uploadToR2(fileBuffer, folder = 'apartments', originalname = 'upload.jpg', mimetype = 'image/jpeg') {
+  const key = `${folder}/${uuidv4()}-${originalname}`;
+  const bucket = BUCKETS.PROPERTY_IMAGES;
+  await uploadFile(bucket, key, fileBuffer, mimetype);
 
   return {
-    url: presignedUrl,
-    publicId: key,
-    width: 800, // Dummy dimensions matching Cloudinary signature
-    height: 600,
+    key,
+    bucket,
   };
 }
 
 async function uploadMany(files, folder = 'apartments') {
   const results = await Promise.all(
-    files.map((f) => uploadToR2(f, folder))
+    files.map((f) => uploadToR2(f.buffer, folder, f.originalname, f.mimetype))
   );
   logger.info(`Uploaded ${results.length} images to R2`);
   return results;
 }
 
-module.exports = { upload, uploadMany };
-
+module.exports = { upload, uploadMany, uploadToR2 };

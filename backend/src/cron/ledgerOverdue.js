@@ -6,10 +6,14 @@ async function runLedgerOverdue() {
   fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5);
   const dateStr = fiveDaysAgo.toISOString().split('T')[0];
 
-  await LedgerRow.update(
+  const [count] = await LedgerRow.update(
     { status: 'OVERDUE' },
     { where: { status: 'PENDING', dueDate: { [Op.lte]: dateStr } } }
   );
+
+  if (count > 0) {
+    console.log(`LEDGER OVERDUE: Marked ${count} payments as OVERDUE`);
+  }
 }
 
 module.exports = { runLedgerOverdue };

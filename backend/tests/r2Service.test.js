@@ -1,5 +1,3 @@
-const { describe, it, expect, beforeEach } = require('@jest/globals');
-
 jest.mock('@aws-sdk/client-s3', () => {
   const mockSend = jest.fn().mockResolvedValue({});
   return {
@@ -30,7 +28,7 @@ describe('r2Service', () => {
     expect(result).toHaveProperty('bucket', 'property-images');
   });
 
-  it('generates a presigned URL with 5-minute expiry', async () => {
+  it('generates a presigned URL', async () => {
     const { getPresignedUrl } = require('../src/services/r2Service');
     const url = await getPresignedUrl('contract-docs', 'doc.pdf');
     expect(url).toContain('presigned');
@@ -39,5 +37,12 @@ describe('r2Service', () => {
   it('deletes a file from R2', async () => {
     const { deleteFile } = require('../src/services/r2Service');
     await expect(deleteFile('archive', 'old.pdf')).resolves.not.toThrow();
+  });
+
+  it('exposes correct bucket names', async () => {
+    const { BUCKETS } = require('../src/services/r2Service');
+    expect(BUCKETS.CONTRACT_DOCS).toBe('contract-docs');
+    expect(BUCKETS.PAYMENT_RECEIPTS).toBe('payment-receipts');
+    expect(BUCKETS.CHECKIN_PHOTOS).toBe('checkin-photos');
   });
 });
