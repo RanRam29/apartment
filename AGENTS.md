@@ -43,11 +43,11 @@ Find your agent name below. Only work on YOUR tasks. Do not touch files owned by
 
 | Task | Description | Status | Depends On |
 |------|-------------|--------|------------|
-| T1 | Storage Migration — Cloudflare R2 replaces Cloudinary | 🔴 TODO | — |
-| T8 | Ledger + Payment Tracking — generate, report, confirm, auto-confirm | 🔴 TODO | T1 |
-| T9 | EXPIRING Alerts — 120/90/60/45/30 day cron | 🔴 TODO | — |
-| T15 | Admin Panel v1 — GODMODE config + management | 🔴 TODO | — |
-| T16 | Remaining Cron Jobs — KYC renewal, maintenance alerts, R2 cleanup, CPI | 🔴 TODO | T1 |
+| T1 | Storage Migration — Cloudflare R2 replaces Cloudinary | 🟢 DONE | — |
+| T8 | Ledger + Payment Tracking — generate, report, confirm, auto-confirm | 🟢 DONE | T1 |
+| T9 | EXPIRING Alerts — 120/90/60/45/30 day cron | 🟢 DONE | — |
+| T15 | Admin Panel v1 — GODMODE config + management | 🟢 DONE | — |
+| T16 | Remaining Cron Jobs — KYC renewal, maintenance alerts, R2 cleanup, CPI | 🟢 DONE | T1 |
 
 **Your files (exclusive):**
 - `backend/src/config/r2.js` (create)
