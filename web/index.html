@@ -57,12 +57,34 @@
     /* ── HERO ── */
     .hero {
       min-height: 100vh;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      padding: 130px 24px 80px; text-align: center; position: relative;
+      display: flex; align-items: center; justify-content: center;
+      padding: 130px 24px 80px; position: relative;
       background:
         radial-gradient(ellipse 70% 50% at 50% 0%, rgba(0,203,169,0.10) 0%, transparent 60%),
         radial-gradient(ellipse 50% 40% at 80% 80%, rgba(0,203,169,0.05) 0%, transparent 60%),
         #0d1b2a;
+    }
+    .hero-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 60px;
+      width: min(calc(100% - 48px), 1040px);
+      margin: 0 auto;
+      text-align: right;
+    }
+    .hero-content {
+      flex: 1.2;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      text-align: right;
+    }
+    .hero-visual {
+      flex: 0.8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
     .hero-badge {
       display: inline-flex; align-items: center; gap: 6px;
@@ -72,20 +94,20 @@
       margin-bottom: 28px;
     }
     .hero h1 {
-      font-size: clamp(2.4rem, 6vw, 4.8rem);
+      font-size: clamp(2.4rem, 5.5vw, 4.4rem);
       font-weight: 800; letter-spacing: -0.03em; color: #f0f4f8;
-      line-height: 1.1; max-width: 760px; margin-bottom: 20px;
+      line-height: 1.15; max-width: 600px; margin-bottom: 20px;
     }
     .hero h1 span { color: #00cba9; }
     .hero-subtitle {
       font-size: 1.1rem; color: rgba(240,244,248,0.65);
-      max-width: 460px; line-height: 1.7; margin-bottom: 40px;
+      max-width: 500px; line-height: 1.7; margin-bottom: 40px;
     }
 
     /* ── WAITLIST FORM ── */
     .waitlist-form {
-      display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
-      width: 100%; max-width: 480px; margin-bottom: 56px;
+      display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-start;
+      width: 100%; max-width: 480px; margin-bottom: 24px;
     }
     .waitlist-input {
       flex: 1; min-width: 200px;
@@ -104,7 +126,7 @@
       transition: transform 200ms, box-shadow 200ms;
     }
     .waitlist-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,203,169,0.35); }
-    .waitlist-note { font-size: 0.78rem; color: rgba(240,244,248,0.35); margin-top: -44px; margin-bottom: 56px; }
+    .waitlist-note { font-size: 0.78rem; color: rgba(240,244,248,0.35); margin-top: 0px; margin-bottom: 0px; }
 
     /* ── HERO CARD ── */
     .hero-card {
@@ -118,6 +140,25 @@
       animation: float 6s ease-in-out infinite;
     }
     @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    @media (max-width: 900px) {
+      .hero-container {
+        flex-direction: column;
+        text-align: center;
+        gap: 48px;
+      }
+      .hero-content {
+        align-items: center;
+        text-align: center;
+      }
+      .waitlist-form {
+        justify-content: center;
+        margin-bottom: 32px;
+      }
+      .waitlist-note {
+        margin-top: -12px;
+        margin-bottom: 0px;
+      }
+    }
     .card-img {
       width: 100%; height: 190px; border-radius: 18px;
       background: linear-gradient(135deg, #1a2e42 0%, #2c3e50 100%);
@@ -286,53 +327,59 @@
 
   <!-- HERO -->
   <section class="hero" aria-labelledby="hero-heading">
-    <div class="hero-badge">🚀 בקרוב בישראל</div>
-
-    <h1 id="hero-heading">
-      מצא את הדירה שלך<br />
-      ב<span>החלקה אחת</span>.
-    </h1>
-
-    <p class="hero-subtitle">
-      DirApp מביאה לך את דירות השכירות הכי מתאימות — בלי סוכנים, בלי עמלות, עם AI שמבין מה אתה/את באמת מחפש/ת.
-    </p>
-
-    <form class="waitlist-form" onsubmit="handleWaitlist(event)" id="waitlist">
-      <input
-        id="hero-email"
-        class="waitlist-input"
-        type="email"
-        placeholder="האימייל שלך"
-        required
-        aria-label="כתובת אימייל"
-      />
-      <button class="waitlist-btn" type="submit">הצטרפו עכשיו ←</button>
-    </form>
-    <p class="waitlist-note">כבר 2,400+ אנשים ברשימת ההמתנה · ללא ספאם</p>
-
-    <!-- Floating swipe card -->
-    <div class="hero-card" role="img" aria-label="דוגמה לכרטיס דירה">
-      <div class="card-img">
-        <img
-          src="https://images.unsplash.com/photo-1502672023488-203a3bb6e526?auto=format&fit=crop&w=800&h=380&q=80"
-          alt="דירה בפלורנטין, תל אביב"
-          loading="lazy"
-        />
-        <div class="card-luxury">LUXURY</div>
+    <div class="hero-container">
+      
+      <!-- Right Side: Content -->
+      <div class="hero-content">
+        <div class="hero-badge">🚀 בקרוב בישראל</div>
+        <h1 id="hero-heading">
+          מצא את הדירה שלך<br />
+          ב<span>החלקה אחת</span>.
+        </h1>
+        <p class="hero-subtitle">
+          DirApp מביאה לך את דירות השכירות הכי מתאימות — בלי סוכנים, בלי עמלות, עם AI שמבין מה אתה/את באמת מחפש/ת.
+        </p>
+        <form class="waitlist-form" onsubmit="handleWaitlist(event)" id="waitlist">
+          <input
+            id="hero-email"
+            class="waitlist-input"
+            type="email"
+            placeholder="האימייל שלך"
+            required
+            aria-label="כתובת אימייל"
+          />
+          <button class="waitlist-btn" type="submit">הצטרפו עכשיו ←</button>
+        </form>
+        <p class="waitlist-note">כבר 2,400+ אנשים ברשימת ההמתנה · ללא ספאם</p>
       </div>
-      <div class="card-price">₪8,500 <span>/חודש</span></div>
-      <div class="card-location">📍 פלורנטין, תל אביב</div>
-      <div class="card-chips">
-        <span class="card-chip">🛏 3 חדרים</span>
-        <span class="card-chip">📐 78 מ"ר</span>
-        <span class="card-chip">🅿️ חניה</span>
-        <span class="card-chip">☀️ מרפסת</span>
+
+      <!-- Left Side: Interactive Mock Card -->
+      <div class="hero-visual">
+        <div class="hero-card" role="img" aria-label="דוגמה לכרטיס דירה">
+          <div class="card-img">
+            <img
+              src="https://images.unsplash.com/photo-1502672023488-203a3bb6e526?auto=format&fit=crop&w=800&h=380&q=80"
+              alt="דירה בפלורנטין, תל אביב"
+              loading="lazy"
+            />
+            <div class="card-luxury">LUXURY</div>
+          </div>
+          <div class="card-price">₪8,500 <span>/חודש</span></div>
+          <div class="card-location">📍 פלורנטין, תל אביב</div>
+          <div class="card-chips">
+            <span class="card-chip">🛏 3 חדרים</span>
+            <span class="card-chip">📐 78 מ"ר</span>
+            <span class="card-chip">🅿️ חניה</span>
+            <span class="card-chip">☀️ מרפסת</span>
+          </div>
+          <div class="card-actions">
+            <button class="card-btn card-btn-reject" aria-label="דלג">✕</button>
+            <button class="card-btn card-btn-super" aria-label="Super Like">★</button>
+            <button class="card-btn card-btn-like" aria-label="אהבתי">♥</button>
+          </div>
+        </div>
       </div>
-      <div class="card-actions">
-        <button class="card-btn card-btn-reject" aria-label="דלג">✕</button>
-        <button class="card-btn card-btn-super" aria-label="Super Like">★</button>
-        <button class="card-btn card-btn-like" aria-label="אהבתי">♥</button>
-      </div>
+
     </div>
   </section>
 

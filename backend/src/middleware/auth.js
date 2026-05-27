@@ -22,7 +22,7 @@ async function authenticate(req, res, next) {
 
   try {
     const user = await User.findByPk(decoded.id, {
-      attributes: ['id', 'role', 'email', 'isPremium', 'isVerified', 'isLocked', 'tosAcceptedAt'],
+      attributes: ['id', 'role', 'activeRole', 'email', 'isPremium', 'isVerified', 'isLocked', 'tosAcceptedAt'],
     });
     if (!user) {
       return res.status(401).json({ error: 'Invalid or expired token' });
@@ -32,7 +32,7 @@ async function authenticate(req, res, next) {
     }
     req.user = {
       id: user.id,
-      role: user.role,
+      role: user.role === 'admin' ? 'admin' : (user.activeRole || user.role),
       email: user.email,
       isPremium: Boolean(user.isPremium),
       isVerified: Boolean(user.isVerified),

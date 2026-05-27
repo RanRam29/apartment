@@ -41,10 +41,13 @@ async function seed() {
   // Create admin accounts (always, idempotent)
   for (const a of ADMIN_ACCOUNTS) {
     const adminHash = await bcrypt.hash(a.password, 12);
-    const [, created] = await User.findOrCreate({
+    const [user, created] = await User.findOrCreate({
       where: { email: a.email },
-      defaults: { email: a.email, passwordHash: adminHash, firstName: a.firstName, lastName: a.lastName, role: a.role, isVerified: true },
+      defaults: { email: a.email, passwordHash: adminHash, firstName: a.firstName, lastName: a.lastName, role: a.role, isVerified: true, tosAcceptedAt: new Date(), tosVersion: '3.0' },
     });
+    if (!created && !user.tosAcceptedAt) {
+      await user.update({ tosAcceptedAt: new Date(), tosVersion: '3.0' });
+    }
     console.log(`${created ? '➕' : '⏩'} Admin: ${a.email}`);
   }
 
@@ -111,10 +114,14 @@ async function autoSeed(queryInterface) {
     // Always ensure admin accounts exist (upsert regardless of DB state)
     const adminHash = await bcrypt.hash('Admin1234!', 12);
     for (const a of ADMIN_ACCOUNTS) {
-      await User.findOrCreate({
+      const [user, created] = await User.findOrCreate({
         where: { email: a.email },
-        defaults: { email: a.email, passwordHash: adminHash, firstName: a.firstName, lastName: a.lastName, role: a.role, isVerified: true },
+        defaults: { email: a.email, passwordHash: adminHash, firstName: a.firstName, lastName: a.lastName, role: a.role, isVerified: true, tosAcceptedAt: new Date(), tosVersion: '3.0' },
       });
+      // Backfill tosAcceptedAt for existing admin accounts that were created before this fix
+      if (!created && !user.tosAcceptedAt) {
+        await user.update({ tosAcceptedAt: new Date(), tosVersion: '3.0' });
+      }
     }
 
     if (!shouldAutoSeedOnStartup()) {

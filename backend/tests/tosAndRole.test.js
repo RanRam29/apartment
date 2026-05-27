@@ -84,7 +84,14 @@ describe('Terms of Service and Role Switching', () => {
   });
 
   describe('Role Switching', () => {
-    it('allows switching role to landlord', async () => {
+    it('blocks landlord-only routes before switching', async () => {
+      const res = await request(app)
+        .get('/api/landlord/leads')
+        .set('Authorization', `Bearer ${userToken}`);
+      expect(res.status).toBe(403);
+    });
+
+    it('allows switching role to landlord and permits landlord-only routes', async () => {
       const res = await request(app)
         .patch('/api/auth/switch-role')
         .set('Authorization', `Bearer ${userToken}`)
@@ -95,6 +102,27 @@ describe('Terms of Service and Role Switching', () => {
       // Verify DB
       const u = await User.findByPk(testUser.id);
       expect(u.activeRole).toBe('landlord');
+
+      // Verify that landlord route is now accessible
+      const landlordRes = await request(app)
+        .get('/api/landlord/leads')
+        .set('Authorization', `Bearer ${userToken}`);
+      expect(landlordRes.status).toBe(200);
+    });
+
+    it('allows switching role back to tenant and blocks landlord-only routes again', async () => {
+      const res = await request(app)
+        .patch('/api/auth/switch-role')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({ role: 'tenant' });
+      expect(res.status).toBe(200);
+      expect(res.body.activeRole).toBe('tenant');
+
+      // Verify that landlord route is blocked again
+      const landlordRes = await request(app)
+        .get('/api/landlord/leads')
+        .set('Authorization', `Bearer ${userToken}`);
+      expect(landlordRes.status).toBe(403);
     });
 
     it('rejects invalid roles', async () => {

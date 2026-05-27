@@ -263,7 +263,12 @@ function App() {
                         <td style={{ color: u.isLocked ? 'var(--accent-danger)' : 'var(--accent-success)' }}>
                           {u.isLocked ? `נעול (${u.blockedCount})` : 'פעיל תקין'}
                         </td>
-                        <td>APPROVED</td>
+                        <td style={{ 
+                          color: u.kycProfile?.status === 'APPROVED' ? 'var(--accent-success)' : u.kycProfile?.status === 'REJECTED' ? 'var(--accent-danger)' : 'var(--text-secondary)',
+                          fontWeight: 'bold'
+                        }}>
+                          {u.kycProfile?.status || 'NOT_STARTED'}
+                        </td>
                         <td>
                           <div style={{ display: 'flex', gap: '8px' }}>
                             {u.isLocked && (

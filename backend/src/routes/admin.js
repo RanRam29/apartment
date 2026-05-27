@@ -29,6 +29,7 @@ router.get('/users', async (req, res, next) => {
       limit: parseInt(limit),
       offset: (parseInt(page) - 1) * parseInt(limit),
       order: [['createdAt', 'DESC']],
+      include: [{ model: UserKycProfile, as: 'kycProfile', attributes: ['status'] }],
     });
     res.json(users);
   } catch (err) { next(err); }

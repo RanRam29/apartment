@@ -80,7 +80,7 @@ const User = sequelize.define('User', {
   },
   activeRole: {
     type: DataTypes.STRING(20),
-    defaultValue: 'tenant',
+    allowNull: true,
     validate: { isIn: [['tenant', 'landlord']] },
   },
 }, {
@@ -92,6 +92,9 @@ const User = sequelize.define('User', {
   ],
   hooks: {
     beforeValidate: async (user) => {
+      if (!user.activeRole && user.role) {
+        user.activeRole = user.role === 'admin' ? 'tenant' : user.role;
+      }
       if (!user.verificationToken) return;
       const existing = await User.findOne({ where: { verificationToken: user.verificationToken } }).catch(() => null);
       if (existing) {
