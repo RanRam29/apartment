@@ -86,6 +86,29 @@ async function startServer() {
       }
     }, Math.max(1, cleanupHours) * 60 * 60 * 1000);
     initSocket(server);
+
+    // Register cron jobs
+    const cron = require('node-cron');
+    const { runExpiringAlerts } = require('./cron/expiringAlerts');
+    const { runLedgerDueAlerts } = require('./cron/ledgerDueAlerts');
+    const { runLedgerOverdue } = require('./cron/ledgerOverdue');
+    const { runPaymentAutoConfirm } = require('./cron/paymentAutoConfirm');
+    const { runKycRenewal } = require('./cron/kycRenewal');
+    const { runMaintenanceAlerts } = require('./cron/maintenanceAlerts');
+    const { runR2Cleanup } = require('./cron/r2Cleanup');
+    const { runCpiAdjustment } = require('./cron/cpiAdjustment');
+
+    if (process.env.NODE_ENV !== 'test') {
+      cron.schedule('0 8 * * *', runLedgerDueAlerts);     // Daily 08:00
+      cron.schedule('0 9 * * *', runExpiringAlerts);       // Daily 09:00
+      cron.schedule('59 23 * * *', runLedgerOverdue);      // Daily 23:59
+      cron.schedule('0 * * * *', runPaymentAutoConfirm);   // Every hour
+      cron.schedule('0 * * * *', runMaintenanceAlerts);    // Every hour
+      cron.schedule('0 0 * * *', runKycRenewal);           // Daily midnight
+      cron.schedule('0 0 1 * *', runR2Cleanup);            // Monthly 1st
+      cron.schedule('0 0 1 1 *', runCpiAdjustment);        // Jan 1 yearly
+      logger.info('V3 platform cron jobs scheduled successfully');
+    }
   } catch (err) {
     logger.error('Failed to start server:', err);
     await logSystemEvent({
@@ -101,3 +124,4 @@ async function startServer() {
 }
 
 startServer();
+

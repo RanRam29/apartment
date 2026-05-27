@@ -1,4 +1,16 @@
 process.env.JWT_SECRET = 'test_jwt_secret_for_verification_tests';
+jest.mock('../src/services/r2Service', () => ({
+  uploadFile: jest.fn().mockResolvedValue({ bucket: 'test-bucket', key: 'test-key' }),
+  getPresignedUrl: jest.fn().mockResolvedValue('https://dummy-presigned-url.com'),
+  BUCKETS: {
+    PROPERTY_IMAGES: 'property-images',
+    CONTRACT_DOCS: 'contract-docs',
+    CHECKIN_PHOTOS: 'checkin-photos',
+    PAYMENT_RECEIPTS: 'payment-receipts',
+    ARCHIVE: 'archive',
+  }
+}));
+
 const request = require('supertest');
 const app = require('../src/app');
 const { User, MaintenanceTicket, TicketInvoice } = require('../src/models');

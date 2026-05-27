@@ -1,7 +1,7 @@
 process.env.JWT_SECRET = 'test_jwt_secret_for_verification_tests';
 const request = require('supertest');
 const app = require('../src/app');
-const { User, AgreementGuarantor } = require('../src/models');
+const { User, AgreementGuarantor, RentalAgreement } = require('../src/models');
 const { sequelize } = require('../src/config/database');
 const { initRedis } = require('../src/config/redis');
 
@@ -34,6 +34,18 @@ describe('Guarantor Flow (M7)', () => {
     landlordToken = llRes.body.token;
     landlord = await User.findOne({ where: { email: landlordEmail } });
     await landlord.update({ isVerified: true });
+
+    // Seed mock rental agreement for guarantor invite
+    await RentalAgreement.destroy({ where: { id: agreementId } }).catch(() => {});
+    await RentalAgreement.create({
+      id: agreementId,
+      landlordId: landlord.id,
+      propertyId: '00000000-0000-4000-8000-000000000001',
+      monthlyRentIls: 5000,
+      startDate: '2026-07-01',
+      endDate: '2027-06-30',
+      extractedFields: { address: 'רחוב הרצל 5, תל אביב' }
+    });
   });
 
   it('allows landlord to invite a guarantor', async () => {

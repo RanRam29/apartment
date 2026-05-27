@@ -41,6 +41,13 @@ TicketInvoice.belongsTo(MaintenanceTicket, { foreignKey: 'ticketId', as: 'ticket
 
 const AgreementGuarantor = require('./pg/AgreementGuarantor');
 
+const RentalAgreement = require('./pg/RentalAgreement');
+const LedgerRow = require('./pg/LedgerRow');
+const AppConfig = require('./pg/AppConfig');
+
+RentalAgreement.hasMany(LedgerRow, { foreignKey: 'agreementId', as: 'ledgerRows' });
+LedgerRow.belongsTo(RentalAgreement, { foreignKey: 'agreementId', as: 'agreement' });
+
 module.exports = {
   User,
   Apartment,
@@ -54,4 +61,8 @@ module.exports = {
   MaintenanceTicket,
   TicketInvoice,
   AgreementGuarantor,
+  RentalAgreement,
+  LedgerRow,
+  AppConfig,
 };
+

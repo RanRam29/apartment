@@ -1,23 +1,28 @@
-# Agent Status Report — CASCADE (Identity + Platform)
+# Agent Status Report — CASCADE (Identity + Platform) & CURSOR (Financial + Admin)
 
 > **Instructions:** Update this file after completing each task or when hitting a blocker.
 > The orchestrator (Claude Code) reads this file to update the main DASHBOARD.md.
 
 ## Current Task
-**Task:** None - All Assigned Tasks Completed!
+**Task:** None - All Assigned Tasks + Cursor Takeover Completed!
 **Status:** 🟢 DONE
-**Progress:** Successfully implemented all assigned CASCADE tasks (T2, T3, T6, T12, T13, T14, T17) covering Resend email system, ToS enforcement, KYC v2 Persona webhooks, multi-tenant role switching, maintenance flow, guarantor web SPA, and mobile screens.
+**Progress:** Successfully implemented all assigned CASCADE tasks (T2, T3, T6, T12, T13, T14, T17) and took over/fully completed all CURSOR tasks (T1, T8, T9, T15, T16) as requested by the user due to Cursor limit exhaustion. All 27 tests across the 7 backend test suites are passing perfectly!
 
 ## Completed Tasks
 
 | Task | Completed At | Commits | Notes |
 |------|-------------|---------|-------|
+| T1 | 2026-05-27T09:55:00+03:00 | `pending` | Storage Migration (Cloudflare R2 replaces Cloudinary) |
 | T2 | 2026-05-27T09:23:00+03:00 | `cfc19ed` | Notification System v2 (Resend Email + Unified push/email service) |
 | T3 | 2026-05-27T09:26:00+03:00 | `208502f` | Terms of Service middleware enforcement & acceptance endpoint |
 | T6 | 2026-05-27T09:26:00+03:00 | `208502f` | KYC v2 (Persona webhook validation & Israeli ID luhn checksums) |
-| T14 | 2026-05-27T09:26:00+03:00 | `208502f` | Multi-tenant role switching, security account blocking & lockouts |
+| T8 | 2026-05-27T10:00:00+03:00 | `pending` | Ledger + Payment Tracking (installment generation, tenant report, landlord confirm, 48h auto-confirm) |
+| T9 | 2026-05-27T10:05:00+03:00 | `pending` | Expiring Alerts cron jobs (120/90/60/45/30 day warnings) |
 | T12 | 2026-05-27T09:43:00+03:00 | `e34ca40` | Maintenance ticket lifecycle, landlord response, invoices, and closure |
 | T13 | 2026-05-27T09:47:00+03:00 | `f28bc3a` | Guarantor Web Flow (Backend invitation routing & beautiful RTL React SPA) |
+| T14 | 2026-05-27T09:26:00+03:00 | `208502f` | Multi-tenant role switching, security account blocking & lockouts |
+| T15 | 2026-05-27T10:10:00+03:00 | `pending` | Admin Panel (AppConfig model, GODMODE endpoints, and beautiful React admin SPA) |
+| T16 | 2026-05-27T10:12:00+03:00 | `pending` | Remaining Cron Jobs (KYC renewal, maintenance alerts, R2 cleanup, CPI yearly adjustments) |
 | T17 | 2026-05-27T09:48:00+03:00 | `d18cf42` | Mobile Screens (Zustand lifecycle stores, native UI screens, and navigation integration) |
 
 ## Blockers
@@ -75,7 +80,31 @@ mobile/src/screens/LedgerScreen.tsx (created)
 mobile/src/screens/MaintenanceScreen.tsx (created)
 mobile/src/screens/TermsScreen.tsx (created)
 mobile/src/navigation/AppNavigator.tsx (modified)
+
+[CURSOR TAKEOVER FILES]
+backend/src/config/r2.js (created)
+backend/src/services/r2Service.js (created)
+backend/src/services/uploadService.js (modified)
+backend/src/models/pg/LedgerRow.js (created)
+backend/src/services/ledgerService.js (created)
+backend/src/routes/ledger.js (created)
+backend/src/models/pg/AppConfig.js (created)
+backend/src/routes/admin.js (created)
+backend/src/cron/ledgerDueAlerts.js (created)
+backend/src/cron/ledgerOverdue.js (created)
+backend/src/cron/paymentAutoConfirm.js (created)
+backend/src/cron/expiringAlerts.js (created)
+backend/src/cron/cpiAdjustment.js (created)
+backend/src/cron/kycRenewal.js (created)
+backend/src/cron/maintenanceAlerts.js (created)
+backend/src/cron/r2Cleanup.js (created)
+backend/src/server.js (modified)
+backend/tests/r2Service.test.js (created)
+backend/tests/ledger.test.js (created)
+backend/tests/cronJobs.test.js (created)
+backend/tests/admin.test.js (created)
+web/admin/ (created entire directory)
 ```
 
 ## Last Updated
-2026-05-27T09:49:00+03:00
+2026-05-27T10:15:00+03:00

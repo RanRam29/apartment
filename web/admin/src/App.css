@@ -1,0 +1,318 @@
+:root {
+  --primary: #f43f5e;
+  --primary-hover: #e11d48;
+  --bg-gradient: radial-gradient(circle at 10% 20%, rgb(10, 10, 18) 0%, rgb(15, 12, 30) 90.1%);
+  --card-bg: rgba(20, 15, 35, 0.7);
+  --card-border: rgba(244, 63, 94, 0.12);
+  --text-primary: #ffffff;
+  --text-secondary: #a78bfa;
+  --accent-success: #10b981;
+  --accent-danger: #ef4444;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Heebo', 'Outfit', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background: var(--bg-gradient);
+  color: var(--text-primary);
+  min-height: 100vh;
+  padding: 30px;
+}
+
+.admin-layout {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Glowing top border */
+.glowing-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid var(--card-border);
+  border-radius: 24px;
+  padding: 35px;
+  box-shadow: 0 15px 45px rgba(244, 63, 94, 0.08);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 30px;
+}
+
+.glowing-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary), var(--text-secondary));
+}
+
+/* Header */
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 20px;
+}
+
+.admin-title-box h1 {
+  font-size: 2.2rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #fff 0%, var(--text-secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.admin-title-box p {
+  color: #9aa0b9;
+  font-size: 0.95rem;
+}
+
+.badge-godmode {
+  background: rgba(244, 63, 94, 0.15);
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  padding: 6px 14px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 0 15px rgba(244, 63, 94, 0.2);
+}
+
+/* Sidebar / Main Layout grid */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  gap: 30px;
+}
+
+.nav-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nav-link {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: #9aa0b9;
+  padding: 14px 20px;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: right;
+}
+
+.nav-link:hover, .nav-link.active {
+  background: rgba(244, 63, 94, 0.1);
+  border-color: rgba(244, 63, 94, 0.3);
+  color: white;
+  transform: translateX(-4px);
+}
+
+/* Dashboard metrics */
+.metrics-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.metric-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 18px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: transform 0.3s;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(244, 63, 94, 0.2);
+}
+
+.metric-label {
+  font-size: 0.8rem;
+  color: #9aa0b9;
+  font-weight: 500;
+}
+
+.metric-value {
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: white;
+}
+
+/* Tables and records */
+.data-table-container {
+  overflow-x: auto;
+  margin-top: 15px;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: right;
+}
+
+.data-table th {
+  padding: 14px 18px;
+  color: var(--text-secondary);
+  font-weight: 700;
+  font-size: 0.85rem;
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.1);
+}
+
+.data-table td {
+  padding: 14px 18px;
+  color: #e2e8f0;
+  font-size: 0.9rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.data-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.01);
+}
+
+/* Action controls */
+.action-btn {
+  background: rgba(244, 63, 94, 0.1);
+  color: var(--primary);
+  border: 1px solid rgba(244, 63, 94, 0.2);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.action-btn:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.action-btn.btn-success {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--accent-success);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.action-btn.btn-success:hover {
+  background: var(--accent-success);
+  color: white;
+}
+
+/* Forms and config editing */
+.config-form-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.config-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.config-key {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: white;
+}
+
+.config-desc {
+  font-size: 0.8rem;
+  color: #9aa0b9;
+}
+
+.config-edit-box {
+  display: flex;
+  gap: 10px;
+}
+
+.config-input {
+  background: #0f1019;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: white;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  width: 100px;
+  text-align: center;
+}
+
+.config-input:focus {
+  border-color: var(--primary);
+  outline: none;
+}
+
+/* Authentication Gate panel */
+.auth-gate {
+  max-width: 400px;
+  margin: 100px auto;
+}
+
+.auth-input {
+  width: 100%;
+  background: #0f1019;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: white;
+  padding: 12px 16px;
+  font-size: 0.95rem;
+  margin-bottom: 16px;
+}
+
+.auth-input:focus {
+  border-color: var(--primary);
+  outline: none;
+}
+
+.auth-btn {
+  width: 100%;
+  height: 48px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.auth-btn:hover {
+  background: var(--primary-hover);
+}
+
+@media(max-width: 900px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  body {
+    padding: 15px;
+  }
+}
