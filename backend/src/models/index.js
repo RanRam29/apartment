@@ -39,6 +39,8 @@ const TicketInvoice = require('./pg/TicketInvoice');
 MaintenanceTicket.hasMany(TicketInvoice, { foreignKey: 'ticketId', as: 'invoices' });
 TicketInvoice.belongsTo(MaintenanceTicket, { foreignKey: 'ticketId', as: 'ticket' });
 
+const AgreementGuarantor = require('./pg/AgreementGuarantor');
+
 module.exports = {
   User,
   Apartment,
@@ -51,4 +53,5 @@ module.exports = {
   UserKycProfile,
   MaintenanceTicket,
   TicketInvoice,
+  AgreementGuarantor,
 };

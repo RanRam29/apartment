@@ -50,6 +50,15 @@ import ServicesScreen from '../screens/ServicesScreen';
 import IoTScreen from '../screens/IoTScreen';
 import LogsConsoleScreen from '../screens/LogsConsoleScreen';
 
+import ContractUploadScreen from '../screens/ContractUploadScreen';
+import ContractDetailScreen from '../screens/ContractDetailScreen';
+import CheckInScreen from '../screens/CheckInScreen';
+import CheckOutScreen from '../screens/CheckOutScreen';
+import LedgerScreen from '../screens/LedgerScreen';
+import MaintenanceScreen from '../screens/MaintenanceScreen';
+import TermsScreen from '../screens/TermsScreen';
+
+
 const RootStack  = createNativeStackNavigator<RootStackParamList>();
 const TenantTab  = createBottomTabNavigator<TenantTabParamList>();
 const LandlordTab = createBottomTabNavigator<LandlordTabParamList>();
@@ -387,7 +396,15 @@ function MainNavigator() {
           headerShadowVisible: false,
         }}
       />
+      <MainStack.Screen name="ContractUpload" component={ContractUploadScreen} options={{ headerShown: false }} />
+      <MainStack.Screen name="ContractDetail" component={ContractDetailScreen} options={{ headerShown: false }} />
+      <MainStack.Screen name="CheckIn" component={CheckInScreen} options={{ headerShown: false }} />
+      <MainStack.Screen name="CheckOut" component={CheckOutScreen} options={{ headerShown: false }} />
+      <MainStack.Screen name="Ledger" component={LedgerScreen} options={{ headerShown: false }} />
+      <MainStack.Screen name="Maintenance" component={MaintenanceScreen} options={{ headerShown: false }} />
+      <MainStack.Screen name="Terms" component={TermsScreen} options={{ headerShown: false }} />
     </MainStack.Navigator>
+
   );
 }
 

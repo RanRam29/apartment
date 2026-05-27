@@ -116,4 +116,9 @@ describe('Maintenance Ticket Flow (M15)', () => {
     expect(res.status).toBe(200);
     expect(res.body.status).toBe('CLOSED');
   });
+
+  afterAll(async () => {
+    await sequelize.close();
+  });
 });
+

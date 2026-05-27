@@ -156,4 +156,9 @@ describe('Terms of Service and Role Switching', () => {
       expect(tryRes.status).toBe(200);
     });
   });
+
+  afterAll(async () => {
+    await sequelize.close();
+  });
 });
+
