@@ -157,6 +157,7 @@ app.use('/api/logs', logsRoutes);
 
 // CASCADE routes
 app.use('/api/v3/kyc', require('./routes/kycV3'));
+app.use('/api/v3/maintenance', require('./routes/maintenanceV3'));
 
 
 app.use(errorHandler);

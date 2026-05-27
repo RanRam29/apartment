@@ -34,6 +34,11 @@ const UserKycProfile = require('./pg/UserKycProfile');
 User.hasOne(UserKycProfile, { foreignKey: 'userId', as: 'kycProfile' });
 UserKycProfile.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
+const MaintenanceTicket = require('./pg/MaintenanceTicket');
+const TicketInvoice = require('./pg/TicketInvoice');
+MaintenanceTicket.hasMany(TicketInvoice, { foreignKey: 'ticketId', as: 'invoices' });
+TicketInvoice.belongsTo(MaintenanceTicket, { foreignKey: 'ticketId', as: 'ticket' });
+
 module.exports = {
   User,
   Apartment,
@@ -44,4 +49,6 @@ module.exports = {
   Message,
   SystemEvent,
   UserKycProfile,
+  MaintenanceTicket,
+  TicketInvoice,
 };
