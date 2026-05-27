@@ -209,4 +209,60 @@ router.post('/:id/checkin/complete', requireRole('landlord'), async (req, res, n
   }
 });
 
+// --- Check-Out Flow ---
+
+router.post('/:id/checkout/:roomId/photos',
+  upload.array('photos', 20),
+  async (req, res, next) => {
+    try {
+      const room = await AgreementRoom.findByPk(req.params.roomId);
+      if (!room || room.agreementId !== req.params.id) {
+        return res.status(404).json({ error: 'Room not found' });
+      }
+
+      const photoKeys = [];
+      for (const file of req.files) {
+        const key = `checkout/${req.params.id}/${room.id}/${Date.now()}-${file.originalname}`;
+        await uploadFile(BUCKETS.CHECKOUT_PHOTOS, key, file.buffer, file.mimetype);
+        photoKeys.push(key);
+      }
+
+      const existing = room.checkoutPhotos || [];
+      await room.update({ checkoutPhotos: [...existing, ...photoKeys] });
+      res.json({ uploaded: photoKeys.length });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.post('/:id/checkout/review', requireRole('landlord'), async (req, res, next) => {
+  try {
+    const { roomId, notes, approved } = req.body;
+    const room = await AgreementRoom.findByPk(roomId);
+    if (!room) return res.status(404).json({ error: 'Room not found' });
+
+    if (!approved && notes) {
+      await room.update({ checkoutNotes: notes, checkoutPhotos: [] });
+      return res.json({ status: 'revision_requested', notes });
+    }
+
+    res.json({ status: 'approved' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/:id/checkout/complete', async (req, res, next) => {
+  try {
+    const agreement = await RentalAgreement.findByPk(req.params.id);
+    if (!agreement) return res.status(404).json({ error: 'Agreement not found' });
+
+    await agreement.update({ checkoutCompletedAt: new Date() });
+    res.json({ checkoutCompleted: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;
