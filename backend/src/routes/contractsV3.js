@@ -4,7 +4,7 @@ const router = express.Router();
 const { authenticate, requireRole } = require('../middleware/auth');
 const { uploadAndExtract, transitionState, validateGate } = require('../services/contractServiceV3');
 const { RentalAgreement, AgreementParty, AgreementRoom, OwnershipVerification } = require('../models');
-const { getPresignedUrl, BUCKETS } = require('../services/r2Service');
+const { uploadFile, getPresignedUrl, BUCKETS } = require('../services/r2Service');
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
@@ -152,6 +152,58 @@ router.post('/:id/verify-ownership', async (req, res, next) => {
       choice,
     });
     res.status(201).json(record);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// --- Check-In Flow ---
+
+router.post('/:id/checkin/:roomId/photos',
+  upload.array('photos', 20),
+  async (req, res, next) => {
+    try {
+      const room = await AgreementRoom.findByPk(req.params.roomId);
+      if (!room || room.agreementId !== req.params.id) {
+        return res.status(404).json({ error: 'Room not found' });
+      }
+
+      const agreement = await RentalAgreement.findByPk(req.params.id);
+      if (!agreement || agreement.status !== 'ACTIVE') {
+        return res.status(422).json({ error: 'Contract must be in ACTIVE state for check-in' });
+      }
+
+      const photoKeys = [];
+      for (const file of req.files) {
+        const key = `checkin/${agreement.id}/${room.id}/${Date.now()}-${file.originalname}`;
+        await uploadFile(BUCKETS.CHECKIN_PHOTOS, key, file.buffer, file.mimetype);
+        photoKeys.push(key);
+      }
+
+      const existing = room.checkinPhotos || [];
+      await room.update({ checkinPhotos: [...existing, ...photoKeys] });
+      res.json({ uploaded: photoKeys.length, total: room.checkinPhotos.length });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.post('/:id/checkin/complete', requireRole('landlord'), async (req, res, next) => {
+  try {
+    const agreement = await RentalAgreement.findByPk(req.params.id, {
+      include: [{ model: AgreementRoom, as: 'rooms' }],
+    });
+    if (!agreement) return res.status(404).json({ error: 'Agreement not found' });
+    if (agreement.status !== 'ACTIVE') {
+      return res.status(422).json({ error: 'Contract must be ACTIVE for check-in' });
+    }
+    if (agreement.checkinCompletedAt) {
+      return res.status(422).json({ error: 'Check-in already completed' });
+    }
+
+    await agreement.update({ checkinCompletedAt: new Date() });
+    res.json({ checkinCompleted: true, completedAt: agreement.checkinCompletedAt });
   } catch (err) {
     next(err);
   }
