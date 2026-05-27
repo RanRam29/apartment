@@ -403,10 +403,71 @@ Output only the description text, no labels or formatting.`;
   }
 }
 
+const CONTRACT_EXTRACTION_PROMPT = `You are a Hebrew rental contract analyzer. Extract the following fields from this rental contract document.
+Return a JSON object with exactly these keys:
+- landlordName (string)
+- landlordId (string, Israeli ID number)
+- tenantName (string, or null if not present)
+- tenantId (string, or null)
+- address (string, full address)
+- startDate (string, YYYY-MM-DD)
+- endDate (string, YYYY-MM-DD)
+- monthlyRent (number, in ILS)
+- paymentDay (number, 1-31)
+- cpiLinked (boolean)
+- missingFields (array of field names that could not be extracted)
+- warnings (array of strings for problematic clauses)
+Return ONLY valid JSON, no markdown.`;
+
+async function extractContractFields(fileBuffer) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error('GEMINI_API_KEY is required for contract extraction');
+  }
+
+  const base64 = fileBuffer.toString('base64');
+  const t0 = Date.now();
+
+  try {
+    const response = await axios.post(
+      geminiGenerateUrl(),
+      {
+        contents: [
+          {
+            parts: [
+              { text: CONTRACT_EXTRACTION_PROMPT },
+              { inlineData: { mimeType: 'application/pdf', data: base64 } },
+            ],
+          },
+        ],
+        generationConfig: {
+          temperature: 0.1,
+          maxOutputTokens: 1024,
+        },
+      },
+      { ...geminiRequestConfig(apiKey), timeout: 30000 }
+    );
+
+    const rawText = response.data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+    const parsed = extractJsonObject(rawText);
+    if (!parsed) {
+      logger.warn(`Gemini contract_extract invalid_json ms=${Date.now() - t0}`);
+      return { missingFields: ['all'], warnings: ['Failed to parse contract'] };
+    }
+
+    logger.info(`Gemini contract_extract ok ms=${Date.now() - t0}`);
+    return parsed;
+  } catch (err) {
+    logger.error(`Gemini contract_extract error ms=${Date.now() - t0}: ${err.message}`);
+    return { missingFields: ['all'], warnings: [`Extraction failed: ${err.message}`] };
+  }
+}
+
 module.exports = {
   parseSearchQuery,
   generateListingSummary,
   generateMarketingCopy,
+  extractContractFields,
   COPY_STYLE_INSTRUCTIONS,
   sanitizeParsedFilters,
   extractJsonObject,
