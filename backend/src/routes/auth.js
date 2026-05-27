@@ -474,5 +474,63 @@ router.patch('/push-token', require('../middleware/auth').authenticate, async (r
   }
 });
 
-// POST /api/auth/resend-verification
+// POST /api/auth/accept-tos — Accept Terms of Service
+router.post('/accept-tos', require('../middleware/auth').authenticate, async (req, res, next) => {
+  try {
+    const user = await User.findByPk(req.user.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    await user.update({
+      tosAcceptedAt: new Date(),
+      tosVersion: '3.0',
+    });
+    res.json({ ok: true, tosAcceptedAt: user.tosAcceptedAt });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// PATCH /api/auth/switch-role — Switch active role between tenant and landlord
+router.patch('/switch-role', require('../middleware/auth').authenticate, async (req, res, next) => {
+  try {
+    const { role } = req.body;
+    if (!['tenant', 'landlord'].includes(role)) {
+      return res.status(400).json({ error: 'Role must be tenant or landlord' });
+    }
+    const user = await User.findByPk(req.user.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    await user.update({ activeRole: role });
+    res.json({ activeRole: role });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /api/auth/block/:userId — block a user (admin only)
+router.post('/block/:userId', require('../middleware/auth').authenticate, require('../middleware/auth').requireRole('admin'), async (req, res, next) => {
+  try {
+    const user = await User.findByPk(req.params.userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    const blockedCount = user.blockedCount + 1;
+    const isLocked = blockedCount >= 5;
+    await user.update({ blockedCount, isLocked });
+    res.json({ blockedCount, isLocked });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /api/auth/unblock/:userId — unblock a user (admin only)
+router.post('/unblock/:userId', require('../middleware/auth').authenticate, require('../middleware/auth').requireRole('admin'), async (req, res, next) => {
+  try {
+    const user = await User.findByPk(req.params.userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    const blockedCount = Math.max(0, user.blockedCount - 1);
+    const isLocked = blockedCount >= 5;
+    await user.update({ blockedCount, isLocked });
+    res.json({ blockedCount, isLocked });
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;

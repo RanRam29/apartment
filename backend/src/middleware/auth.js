@@ -22,10 +22,13 @@ async function authenticate(req, res, next) {
 
   try {
     const user = await User.findByPk(decoded.id, {
-      attributes: ['id', 'role', 'email', 'isPremium', 'isVerified'],
+      attributes: ['id', 'role', 'email', 'isPremium', 'isVerified', 'isLocked', 'tosAcceptedAt'],
     });
     if (!user) {
       return res.status(401).json({ error: 'Invalid or expired token' });
+    }
+    if (user.isLocked) {
+      return res.status(403).json({ error: 'Account locked', code: 'ACCOUNT_LOCKED' });
     }
     req.user = {
       id: user.id,
@@ -33,6 +36,7 @@ async function authenticate(req, res, next) {
       email: user.email,
       isPremium: Boolean(user.isPremium),
       isVerified: Boolean(user.isVerified),
+      tosAcceptedAt: user.tosAcceptedAt,
     };
     next();
   } catch (err) {

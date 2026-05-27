@@ -62,6 +62,26 @@ const User = sequelize.define('User', {
     type: DataTypes.DATE,
     allowNull: true,
   },
+  tosAcceptedAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
+  tosVersion: {
+    type: DataTypes.STRING(20),
+    allowNull: true,
+  },
+  blockedCount: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+  },
+  isLocked: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+  activeRole: {
+    type: DataTypes.ENUM('tenant', 'landlord'),
+    defaultValue: 'tenant',
+  },
 }, {
   tableName: 'users',
   indexes: [

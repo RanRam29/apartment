@@ -125,6 +125,14 @@ const swipeLimiter = rateLimit({
 
 app.use(globalLimiter);
 
+// Terms of Service enforcement gates (CASCADE)
+const { authenticate: tosAuthenticate } = require('./middleware/auth');
+const { requireTos } = require('./middleware/requireTos');
+app.use('/api/apartments', tosAuthenticate, requireTos);
+app.use('/api/swipe', tosAuthenticate, requireTos);
+app.use('/api/matches', tosAuthenticate, requireTos);
+app.use('/api/contracts', tosAuthenticate, requireTos);
+
 app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
 app.use('/api/auth', authLimiter, authRoutes);
@@ -146,6 +154,10 @@ app.use('/api/services', servicesRoutes);
 app.use('/api/iot', iotRoutes);
 app.use('/api/admin/logs', adminLogsRoutes);
 app.use('/api/logs', logsRoutes);
+
+// CASCADE routes
+app.use('/api/v3/kyc', require('./routes/kycV3'));
+
 
 app.use(errorHandler);
 

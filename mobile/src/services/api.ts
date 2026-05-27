@@ -322,6 +322,47 @@ export const clientLogsApi = {
   }) => api.post('/logs/client-event', data, { headers: { 'x-client-log-no-report': '1' } }),
 };
 
+// ─── CASCADE V3 APIs ────────────────────────────────────────────────────────
+export const contractsV3Api = {
+  upload: (formData: FormData) => api.post('/v3/contracts/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  get: (id: string) => api.get(`/v3/contracts/${id}`),
+  updateFields: (id: string, fields: any) => api.patch(`/v3/contracts/${id}/fields`, fields),
+  inviteTenant: (id: string, tenantUserId: string) => api.post(`/v3/contracts/${id}/invite-tenant`, { tenantUserId }),
+  validate: (id: string) => api.get(`/v3/contracts/${id}/validate`),
+  transition: (id: string, targetStatus: string) => api.post(`/v3/contracts/${id}/transition`, { targetStatus }),
+  sign: (id: string) => api.post(`/v3/contracts/${id}/sign`),
+  verifyOwnership: (id: string, choice: string) => api.post(`/v3/contracts/${id}/verify-ownership`, { choice }),
+  uploadCheckinPhotos: (id: string, roomId: string, formData: FormData) => api.post(`/v3/contracts/${id}/checkin/${roomId}/photos`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  completeCheckin: (id: string) => api.post(`/v3/contracts/${id}/checkin/complete`),
+  uploadCheckoutPhotos: (id: string, roomId: string, formData: FormData) => api.post(`/v3/contracts/${id}/checkout/${roomId}/photos`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  reviewCheckout: (id: string, data: any) => api.post(`/v3/contracts/${id}/checkout/review`, data),
+  completeCheckout: (id: string) => api.post(`/v3/contracts/${id}/checkout/complete`),
+  renew: (id: string, formData: FormData) => api.post(`/v3/contracts/${id}/renew`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+};
+
+export const ledgerApi = {
+  getForAgreement: (agreementId: string) => api.get(`/v3/ledger/agreement/${agreementId}`),
+  reportPayment: (id: string, formData?: FormData) => formData ? api.post(`/v3/ledger/${id}/report`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }) : api.post(`/v3/ledger/${id}/report`),
+  confirmPayment: (id: string) => api.post(`/v3/ledger/${id}/confirm`),
+  rejectPayment: (id: string) => api.post(`/v3/ledger/${id}/reject`),
+};
+
+export const maintenanceApi = {
+  create: (formData: FormData) => api.post('/v3/maintenance', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  getForAgreement: (agreementId: string) => api.get(`/v3/maintenance/agreement/${agreementId}`),
+  respond: (id: string, data: any) => api.post(`/v3/maintenance/${id}/respond`, data),
+  close: (id: string) => api.post(`/v3/maintenance/${id}/close`),
+};
+
+export const kycApi = {
+  initiate: () => api.post('/v3/kyc/initiate'),
+  validateId: (idNumber: string) => api.post('/v3/kyc/validate-id', { idNumber }),
+};
+
+export const tosApi = {
+  accept: () => api.post('/auth/accept-tos'),
+};
+
 // ─── Token helpers ────────────────────────────────────────────────────────────
 export const tokenStorage = {
   save: (token: string) => storage.setItemAsync(TOKEN_KEY, token),

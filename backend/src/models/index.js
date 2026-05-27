@@ -29,6 +29,11 @@ Match.belongsTo(User, { foreignKey: 'landlordId', as: 'landlord' });
 Apartment.hasMany(Match, { foreignKey: 'apartmentId', as: 'matches' });
 Match.belongsTo(Apartment, { foreignKey: 'apartmentId', as: 'apartment' });
 
+// CASCADE associations
+const UserKycProfile = require('./pg/UserKycProfile');
+User.hasOne(UserKycProfile, { foreignKey: 'userId', as: 'kycProfile' });
+UserKycProfile.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
 module.exports = {
   User,
   Apartment,
@@ -38,4 +43,5 @@ module.exports = {
   UserPreferences,
   Message,
   SystemEvent,
+  UserKycProfile,
 };
