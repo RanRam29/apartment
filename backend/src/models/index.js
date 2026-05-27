@@ -29,12 +29,18 @@ Match.belongsTo(User, { foreignKey: 'landlordId', as: 'landlord' });
 Apartment.hasMany(Match, { foreignKey: 'apartmentId', as: 'matches' });
 Match.belongsTo(Apartment, { foreignKey: 'apartmentId', as: 'apartment' });
 
+// --- v3.0 Cursor Agent: Financial + Admin Models ---
+const LedgerRow = require('./pg/LedgerRow');
+const AppConfig = require('./pg/AppConfig');
+
 module.exports = {
   User,
   Apartment,
   Swipe,
   Match,
   AuditLog,
+  LedgerRow,
+  AppConfig,
   UserPreferences,
   Message,
   SystemEvent,

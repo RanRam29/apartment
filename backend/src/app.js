@@ -147,6 +147,12 @@ app.use('/api/iot', iotRoutes);
 app.use('/api/admin/logs', adminLogsRoutes);
 app.use('/api/logs', logsRoutes);
 
+// v3 routes (Cursor Agent: Financial + Admin)
+const ledgerRoutes = require('./routes/ledger');
+const adminRoutes = require('./routes/admin');
+app.use('/api/v3/ledger', ledgerRoutes);
+app.use('/api/v3/admin', adminRoutes);
+
 app.use(errorHandler);
 
 module.exports = app;
