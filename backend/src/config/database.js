@@ -32,6 +32,15 @@ const USER_VERIFICATION_COLUMNS = {
   verification_token: { type: DataTypes.STRING(128), allowNull: true },
   verified_at: { type: DataTypes.DATE, allowNull: true },
 };
+
+// v3.0 columns added by Cascade (multi-tenant, ToS, blocking)
+const USER_V3_COLUMNS = {
+  tos_accepted_at: { type: DataTypes.DATE, allowNull: true },
+  tos_version: { type: DataTypes.STRING(20), allowNull: true },
+  blocked_count: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
+  is_locked: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+  active_role: { type: DataTypes.STRING(20), allowNull: true, defaultValue: 'tenant' },
+};
 const APARTMENT_STREET_COLUMN = {
   street: { type: DataTypes.STRING(100), allowNull: true },
 };
@@ -52,7 +61,8 @@ async function ensureUserVerificationColumns(queryInterface = sequelize.getQuery
     throw err;
   }
 
-  for (const [columnName, definition] of Object.entries(USER_VERIFICATION_COLUMNS)) {
+  const allUserColumns = { ...USER_VERIFICATION_COLUMNS, ...USER_V3_COLUMNS };
+  for (const [columnName, definition] of Object.entries(allUserColumns)) {
     if (!usersTable[columnName]) {
       await queryInterface.addColumn('users', columnName, definition);
       logger.info(`Added missing users.${columnName} column`);
