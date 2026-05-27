@@ -23,6 +23,7 @@ const servicesRoutes   = require('./routes/services');
 const iotRoutes        = require('./routes/iot');
 const adminLogsRoutes = require('./routes/adminLogs');
 const logsRoutes = require('./routes/logs');
+const agreementRoutes = require('./routes/agreements');
 const { requestContext } = require('./middleware/requestContext');
 const { auditCapture } = require('./middleware/auditCapture');
 const { errorHandler } = require('./middleware/errorHandler');
@@ -154,6 +155,11 @@ app.use('/api/services', servicesRoutes);
 app.use('/api/iot', iotRoutes);
 app.use('/api/admin/logs', adminLogsRoutes);
 app.use('/api/logs', logsRoutes);
+app.use('/api/v1/agreements', agreementRoutes);
+
+// v3 routes (DirApp MVP v3.0)
+const contractsV3Routes = require('./routes/contractsV3');
+app.use('/api/v3/contracts', contractsV3Routes);
 
 // CASCADE routes
 app.use('/api/v3/kyc', require('./routes/kycV3'));
