@@ -15,11 +15,11 @@ Find your agent name below. Only work on YOUR tasks. Do not touch files owned by
 
 | Task | Description | Status | Depends On |
 |------|-------------|--------|------------|
-| T4 | State Machine v3 — new statuses, AgreementParty, AgreementRoom, OwnershipVerification | 🟢 DONE | — |
-| T5 | Contract Upload + AI Extraction (Gemini OCR) | 🟢 DONE | T4 |
-| T7 | Check-In Flow — photos per room + landlord confirm | 🟢 DONE | T5 |
-| T10 | Check-Out Flow — photos, review rounds, auto-confirm | 🟢 DONE | T7 |
-| T11 | Contract Renewal — PENDING_ACTIVATION state | 🟢 DONE | T5 |
+| T4 | State Machine v3 — new statuses, AgreementParty, AgreementRoom, OwnershipVerification | 🔵 MERGED | — |
+| T5 | Contract Upload + AI Extraction (Gemini OCR) | 🔵 MERGED | T4 |
+| T7 | Check-In Flow — photos per room + landlord confirm | 🔵 MERGED | T5 |
+| T10 | Check-Out Flow — photos, review rounds, auto-confirm | 🔵 MERGED | T7 |
+| T11 | Contract Renewal — PENDING_ACTIVATION state | 🔵 MERGED | T5 |
 
 **Your files (exclusive):**
 - `backend/src/services/contractServiceV3.js` (create)
@@ -49,6 +49,8 @@ Find your agent name below. Only work on YOUR tasks. Do not touch files owned by
 | T15 | Admin Panel v1 — GODMODE config + management | 🟢 DONE | — |
 | T16 | Remaining Cron Jobs — KYC renewal, maintenance alerts, R2 cleanup, CPI | 🟢 DONE | T1 |
 
+**Note:** Cursor tasks implemented by Claude Code (acting as Cursor agent). Branch ready to merge — pending merge into main to replace Cascade's rogue duplicates with proper implementations.
+
 **Your files (exclusive):**
 - `backend/src/config/r2.js` (create)
 - `backend/src/services/r2Service.js` (create)
@@ -75,13 +77,15 @@ Find your agent name below. Only work on YOUR tasks. Do not touch files owned by
 
 | Task | Description | Status | Depends On |
 |------|-------------|--------|------------|
-| T2 | Notification System v2 — Resend Email + unified notify service | 🔴 TODO | — |
-| T3 | Terms of Service — middleware + acceptance endpoint | 🔴 TODO | — |
-| T6 | KYC v2 — Persona abstraction, HMAC webhook, ID checksum | 🔴 TODO | T2 |
-| T14 | Multi-tenant — role switch, blocking, account locking | 🔴 TODO | — |
-| T12 | Maintenance Flow — tickets, invoices, midrag.co.il link | 🔴 TODO | T2 |
-| T13 | Guarantor Web Flow — invite, web SPA, Persona Web SDK | 🔴 TODO | T2, T6 |
-| T17 | Mobile Screens — all new screens + Zustand stores | 🔴 TODO | T2 |
+| T2 | Notification System v2 — Resend Email + unified notify service | 🔵 MERGED | — |
+| T3 | Terms of Service — middleware + acceptance endpoint | 🔵 MERGED | — |
+| T6 | KYC v2 — Persona abstraction, HMAC webhook, ID checksum | 🔵 MERGED | T2 |
+| T14 | Multi-tenant — role switch, blocking, account locking | 🔵 MERGED | — |
+| T12 | Maintenance Flow — tickets, invoices, midrag.co.il link | 🔵 MERGED | T2 |
+| T13 | Guarantor Web Flow — invite, web SPA, Persona Web SDK | 🔵 MERGED | T2, T6 |
+| T17 | Mobile Screens — all new screens + Zustand stores | 🔵 MERGED | T2 |
+
+**WARNING:** Cascade went out of scope — also implemented all Cursor (T1, T8, T9, T15, T16) and Claude Code (T4, T5, T7, T10, T11) tasks on its branch. This caused a broken `require('./routes/agreements')` import on main that crashed Render (hotfixed `37792b6`). Cursor branch has proper isolated implementations that should replace Cascade's rogue duplicates.
 
 **Your files (exclusive):**
 - `backend/src/config/resend.js` (create)
