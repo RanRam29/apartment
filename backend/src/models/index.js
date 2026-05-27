@@ -45,8 +45,23 @@ const RentalAgreement = require('./pg/RentalAgreement');
 const LedgerRow = require('./pg/LedgerRow');
 const AppConfig = require('./pg/AppConfig');
 
+const AgreementParty = require('./pg/AgreementParty');
+const AgreementRoom = require('./pg/AgreementRoom');
+const OwnershipVerification = require('./pg/OwnershipVerification');
+
 RentalAgreement.hasMany(LedgerRow, { foreignKey: 'agreementId', as: 'ledgerRows' });
 LedgerRow.belongsTo(RentalAgreement, { foreignKey: 'agreementId', as: 'agreement' });
+
+RentalAgreement.hasMany(AgreementParty, { foreignKey: 'agreementId', as: 'parties' });
+AgreementParty.belongsTo(RentalAgreement, { foreignKey: 'agreementId', as: 'agreement' });
+User.hasMany(AgreementParty, { foreignKey: 'userId', as: 'agreementRoles' });
+AgreementParty.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
+RentalAgreement.hasMany(AgreementRoom, { foreignKey: 'agreementId', as: 'rooms' });
+AgreementRoom.belongsTo(RentalAgreement, { foreignKey: 'agreementId', as: 'agreement' });
+
+RentalAgreement.hasMany(OwnershipVerification, { foreignKey: 'agreementId', as: 'ownershipVerifications' });
+OwnershipVerification.belongsTo(RentalAgreement, { foreignKey: 'agreementId', as: 'agreement' });
 
 module.exports = {
   User,
@@ -64,5 +79,8 @@ module.exports = {
   RentalAgreement,
   LedgerRow,
   AppConfig,
+  AgreementParty,
+  AgreementRoom,
+  OwnershipVerification,
 };
 

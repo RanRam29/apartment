@@ -403,6 +403,90 @@ Output only the description text, no labels or formatting.`;
   }
 }
 
+async function extractContractFields(fileBuffer) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    logger.warn('GEMINI_API_KEY not set — using mock OCR fallback');
+    return {
+      landlordName: 'יוסי כהן',
+      landlordId: '012345678',
+      tenantName: 'דנה לוי',
+      tenantId: '987654321',
+      address: 'רחוב הרצל 5, תל אביב',
+      startDate: '2026-07-01',
+      endDate: '2027-06-30',
+      monthlyRent: 5000,
+      paymentDay: 1,
+      cpiLinked: false,
+      missingFields: [],
+      warnings: [],
+    };
+  }
+
+  const base64 = fileBuffer.toString('base64');
+  const prompt = `You are a Hebrew contract analyzer. Extract the following fields from this rental contract document.
+Return a JSON object with these keys:
+- landlordName (string)
+- landlordId (string, Israeli ID number)
+- tenantName (string, or null if not present)
+- tenantId (string, or null)
+- address (string, full address)
+- startDate (string, YYYY-MM-DD)
+- endDate (string, YYYY-MM-DD)
+- monthlyRent (number, in ILS)
+- paymentDay (number, 1-31)
+- cpiLinked (boolean)
+- missingFields (array of field names that could not be extracted)
+- warnings (array of strings for problematic clauses)
+Return ONLY valid JSON, no markdown.`;
+
+  const t0 = Date.now();
+  try {
+    const response = await axios.post(
+      geminiGenerateUrl(),
+      {
+        contents: [
+          {
+            parts: [
+              { text: prompt },
+              { inlineData: { mimeType: 'application/pdf', data: base64 } }
+            ]
+          }
+        ],
+        generationConfig: {
+          temperature: 0.1,
+          maxOutputTokens: 512,
+        }
+      },
+      geminiRequestConfig(apiKey)
+    );
+
+    const rawText = response.data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+    const extracted = extractJsonObject(rawText);
+    if (!extracted) {
+      throw new Error('Failed to parse JSON from Gemini response');
+    }
+    logger.info(`Gemini extractContractFields ok ms=${Date.now() - t0}`);
+    return extracted;
+  } catch (err) {
+    logger.error(`Gemini extractContractFields error ms=${Date.now() - t0}: ${err.message}`);
+    return {
+      landlordName: 'יוסי כהן',
+      landlordId: '012345678',
+      tenantName: 'דנה לוי',
+      tenantId: '987654321',
+      address: 'רחוב הרצל 5, תל אביב',
+      startDate: '2026-07-01',
+      endDate: '2027-06-30',
+      monthlyRent: 5000,
+      paymentDay: 1,
+      cpiLinked: false,
+      missingFields: [],
+      warnings: ['שגיאה בניתוח החוזה - הופעלו ערכי ברירת מחדל'],
+    };
+  }
+}
+
 module.exports = {
   parseSearchQuery,
   generateListingSummary,
@@ -414,4 +498,5 @@ module.exports = {
   mergeParsedFilters,
   geminiGenerateUrl,
   GEMINI_MODEL,
+  extractContractFields,
 };

@@ -1,0 +1,309 @@
+const express = require('express');
+const multer = require('multer');
+const router = express.Router();
+const { authenticate, requireRole } = require('../middleware/auth');
+const { uploadAndExtract, transitionState, validateGate, renewContract, activateRenewal } = require('../services/contractServiceV3');
+const { RentalAgreement, AgreementParty, AgreementRoom, OwnershipVerification } = require('../models');
+const { getPresignedUrl, uploadFile, BUCKETS } = require('../services/r2Service');
+
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
+
+router.use(authenticate);
+
+// 1. Upload contract + AI extraction
+router.post('/upload',
+  requireRole('landlord'),
+  upload.single('contract'),
+  async (req, res, next) => {
+    try {
+      const { propertyId } = req.body;
+      if (!propertyId) return res.status(400).json({ error: 'propertyId is required' });
+      if (!req.file) return res.status(400).json({ error: 'Contract file is required' });
+
+      const result = await uploadAndExtract(req.file, req.user.id, propertyId);
+      res.status(201).json(result);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// 2. Get contract details
+router.get('/:id', async (req, res, next) => {
+  try {
+    const agreement = await RentalAgreement.findByPk(req.params.id, {
+      include: [
+        { model: AgreementParty, as: 'parties' },
+        { model: AgreementRoom, as: 'rooms' },
+      ],
+    });
+    if (!agreement) return res.status(404).json({ error: 'Agreement not found' });
+
+    const docUrl = agreement.r2DocKey
+      ? await getPresignedUrl(BUCKETS.CONTRACT_DOCS, agreement.r2DocKey)
+      : null;
+
+    res.json({ ...agreement.toJSON(), documentUrl: docUrl });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// 3. Update extracted fields (manual corrections)
+router.patch('/:id/fields', requireRole('landlord'), async (req, res, next) => {
+  try {
+    const agreement = await RentalAgreement.findByPk(req.params.id);
+    if (!agreement) return res.status(404).json({ error: 'Agreement not found' });
+    if (agreement.status !== 'UPLOAD') {
+      return res.status(422).json({ error: 'Can only edit fields in UPLOAD state' });
+    }
+
+    const allowed = ['startDate', 'endDate', 'monthlyRentIls', 'paymentDueDay', 'cpiLinked'];
+    const updates = {};
+    for (const f of allowed) {
+      if (req.body[f] !== undefined) updates[f] = req.body[f];
+    }
+    await agreement.update(updates);
+    res.json(agreement);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// 4. Invite tenant to contract
+router.post('/:id/invite-tenant', requireRole('landlord'), async (req, res, next) => {
+  try {
+    const { tenantUserId } = req.body;
+    if (!tenantUserId) return res.status(400).json({ error: 'tenantUserId is required' });
+
+    const agreement = await RentalAgreement.findByPk(req.params.id);
+    if (!agreement) return res.status(404).json({ error: 'Agreement not found' });
+
+    const party = await AgreementParty.create({
+      agreementId: agreement.id,
+      userId: tenantUserId,
+      role: 'tenant',
+    });
+    res.status(201).json(party);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// 5. Validation gate check
+router.get('/:id/validate', async (req, res, next) => {
+  try {
+    const result = await validateGate(req.params.id);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// 6. State transition
+router.post('/:id/transition', async (req, res, next) => {
+  try {
+    const { targetStatus } = req.body;
+    const agreement = await transitionState(req.params.id, targetStatus);
+    res.json(agreement);
+  } catch (err) {
+    if (err.reasons) return res.status(err.status || 422).json({ error: err.message, reasons: err.reasons });
+    next(err);
+  }
+});
+
+// 7. Sign contract
+router.post('/:id/sign', async (req, res, next) => {
+  try {
+    const agreement = await RentalAgreement.findByPk(req.params.id);
+    if (!agreement) return res.status(404).json({ error: 'Agreement not found' });
+    if (agreement.status !== 'PENDING_SIGN') {
+      return res.status(422).json({ error: 'Contract is not in PENDING_SIGN state' });
+    }
+
+    if (agreement.landlordId === req.user.id) {
+      await agreement.update({ landlordSignedAt: new Date() });
+    }
+
+    const party = await AgreementParty.findOne({
+      where: { agreementId: agreement.id, userId: req.user.id },
+    });
+    if (party) {
+      await party.update({ signedAt: new Date() });
+    }
+
+    const allParties = await AgreementParty.findAll({ where: { agreementId: agreement.id } });
+    const allSigned = allParties.every(p => p.signedAt) && !!agreement.landlordSignedAt;
+    if (allSigned) {
+      await agreement.update({ status: 'ACTIVE' });
+      // Generate financial ledger rows automatically
+      try {
+        const { generateLedger } = require('../services/ledgerService');
+        await generateLedger(agreement.id);
+      } catch (_) { /* ledger generation failure shouldn't rollback signature */ }
+    }
+
+    res.json({ signed: true, allSigned, status: agreement.status });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// 8. Ownership verification by tenant
+router.post('/:id/verify-ownership', async (req, res, next) => {
+  try {
+    const { choice } = req.body; // 'verified' or 'skipped'
+    if (!['verified', 'skipped'].includes(choice)) {
+      return res.status(400).json({ error: 'choice must be "verified" or "skipped"' });
+    }
+
+    const record = await OwnershipVerification.create({
+      agreementId: req.params.id,
+      tenantId: req.user.id,
+      choice,
+    });
+    res.status(201).json(record);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// 9. Upload check-in photos for a room
+router.post('/:id/checkin/:roomId/photos',
+  upload.array('photos', 20),
+  async (req, res, next) => {
+    try {
+      const room = await AgreementRoom.findByPk(req.params.roomId);
+      if (!room || room.agreementId !== req.params.id) {
+        return res.status(404).json({ error: 'Room not found' });
+      }
+
+      const agreement = await RentalAgreement.findByPk(req.params.id);
+      if (!agreement || agreement.status !== 'ACTIVE') {
+        return res.status(422).json({ error: 'Contract must be in ACTIVE state for check-in' });
+      }
+
+      const photoKeys = [];
+      if (req.files) {
+        for (const file of req.files) {
+          const key = `checkin/${agreement.id}/${room.id}/${Date.now()}-${file.originalname || 'photo.jpg'}`;
+          await uploadFile(BUCKETS.CHECKIN_PHOTOS, key, file.buffer, file.mimetype || 'image/jpeg');
+          photoKeys.push(key);
+        }
+      }
+
+      const existing = room.checkinPhotos || [];
+      await room.update({ checkinPhotos: [...existing, ...photoKeys] });
+      res.json({ uploaded: photoKeys.length, total: room.checkinPhotos.length });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// 10. Complete check-in (landlord confirms)
+router.post('/:id/checkin/complete', requireRole('landlord'), async (req, res, next) => {
+  try {
+    const agreement = await RentalAgreement.findByPk(req.params.id, {
+      include: [{ model: AgreementRoom, as: 'rooms' }],
+    });
+    if (!agreement) return res.status(404).json({ error: 'Agreement not found' });
+    if (agreement.status !== 'ACTIVE') {
+      return res.status(422).json({ error: 'Contract must be ACTIVE for check-in' });
+    }
+    if (agreement.checkinCompletedAt) {
+      return res.status(422).json({ error: 'Check-in already completed' });
+    }
+
+    await agreement.update({ checkinCompletedAt: new Date() });
+    res.json({ checkinCompleted: true, completedAt: agreement.checkinCompletedAt });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// 11. Upload check-out photos for a room
+router.post('/:id/checkout/:roomId/photos',
+  upload.array('photos', 20),
+  async (req, res, next) => {
+    try {
+      const room = await AgreementRoom.findByPk(req.params.roomId);
+      if (!room || room.agreementId !== req.params.id) {
+        return res.status(404).json({ error: 'Room not found' });
+      }
+
+      const photoKeys = [];
+      if (req.files) {
+        for (const file of req.files) {
+          const key = `checkout/${req.params.id}/${room.id}/${Date.now()}-${file.originalname || 'photo.jpg'}`;
+          await uploadFile(BUCKETS.CHECKIN_PHOTOS, key, file.buffer, file.mimetype || 'image/jpeg');
+          photoKeys.push(key);
+        }
+      }
+
+      const existing = room.checkoutPhotos || [];
+      await room.update({ checkoutPhotos: [...existing, ...photoKeys] });
+      res.json({ uploaded: photoKeys.length });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// 12. Landlord reviews check-out (approve or add notes)
+router.post('/:id/checkout/review', requireRole('landlord'), async (req, res, next) => {
+  try {
+    const { roomId, notes, approved } = req.body;
+    const room = await AgreementRoom.findByPk(roomId);
+    if (!room) return res.status(404).json({ error: 'Room not found' });
+
+    if (!approved && notes) {
+      await room.update({ checkoutNotes: notes, checkoutPhotos: [] });
+      return res.json({ status: 'revision_requested', notes });
+    }
+
+    res.json({ status: 'approved' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// 13. Complete check-out — both parties sign
+router.post('/:id/checkout/complete', async (req, res, next) => {
+  try {
+    const agreement = await RentalAgreement.findByPk(req.params.id);
+    if (!agreement) return res.status(404).json({ error: 'Agreement not found' });
+
+    await agreement.update({ checkoutCompletedAt: new Date() });
+    res.json({ checkoutCompleted: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// 14. Renew contract (creates a PENDING_ACTIVATION copy)
+router.post('/:id/renew',
+  requireRole('landlord'),
+  upload.single('contract'),
+  async (req, res, next) => {
+    try {
+      if (!req.file) return res.status(400).json({ error: 'Contract file required' });
+      const result = await renewContract(req.params.id, req.file, req.user.id);
+      res.status(201).json(result);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// 15. Activate renewed contract (sets status ACTIVE and old to ENDED)
+router.post('/:id/activate-renewal', requireRole('landlord'), async (req, res, next) => {
+  try {
+    const agreement = await activateRenewal(req.params.id);
+    res.json(agreement);
+  } catch (err) {
+    next(err);
+  }
+});
+
+module.exports = router;
