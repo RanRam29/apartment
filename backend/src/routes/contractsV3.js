@@ -209,6 +209,35 @@ router.post('/:id/checkin/complete', requireRole('landlord'), async (req, res, n
   }
 });
 
+// --- Contract Renewal ---
+
+router.post('/:id/renew',
+  requireRole('landlord'),
+  upload.single('contract'),
+  async (req, res, next) => {
+    try {
+      if (!req.file) return res.status(400).json({ error: 'Contract file required' });
+      const { renewContract } = require('../services/contractServiceV3');
+      const result = await renewContract(req.params.id, req.file, req.user.id);
+      res.status(201).json(result);
+    } catch (err) {
+      if (err.status) return res.status(err.status).json({ error: err.message });
+      next(err);
+    }
+  }
+);
+
+router.post('/:id/activate-renewal', async (req, res, next) => {
+  try {
+    const { activateRenewal } = require('../services/contractServiceV3');
+    const agreement = await activateRenewal(req.params.id);
+    res.json(agreement);
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message });
+    next(err);
+  }
+});
+
 // --- Check-Out Flow ---
 
 router.post('/:id/checkout/:roomId/photos',

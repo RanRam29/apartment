@@ -109,4 +109,35 @@ async function transitionState(agreementId, newState) {
   return agreement;
 }
 
-module.exports = { uploadAndExtract, validateGate, transitionState, VALID_TRANSITIONS };
+async function renewContract(oldAgreementId, file, landlordId) {
+  const oldAgreement = await RentalAgreement.findByPk(oldAgreementId);
+  if (!oldAgreement) throw Object.assign(new Error('Agreement not found'), { status: 404 });
+  if (!['ACTIVE', 'EXPIRING'].includes(oldAgreement.status)) {
+    throw Object.assign(new Error('Can only renew ACTIVE or EXPIRING contracts'), { status: 422 });
+  }
+
+  const result = await uploadAndExtract(file, landlordId, oldAgreement.propertyId);
+  await result.agreement.update({
+    status: 'PENDING_ACTIVATION',
+    renewedFromId: oldAgreementId,
+  });
+
+  return result;
+}
+
+async function activateRenewal(agreementId) {
+  const agreement = await RentalAgreement.findByPk(agreementId);
+  if (!agreement || agreement.status !== 'PENDING_ACTIVATION') {
+    throw Object.assign(new Error('Not in PENDING_ACTIVATION'), { status: 422 });
+  }
+
+  if (agreement.renewedFromId) {
+    const old = await RentalAgreement.findByPk(agreement.renewedFromId);
+    if (old) await old.update({ status: 'ENDED' });
+  }
+
+  await agreement.update({ status: 'ACTIVE' });
+  return agreement;
+}
+
+module.exports = { uploadAndExtract, validateGate, transitionState, renewContract, activateRenewal, VALID_TRANSITIONS };
