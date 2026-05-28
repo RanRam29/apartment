@@ -241,6 +241,9 @@ router.post('/login', loginValidator, async (req, res, next) => {
         avatarUrl: user.avatarUrl,
         isVerified: user.isVerified,
         isPremium: user.isPremium,
+        tosAcceptedAt: user.tosAcceptedAt,
+        activeRole: user.activeRole,
+        kycStatus: user.kycStatus,
       },
     });
     await logAudit({
