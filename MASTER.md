@@ -53,8 +53,8 @@
 |--------|--------|--------------|-------|
 | Register / Login / JWT | ✅ | 2026-05-28 | עובד |
 | Email verification (Resend) | ✅ | 2026-05-28 | עובד |
-| `admin@dirapp.com` login | 🔴 | 2026-05-28 | password sync — תוקן בעדכון `ed0e874`, ממתין לרידיפלוי |
-| `admin1@dirapp.com` login | 🔴 | 2026-05-28 | אותה בעיה |
+| `admin@dirapp.com` login | ✅ | 2026-05-28 | **BUG-002 CLOSED** — תוקן `ed0e874`, אומת בייצור |
+| `admin1@dirapp.com` login | ✅ | 2026-05-28 | תוקן יחד עם admin@ |
 | `admin2@dirapp.com` login | ✅ | 2026-05-28 | עובד (tenant) |
 | Switch Role (tenant↔landlord) | 🟡 | — | UI קיים, לא נבדק E2E |
 | Terms of Service (M11) — קבלת ToS | 🔴 | 2026-05-28 | **BUG-006** — כפתור "אשר והמשך" לא עובד + אין כפתור חזרה |
@@ -203,7 +203,7 @@
 | BUG-007 | דשבורד פיקטיבי | Antigravity | 🔴 OPEN |
 | BUG-008 | לא ניתן להיכנס לצ'אטים | Antigravity | 🔴 OPEN |
 | BUG-003 | אישור ליד לא עובד מה-UI | Antigravity | 🔴 OPEN |
-| BUG-002 | admin@dirapp.com 401 | Claude Code | ✅ Fix יצא — ממתין רידיפלוי |
+| BUG-002 | admin@dirapp.com 401 | Claude Code | 🏁 CLOSED |
 | BUG-009 | Trust Score מתחיל ב-0 | Cursor | 🔴 OPEN |
 | BUG-004 | Admin panel לא נבדק E2E | Cursor | 🔴 OPEN |
 
@@ -236,4 +236,5 @@
 | 2026-05-27 | — | Fix ENUM→STRING for activeRole (`7ea9f1a`) | Claude Code |
 | 2026-05-27 | — | Fix tosAcceptedAt + HMAC/mobile (`294c834`) | Antigravity |
 | 2026-05-28 | 1.1 | Triage 5 באגים P1 חדשים (BUG-005/006/007/008/009) — עדכון BUGS.md + CEO_DASHBOARD | Claude Code |
+| 2026-05-28 | 1.2 | BUG-002 CLOSED — אומת בייצור + RCA הושלם | Claude Code |
 | 2026-05-28 | — | Fix admin password sync (`ed0e874`) | Claude Code |

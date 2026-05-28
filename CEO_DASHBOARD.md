@@ -40,7 +40,7 @@
 | BUG-007 | דשבורד פיקטיבי — נתונים לא אמיתיים | 🔴 גבוה — לא ניתן לנהל | Antigravity | אותו יום |
 | BUG-008 | לא ניתן להיכנס לצ'אטים | 🔴 גבוה — פיצ'ר ליבה שבור | Antigravity | אותו יום |
 | BUG-003 | אישור ליד לא עובד מה-UI | 🔴 גבוה — flow חוזה חסום | Antigravity | אותו יום |
-| BUG-002 | admin@dirapp.com לא נכנס | 🟡 בינוני — admin2 עובד | Claude Code | ✅ Fix יצא — ממתין רידיפלוי |
+| ~~BUG-002~~ | ~~admin@dirapp.com לא נכנס~~ | ~~🟡~~ | ~~Claude Code~~ | 🏁 **CLOSED** |
 | BUG-009 | Trust Score מתחיל ב-0 במקום 50 | 🟡 נמוך | Cursor | השבוע |
 | BUG-004 | Admin panel לא נבדק E2E | 🟡 בינוני | Cursor | השבוע |
 
