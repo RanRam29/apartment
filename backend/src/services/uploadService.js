@@ -1,9 +1,9 @@
 const multer = require('multer');
-const { v4: uuidv4 } = require('uuid');
-const { uploadFile, BUCKETS } = require('./r2Service');
+const axios = require('axios');
+const FormData = require('form-data');
 const logger = require('../utils/logger');
 
-// Store files in memory — send directly to R2
+// Store files in memory — send directly to Cloudinary
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024, files: 10 },
@@ -15,23 +15,51 @@ const upload = multer({
   },
 });
 
-async function uploadToR2(fileBuffer, folder = 'apartments', originalname = 'upload.jpg', mimetype = 'image/jpeg') {
-  const key = `${folder}/${uuidv4()}-${originalname}`;
-  const bucket = BUCKETS.PROPERTY_IMAGES;
-  await uploadFile(bucket, key, fileBuffer, mimetype);
+// Returns true only when real Cloudinary credentials are configured
+function cloudinaryConfigured() {
+  const name = process.env.CLOUDINARY_CLOUD_NAME;
+  const preset = process.env.CLOUDINARY_UPLOAD_PRESET;
+  return (
+    name && name !== 'your_cloud_name' &&
+    preset && preset !== 'your_unsigned_preset'
+  );
+}
+
+async function uploadToCloudinary(fileBuffer, folder = 'apartments') {
+  const form = new FormData();
+  form.append('file', fileBuffer, { filename: 'upload.jpg' });
+  form.append('upload_preset', process.env.CLOUDINARY_UPLOAD_PRESET);
+  form.append('folder', folder);
+
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+  const url = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
+
+  const response = await axios.post(url, form, {
+    headers: form.getHeaders(),
+    timeout: 15000,
+  });
 
   return {
-    key,
-    bucket,
+    url: response.data.secure_url,
+    publicId: response.data.public_id,
+    width: response.data.width,
+    height: response.data.height,
   };
 }
 
 async function uploadMany(files, folder = 'apartments') {
+  if (!files || files.length === 0) return [];
+
+  if (!cloudinaryConfigured()) {
+    logger.warn(`uploadMany: Cloudinary not configured — skipping ${files.length} file(s). Set CLOUDINARY_CLOUD_NAME + CLOUDINARY_UPLOAD_PRESET to enable image uploads.`);
+    return [];
+  }
+
   const results = await Promise.all(
-    files.map((f) => uploadToR2(f.buffer, folder, f.originalname, f.mimetype))
+    files.map((f) => uploadToCloudinary(f.buffer, folder))
   );
-  logger.info(`Uploaded ${results.length} images to R2`);
+  logger.info(`Uploaded ${results.length} images to Cloudinary`);
   return results;
 }
 
-module.exports = { upload, uploadMany, uploadToR2 };
+module.exports = { upload, uploadMany };
