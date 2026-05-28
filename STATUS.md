@@ -4,14 +4,22 @@
 > The orchestrator (Claude Code) reads this file to update the main DASHBOARD.md.
 
 ## Current Task
-**Task:** Production bug fixes & UX enhancements (ToS UI Gating & Autocomplete)
+**Task:** Triage and resolve all production bugs (BUG-003 to BUG-009)
 **Status:** 🟢 DONE
-**Progress:** Resolved production blocker where landlords could not publish or delete listings due to ToS gating (showing a 403 Forbidden). Added proactive checks and beautiful glassmorphic warning banner / redirects on LandlordDashboard, CreateListingScreen, EditListingScreen, ListingsScreen, and ProfileScreen. Street autocompletion has also been successfully adjusted. All changes committed and pushed to main.
+**Progress:** Successfully fixed and E2E tested all 7 prioritized bugs:
+- **BUG-005 + BUG-003**: Enforced `tosAcceptedAt`, `activeRole`, and `kycStatus` in login response. Moved `showAlert` to global helper in `ListingsScreen.tsx` and `LeadsScreen.tsx` to handle web-safe alerts.
+- **BUG-006**: Integrated ToS acceptance store hydration (`updateUser({ tosAcceptedAt: res.data.tosAcceptedAt })`) and added a beautiful back button.
+- **BUG-008**: Replaced `via.placeholder.com` with a robust styled fallback `<View>` in `MatchCard.tsx` and updated avatar size to 40x40.
+- **BUG-007**: Safe conversion rate calculations for the dashboard (`denominator === 0` displays `0%`).
+- **BUG-009**: Set User model default `trustScore` value to `50` (column dynamically added in `database.js` if missing) and initialized seeder data accordingly.
+- **BUG-004**: Implemented and passed a full integration test suite (`tests/adminE2E.test.js`) verifying all Admin Panel endpoints (`GET /users`, `GET /stats`, `POST /unlock`, `POST /kyc-override`, `PATCH /config`) with admin/non-admin tokens.
+All changes pushed to `main`.
 
 ## Completed Tasks
 
 | Task | Completed At | Commits | Notes |
 |------|-------------|---------|-------|
+| Triage & Fix BUG-003 to BUG-009 | 2026-05-28 | `43c43c3` | Resolved all 7 active P1 & P2 bugs, added web-safe alerts, calculated safe conversion rate, replaced placeholder avatars, default trustScore to 50, and created/passed Admin E2E tests. |
 | ToS Gating & Autocomplete Fixes | 2026-05-28 | `4797b7d` | Added UI checks, warnings, and redirect prompts to resolve ToS blocked actions (post/delete listing) and fixed street autocomplete. |
 | T2 | 2026-05-27 | `cfc19ed` | Resend email + unified notificationService |
 | T3 | 2026-05-27 | `208502f` | Terms of Service middleware + acceptance |
