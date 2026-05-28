@@ -23,13 +23,29 @@ type Nav = NativeStackNavigationProp<MainStackParamList>;
 export default function ProfileScreen() {
   const colors = useColors();
   const { isDark, toggleTheme } = useTheme();
-  const { user, logout, updateUser } = useAuthStore();
+  const { user, logout, updateUser, switchRole } = useAuthStore();
   const navigation = useNavigation<Nav>();
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [editVisible, setEditVisible]         = useState(false);
   const [firstName,   setFirstName]           = useState(user?.firstName ?? '');
   const [lastName,    setLastName]            = useState(user?.lastName ?? '');
   const [savingProfile, setSavingProfile]     = useState(false);
+  const [switchingRole, setSwitchingRole]     = useState(false);
+
+  async function handleSwitchRole() {
+    const currentRole = user?.activeRole || user?.role;
+    const targetRole = currentRole === 'tenant' ? 'landlord' : 'tenant';
+    
+    setSwitchingRole(true);
+    try {
+      await switchRole(targetRole);
+      Alert.alert('הצלחה', `החלפת לממשק ${targetRole === 'landlord' ? 'משכיר 🏠' : 'שוכר 👤'} בהצלחה!`);
+    } catch (err) {
+      Alert.alert('שגיאה', 'החלפת התפקיד נכשלה');
+    } finally {
+      setSwitchingRole(false);
+    }
+  }
 
   const initials = `${user?.firstName?.[0] ?? ''}${user?.lastName?.[0] ?? ''}`.toUpperCase();
   const personaLandlord = usePersonaIsLandlord();
@@ -229,6 +245,26 @@ export default function ProfileScreen() {
             thumbColor={isDark ? C.cyan : colors.bgCard}
           />
         </TouchableOpacity>
+
+        {/* Switch active role (T14 Multi-tenant) */}
+        {user?.role !== 'admin' && (
+          <TouchableOpacity 
+            style={[styles.darkModeRow, { backgroundColor: colors.bgCard, borderColor: colors.border }]} 
+            onPress={handleSwitchRole} 
+            activeOpacity={0.8}
+            disabled={switchingRole}
+          >
+            {switchingRole ? (
+              <ActivityIndicator size="small" color={C.cyan} />
+            ) : (
+              <Ionicons name="repeat" size={20} color={C.cyan} />
+            )}
+            <Text style={[styles.darkModeLabel, { color: colors.text }]}>
+              מעבר לממשק { (user?.activeRole || user?.role) === 'tenant' ? 'משכיר 🏠' : 'שוכר 👤' }
+            </Text>
+            <Ionicons name="chevron-back" size={15} color={colors.textMut} />
+          </TouchableOpacity>
+        )}
 
         <TouchableOpacity style={styles.logoutBtn} onPress={confirmLogout} activeOpacity={0.8}>
           <Ionicons name="log-out-outline" size={17} color={C.danger} />

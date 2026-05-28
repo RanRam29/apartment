@@ -27,8 +27,9 @@ export function usePersonaIsLandlord(): boolean {
   const user = useAuthStore((s) => s.user);
   const adminPersona = useContext(AdminAppModeContext);
 
-  if (user?.role === 'landlord') return true;
-  if (user?.role === 'tenant') return false;
-  if (user?.role === 'admin') return adminPersona === 'landlord';
+  const role = user?.activeRole || user?.role;
+  if (role === 'landlord') return true;
+  if (role === 'tenant') return false;
+  if (role === 'admin') return adminPersona === 'landlord';
   return false;
 }

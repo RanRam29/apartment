@@ -124,6 +124,7 @@ export const authApi = {
     api.patch('/auth/profile', data),
   uploadAvatar: (formData: FormData) =>
     api.patch('/auth/avatar', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  switchRole: (role: 'tenant' | 'landlord') => api.patch('/auth/switch-role', { role }),
 };
 
 // ─── Apartments ───────────────────────────────────────────────────────────────

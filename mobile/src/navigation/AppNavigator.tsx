@@ -273,6 +273,7 @@ function LandlordTabs() {
 function MainNavigator() {
   const { user, needsOnboarding } = useAuthStore();
   const appTheme = useAppTheme();
+  const userRole = user?.activeRole || user?.role;
 
   useEffect(() => {
     useChatStore.getState().connect();
@@ -287,9 +288,9 @@ function MainNavigator() {
       <MainStack.Screen
         name="Tabs"
         component={
-          user?.role === 'landlord'
+          userRole === 'landlord'
             ? LandlordTabs
-            : user?.role === 'admin'
+            : userRole === 'admin'
               ? AdminTabs
               : TenantTabs
         }

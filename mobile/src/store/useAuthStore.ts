@@ -24,6 +24,7 @@ interface AuthState {
   updateUser: (updates: Partial<import('../types').User>) => void;
   verifyEmail: (token: string) => Promise<void>;
   resendVerification: (email?: string) => Promise<void>;
+  switchRole: (role: 'tenant' | 'landlord') => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -86,5 +87,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     const target = email ?? useAuthStore.getState().user?.email;
     if (!target) return;
     await authApi.resendVerification(target);
+  },
+
+  switchRole: async (role) => {
+    await authApi.switchRole(role);
+    set((state) => ({ user: state.user ? { ...state.user, activeRole: role } : state.user }));
   },
 }));
