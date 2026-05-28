@@ -13,8 +13,8 @@
 |--------|------|
 | 🔴 OPEN | 6 |
 | 🔵 IN_PROGRESS | 1 |
-| ✅ FIXED (ממתין RCA) | 1 |
-| 🏁 CLOSED (RCA הושלם) | 1 |
+| ✅ FIXED (ממתין RCA) | 0 |
+| 🏁 CLOSED (RCA הושלם) | 2 |
 | **סה"כ** | **9** |
 
 ---
@@ -24,13 +24,13 @@
 | ID | כותרת | עדיפות | סטטוס | מדווח | מטפל | תאריך פתיחה |
 |----|--------|---------|--------|--------|------|-------------|
 | [BUG-001](#bug-001) | Admin login 503 — DB columns missing | P0 | 🏁 CLOSED | ראן | Claude Code | 2026-05-27 |
-| [BUG-002](#bug-002) | Admin login 401 — password hash out of sync | P1 | ✅ FIXED | ראן | Claude Code | 2026-05-28 |
-| [BUG-003](#bug-003) | אישור ליד לא עובד מה-UI | P1 | ✅ FIXED | ראן | Antigravity | 2026-05-28 |
+| [BUG-002](#bug-002) | Admin login 401 — password hash out of sync | P1 | 🏁 CLOSED | ראן | Claude Code | 2026-05-28 |
+| [BUG-003](#bug-003) | אישור ליד לא עובד מה-UI | P1 | 🔴 OPEN | ראן | Antigravity | 2026-05-28 |
 | [BUG-004](#bug-004) | Admin panel endpoints לא נבדקו E2E | P2 | 🔴 OPEN | Claude Code | Cursor | 2026-05-28 |
-| [BUG-005](#bug-005) | כל כפתורי המודעות לא עובדים (מחיקה, השהיה, עריכה) | P1 | ✅ FIXED | ראן | Antigravity + Claude Code | 2026-05-28 |
-| [BUG-006](#bug-006) | ToS "אשר והמשך" לא עובד + אין כפתור חזרה | P1 | ✅ FIXED | ראן | Antigravity | 2026-05-28 |
-| [BUG-007](#bug-007) | דשבורד פיקטיבי — נתונים לא מחוברים לבאקאנד | P1 | ✅ FIXED | ראן | Antigravity | 2026-05-28 |
-| [BUG-008](#bug-008) | לא ניתן להיכנס לצ'אטים | P1 | ✅ FIXED | ראן | Antigravity | 2026-05-28 |
+| [BUG-005](#bug-005) | כל כפתורי המודעות לא עובדים (מחיקה, השהיה, עריכה) | P1 | 🔵 IN_PROGRESS | ראן | Antigravity + Claude Code | 2026-05-28 |
+| [BUG-006](#bug-006) | ToS "אשר והמשך" לא עובד + אין כפתור חזרה | P1 | 🔴 OPEN | ראן | Antigravity | 2026-05-28 |
+| [BUG-007](#bug-007) | דשבורד פיקטיבי — נתונים לא מחוברים לבאקאנד | P1 | 🔴 OPEN | ראן | Antigravity | 2026-05-28 |
+| [BUG-008](#bug-008) | לא ניתן להיכנס לצ'אטים | P1 | 🔴 OPEN | ראן | Antigravity | 2026-05-28 |
 | [BUG-009](#bug-009) | Trust Score מתחיל ב-0 במקום 50 | P2 | 🔴 OPEN | ראן | Cursor | 2026-05-28 |
 
 ---
@@ -258,34 +258,59 @@
 
 ---
 
-## ✅ FIXED — ממתין להשלמת RCA
+
+## 🏁 CLOSED — RCA הושלם
 
 ---
 
 ### BUG-002
 **כותרת:** Admin login 401 — password hash out of sync
 **עדיפות:** P1
-**סטטוס:** ✅ FIXED | **תאריך תיקון:** 2026-05-28 | **Commit:** `ed0e874`
+**סטטוס:** 🏁 CLOSED
+**תאריך פתיחה:** 2026-05-28 | **תאריך סגירה:** 2026-05-28
 **מדווח:** ראן | **מטפל:** Claude Code
+**Commit:** `ed0e874`
+**עלות תיקון:** ~30K tokens | ~45 דק׳
 
-**תיאור:**
+**תיאור מקורי:**
 `admin@dirapp.com` ו-`admin1@dirapp.com` החזירו 401 "Invalid credentials" אחרי deploy מחודש. `admin2@dirapp.com` עבד תקין.
-
-**שלבים לשחזור:**
-1. נווט ל-apartment-olive.vercel.app/login
-2. הכנס `admin@dirapp.com` / `Admin1234!`
-3. מקבל: "אימייל או סיסמה שגויים"
-
-**הFix שיצא:**
-עדכון `autoSeed()` ב-`backend/src/seeders/demo.js` לסנכרן password hash בכל הרצה.
-
-**ממתין:** רידיפלוי Render (push יצא ב-`ed0e874`) + אימות
-
-**⚠️ RCA — חסר (למלא אחרי אימות הfix בייצור)**
 
 ---
 
-## 🏁 CLOSED — RCA הושלם
+### 🔬 RCA — BUG-002
+
+**Root Cause (גורם שורשי):**
+`autoSeed()` השתמש ב-`User.findOrCreate()` — פונקציה שיוצרת משתמש אם לא קיים, אבל **לא מעדכנת** אם כבר קיים.
+
+כשה-admin accounts נוצרו בdeploy ראשון עם password hash מסוים, ולאחר מכן הקוד השתנה (BUG-001 fixes) והserver עלה מחדש — ה-`findOrCreate` מצא את ה-accounts הישנים ולא עדכן אותם. ה-hash בDB נשאר מה-deploy הישן, בעוד שהבדיקה הייתה על ה-hash החדש.
+
+**למה `admin2` עבד?** — `admin2@dirapp.com` נוצר עם `role: 'tenant'`, ואילו `admin` ו-`admin1` נוצרו עם `role: 'admin'`. ייתכן שהbug נוצר בזמן שהיה שינוי בlogic של admin accounts דווקא.
+
+**Fix שיושם:**
+
+| קובץ | שינוי | Commit |
+|------|--------|--------|
+| `backend/src/seeders/demo.js` | שינה `findOrCreate` לסנכרן תמיד: `passwordHash`, `tosAcceptedAt`, `tosVersion`, `isVerified` לכל admin account בכל הרצה | `ed0e874` |
+
+```javascript
+// לפני — לא עדכן accounts קיימים
+const [user, created] = await User.findOrCreate({ where: { email }, defaults: { ... } });
+
+// אחרי — תמיד מסנכרן
+const [user, created] = await User.findOrCreate({ where: { email }, defaults: { ... } });
+if (!created) {
+  await user.update({ passwordHash: adminHash, tosAcceptedAt: new Date(), ... });
+}
+```
+
+**למה זה קרה — Design Gap:**
+1. `findOrCreate` מתאים ל-seeding חד-פעמי — לא ל-sync בכל boot
+2. אין טסט שמאמת שadmin login עובד אחרי redeploy
+3. תיאום לקוי: שינויי BUG-001 לא עדכנו את ה-seeder בהתאם
+
+**מניעה עתידית:**
+- [x] `autoSeed()` תמיד מסנכרן password + tosAcceptedAt לכל admin account
+- [ ] הוסף integration test: אחרי `autoSeed()`, בדוק שכל admin accounts עוברים bcrypt.compare
 
 ---
 
