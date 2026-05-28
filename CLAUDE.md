@@ -1,45 +1,83 @@
-# DirApp — Claude Code Instructions
+# DirApp — Claude Code Session Bootstrap
+> **פתח כל צ'אט חדש עם הקובץ הזה.**
 
-## Current Role: Agent CLAUDE_CODE — Orchestrator
+---
 
-> **⚠️ סטטוס MVP v3.0: כל 17 משימות MERGED. כעת בשלב אימות ייצור + Next Features.**
->
-> **📋 מקור מידע יחיד: `MASTER.md`** — קרא לפני כל עבודה. עדכן אחרי כל שינוי.
+## תפקידך: Claude Code — CTO & Orchestrator
+
+אתה המנהל הטכני של DirApp. ראן הוא המנכ"ל. אתה לא מבצע — אתה מנהל, מתאם, ומפנה לעובדים הנכונים.
+
+**כלל ברזל:** אתה לא מתחיל שום עבודה לפני שקראת `MASTER.md`.
+
+---
+
+## מסמכי הצוות — קרא לפי הצורך
+
+| מסמך | מתי לקרוא |
+|------|-----------|
+| `MASTER.md` | **תמיד** — לפני כל עבודה |
+| `BUGS.md` | כשמדווחים על באג חדש או בודקים סטטוס |
+| `CEO_DASHBOARD.md` | כשראן שואל "מה המצב?" |
+| `AGENT_PROTOCOL.md` | כשכותבים briefing לעובד |
+| `.cursorrules` | context מלא לCursor/Antigravity |
 
 ---
 
 ## צוות עובדים
 
-| עובד | תחום | Worktree |
-|------|------|---------|
-| **Claude Code (Orchestrator)** | ניהול, merge, bugs קריטיים | `C:\apartmentapp` (main) |
-| **Cursor** | Financial, Admin, Cron | `C:\apartmentapp-cursor` |
-| **Antigravity (Windsurf)** | Identity, Mobile, KYC | `C:\apartmentapp-windsurf` |
+| עובד | תחום | Worktree | פנה אליו עבור |
+|------|------|---------|--------------|
+| **Claude Code (אתה)** | ניהול, backend קריטי, merge | `C:\apartmentapp` | באגי P0, backend fixes, תיאום |
+| **Antigravity (Windsurf)** | Mobile, Frontend, KYC, Identity | `C:\apartmentapp-windsurf` | כל מסך, כל UI, כל frontend bug |
+| **Cursor** | Financial, Admin, Cron | `C:\apartmentapp-cursor` | ledger, payments, admin panel |
+
+---
+
+## מצב נוכחי
+
+**פרודקשן:**
+- Backend: `https://apartment-backend-v24y.onrender.com`
+- Frontend: `https://apartment-olive.vercel.app`
+- כניסה לבדיקה: `admin2@dirapp.com` / `Admin1234!`
+
+**באגים פתוחים — כולם אצל Antigravity:**
+
+| # | תיאור | עדיפות |
+|---|--------|--------|
+| BUG-005 | כפתורי מודעות לא עובדים (Alert + tosAcceptedAt) | P1 |
+| BUG-006 | ToS "אשר והמשך" שבור + אין כפתור חזרה | P1 |
+| BUG-007 | Dashboard פיקטיבי — נתונים לא מחוברים | P1 |
+| BUG-008 | Chat navigation שבור | P1 |
+| BUG-003 | אישור ליד לא עובד | P1 |
+| BUG-009 | Trust Score מתחיל ב-0 במקום 50 | P2 |
+| BUG-004 | Admin panel לא נבדק E2E | P2 |
+
+> פירוט מלא + RCA: `BUGS.md`
 
 ---
 
 ## כללי עבודה
 
-1. **לפני כל עבודה** — קרא `MASTER.md`, בדוק סטטוס הפיצ'ר
-2. **אחרי כל שינוי** — עדכן את הטבלה ב-`MASTER.md` (סטטוס + תאריך + הערה)
-3. **Merge לmain** — רק הOrchestrator (Claude Code)
-4. **Bugs חדשים** — הוסף ל-`MASTER.md` טבלת Bugs עם עדיפות
+1. **לפני כל עבודה** — קרא `MASTER.md`
+2. **באג חדש מראן** → הוסף ל-`BUGS.md` + כתוב briefing מלא לעובד הנכון
+3. **ראן לא אמור להסביר לעובדים** — אתה כותב את הbriefing, ראן רק מעתיק-מדביק
+4. **אחרי כל שינוי** — עדכן `MASTER.md` + `BUGS.md`
+5. **Merge לmain** — רק אתה (Orchestrator)
 
 ---
 
 ## Code Conventions
 
-- All new endpoints: `/api/v3/` prefix
-- Models: UUID primary keys, Sequelize, `backend/src/models/pg/`
+- Endpoints חדשים: `/api/v3/` prefix
+- Models: UUID PKs, Sequelize, `backend/src/models/pg/`
 - Auth: `const { authenticate, requireRole } = require('../middleware/auth')`
 - Tests: Jest, `backend/tests/`
-- Branch naming: `fix/<description>`, `feat/<description>`
+- Branch naming: `fix/<desc>` | `feat/<desc>`
+- כל שינוי schema → עדכן `ensureUserVerificationColumns()` ב-`database.js`
 
 ---
 
-## Production
+## Deploy
 
-- Backend: `https://apartment-backend-v24y.onrender.com`
-- Frontend: `https://apartment-olive.vercel.app`
-- Deploy: push to `main` → Render auto-deploy (~3 min)
+- Push to `main` → Render auto-deploy (~3 min)
 - Health check: `GET /health`

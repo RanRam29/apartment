@@ -58,7 +58,7 @@
 | `admin2@dirapp.com` login | ✅ | 2026-05-28 | עובד (tenant) |
 | Switch Role (tenant↔landlord) | 🟡 | — | UI קיים, לא נבדק E2E |
 | Terms of Service (M11) — קבלת ToS | 🔴 | 2026-05-28 | **BUG-006** — כפתור "אשר והמשך" לא עובד + אין כפתור חזרה |
-| Login response — `tosAcceptedAt` | 🔴 | 2026-05-28 | **BUG-005 root** — login לא מחזיר tosAcceptedAt → כל actions חסומות |
+| Login response — `tosAcceptedAt` | ✅ | 2026-05-28 | **BUG-005 FIXED** — הוסף tosAcceptedAt/activeRole/kycStatus ל-login response (`94b7e7b`) |
 | Multi-tenant / מנהל בית (M12) | 🟡 | — | קוד קיים, לא נבדק E2E |
 
 ---
@@ -198,7 +198,7 @@
 
 | # | תיאור | מטפל | מצב |
 |---|--------|------|-----|
-| BUG-005 | כל כפתורי המודעות לא עובדים | Antigravity + Claude Code | 🔵 IN_PROGRESS |
+| BUG-005 | כל כפתורי המודעות לא עובדים | Antigravity + Claude Code | ✅ FIXED (`94b7e7b`) |
 | BUG-006 | ToS "אשר והמשך" לא עובד + אין חזרה | Antigravity | 🔴 OPEN |
 | BUG-007 | דשבורד פיקטיבי | Antigravity | 🔴 OPEN |
 | BUG-008 | לא ניתן להיכנס לצ'אטים | Antigravity | 🔴 OPEN |
@@ -237,4 +237,6 @@
 | 2026-05-27 | — | Fix tosAcceptedAt + HMAC/mobile (`294c834`) | Antigravity |
 | 2026-05-28 | 1.1 | Triage 5 באגים P1 חדשים (BUG-005/006/007/008/009) — עדכון BUGS.md + CEO_DASHBOARD | Claude Code |
 | 2026-05-28 | 1.2 | BUG-002 CLOSED — אומת בייצור + RCA הושלם | Claude Code |
+| 2026-05-28 | 1.3 | BUG-005 FIXED — tosAcceptedAt בlogin + stale cache delete fix (`94b7e7b`) | Claude Code |
+| 2026-05-28 | 1.3 | BUG-010 CLOSED — uploadService guard + RCA הושלם | Claude Code |
 | 2026-05-28 | — | Fix admin password sync (`ed0e874`) | Claude Code |
