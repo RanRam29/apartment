@@ -26,12 +26,12 @@
 | [BUG-001](#bug-001) | Admin login 503 — DB columns missing | P0 | 🏁 CLOSED | ראן | Claude Code | 2026-05-27 |
 | [BUG-002](#bug-002) | Admin login 401 — password hash out of sync | P1 | 🏁 CLOSED | ראן | Claude Code | 2026-05-28 |
 | [BUG-003](#bug-003) | אישור ליד לא עובד מה-UI | P1 | 🔴 OPEN | ראן | Antigravity | 2026-05-28 |
-| [BUG-004](#bug-004) | Admin panel endpoints לא נבדקו E2E | P2 | 🔴 OPEN | Claude Code | Cursor | 2026-05-28 |
+| [BUG-004](#bug-004) | Admin panel endpoints לא נבדקו E2E | P2 | 🔴 OPEN | Claude Code | Antigravity | 2026-05-28 |
 | [BUG-005](#bug-005) | כל כפתורי המודעות לא עובדים (מחיקה, השהיה, עריכה) | P1 | 🔵 IN_PROGRESS | ראן | Antigravity + Claude Code | 2026-05-28 |
 | [BUG-006](#bug-006) | ToS "אשר והמשך" לא עובד + אין כפתור חזרה | P1 | 🔴 OPEN | ראן | Antigravity | 2026-05-28 |
 | [BUG-007](#bug-007) | דשבורד פיקטיבי — נתונים לא מחוברים לבאקאנד | P1 | 🔴 OPEN | ראן | Antigravity | 2026-05-28 |
 | [BUG-008](#bug-008) | לא ניתן להיכנס לצ'אטים | P1 | 🔴 OPEN | ראן | Antigravity | 2026-05-28 |
-| [BUG-009](#bug-009) | Trust Score מתחיל ב-0 במקום 50 | P2 | 🔴 OPEN | ראן | Cursor | 2026-05-28 |
+| [BUG-009](#bug-009) | Trust Score מתחיל ב-0 במקום 50 | P2 | 🔴 OPEN | ראן | Antigravity | 2026-05-28 |
 
 ---
 
@@ -112,7 +112,7 @@
 **עדיפות:** P2 — לא בשימוש יצרני עדיין
 **סטטוס:** 🔴 OPEN
 **מדווח על ידי:** Claude Code | **תאריך:** 2026-05-28
-**מטפל:** Cursor (מוצע)
+**מטפל:** Antigravity
 
 **תיאור:**
 כל endpoints של Admin Panel (ADM-001 עד ADM-006) סומנו "חדש" ב-Test Coverage Matrix. קוד קיים אבל לא אומת בייצור.
@@ -235,7 +235,7 @@
 **עדיפות:** P2 — UX לא תקין
 **סטטוס:** 🔴 OPEN
 **מדווח על ידי:** ראן | **תאריך:** 2026-05-28
-**מטפל:** Cursor
+**מטפל:** Antigravity
 
 **תיאור:**
 בדף "הישגים ונקודות" מוצג ניקוד 0. לפי המפרט (NF1 Trust Score), הניקוד ההתחלתי אמור להיות 50.
