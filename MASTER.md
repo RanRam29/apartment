@@ -59,7 +59,8 @@
 | `admin1@dirapp.com` login | 🔴 | 2026-05-28 | אותה בעיה |
 | `admin2@dirapp.com` login | ✅ | 2026-05-28 | עובד (tenant) |
 | Switch Role (tenant↔landlord) | 🟡 | — | UI קיים, לא נבדק E2E |
-| Terms of Service (M11) | ✅ | 2026-05-28 | `tosAcceptedAt` מוגדר ב-autoSeed |
+| Terms of Service (M11) — קבלת ToS | 🔴 | 2026-05-28 | **BUG-006** — כפתור "אשר והמשך" לא עובד + אין כפתור חזרה |
+| Login response — `tosAcceptedAt` | 🔴 | 2026-05-28 | **BUG-005 root** — login לא מחזיר tosAcceptedAt → כל actions חסומות |
 | Multi-tenant / מנהל בית (M12) | 🟡 | — | קוד קיים, לא נבדק E2E |
 
 ---
@@ -71,7 +72,8 @@
 | Swipe (right/left/superlike) | ✅ | 2026-05-27 | עובד |
 | Match creation | ✅ | 2026-05-27 | עובד |
 | **אישור ליד** (`POST /api/matches/:id/accept`) | 🔴 | 2026-05-28 | API קיים; **הודלק מה-UI — צריך בדיקה** |
-| Chat Real-Time | ✅ | 2026-05-27 | עובד |
+| Chat Real-Time (backend) | ✅ | 2026-05-27 | backend עובד |
+| Chat navigation (frontend) | 🔴 | 2026-05-28 | **BUG-008** — לא ניתן להיכנס לצ'אטים מהUI |
 
 ---
 
@@ -194,11 +196,18 @@
 
 ## 🔴 Bugs פתוחים (בעדיפות)
 
-| # | תיאור | גורם | מצב |
+> 📋 פירוט מלא: [`BUGS.md`](BUGS.md)
+
+| # | תיאור | מטפל | מצב |
 |---|--------|------|-----|
-| BUG-001 | `admin@dirapp.com` + `admin1@dirapp.com` לא נכנסים | password hash לא מסונכרן ב-DB | 🟡 Fix בקוד `ed0e874`, ממתין לרידיפלוי Render |
-| BUG-002 | אישור ליד לא עובד מה-UI | לא ידוע — API קיים, בעיית frontend? | 🔴 פתוח — צריך בדיקה |
-| BUG-003 | Admin panel endpoints — לא נבדקו | טסטים "חדש" | 🔴 פתוח |
+| BUG-005 | כל כפתורי המודעות לא עובדים | Antigravity + Claude Code | 🔵 IN_PROGRESS |
+| BUG-006 | ToS "אשר והמשך" לא עובד + אין חזרה | Antigravity | 🔴 OPEN |
+| BUG-007 | דשבורד פיקטיבי | Antigravity | 🔴 OPEN |
+| BUG-008 | לא ניתן להיכנס לצ'אטים | Antigravity | 🔴 OPEN |
+| BUG-003 | אישור ליד לא עובד מה-UI | Antigravity | 🔴 OPEN |
+| BUG-002 | admin@dirapp.com 401 | Claude Code | ✅ Fix יצא — ממתין רידיפלוי |
+| BUG-009 | Trust Score מתחיל ב-0 | Cursor | 🔴 OPEN |
+| BUG-004 | Admin panel לא נבדק E2E | Cursor | 🔴 OPEN |
 
 ---
 
@@ -228,4 +237,5 @@
 | 2026-05-27 | — | Fix 503: v3 columns at boot (`2ab7347`) | Claude Code |
 | 2026-05-27 | — | Fix ENUM→STRING for activeRole (`7ea9f1a`) | Claude Code |
 | 2026-05-27 | — | Fix tosAcceptedAt + HMAC/mobile (`294c834`) | Antigravity |
+| 2026-05-28 | 1.1 | Triage 5 באגים P1 חדשים (BUG-005/006/007/008/009) — עדכון BUGS.md + CEO_DASHBOARD | Claude Code |
 | 2026-05-28 | — | Fix admin password sync (`ed0e874`) | Claude Code |
