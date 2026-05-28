@@ -11,11 +11,11 @@
 
 | סטטוס | כמות |
 |--------|------|
-| 🔴 OPEN | 7 |
+| 🔴 OPEN | 6 |
 | 🔵 IN_PROGRESS | 1 |
-| ✅ FIXED (ממתין RCA) | 0 |
-| 🏁 CLOSED (RCA הושלם) | 2 |
-| **סה"כ** | **10** |
+| ✅ FIXED (ממתין RCA) | 1 |
+| 🏁 CLOSED (RCA הושלם) | 3 |
+| **סה"כ** | **11** |
 
 ---
 
@@ -25,10 +25,10 @@
 |----|--------|---------|--------|--------|------|-------------|
 | [BUG-001](#bug-001) | Admin login 503 — DB columns missing | P0 | 🏁 CLOSED | ראן | Claude Code | 2026-05-27 |
 | [BUG-002](#bug-002) | Admin login 401 — password hash out of sync | P1 | 🏁 CLOSED | ראן | Claude Code | 2026-05-28 |
-| [BUG-010](#bug-010) | פרסום מודעה חדשה — 500 Internal Server Error | P1 | 🔵 IN_PROGRESS | ראן | Claude Code | 2026-05-28 |
+| [BUG-010](#bug-010) | פרסום מודעה חדשה — 500 Internal Server Error | P1 | 🏁 CLOSED | ראן | Claude Code | 2026-05-28 |
 | [BUG-003](#bug-003) | אישור ליד לא עובד מה-UI | P1 | 🔴 OPEN | ראן | Antigravity | 2026-05-28 |
 | [BUG-004](#bug-004) | Admin panel endpoints לא נבדקו E2E | P2 | 🔴 OPEN | Claude Code | Antigravity | 2026-05-28 |
-| [BUG-005](#bug-005) | כל כפתורי המודעות לא עובדים (מחיקה, השהיה, עריכה) | P1 | 🔵 IN_PROGRESS | ראן | Antigravity + Claude Code | 2026-05-28 |
+| [BUG-005](#bug-005) | כל כפתורי המודעות לא עובדים (מחיקה, השהיה, עריכה) | P1 | ✅ FIXED | ראן | Antigravity + Claude Code | 2026-05-28 |
 | [BUG-006](#bug-006) | ToS "אשר והמשך" לא עובד + אין כפתור חזרה | P1 | 🔴 OPEN | ראן | Antigravity | 2026-05-28 |
 | [BUG-007](#bug-007) | דשבורד פיקטיבי — נתונים לא מחוברים לבאקאנד | P1 | 🔴 OPEN | ראן | Antigravity | 2026-05-28 |
 | [BUG-008](#bug-008) | לא ניתן להיכנס לצ'אטים | P1 | 🔴 OPEN | ראן | Antigravity | 2026-05-28 |
@@ -43,9 +43,10 @@
 ### BUG-010
 **כותרת:** פרסום מודעה חדשה — 500 Internal Server Error
 **עדיפות:** P1
-**סטטוס:** 🔵 IN_PROGRESS → ✅ FIXED (deploy ממתין)
+**סטטוס:** 🏁 CLOSED
 **מדווח על ידי:** ראן | **תאריך:** 2026-05-28
 **מטפל:** Claude Code
+**Commit תיקון:** `91b7fd0` | **Merged:** `94b7e7b`
 
 **תיאור:**
 לחיצה על "פרסם מודעה" עם תמונות מחזירה `500 Internal Server Error`.
@@ -71,9 +72,14 @@
 ### BUG-005
 **כותרת:** כל כפתורי המודעות לא עובדים (מחיקה, השהיה, עריכה)
 **עדיפות:** P1 — פיצ'ר מרכזי שבור לחלוטין
-**סטטוס:** 🔵 IN_PROGRESS
+**סטטוס:** ✅ FIXED — deploy בוצע `94b7e7b` | ממתין לאימות
 **מדווח על ידי:** ראן | **תאריך:** 2026-05-28
 **מטפל:** Antigravity (frontend) + Claude Code (backend)
+
+**RCA + תיקונים:**
+- **Backend (Claude Code, commit `4001607`):** הוסף `tosAcceptedAt`, `activeRole`, `kycStatus` ל-`POST /api/auth/login` response — כעת Zustand store מקבל את הנתונים ישירות מהlogin ללא צורך ב-restoreSession
+- **Frontend (Antigravity):** `showAlert()` helper במקום `Alert.alert()` — עובד על web
+- **Frontend (merge `94b7e7b`):** הוסף `queryClient.invalidateQueries` גם ב-catch block — כעת גם אחרי 404 הפריט יעלם מהרשימה
 
 **תיאור:**
 בדף "המודעות שלי" — כל הכפתורים (מחיקה 🗑️, השהיה ⏸, עריכה ✏️, שיווק ✨) לא מגיבים ללחיצה. הקונסול מראה 403 Forbidden לכל קריאות `/api/apartments/*`.
