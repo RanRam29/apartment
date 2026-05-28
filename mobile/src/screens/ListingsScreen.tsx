@@ -9,6 +9,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import axios from 'axios';
+import { useAuthStore } from '../store/useAuthStore';
 import { landlordApi, apartmentsApi } from '../services/api';
 import type { Apartment, MainStackParamList } from '../types';
 import { C, Dark } from '../theme';
@@ -29,6 +30,7 @@ const COPY_STYLES: { key: CopyStyle; label: string; icon: keyof typeof Ionicons.
 export default function ListingsScreen() {
   const navigation = useNavigation<Nav>();
   const queryClient = useQueryClient();
+  const { user } = useAuthStore();
 
   const [copyModal, setCopyModal] = React.useState<{
     visible: boolean;
@@ -59,6 +61,17 @@ export default function ListingsScreen() {
   }
 
   async function toggleActive(apt: Apartment) {
+    if (!user?.tosAcceptedAt) {
+      Alert.alert(
+        'אישור תנאי שימוש נדרש ⚠️',
+        'על מנת לבצע פעולות במודעות, עליך לאשר את תנאי השימוש ומדיניות הפרטיות.',
+        [
+          { text: 'ביטול', style: 'cancel' },
+          { text: 'לאישור התנאים', onPress: () => navigation.navigate('Terms') }
+        ]
+      );
+      return;
+    }
     const next = !apt.isActive;
     Alert.alert(
       next ? 'הפעל מודעה' : 'השבת מודעה',
@@ -115,6 +128,17 @@ export default function ListingsScreen() {
   }
 
   function confirmDelete(apt: Apartment) {
+    if (!user?.tosAcceptedAt) {
+      Alert.alert(
+        'אישור תנאי שימוש נדרש ⚠️',
+        'על מנת לבצע פעולות במודעות, עליך לאשר את תנאי השימוש ומדיניות הפרטיות.',
+        [
+          { text: 'ביטול', style: 'cancel' },
+          { text: 'לאישור התנאים', onPress: () => navigation.navigate('Terms') }
+        ]
+      );
+      return;
+    }
     const runDelete = () => {
       void (async () => {
         try {

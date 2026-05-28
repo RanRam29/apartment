@@ -221,6 +221,7 @@ export default function ProfileScreen() {
           <MenuItem icon="trophy-outline" label="הישגים ונקודות" onPress={() => navigation.navigate('Gamification')} />
           <MenuItem icon="construct-outline" label="שירותים לדירה" onPress={() => navigation.navigate('Services')} />
           <MenuItem icon="hardware-chip-outline" label="ניהול IoT" onPress={() => navigation.navigate('IoT')} />
+          <MenuItem icon="document-text-outline" label="תנאי שימוש ומדיניות" onPress={() => navigation.navigate('Terms')} />
           {isAdmin && (
             <MenuItem icon="list-outline" label="Logs Console" onPress={() => navigation.navigate('LogsConsole')} />
           )}

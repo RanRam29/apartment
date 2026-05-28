@@ -8,6 +8,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { useQueryClient } from '@tanstack/react-query';
+import { useAuthStore } from '../store/useAuthStore';
 import { apartmentsApi } from '../services/api';
 import type { Amenity } from '../types';
 import { C } from '../theme';
@@ -31,6 +32,26 @@ const ISRAELI_CITIES = Object.keys(CITY_CENTER_BY_NAME).sort((a, b) => a.localeC
 export default function CreateListingScreen({ navigation }: any) {
   const colors = useColors();
   const queryClient = useQueryClient();
+  const { user } = useAuthStore();
+
+  useEffect(() => {
+    if (!user?.tosAcceptedAt) {
+      if (Platform.OS === 'web') {
+        window.alert('עליך לאשר את תנאי השימוש ומדיניות הפרטיות על מנת לפרסם מודעות.');
+        navigation.navigate('Terms');
+      } else {
+        Alert.alert(
+          'אישור תנאי שימוש נדרש ⚠️',
+          'על מנת לפרסם מודעות, עליך לקרוא ולאשר את תנאי השימוש ומדיניות הפרטיות.',
+          [
+            { text: 'ביטול', onPress: () => navigation.goBack(), style: 'cancel' },
+            { text: 'לאישור התנאים', onPress: () => navigation.navigate('Terms') }
+          ],
+          { cancelable: false }
+        );
+      }
+    }
+  }, [user, navigation]);
 
   const [title, setTitle]             = useState('');
   const [description, setDescription] = useState('');

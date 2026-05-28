@@ -7,6 +7,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useAuthStore } from '../store/useAuthStore';
 import { apartmentsApi } from '../services/api';
 import { C } from '../theme';
 import { dirApp } from '../theme/dirAppTokens';
@@ -34,6 +35,26 @@ export default function EditListingScreen({ route, navigation }: Props) {
   const colors = useColors();
   const { apartmentId } = route.params;
   const queryClient = useQueryClient();
+  const { user } = useAuthStore();
+
+  useEffect(() => {
+    if (!user?.tosAcceptedAt) {
+      if (Platform.OS === 'web') {
+        window.alert('עליך לאשר את תנאי השימוש ומדיניות הפרטיות על מנת לערוך מודעות.');
+        navigation.navigate('Terms');
+      } else {
+        Alert.alert(
+          'אישור תנאי שימוש נדרש ⚠️',
+          'על מנת לערוך מודעות, עליך לקרוא ולאשר את תנאי השימוש ומדיניות הפרטיות.',
+          [
+            { text: 'ביטול', onPress: () => navigation.goBack(), style: 'cancel' },
+            { text: 'לאישור התנאים', onPress: () => navigation.navigate('Terms') }
+          ],
+          { cancelable: false }
+        );
+      }
+    }
+  }, [user, navigation]);
 
   const { data: apt, isLoading } = useQuery({
     queryKey: ['apartment', apartmentId],

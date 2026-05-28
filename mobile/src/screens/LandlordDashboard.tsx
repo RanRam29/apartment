@@ -5,6 +5,8 @@ import {
 } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { useAuthStore } from '../store/useAuthStore';
 import { landlordApi } from '../services/api';
 import type { LandlordDashboard as DashboardData } from '../types';
 import { C } from '../theme';
@@ -21,6 +23,8 @@ const PERIODS: { label: string; days: number }[] = [
 
 export default function LandlordDashboard() {
   const colors = useColors();
+  const navigation = useNavigation<any>();
+  const { user } = useAuthStore();
   const { contentMaxWidth } = useResponsive();
   const chartWidth = Math.max(220, contentMaxWidth - 28);
 
@@ -59,6 +63,26 @@ export default function LandlordDashboard() {
       >
         <ResponsiveContainer>
         <Text style={styles.header}>דשבורד</Text>
+
+        {/* ToS warning banner */}
+        {!user?.tosAcceptedAt && (
+          <TouchableOpacity
+            style={styles.tosWarningBanner}
+            onPress={() => navigation.navigate('Terms')}
+            activeOpacity={0.9}
+          >
+            <View style={styles.tosWarningLeft}>
+              <Ionicons name="chevron-back" size={16} color="#ffffff" />
+            </View>
+            <View style={styles.tosWarningTextContainer}>
+              <Text style={styles.tosWarningTitle}>אישור תנאי השימוש נדרש ⚠️</Text>
+              <Text style={styles.tosWarningSub}>
+                טרם אישרת את תנאי השימוש. לחץ כאן לקריאה ואישור כדי לפתוח את האפשרות לפרסם ולמחוק מודעות.
+              </Text>
+            </View>
+            <Ionicons name="warning-outline" size={24} color="#f59e0b" style={styles.tosWarningIcon} />
+          </TouchableOpacity>
+        )}
 
         {/* KPI row */}
         <View style={styles.kpiRow}>
@@ -367,6 +391,41 @@ const styles = StyleSheet.create({
   barSelected: { backgroundColor: dirApp.secondary, opacity: 1 },
   barWeekend: { backgroundColor: dirApp.outlineVariant, opacity: 0.95 },
   barLabel: { fontSize: 8, color: dirApp.outline, width: '100%', textAlign: 'center' },
+
+  tosWarningBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(245, 158, 11, 0.3)',
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 16,
+    gap: 12,
+  },
+  tosWarningIcon: {
+    marginLeft: 4,
+  },
+  tosWarningTextContainer: {
+    flex: 1,
+  },
+  tosWarningTitle: {
+    color: '#f59e0b',
+    fontSize: 14,
+    fontWeight: '800',
+    textAlign: 'right',
+    marginBottom: 2,
+  },
+  tosWarningSub: {
+    color: '#e0e0e0',
+    fontSize: 12,
+    textAlign: 'right',
+    lineHeight: 18,
+  },
+  tosWarningLeft: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 
   leadRow: {
     flexDirection: 'row',
