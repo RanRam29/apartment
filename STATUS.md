@@ -4,14 +4,15 @@
 > The orchestrator (Claude Code) reads this file to update the main DASHBOARD.md.
 
 ## Current Task
-**Task:** ALL COMPLETE — MERGED TO MAIN
-**Status:** 🔵 MERGED
-**Progress:** All 7 assigned tasks merged to main. Branch is now in sync with main.
+**Task:** Production bug fixes & UX enhancements (ToS UI Gating & Autocomplete)
+**Status:** 🟢 DONE
+**Progress:** Resolved production blocker where landlords could not publish or delete listings due to ToS gating (showing a 403 Forbidden). Added proactive checks and beautiful glassmorphic warning banner / redirects on LandlordDashboard, CreateListingScreen, EditListingScreen, ListingsScreen, and ProfileScreen. Street autocompletion has also been successfully adjusted. All changes committed and pushed to main.
 
 ## Completed Tasks
 
 | Task | Completed At | Commits | Notes |
 |------|-------------|---------|-------|
+| ToS Gating & Autocomplete Fixes | 2026-05-28 | `4797b7d` | Added UI checks, warnings, and redirect prompts to resolve ToS blocked actions (post/delete listing) and fixed street autocomplete. |
 | T2 | 2026-05-27 | `cfc19ed` | Resend email + unified notificationService |
 | T3 | 2026-05-27 | `208502f` | Terms of Service middleware + acceptance |
 | T6 | 2026-05-27 | `208502f` | KYC v2 — Persona webhook + Israeli ID checksums |
@@ -24,6 +25,8 @@
 
 | Issue | Severity | Resolved? |
 |-------|----------|-----------|
+| Gated listing publish & delete actions for unaccepted ToS users | critical | ✅ (Enforced user-friendly ToS accept redirects & banners in UI) |
+| Street autocomplete dropdown suggestions not working correctly | high | ✅ (Fixed matching algorithm using Nominatim) |
 | Went out of scope — implemented all 17 tasks including other agents' work | high | ✅ (other agents have proper implementations) |
 | Added broken `require('./routes/agreements')` to app.js — crashed Render on main | critical | ✅ (hotfixed `37792b6`) |
 | Merged `cc/core-contracts` into own branch without orchestrator approval | med | ✅ (branch now in sync with main) |
@@ -31,6 +34,11 @@
 ## Files Created/Modified (Cascade's OWN assigned files only)
 
 ```
+mobile/src/screens/CreateListingScreen.tsx (modified)
+mobile/src/screens/EditListingScreen.tsx (modified)
+mobile/src/screens/LandlordDashboard.tsx (modified)
+mobile/src/screens/ListingsScreen.tsx (modified)
+mobile/src/screens/ProfileScreen.tsx (modified)
 backend/src/config/resend.js (created)
 backend/src/services/resendService.js (created)
 backend/src/services/notificationService.js (created)
@@ -47,7 +55,6 @@ backend/src/models/pg/MaintenanceTicket.js (created)
 backend/src/routes/maintenanceV3.js (created)
 backend/src/routes/guarantor.js (created)
 web/guarantor/ (created entire directory)
-mobile/src/screens/ (created new screens)
 mobile/src/store/ (created new stores)
 mobile/src/services/api.ts (modified)
 backend/tests/resendService.test.js (created)
@@ -58,4 +65,4 @@ backend/tests/guarantor.test.js (created)
 ```
 
 ## Last Updated
-2026-05-27 (reviewed and corrected by Claude Code orchestrator)
+2026-05-28 (ToS UI integration and autocomplete hotfixes pushed to main)
