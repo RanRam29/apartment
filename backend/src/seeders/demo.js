@@ -118,9 +118,14 @@ async function autoSeed(queryInterface) {
         where: { email: a.email },
         defaults: { email: a.email, passwordHash: adminHash, firstName: a.firstName, lastName: a.lastName, role: a.role, isVerified: true, tosAcceptedAt: new Date(), tosVersion: '3.0' },
       });
-      // Backfill tosAcceptedAt for existing admin accounts that were created before this fix
-      if (!created && !user.tosAcceptedAt) {
-        await user.update({ tosAcceptedAt: new Date(), tosVersion: '3.0' });
+      // Backfill missing fields for existing admin accounts created before v3 fixes
+      if (!created) {
+        const updates = {};
+        if (!user.tosAcceptedAt) { updates.tosAcceptedAt = new Date(); updates.tosVersion = '3.0'; }
+        if (!user.isVerified) { updates.isVerified = true; }
+        // Always sync password hash so admin accounts stay accessible
+        updates.passwordHash = adminHash;
+        await user.update(updates);
       }
     }
 
