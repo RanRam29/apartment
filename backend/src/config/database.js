@@ -40,6 +40,7 @@ const USER_V3_COLUMNS = {
   blocked_count: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
   is_locked: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
   active_role: { type: DataTypes.STRING(20), allowNull: true, defaultValue: 'tenant' },
+  trust_score: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 50 },
 };
 const APARTMENT_STREET_COLUMN = {
   street: { type: DataTypes.STRING(100), allowNull: true },

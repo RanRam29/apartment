@@ -55,10 +55,10 @@ export default function LandlordDashboard() {
 
   const maxLikes = Math.max(...listings.map((l) => l.likeCount ?? 0), 1);
 
-  // BUG-007: Safe conversion rate sanitization (if denominator=0 → 0.0%)
-  const rawRate = summary.conversionRate;
-  const isInvalid = rawRate === 'Infinity' || rawRate === 'NaN' || !rawRate || Number(rawRate) === Infinity || isNaN(Number(rawRate)) || !isFinite(Number(rawRate));
-  const conversionRateVal = isInvalid ? '0.0' : String(rawRate);
+  // BUG-007: Safe conversion rate calculation based on matches
+  const acceptedMatches = summary.matches?.accepted ?? 0;
+  const totalMatches = (summary.matches?.pending ?? 0) + (summary.matches?.accepted ?? 0) + (summary.matches?.rejected ?? 0);
+  const conversionRateVal = totalMatches > 0 ? Math.round((acceptedMatches / totalMatches) * 100) : 0;
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>

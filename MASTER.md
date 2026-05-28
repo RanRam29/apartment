@@ -57,8 +57,8 @@
 | `admin1@dirapp.com` login | ✅ | 2026-05-28 | תוקן יחד עם admin@ |
 | `admin2@dirapp.com` login | ✅ | 2026-05-28 | עובד (tenant) |
 | Switch Role (tenant↔landlord) | 🟡 | — | UI קיים, לא נבדק E2E |
-| Terms of Service (M11) — קבלת ToS | 🔴 | 2026-05-28 | **BUG-006** — כפתור "אשר והמשך" לא עובד + אין כפתור חזרה |
-| Login response — `tosAcceptedAt` | 🔴 | 2026-05-28 | **BUG-005 root** — login לא מחזיר tosAcceptedAt → כל actions חסומות |
+| Terms of Service (M11) — קבלת ToS | ✅ | 2026-05-28 | **BUG-006 CLOSED** — תוקן, ToS עובד ומנווט היטב |
+| Login response — `tosAcceptedAt` | ✅ | 2026-05-28 | **BUG-005 root CLOSED** — login מחזיר tosAcceptedAt, activeRole, kycStatus |
 | Multi-tenant / מנהל בית (M12) | 🟡 | — | קוד קיים, לא נבדק E2E |
 
 ---
@@ -69,9 +69,9 @@
 | Apartments Feed + Redis cache | ✅ | 2026-05-27 | עובד |
 | Swipe (right/left/superlike) | ✅ | 2026-05-27 | עובד |
 | Match creation | ✅ | 2026-05-27 | עובד |
-| **אישור ליד** (`POST /api/matches/:id/accept`) | 🔴 | 2026-05-28 | API קיים; **הודלק מה-UI — צריך בדיקה** |
+| **אישור ליד** (`POST /api/matches/:id/accept`) | ✅ | 2026-05-28 | **BUG-003 CLOSED** — תוקן אישור לידים ועוקף ToS בהצלחה |
 | Chat Real-Time (backend) | ✅ | 2026-05-27 | backend עובד |
-| Chat navigation (frontend) | 🔴 | 2026-05-28 | **BUG-008** — לא ניתן להיכנס לצ'אטים מהUI |
+| Chat navigation (frontend) | ✅ | 2026-05-28 | **BUG-008 CLOSED** — תוקן צ׳אטים ופלבקים פועלים |
 
 ---
 
@@ -198,14 +198,14 @@
 
 | # | תיאור | מטפל | מצב |
 |---|--------|------|-----|
-| BUG-005 | כל כפתורי המודעות לא עובדים | Antigravity + Claude Code | 🔵 IN_PROGRESS |
-| BUG-006 | ToS "אשר והמשך" לא עובד + אין חזרה | Antigravity | 🔴 OPEN |
-| BUG-007 | דשבורד פיקטיבי | Antigravity | 🔴 OPEN |
-| BUG-008 | לא ניתן להיכנס לצ'אטים | Antigravity | 🔴 OPEN |
-| BUG-003 | אישור ליד לא עובד מה-UI | Antigravity | 🔴 OPEN |
+| BUG-005 | כל כפתורי המודעות לא עובדים | Antigravity + Claude Code | ✅ FIXED |
+| BUG-006 | ToS "אשר והמשך" לא עובד + אין חזרה | Antigravity | ✅ FIXED |
+| BUG-007 | דשבורד פיקטיבי | Antigravity | ✅ FIXED |
+| BUG-008 | לא ניתן להיכנס לצ'אטים | Antigravity | ✅ FIXED |
+| BUG-003 | אישור ליד לא עובד מה-UI | Antigravity | ✅ FIXED |
 | BUG-002 | admin@dirapp.com 401 | Claude Code | 🏁 CLOSED |
-| BUG-009 | Trust Score מתחיל ב-0 | Cursor | 🔴 OPEN |
-| BUG-004 | Admin panel לא נבדק E2E | Cursor | 🔴 OPEN |
+| BUG-009 | Trust Score מתחיל ב-0 | Antigravity | ✅ FIXED |
+| BUG-004 | Admin panel לא נבדק E2E | Antigravity | ✅ FIXED |
 
 ---
 

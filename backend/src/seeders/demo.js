@@ -43,7 +43,7 @@ async function seed() {
     const adminHash = await bcrypt.hash(a.password, 12);
     const [user, created] = await User.findOrCreate({
       where: { email: a.email },
-      defaults: { email: a.email, passwordHash: adminHash, firstName: a.firstName, lastName: a.lastName, role: a.role, isVerified: true, tosAcceptedAt: new Date(), tosVersion: '3.0' },
+      defaults: { email: a.email, passwordHash: adminHash, firstName: a.firstName, lastName: a.lastName, role: a.role, isVerified: true, tosAcceptedAt: new Date(), tosVersion: '3.0', trustScore: 50 },
     });
     if (!created && !user.tosAcceptedAt) {
       await user.update({ tosAcceptedAt: new Date(), tosVersion: '3.0' });
@@ -58,7 +58,7 @@ async function seed() {
   for (const l of LANDLORDS) {
     const [user, created] = await User.findOrCreate({
       where: { email: l.email },
-      defaults: { email: l.email, passwordHash: hash, firstName: l.firstName, lastName: l.lastName, role: 'landlord', isVerified: true },
+      defaults: { email: l.email, passwordHash: hash, firstName: l.firstName, lastName: l.lastName, role: 'landlord', isVerified: true, trustScore: 50 },
     });
     landlordIds.push(user.id);
     console.log(`${created ? '➕' : '⏩'} Landlord: ${l.email}`);
@@ -67,7 +67,7 @@ async function seed() {
   // Create demo tenant
   const [, tenantCreated] = await User.findOrCreate({
     where: { email: TENANT.email },
-    defaults: { email: TENANT.email, passwordHash: hash, firstName: TENANT.firstName, lastName: TENANT.lastName, role: 'tenant' },
+    defaults: { email: TENANT.email, passwordHash: hash, firstName: TENANT.firstName, lastName: TENANT.lastName, role: 'tenant', trustScore: 50 },
   });
   console.log(`${tenantCreated ? '➕' : '⏩'} Tenant: ${TENANT.email}`);
 
@@ -116,7 +116,7 @@ async function autoSeed(queryInterface) {
     for (const a of ADMIN_ACCOUNTS) {
       const [user, created] = await User.findOrCreate({
         where: { email: a.email },
-        defaults: { email: a.email, passwordHash: adminHash, firstName: a.firstName, lastName: a.lastName, role: a.role, isVerified: true, tosAcceptedAt: new Date(), tosVersion: '3.0' },
+        defaults: { email: a.email, passwordHash: adminHash, firstName: a.firstName, lastName: a.lastName, role: a.role, isVerified: true, tosAcceptedAt: new Date(), tosVersion: '3.0', trustScore: 50 },
       });
       // Backfill missing fields for existing admin accounts created before v3 fixes
       if (!created) {
@@ -142,13 +142,13 @@ async function autoSeed(queryInterface) {
     for (const l of LANDLORDS) {
       const [user] = await User.findOrCreate({
         where: { email: l.email },
-        defaults: { email: l.email, passwordHash: demoHash, firstName: l.firstName, lastName: l.lastName, role: 'landlord', isVerified: true },
+        defaults: { email: l.email, passwordHash: demoHash, firstName: l.firstName, lastName: l.lastName, role: 'landlord', isVerified: true, trustScore: 50 },
       });
       landlordIds.push(user.id);
     }
     await User.findOrCreate({
       where: { email: TENANT.email },
-      defaults: { email: TENANT.email, passwordHash: demoHash, firstName: TENANT.firstName, lastName: TENANT.lastName, role: 'tenant' },
+      defaults: { email: TENANT.email, passwordHash: demoHash, firstName: TENANT.firstName, lastName: TENANT.lastName, role: 'tenant', trustScore: 50 },
     });
     const admin1 = await User.findOne({ where: { email: 'admin1@dirapp.com' } });
     if (admin1) {

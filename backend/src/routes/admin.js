@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, requireRole } = require('../middleware/auth');
-const { AppConfig, User, RentalAgreement, LedgerRow, MaintenanceTicket, UserKycProfile } = require('../models');
+const { AppConfig, User, RentalAgreement, LedgerRow, MaintenanceTicket, UserKycProfile, Apartment } = require('../models');
 
 router.use(authenticate);
 router.use(requireRole('admin'));
@@ -98,6 +98,39 @@ router.post('/maintenance/:id/close', async (req, res, next) => {
   try {
     await MaintenanceTicket.update({ status: 'CLOSED' }, { where: { id: req.params.id } });
     res.json({ closed: true });
+  } catch (err) { next(err); }
+});
+
+// GET /api/v3/admin/stats — Admin stats summary
+router.get('/stats', async (req, res, next) => {
+  try {
+    const userCount = await User.count();
+    const agreementCount = await RentalAgreement.count();
+    const activeApartmentCount = await Apartment.count({ where: { isActive: true } });
+    res.json({
+      users: userCount,
+      agreements: agreementCount,
+      activeApartments: activeApartmentCount,
+    });
+  } catch (err) { next(err); }
+});
+
+// POST /api/v3/admin/kyc/:id/override — KYC verification override
+router.post('/kyc/:id/override', async (req, res, next) => {
+  try {
+    const { status = 'APPROVED' } = req.body;
+    await UserKycProfile.upsert({ userId: req.params.id, status });
+    res.json({ overridden: true });
+  } catch (err) { next(err); }
+});
+
+// PATCH /api/v3/admin/config — Patch config values
+router.patch('/config', async (req, res, next) => {
+  try {
+    const { key, value } = req.body;
+    if (!key) return res.status(400).json({ error: 'Key is required' });
+    const [config] = await AppConfig.upsert({ key, value });
+    res.json(config);
   } catch (err) { next(err); }
 });
 

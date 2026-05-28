@@ -83,6 +83,10 @@ const User = sequelize.define('User', {
     allowNull: true,
     validate: { isIn: [['tenant', 'landlord']] },
   },
+  trustScore: {
+    type: DataTypes.INTEGER,
+    defaultValue: 50,
+  },
 }, {
   tableName: 'users',
   indexes: [

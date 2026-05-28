@@ -31,31 +31,31 @@ function leadScoreStyle(score: number | null | undefined) {
   return { bg: `${C.statusTone.caution}22`, color: C.statusTone.caution, label: `${pct}%` };
 }
 
+function showAlert(
+  title: string,
+  message: string,
+  buttons?: Array<{text:string; onPress?:()=>void; style?:'cancel'|'destructive'|'default'}>,
+  options?: {cancelable?:boolean}
+) {
+  if (Platform.OS === 'web') {
+    const action = buttons?.find(b => b.style !== 'cancel');
+    if (!buttons || !action) {
+      window.alert(`${title}\n\n${message}`);
+      buttons?.[0]?.onPress?.();
+      return;
+    }
+    if (window.confirm(`${title}\n\n${message}`)) action.onPress?.();
+    return;
+  }
+  Alert.alert(title, message, buttons as any, options);
+}
+
 export default function LeadsScreen() {
   const [activeTab, setActiveTab] = useState<StatusTab>('pending');
   const navigation = useNavigation<any>();
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
 
-  function showAlert(title: string, message: string, buttons?: { text: string; onPress?: () => void; style?: string }[]) {
-    if (Platform.OS === 'web') {
-      if (buttons && buttons.length > 1) {
-        const confirmed = window.confirm(`${title}\n\n${message}`);
-        if (confirmed) {
-          const mainBtn = buttons.find(b => b.style !== 'cancel' && b.text !== 'ביטול');
-          if (mainBtn && mainBtn.onPress) mainBtn.onPress();
-        } else {
-          const cancelBtn = buttons.find(b => b.style === 'cancel' || b.text === 'ביטול');
-          if (cancelBtn && cancelBtn.onPress) cancelBtn.onPress();
-        }
-      } else {
-        window.alert(`${title}\n\n${message}`);
-        if (buttons && buttons[0] && buttons[0].onPress) buttons[0].onPress();
-      }
-    } else {
-      Alert.alert(title, message, buttons as any);
-    }
-  }
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['leads', activeTab],

@@ -47,11 +47,11 @@ export default function MatchCard({ match, currentUserId, unreadCount, onPress }
           {apartment?.city} · ₪{apartment?.price?.toLocaleString()}/חודש
         </Text>
         <View style={styles.partyRow}>
-          {otherParty?.avatarUrl ? (
+          {otherParty?.avatarUrl && !otherParty.avatarUrl.includes('via.placeholder.com') ? (
             <Image source={{ uri: otherParty.avatarUrl }} style={styles.avatar} contentFit="cover" />
           ) : (
-            <View style={[styles.avatar, styles.avatarPlaceholder]}>
-              <Ionicons name="person" size={11} color={C.textMut} />
+            <View style={{width:40,height:40,borderRadius:20,backgroundColor:'#334',justifyContent:'center',alignItems:'center'}}>
+              <Ionicons name="person" size={20} color={C.textMut} />
             </View>
           )}
           <Text style={styles.partyName} numberOfLines={1}>
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
   title: { color: dirApp.primary, fontSize: 14, fontWeight: '600', textAlign: 'right' },
   location: { color: C.textSub, fontSize: 12, textAlign: 'right' },
   partyRow: { flexDirection: 'row', alignItems: 'center', gap: 5, justifyContent: 'flex-end' },
-  avatar: { width: 16, height: 16, borderRadius: 8 },
+  avatar: { width: 40, height: 40, borderRadius: 20 },
   avatarPlaceholder: { backgroundColor: C.border, justifyContent: 'center', alignItems: 'center' },
   partyName: { color: C.textMut, fontSize: 11 },
   right: { alignItems: 'flex-end', gap: 8 },

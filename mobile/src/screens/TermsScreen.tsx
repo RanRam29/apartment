@@ -29,8 +29,8 @@ export default function TermsScreen({ navigation }: any) {
 
     setIsSubmitting(true);
     try {
-      await tosApi.accept();
-      updateUser({ tosAcceptedAt: new Date().toISOString() });
+      const res = await tosApi.accept();
+      updateUser({ tosAcceptedAt: res.data.tosAcceptedAt });
       if (Platform.OS === 'web') {
         window.alert('תנאי השימוש אושרו בהצלחה.');
         if (navigation.canGoBack()) {
