@@ -135,6 +135,11 @@ export default function CreateListingScreen({ navigation }: any) {
           ? data
               .map((item: any) => item?.address?.road)
               .filter(Boolean)
+              .filter((road: string) => {
+                const qNorm = normalizeText(q);
+                const words = normalizeText(road).split(/\s+/);
+                return words.some(word => word.startsWith(qNorm));
+              })
           : [];
         const unique = Array.from(new Set(parsed));
         setStreetSuggestions(unique.slice(0, 8));
