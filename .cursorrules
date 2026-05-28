@@ -1,0 +1,150 @@
+# DirApp — Cursor Rules
+# עדכון אחרון: 2026-05-28 | מנהל: Claude Code (CTO)
+
+# ============================================================
+# ⚠️ חובה לקרוא לפני כל עבודה
+# ============================================================
+# לפני כל משימה — קרא:
+#   1. BUGS.md      — מה פתוח, מה מוקצה לך
+#   2. MASTER.md    — סטטוס כל פיצ'ר
+#   3. AGENT_PROTOCOL.md — פרוטוקול עבודה + פורמט commits
+#
+# אם משימה לא מופיעה ב-BUGS.md / MASTER.md — עצור ושאל.
+# ============================================================
+
+## 📋 PROJECT OVERVIEW
+DirApp — פלטפורמת השכרת דירות ישראלית (שוכרים + משכירים).
+React Native/Expo cross-platform: iOS, Android, Web (Vercel).
+עברית RTL היא שפת ברירת המחדל.
+
+## 🔴 ACTIVE BUGS — קרא BUGS.md לפירוט מלא
+# הבאגים הפעילים שהוקצו ל-Cursor:
+# BUG-004 (P2): Admin panel endpoints לא נבדקו E2E
+# BUG-009 (P2): Trust Score מתחיל ב-0 במקום 50
+#
+# הבאגים שהוקצו ל-Antigravity (לא לגעת):
+# BUG-003, BUG-005, BUG-006, BUG-007, BUG-008
+
+## 🏗️ TECH STACK
+- Frontend: React Native 0.79.6 / Expo 53 / TypeScript 5.8
+- State: Zustand 4 (global), React Query (server)
+- Navigation: React Navigation v6 (native stack + bottom tabs)
+- Animations: Reanimated 3 (UI thread worklets בלבד)
+- Fonts: expo-font (Rubik) — טעון ב-App.tsx
+- Images: expo-image (לא React Native Image)
+
+## 📁 BACKEND STRUCTURE
+```
+backend/
+  src/
+    config/database.js     # Sequelize + boot migrations (ensureUserVerificationColumns)
+    models/pg/             # Sequelize models (UUID PKs, PostgreSQL)
+    routes/                # Express routers
+    middleware/
+      auth.js              # authenticate, requireRole, requireTos
+    seeders/demo.js        # autoSeed() — מריץ בכל boot
+    services/              # R2 storage, email, push notifications
+```
+
+## 📁 FRONTEND STRUCTURE
+```
+mobile/
+  App.tsx                      # Entry point, font loading, error boundary
+  src/
+    theme.ts                   # Design tokens (C, Dark, typography, space)
+    theme/dirAppTokens.ts      # dirApp color tokens
+    hooks/useResponsive.ts     # Breakpoints: phone/tablet/desktop
+    components/
+      ResponsiveContainer.tsx  # Max-width wrapper
+    screens/                   # מסכים (default exports)
+    navigation/AppNavigator.tsx
+    store/
+      useAuthStore.ts          # Zustand auth (user, token, login, restoreSession)
+    services/api.ts            # Axios API clients
+    types/                     # TypeScript types
+```
+
+## 🎨 DESIGN SYSTEM
+
+### Colors (import as `C` from `../theme`)
+| Token        | Value     | שימוש                          |
+|-------------|-----------|--------------------------------|
+| `C.navy`    | #1A365D   | רקעים ראשיים, כותרות, כפתורים  |
+| `C.cyan`    | #2DD4BF   | Accent, active states, CTAs    |
+| `C.textMut` | #64748B   | טקסט משני, לא פעיל            |
+| `C.coral`   | #FF7F7F   | לייקים, לבבות                 |
+
+### ⚠️ WCAG RULE — אסור להפר
+**לעולם לא לשים טקסט לבן על teal (#2DD4BF)** — ratio 2.7:1 (FAIL).
+- רקע teal → טקסט `C.navy`
+- רקע navy → טקסט לבן
+
+### Responsive Breakpoints
+| Breakpoint | Width      | ניווט                              |
+|-----------|------------|------------------------------------|
+| phone     | <768px     | Bottom tab bar (80px, 5-6 tabs)    |
+| tablet    | 768–1023px | Side rail (72px, icons only, RTL)  |
+| desktop   | >=1024px   | Sidebar (240px, icons+labels, RTL) |
+
+## 🌐 RTL / Hebrew
+- `I18nManager.forceRTL(true)` לRTL מערכת
+- `marginStart`/`marginEnd` ולא `marginLeft`/`marginRight`
+- Sidebar ו-nav tabs — anchored לצד ימין ב-RTL
+
+## ⚙️ CODE CONVENTIONS
+- Named exports לcomponents משותפים, default exports למסכים
+- PascalCase.tsx לcomponents, camelCase.ts לhooks/utils
+- אין תגובות אלא אם ה-WHY לא ברור
+- `expo-image` במקום `Image` לתמונות נכסים (`contentFit="cover"`, `transition={200}`)
+- `FlatList` עם `getItemLayout` לפריטים בגובה קבוע
+- `React.memo()` לcard components ברשימות
+
+## 🔐 AUTH CONVENTIONS
+```javascript
+// Backend middleware
+const { authenticate, requireRole } = require('../middleware/auth');
+
+// All new endpoints
+router.get('/api/v3/...', authenticate, requireRole('landlord'), async (req, res) => {...});
+```
+
+## 💾 MODELS CONVENTION
+- UUID primary keys
+- Sequelize
+- תיקייה: `backend/src/models/pg/`
+- כל שינוי schema → **חייב** לעדכן `ensureUserVerificationColumns()` ב-`database.js`
+
+## 🧪 TESTING
+- Jest + jest-expo + React Native Testing Library
+- בדיקות: `backend/tests/`
+- הרצה: `node node_modules/jest/bin/jest.js --runInBand` (מתיקיית mobile/)
+
+## 📝 COMMIT FORMAT (חובה)
+```
+<type>(<scope>): <תיאור>
+
+AGENT: Cursor
+TOKENS: ~XXK
+TIME: XX min
+TESTS: עבר/נכשל/לא נבדק
+
+BUG-XXX: <אם רלוונטי>
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+```
+
+סוגי type: feat | fix | test | docs | refactor | perf
+
+## 🚀 PRODUCTION
+- Backend: https://apartment-backend-v24y.onrender.com
+- Frontend: https://apartment-olive.vercel.app
+- Deploy: push to `main` → Render auto-deploy (~3 min)
+- Health: GET /health
+
+## 🚫 אסור בהחלט
+- Merge ל-main בלי אישור Claude Code (Orchestrator)
+- לסיים משימה בלי לעדכן MASTER.md + BUGS.md
+- לפתוח feature חדש כשיש BUG קריטי פתוח באותו flow
+- לשנות `.env.production` בלי תיאום
+- לגעת בקבצים שהוקצו ל-Antigravity (mobile/src/screens/*)
+  אלא אם MASTER.md מאשר במפורש
