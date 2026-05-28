@@ -1,7 +1,9 @@
 # DirApp — MASTER STATUS DOCUMENT
-> **מנהל: Claude Code (Orchestrator)**  
-> **עדכון אחרון:** 2026-05-28  
+> **מנהל:** Claude Code (CTO / Orchestrator)
+> **עדכון אחרון:** 2026-05-28
 > **כלל ברזל:** זה המסמך היחיד שסומך עליו. כל שינוי קוד → עדכון כאן.
+>
+> 📖 **קריאה נוספת:** [`CEO_DASHBOARD.md`](CEO_DASHBOARD.md) — למנכ"ל | [`AGENT_PROTOCOL.md`](AGENT_PROTOCOL.md) — לכל עובד
 
 ---
 
