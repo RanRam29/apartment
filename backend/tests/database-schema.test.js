@@ -1,4 +1,4 @@
-const { ensureUserVerificationColumns } = require('../src/config/database');
+const { ensureUserVerificationColumns, ensureApartmentStreetColumn } = require('../src/config/database');
 
 describe('Database schema compatibility', () => {
   it('adds missing email verification columns to existing users tables', async () => {
@@ -34,5 +34,38 @@ describe('Database schema compatibility', () => {
 
     await expect(ensureUserVerificationColumns(queryInterface)).resolves.toBeUndefined();
     expect(queryInterface.addColumn).not.toHaveBeenCalled();
+  });
+
+  it('adds apartment street column with idempotent DDL', async () => {
+    const queryInterface = {
+      describeTable: jest.fn().mockResolvedValue({
+        id: {},
+        city: {},
+      }),
+    };
+    const database = { query: jest.fn().mockResolvedValue(undefined) };
+
+    await ensureApartmentStreetColumn(queryInterface, database);
+
+    expect(database.query).toHaveBeenCalledTimes(1);
+    expect(database.query.mock.calls[0][0]).toContain('ADD COLUMN IF NOT EXISTS "street"');
+  });
+
+  it('backfills blank street values before dropping legacy neighborhood column', async () => {
+    const queryInterface = {
+      describeTable: jest.fn().mockResolvedValue({
+        id: {},
+        street: {},
+        neighborhood: {},
+      }),
+    };
+    const database = { query: jest.fn().mockResolvedValue(undefined) };
+
+    await ensureApartmentStreetColumn(queryInterface, database);
+
+    expect(database.query).toHaveBeenCalledTimes(2);
+    expect(database.query.mock.calls[0][0]).toContain('NULLIF(TRIM("street"), \'\') IS NULL');
+    expect(database.query.mock.calls[0][0]).toContain('NULLIF(TRIM("neighborhood"), \'\') IS NOT NULL');
+    expect(database.query.mock.calls[1][0]).toContain('DROP COLUMN IF EXISTS "neighborhood"');
   });
 });

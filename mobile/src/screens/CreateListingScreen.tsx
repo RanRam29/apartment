@@ -12,6 +12,12 @@ import { apartmentsApi } from '../services/api';
 import type { Amenity } from '../types';
 import { C } from '../theme';
 import { CITY_CENTER_BY_NAME } from '../constants/cityCenters';
+import {
+  isDecimalNumberText,
+  isIntegerNumberText,
+  keepDecimalNumber,
+  keepDigitsOnly,
+} from '../utils/listingFormValidation';
 
 const AMENITY_OPTIONS: { key: Amenity; label: string }[] = [
   { key: 'parking',     label: '🚗 חניה' },
@@ -58,10 +64,6 @@ export default function CreateListingScreen({ navigation }: any) {
     );
   }
 
-  function keepDigitsOnly(value: string) {
-    return value.replace(/[^\d]/g, '');
-  }
-
   function sanitizeTitleInput(value: string) {
     const withoutCodeChars = value.replace(/[<>`{}]/g, '');
     return withoutCodeChars.slice(0, 100);
@@ -87,27 +89,6 @@ export default function CreateListingScreen({ navigation }: any) {
   async function validateIsraeliCity(cityName: string) {
     const cityNorm = normalizeText(cityName);
     return ISRAELI_CITIES.some((candidate) => normalizeText(candidate) === cityNorm);
-  }
-
-  async function validateStreetInCity(cityName: string, streetName: string) {
-    try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=il&addressdetails=1&accept-language=he&limit=10&street=${encodeURIComponent(streetName)}&city=${encodeURIComponent(cityName)}`,
-        { headers: { 'User-Agent': 'ApartmentApp/1.0 (CreateListing)' } }
-      );
-      const data = await res.json();
-      if (!Array.isArray(data)) return false;
-      const cityNorm = normalizeText(cityName);
-      const streetNorm = normalizeText(streetName);
-      return data.some((item: any) => {
-        const address = item?.address || {};
-        const candidateCity = normalizeText(address.city || address.town || address.village || address.municipality || '');
-        const candidateStreet = normalizeText(address.road || '');
-        return candidateCity === cityNorm && candidateStreet === streetNorm;
-      });
-    } catch {
-      return false;
-    }
   }
 
   useEffect(() => {
@@ -190,7 +171,7 @@ export default function CreateListingScreen({ navigation }: any) {
       showMessage('שגיאה', 'כותרת לא יכולה להכיל קוד או תווים לא תקינים');
       return;
     }
-    if (!/^\d+$/.test(price) || !/^\d+$/.test(rooms) || (sizeSqm && !/^\d+$/.test(sizeSqm)) || (floor && !/^\d+$/.test(floor))) {
+    if (!isIntegerNumberText(price) || !isDecimalNumberText(rooms) || (sizeSqm && !isIntegerNumberText(sizeSqm)) || (floor && !isIntegerNumberText(floor))) {
       showMessage('שגיאה', 'שדות מחיר, חדרים, קומה וגודל חייבים להכיל מספרים בלבד');
       return;
     }
@@ -199,12 +180,6 @@ export default function CreateListingScreen({ navigation }: any) {
       showMessage('שגיאה', 'יש לבחור עיר קיימת בישראל מתוך ההצעות');
       return;
     }
-    const isStreetValid = await validateStreetInCity(cityValue, streetValue);
-    if (!isStreetValid) {
-      showMessage('שגיאה', 'יש לבחור רחוב שקיים בעיר שנבחרה');
-      return;
-    }
-
     setLoading(true);
     try {
       const form = new FormData();
@@ -283,8 +258,8 @@ export default function CreateListingScreen({ navigation }: any) {
                 <TextInput
                   style={styles.input}
                   value={rooms}
-                  onChangeText={(value) => setRooms(keepDigitsOnly(value))}
-                  keyboardType="numeric"
+                  onChangeText={(value) => setRooms(keepDecimalNumber(value))}
+                  keyboardType="decimal-pad"
                   placeholder="3"
                   placeholderTextColor={C.textMut}
                   textAlign="right"
@@ -299,7 +274,6 @@ export default function CreateListingScreen({ navigation }: any) {
                   value={city}
                   onChangeText={(value) => {
                     setCity(value);
-                    setStreet('');
                     setStreetSuggestions([]);
                   }}
                   placeholder="בחר עיר בישראל"
@@ -314,6 +288,7 @@ export default function CreateListingScreen({ navigation }: any) {
                         key={item}
                         style={styles.suggestionItem}
                         onPress={() => {
+                          if (item !== city) setStreet('');
                           setCity(item);
                           setCitySuggestions([]);
                         }}

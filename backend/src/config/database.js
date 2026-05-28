@@ -32,9 +32,6 @@ const USER_VERIFICATION_COLUMNS = {
   verification_token: { type: DataTypes.STRING(128), allowNull: true },
   verified_at: { type: DataTypes.DATE, allowNull: true },
 };
-const APARTMENT_STREET_COLUMN = {
-  street: { type: DataTypes.STRING(100), allowNull: true },
-};
 
 function isMissingUsersTableError(err) {
   const message = String(err?.message || '');
@@ -65,7 +62,7 @@ function isMissingApartmentsTableError(err) {
   return /apartments.*does not exist|relation "apartments" does not exist|No description found/i.test(message);
 }
 
-async function ensureApartmentStreetColumn(queryInterface = sequelize.getQueryInterface()) {
+async function ensureApartmentStreetColumn(queryInterface = sequelize.getQueryInterface(), database = sequelize) {
   let apartmentsTable;
   try {
     apartmentsTable = await queryInterface.describeTable('apartments');
@@ -76,22 +73,26 @@ async function ensureApartmentStreetColumn(queryInterface = sequelize.getQueryIn
     throw err;
   }
 
-  for (const [columnName, definition] of Object.entries(APARTMENT_STREET_COLUMN)) {
-    if (!apartmentsTable[columnName]) {
-      await queryInterface.addColumn('apartments', columnName, definition);
-      logger.info(`Added missing apartments.${columnName} column`);
-    }
+  if (!apartmentsTable.street) {
+    await database.query(`
+      ALTER TABLE "apartments"
+      ADD COLUMN IF NOT EXISTS "street" VARCHAR(100)
+    `);
+    logger.info('Added missing apartments.street column');
   }
 
   // One-time backfill + schema cleanup from legacy neighborhood column.
   if (apartmentsTable.neighborhood) {
-    await sequelize.query(`
-      UPDATE apartments
-      SET street = neighborhood
-      WHERE street IS NULL
-        AND neighborhood IS NOT NULL
+    await database.query(`
+      UPDATE "apartments"
+      SET "street" = "neighborhood"
+      WHERE NULLIF(TRIM("street"), '') IS NULL
+        AND NULLIF(TRIM("neighborhood"), '') IS NOT NULL
     `);
-    await queryInterface.removeColumn('apartments', 'neighborhood');
+    await database.query(`
+      ALTER TABLE "apartments"
+      DROP COLUMN IF EXISTS "neighborhood"
+    `);
     logger.info('Dropped legacy apartments.neighborhood column after backfill');
   }
 }
