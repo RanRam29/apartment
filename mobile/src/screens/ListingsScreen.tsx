@@ -175,6 +175,8 @@ export default function ListingsScreen() {
             else if (st === 404) detail = 'המודעה לא נמצאה.';
             else if (st === 401 || st === 403) detail = 'אין הרשאה למחוק.';
           }
+          // Invalidate even on error — if apartment no longer exists (404), remove it from cache
+          await queryClient.invalidateQueries({ queryKey: ['landlord-dashboard'] });
           showAlert('שגיאה', detail);
         }
       })();
