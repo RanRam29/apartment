@@ -2,6 +2,7 @@ import React from 'react';
 import {
   View, Text, FlatList, TouchableOpacity, Pressable, StyleSheet,
   SafeAreaView, ActivityIndicator, Alert, Modal,   Share, ScrollView,
+  Platform,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
@@ -31,6 +32,26 @@ export default function ListingsScreen() {
   const navigation = useNavigation<Nav>();
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
+
+  function showAlert(title: string, message: string, buttons?: { text: string; onPress?: () => void; style?: string }[]) {
+    if (Platform.OS === 'web') {
+      if (buttons && buttons.length > 1) {
+        const confirmed = window.confirm(`${title}\n\n${message}`);
+        if (confirmed) {
+          const mainBtn = buttons.find(b => b.style !== 'cancel' && b.text !== 'ביטול');
+          if (mainBtn && mainBtn.onPress) mainBtn.onPress();
+        } else {
+          const cancelBtn = buttons.find(b => b.style === 'cancel' || b.text === 'ביטול');
+          if (cancelBtn && cancelBtn.onPress) cancelBtn.onPress();
+        }
+      } else {
+        window.alert(`${title}\n\n${message}`);
+        if (buttons && buttons[0] && buttons[0].onPress) buttons[0].onPress();
+      }
+    } else {
+      Alert.alert(title, message, buttons as any);
+    }
+  }
 
   const [copyModal, setCopyModal] = React.useState<{
     visible: boolean;
@@ -62,7 +83,7 @@ export default function ListingsScreen() {
 
   async function toggleActive(apt: Apartment) {
     if (!user?.tosAcceptedAt) {
-      Alert.alert(
+      showAlert(
         'אישור תנאי שימוש נדרש ⚠️',
         'על מנת לבצע פעולות במודעות, עליך לאשר את תנאי השימוש ומדיניות הפרטיות.',
         [
@@ -73,7 +94,7 @@ export default function ListingsScreen() {
       return;
     }
     const next = !apt.isActive;
-    Alert.alert(
+    showAlert(
       next ? 'הפעל מודעה' : 'השבת מודעה',
       `האם ${next ? 'להפעיל' : 'להשבית'} את "${apt.title}"?`,
       [
@@ -85,7 +106,7 @@ export default function ListingsScreen() {
               await apartmentsApi.update(apt.id, { isActive: next });
               await queryClient.invalidateQueries({ queryKey: ['landlord-dashboard'] });
             } catch {
-              Alert.alert('שגיאה', 'לא ניתן לעדכן את המודעה');
+              showAlert('שגיאה', 'לא ניתן לעדכן את המודעה');
             }
           },
         },
@@ -104,32 +125,32 @@ export default function ListingsScreen() {
       const moderation = moderateMarketingCopy(res.data.copy ?? '');
       if (!moderation.ok) {
         setCopyModal((prev) => ({ ...prev, copy: '', loading: false }));
-        Alert.alert('תוכן לא מאושר', moderation.reason ?? 'נסה ליצור מחדש.');
+        showAlert('תוכן לא מאושר', moderation.reason ?? 'נסה ליצור מחדש.');
         return;
       }
       setCopyModal((prev) => ({ ...prev, copy: res.data.copy, loading: false }));
     } catch {
       setCopyModal((prev) => ({ ...prev, loading: false }));
-      Alert.alert('שגיאה', 'לא ניתן ליצור תוכן כרגע. ודא שה-GEMINI_API_KEY מוגדר.');
+      showAlert('שגיאה', 'לא ניתן ליצור תוכן כרגע. ודא שה-GEMINI_API_KEY מוגדר.');
     }
   }
 
   async function shareCopy(text: string) {
     const moderation = moderateMarketingCopy(text);
     if (!moderation.ok) {
-      Alert.alert('תוכן לא מאושר', moderation.reason ?? 'נסה ליצור מחדש.');
+      showAlert('תוכן לא מאושר', moderation.reason ?? 'נסה ליצור מחדש.');
       return;
     }
     try {
       await Share.share({ message: text });
     } catch {
-      Alert.alert('שגיאה', 'לא ניתן לשתף');
+      showAlert('שגיאה', 'לא ניתן לשתף');
     }
   }
 
   function confirmDelete(apt: Apartment) {
     if (!user?.tosAcceptedAt) {
-      Alert.alert(
+      showAlert(
         'אישור תנאי שימוש נדרש ⚠️',
         'על מנת לבצע פעולות במודעות, עליך לאשר את תנאי השימוש ומדיניות הפרטיות.',
         [
@@ -154,12 +175,12 @@ export default function ListingsScreen() {
             else if (st === 404) detail = 'המודעה לא נמצאה.';
             else if (st === 401 || st === 403) detail = 'אין הרשאה למחוק.';
           }
-          Alert.alert('שגיאה', detail);
+          showAlert('שגיאה', detail);
         }
       })();
     };
 
-    Alert.alert(
+    showAlert(
       'מחיקת מודעה',
       `למחוק לצמיתות את "${apt.title}"? פעולה זו אינה הפיכה.`,
       [
@@ -169,8 +190,7 @@ export default function ListingsScreen() {
           style: 'destructive',
           onPress: runDelete,
         },
-      ],
-      { cancelable: true }
+      ]
     );
   }
 

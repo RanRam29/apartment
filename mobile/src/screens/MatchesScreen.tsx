@@ -109,9 +109,7 @@ export default function MatchesScreen() {
                   match={item}
                   currentUserId={user!.id}
                   unreadCount={item.unreadCount}
-                  onPress={() => {
-                    if (item.status === 'accepted') openChat(item);
-                  }}
+                  onPress={() => openChat(item)}
                 />
               </>
             );

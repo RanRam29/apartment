@@ -29,11 +29,17 @@ export default function MatchCard({ match, currentUserId, unreadCount, onPress }
 
   return (
     <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.8}>
-      <Image
-        source={{ uri: coverImage || 'https://via.placeholder.com/80x80' }}
-        style={styles.thumb}
-        contentFit="cover"
-      />
+      {coverImage ? (
+        <Image
+          source={{ uri: coverImage }}
+          style={styles.thumb}
+          contentFit="cover"
+        />
+      ) : (
+        <View style={[styles.thumb, styles.thumbFallback]}>
+          <Ionicons name="home-outline" size={24} color={C.textMut} />
+        </View>
+      )}
 
       <View style={styles.info}>
         <Text style={styles.title} numberOfLines={1}>{apartment?.title || 'דירה'}</Text>
@@ -83,6 +89,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.04, shadowRadius: 6, elevation: 2,
   },
   thumb: { width: 62, height: 62, borderRadius: 12 },
+  thumbFallback: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   info:  { flex: 1, gap: 3 },
   title: { color: dirApp.primary, fontSize: 14, fontWeight: '600', textAlign: 'right' },
   location: { color: C.textSub, fontSize: 12, textAlign: 'right' },

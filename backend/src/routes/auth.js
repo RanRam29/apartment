@@ -238,9 +238,12 @@ router.post('/login', loginValidator, async (req, res, next) => {
         firstName: user.firstName,
         lastName: user.lastName,
         role: user.role,
+        activeRole: user.activeRole || user.role,
         avatarUrl: user.avatarUrl,
         isVerified: user.isVerified,
         isPremium: user.isPremium,
+        tosAcceptedAt: user.tosAcceptedAt,
+        kycStatus: user.kycStatus,
       },
     });
     await logAudit({

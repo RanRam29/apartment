@@ -55,6 +55,11 @@ export default function LandlordDashboard() {
 
   const maxLikes = Math.max(...listings.map((l) => l.likeCount ?? 0), 1);
 
+  // BUG-007: Safe conversion rate sanitization (if denominator=0 → 0.0%)
+  const rawRate = summary.conversionRate;
+  const isInvalid = rawRate === 'Infinity' || rawRate === 'NaN' || !rawRate || Number(rawRate) === Infinity || isNaN(Number(rawRate)) || !isFinite(Number(rawRate));
+  const conversionRateVal = isInvalid ? '0.0' : String(rawRate);
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
       <ScrollView
@@ -88,7 +93,7 @@ export default function LandlordDashboard() {
         <View style={styles.kpiRow}>
           <KPICard icon="eye-outline"   label="צפיות"   value={summary.totalViews}              color={C.cyan} />
           <KPICard icon="heart-outline" label="לייקים"  value={summary.totalLikes}              color={C.coral} />
-          <KPICard icon="trending-up"  label="המרה"    value={`${summary.conversionRate}%`}    color={C.statusTone.positive} />
+          <KPICard icon="trending-up"  label="המרה"    value={`${conversionRateVal}%`}    color={C.statusTone.positive} />
           <KPICard icon="home-outline"  label="פעילות"  value={summary.activeListings}          color={C.statusTone.caution} />
         </View>
 

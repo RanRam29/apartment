@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  Platform,
 } from 'react-native';
 import { useAuthStore } from '../store/useAuthStore';
 import { tosApi } from '../services/api';
@@ -18,7 +19,11 @@ export default function TermsScreen({ navigation }: any) {
 
   const handleAccept = async () => {
     if (!accepted) {
-      Alert.alert('שגיאה', 'אנא אשר כי קראת והסכמת לתנאי השימוש.');
+      if (Platform.OS === 'web') {
+        window.alert('אנא אשר כי קראת והסכמת לתנאי השימוש.');
+      } else {
+        Alert.alert('שגיאה', 'אנא אשר כי קראת והסכמת לתנאי השימוש.');
+      }
       return;
     }
 
@@ -26,11 +31,24 @@ export default function TermsScreen({ navigation }: any) {
     try {
       await tosApi.accept();
       updateUser({ tosAcceptedAt: new Date().toISOString() });
-      Alert.alert('תודה', 'תנאי השימוש אושרו בהצלחה.', [
-        { text: 'המשך', onPress: () => navigation.goBack() }
-      ]);
+      if (Platform.OS === 'web') {
+        window.alert('תנאי השימוש אושרו בהצלחה.');
+        if (navigation.canGoBack()) {
+          navigation.goBack();
+        } else {
+          navigation.navigate('Home');
+        }
+      } else {
+        Alert.alert('תודה', 'תנאי השימוש אושרו בהצלחה.', [
+          { text: 'המשך', onPress: () => navigation.goBack() }
+        ]);
+      }
     } catch (err: any) {
-      Alert.alert('שגיאה', 'אישור תנאי השימוש נכשל.');
+      if (Platform.OS === 'web') {
+        window.alert('אישור תנאי שימוש נכשל.');
+      } else {
+        Alert.alert('שגיאה', 'אישור תנאי השימוש נכשל.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -76,6 +94,19 @@ export default function TermsScreen({ navigation }: any) {
           ) : (
             <Text style={styles.acceptBtnText}>אשר והמשך</Text>
           )}
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          onPress={() => {
+            if (navigation.canGoBack()) {
+              navigation.goBack();
+            } else {
+              navigation.navigate('Home');
+            }
+          }} 
+          style={styles.backBtn}
+        >
+          <Text style={styles.backBtnText}>חזור</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -156,6 +187,21 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
   acceptBtnText: {
+    color: '#ffffff',
+    fontSize: 15,
+    fontWeight: 'bold',
+  },
+  backBtn: {
+    height: 52,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  backBtnText: {
     color: '#ffffff',
     fontSize: 15,
     fontWeight: 'bold',

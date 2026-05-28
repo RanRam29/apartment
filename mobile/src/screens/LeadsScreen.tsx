@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import {
   View, Text, FlatList, StyleSheet, SafeAreaView,
   TouchableOpacity, ActivityIndicator, Alert,
+  Platform,
 } from 'react-native';
+import { useAuthStore } from '../store/useAuthStore';
 import { useNavigation } from '@react-navigation/native';
 import { Image } from 'expo-image';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -33,6 +35,27 @@ export default function LeadsScreen() {
   const [activeTab, setActiveTab] = useState<StatusTab>('pending');
   const navigation = useNavigation<any>();
   const queryClient = useQueryClient();
+  const { user } = useAuthStore();
+
+  function showAlert(title: string, message: string, buttons?: { text: string; onPress?: () => void; style?: string }[]) {
+    if (Platform.OS === 'web') {
+      if (buttons && buttons.length > 1) {
+        const confirmed = window.confirm(`${title}\n\n${message}`);
+        if (confirmed) {
+          const mainBtn = buttons.find(b => b.style !== 'cancel' && b.text !== 'ביטול');
+          if (mainBtn && mainBtn.onPress) mainBtn.onPress();
+        } else {
+          const cancelBtn = buttons.find(b => b.style === 'cancel' || b.text === 'ביטול');
+          if (cancelBtn && cancelBtn.onPress) cancelBtn.onPress();
+        }
+      } else {
+        window.alert(`${title}\n\n${message}`);
+        if (buttons && buttons[0] && buttons[0].onPress) buttons[0].onPress();
+      }
+    } else {
+      Alert.alert(title, message, buttons as any);
+    }
+  }
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['leads', activeTab],
@@ -54,7 +77,18 @@ export default function LeadsScreen() {
   });
 
   function confirmAction(id: string, action: 'accept' | 'reject') {
-    Alert.alert(
+    if (!user?.tosAcceptedAt) {
+      showAlert(
+        'אישור תנאי שימוש נדרש ⚠️',
+        'על מנת לבצע פעולות בלידים, עליך לאשר את תנאי השימוש ומדיניות הפרטיות.',
+        [
+          { text: 'ביטול', style: 'cancel' },
+          { text: 'לאישור התנאים', onPress: () => navigation.navigate('Terms') }
+        ]
+      );
+      return;
+    }
+    showAlert(
       action === 'accept' ? 'אישור ליד' : 'דחיית ליד',
       action === 'accept' ? 'לאשר את הליד הזה?' : 'לדחות את הליד הזה?',
       [
