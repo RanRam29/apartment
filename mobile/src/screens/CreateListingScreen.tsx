@@ -100,17 +100,9 @@ export default function CreateListingScreen({ navigation }: any) {
         { headers: { 'User-Agent': 'ApartmentApp/1.0 (CreateListing)' } }
       );
       const data = await res.json();
-      if (!Array.isArray(data)) return false;
-      const cityNorm = normalizeText(cityName);
-      const streetNorm = normalizeText(streetName);
-      return data.some((item: any) => {
-        const address = item?.address || {};
-        const candidateCity = normalizeText(address.city || address.town || address.village || address.municipality || '');
-        const candidateStreet = normalizeText(address.road || '');
-        return candidateCity === cityNorm && candidateStreet === streetNorm;
-      });
+      return Array.isArray(data) && data.length > 0;
     } catch {
-      return false;
+      return true; // Graceful fallback
     }
   }
 
@@ -141,14 +133,7 @@ export default function CreateListingScreen({ navigation }: any) {
         const data = await res.json();
         const parsed = Array.isArray(data)
           ? data
-              .map((item: any) => item?.address)
-              .filter(Boolean)
-              .filter((address: any) => {
-                const addressCity = normalizeText(address?.city || address?.town || address?.village || address?.municipality || '');
-                const streetName = normalizeText(address?.road || '');
-                return addressCity === normalizeText(selectedCity) && streetName.startsWith(normalizeText(q));
-              })
-              .map((address: any) => address?.road)
+              .map((item: any) => item?.address?.road)
               .filter(Boolean)
           : [];
         const unique = Array.from(new Set(parsed));
