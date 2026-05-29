@@ -1,12 +1,27 @@
 const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
+const { getJwtSecret } = require('./security');
 const logger = require('../utils/logger');
 const { logSystemEvent } = require('../services/systemEventService');
 const { logAudit } = require('../services/auditLogService');
 const { SYSTEM_CATEGORY, SYSTEM_SEVERITY, AUDIT_ACTIONS } = require('../constants/logging');
 
 let io;
+
+async function findAcceptedMatchForUser(matchId, userId) {
+  const { Match } = require('../models');
+  const match = await Match.findOne({
+    where: { id: matchId, status: 'accepted' },
+    attributes: ['id', 'tenantId', 'landlordId'],
+  });
+
+  if (!match || (String(match.tenantId) !== String(userId) && String(match.landlordId) !== String(userId))) {
+    return null;
+  }
+
+  return match;
+}
 
 function initSocket(server) {
   io = new Server(server, {
@@ -18,7 +33,7 @@ function initSocket(server) {
     const token = socket.handshake.auth.token;
     if (!token) return next(new Error('Authentication required'));
     try {
-      socket.user = jwt.verify(token, process.env.JWT_SECRET);
+      socket.user = jwt.verify(token, getJwtSecret());
       next();
     } catch {
       logSystemEvent({
@@ -88,9 +103,20 @@ function initSocket(server) {
     })();
 
     // Join a specific match chat room
-    socket.on('join_chat', (matchId) => {
-      socket.join(`chat:${matchId}`);
-      logger.debug(`User ${userId} joined chat:${matchId}`);
+    socket.on('join_chat', async (matchId, ack) => {
+      try {
+        const match = await findAcceptedMatchForUser(matchId, userId);
+        if (!match) {
+          return ack?.({ error: 'Unauthorized' });
+        }
+
+        socket.join(`chat:${match.id}`);
+        logger.debug(`User ${userId} joined chat:${match.id}`);
+        return ack?.({ success: true });
+      } catch (err) {
+        logger.warn(`Socket join_chat authorization failed: ${err.message}`);
+        return ack?.({ error: 'Failed to join chat' });
+      }
     });
 
     socket.on('leave_chat', (matchId) => {
@@ -107,15 +133,11 @@ function initSocket(server) {
         }
 
         // Lazy-require to avoid circular dependency at module load time
-        const { Message, Match } = require('../models');
+        const { Message } = require('../models');
 
         // Verify sender is a participant in an accepted match
-        const match = await Match.findOne({
-          where: { id: matchId, status: 'accepted' },
-          attributes: ['id', 'tenantId', 'landlordId'],
-        });
-
-        if (!match || (match.tenantId !== userId && match.landlordId !== userId)) {
+        const match = await findAcceptedMatchForUser(matchId, userId);
+        if (!match) {
           return ack?.({ error: 'Unauthorized' });
         }
 
@@ -198,4 +220,4 @@ function getIO() {
   return io;
 }
 
-module.exports = { initSocket, getIO };
+module.exports = { initSocket, getIO, findAcceptedMatchForUser };

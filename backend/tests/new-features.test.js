@@ -478,6 +478,23 @@ describe('F11 — Rent payments routes', () => {
     expect(res.body).toHaveProperty('received', true);
   });
 
+  it('POST /api/payments/webhook — rejects unsigned production webhooks when secret is missing', async () => {
+    const originalNodeEnv = process.env.NODE_ENV;
+    const originalWebhookSecret = process.env.WEBHOOK_SECRET;
+    process.env.NODE_ENV = 'production';
+    delete process.env.WEBHOOK_SECRET;
+
+    const res = await request(app)
+      .post('/api/payments/webhook')
+      .send({ transactionId: 'tx-forged', status: 'success', rentPaymentId: 'rp-pay-1' });
+
+    process.env.NODE_ENV = originalNodeEnv;
+    if (originalWebhookSecret === undefined) delete process.env.WEBHOOK_SECRET;
+    else process.env.WEBHOOK_SECRET = originalWebhookSecret;
+
+    expect(res.status).toBe(401);
+  });
+
   it('POST /api/payments/webhook — rejects invalid signature when WEBHOOK_SECRET set', async () => {
     process.env.WEBHOOK_SECRET = 'test-secret';
     const res = await request(app)
