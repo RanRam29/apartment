@@ -31,7 +31,7 @@ router.get('/', authenticate, async (req, res, next) => {
         {
           model: User,
           as: role === 'tenant' ? 'landlord' : 'tenant',
-          attributes: ['id', 'firstName', 'lastName', 'avatarUrl', 'isVerified'],
+          attributes: ['id', 'firstName', 'lastName', 'avatarUrl', 'isVerified', 'phone', 'email'],
         },
       ],
       order: [['lastMessageAt', 'DESC NULLS LAST'], ['createdAt', 'DESC']],
