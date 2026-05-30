@@ -53,6 +53,7 @@
 | משימה | עובד | התחיל | ETA | סטטוס |
 |--------|------|--------|-----|-------|
 | כל 10 הבאגים | כולם | 2026-05-27 | 2026-05-30 | ✅ הושלם |
+| E2E verify כל המסכים הצהובים | Antigravity | 2026-05-30 | 2026-05-30 | ✅ הושלם |
 | **הבא:** NF1 Trust Score | TBD | — | — | ❌ לא התחיל |
 | **הבא:** NF2 Renter Journal | TBD | — | — | ❌ לא התחיל |
 
@@ -98,7 +99,7 @@
 |------|--------|--------|-----------------|
 | **Claude Code** | CTO + Orchestrator | תמיד | Triage כל הבאגים + BUGS.md |
 | **Cursor** | Financial + Admin | לפי דרישה | T1/T8/T9/T15/T16 merged |
-| **Antigravity** | Identity + Mobile | לפי דרישה | T2/T3/T6/T12/T13/T14/T17 merged |
+| **Antigravity** | Identity + Mobile | לפי דרישה | E2E verified all yellow screens (`81b2918`) |
 
 ---
 
