@@ -5,7 +5,7 @@
 
 ---
 
-## 🚦 מצב כללי: 🟢 GREEN — הכל פועל, באגים תוקנו ואומתו E2E בפרודקשן
+## 🚦 מצב כללי: 🟢 GREEN — כל הבאגים תוקנו, פרודקשן יציב
 
 | רמה | משמעות |
 |-----|---------|
@@ -30,71 +30,52 @@
 
 ---
 
-## 🟢 תקלות פתוחות (לפי עדיפות)
+## ✅ תקלות — הכל סגור
 > 📋 **פירוט מלא + RCA:** [`BUGS.md`](BUGS.md)
 
-| # | תיאור | השפעה | מי מטפל | ETA |
-|---|--------|--------|---------|-----|
-| BUG-005 | כל כפתורי המודעות לא עובדים | — | Antigravity + Claude Code | 🏁 **CLOSED** |
-| BUG-006 | ToS "אשר והמשך" לא עובד + אין כפתור חזרה | — | Antigravity | 🏁 **CLOSED** |
-| BUG-007 | דשבורד פיקטיבי — נתונים לא אמיתיים | — | Antigravity | 🏁 **CLOSED** |
-| BUG-008 | לא ניתן להיכנס לצ'אטים | — | Antigravity | 🏁 **CLOSED** |
-| BUG-003 | אישור ליד לא עובד מה-UI | — | Antigravity | 🏁 **CLOSED** |
-| BUG-002 | admin@dirapp.com לא נכנס | — | Claude Code | 🏁 **CLOSED** |
-| BUG-009 | Trust Score מתחיל ב-0 במקום 50 | — | Antigravity | 🏁 **CLOSED** |
-| BUG-004 | Admin panel לא נבדק E2E | — | Antigravity | 🏁 **CLOSED** |
+| # | תיאור | סטטוס | מי תיקן | תאריך סגירה |
+|---|--------|--------|---------|-------------|
+| BUG-001 | Admin login 503 | 🏁 CLOSED | Claude Code | 2026-05-27 |
+| BUG-002 | Admin login 401 | 🏁 CLOSED | Claude Code | 2026-05-28 |
+| BUG-003 | אישור ליד לא עובד | 🏁 CLOSED | Antigravity | 2026-05-30 |
+| BUG-004 | Admin panel E2E | 🏁 CLOSED | Antigravity | 2026-05-30 |
+| BUG-005 | כפתורי מודעות שבורים | 🏁 CLOSED | Antigravity + Claude Code | 2026-05-30 |
+| BUG-006 | ToS לא עובד | 🏁 CLOSED | Antigravity | 2026-05-30 |
+| BUG-007 | דשבורד פיקטיבי | 🏁 CLOSED | Antigravity | 2026-05-30 |
+| BUG-008 | צ'אטים לא נפתחים | 🏁 CLOSED | Antigravity | 2026-05-30 |
+| BUG-009 | Trust Score = 0 | 🏁 CLOSED | Antigravity | 2026-05-30 |
+| BUG-010 | פרסום מודעה 500 | 🏁 CLOSED | Claude Code | 2026-05-28 |
 
 ---
 
 ## 🏗️ בפיתוח עכשיו
 
-| משימה | עובד | התחיל | ETA | עלות טוקנים |
-|--------|------|--------|-----|-------------|
-| תיעוד + Triage כל הבאגים (סשן זה) | Claude Code | 2026-05-28 | ✅ הושלם | ~15K |
-| BUG-005+006+007+008+003 | Antigravity | — | להקצות | ~150K |
-| BUG-002 admin login | Claude Code | 2026-05-28 | ✅ Fix יצא | ~30K |
+| משימה | עובד | התחיל | ETA | סטטוס |
+|--------|------|--------|-----|-------|
+| כל 10 הבאגים | כולם | 2026-05-27 | 2026-05-30 | ✅ הושלם |
+| **הבא:** NF1 Trust Score | TBD | — | — | ❌ לא התחיל |
+| **הבא:** NF2 Renter Journal | TBD | — | — | ❌ לא התחיל |
 
 ---
 
 ## 📤 הוראות לעובדים — מה לעשות עכשיו
 
-### 👉 Antigravity — 5 באגים P1
+**אין באגים פתוחים.** הצוות פנוי לפיצ'רים חדשים.
 
-כל הבאגים הם **frontend** (React Native Web) + שינוי קטן ב-backend.
-
-**עדיפות עבודה:**
-1. **BUG-005 + BUG-006 + BUG-003** — גורם שורשי משותף: `tosAcceptedAt` + `Alert.alert()`
-   - `backend/src/routes/auth.js` שורה 233-244: הוסף `tosAcceptedAt`, `activeRole`, `kycStatus` לlogin response
-   - `mobile/src/screens/ListingsScreen.tsx`: החלף `Alert.alert()` ב-`showAlert()` helper עם Platform check
-   - `mobile/src/screens/TermsScreen.tsx`: תקן כפתור "אשר והמשך" + הוסף כפתור "חזור"
-   - בדוק גם: `mobile/src/screens/LeadsScreen.tsx` (אותה בעיה Alert + tosAcceptedAt)
-
-2. **BUG-008** — Chat navigation
-   - החלף `via.placeholder.com` ב-fallback avatar component
-   - בדוק `navigation.navigate('Chat', ...)` על web
-
-3. **BUG-007** — Dashboard stats
-   - בדוק `GET /api/landlord/dashboard` — מה חוזר בפועל?
-   - בדוק חישוב המרה: אם denominator=0 → division by zero → 150% הוא bug
-
-### 👉 Cursor — 2 באגים P2
-
-1. **BUG-009**: Trust Score — הוסף `defaultValue: 50` ל-User model / seeder
-2. **BUG-004**: Admin panel endpoints — בדוק כל endpoint ב-E2E test
-
-### 👉 Claude Code — 1 באג
-
-1. **BUG-002**: אמת ש-admin@dirapp.com עובד אחרי רידיפלוי Render → כתוב RCA
+**הבא ברודמאפ:**
+1. NF1 — Trust Score (Cursor, ~2 ימים)
+2. NF2 — Renter Journal (Antigravity, ~3 ימים)
+3. V2-1 — Stripe Connect (TBD, ~שבוע)
 
 ---
 
-## 📅 רודמאפ — לאחר תיקון הבאגים
+## 📅 רודמאפ
 
 | שלב | פיצ'ר | עובד | זמן משוער | עלות טוקנים |
 |-----|--------|------|-----------|-------------|
-| **עכשיו** | תיקון 5 באגים P1 | Antigravity | 1-2 ימים | ~150K |
-| **שבוע הבא** | NF1 — Trust Score | Cursor | 2 ימים | ~500K |
-| **שבוע הבא** | NF2 — Renter Journal | Antigravity | 3 ימים | ~700K |
+| ~~עכשיו~~ | ~~תיקון באגים~~ | ~~כולם~~ | ~~1-2 ימים~~ | ✅ הושלם |
+| **הבא** | NF1 — Trust Score | Cursor | 2 ימים | ~500K |
+| **הבא** | NF2 — Renter Journal | Antigravity | 3 ימים | ~700K |
 | **לאחר מכן** | V2-1 — Stripe Connect | TBD | 1 שבוע | ~800K |
 
 ---
@@ -121,4 +102,4 @@
 
 ---
 
-*עדכון אחרון: 2026-05-28 | הבא: Antigravity מתחיל על BUG-005/006/008*
+*עדכון אחרון: 2026-05-30 | הבא: NF1 Trust Score + NF2 Renter Journal*

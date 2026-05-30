@@ -1,6 +1,6 @@
 # DirApp — MASTER STATUS DOCUMENT
 > **מנהל: Claude Code (Orchestrator)**  
-> **עדכון אחרון:** 2026-05-28  
+> **עדכון אחרון:** 2026-05-30  
 > **כלל ברזל:** זה המסמך היחיד שסומך עליו. כל שינוי קוד → עדכון כאן.
 
 ---
@@ -57,7 +57,7 @@
 | `admin1@dirapp.com` login | ✅ | 2026-05-28 | תוקן יחד עם admin@ |
 | `admin2@dirapp.com` login | ✅ | 2026-05-28 | עובד (tenant) |
 | Switch Role (tenant↔landlord) | 🟡 | — | UI קיים, לא נבדק E2E |
-| Terms of Service (M11) — קבלת ToS | 🔴 | 2026-05-28 | **BUG-006** — כפתור "אשר והמשך" לא עובד + אין כפתור חזרה |
+| Terms of Service (M11) — קבלת ToS | ✅ | 2026-05-30 | **BUG-006 CLOSED** — accept-tos + back button + showAlert fixed (`6e56bce`) |
 | Login response — `tosAcceptedAt` | ✅ | 2026-05-28 | **BUG-005 FIXED** — הוסף tosAcceptedAt/activeRole/kycStatus ל-login response (`94b7e7b`) |
 | Multi-tenant / מנהל בית (M12) | 🟡 | — | קוד קיים, לא נבדק E2E |
 
@@ -69,9 +69,9 @@
 | Apartments Feed + Redis cache | ✅ | 2026-05-27 | עובד |
 | Swipe (right/left/superlike) | ✅ | 2026-05-27 | עובד |
 | Match creation | ✅ | 2026-05-27 | עובד |
-| **אישור ליד** (`POST /api/matches/:id/accept`) | 🔴 | 2026-05-28 | API קיים; **הודלק מה-UI — צריך בדיקה** |
+| **אישור ליד** (`POST /api/matches/:id/accept`) | ✅ | 2026-05-30 | **BUG-003 CLOSED** — showAlert + tosAcceptedAt fixed (`43c43c3`) |
 | Chat Real-Time (backend) | ✅ | 2026-05-27 | backend עובד |
-| Chat navigation (frontend) | 🔴 | 2026-05-28 | **BUG-008** — לא ניתן להיכנס לצ'אטים מהUI |
+| Chat navigation (frontend) | ✅ | 2026-05-30 | **BUG-008 CLOSED** — placeholder avatar + web navigation fixed (`43c43c3`) |
 
 ---
 
@@ -174,7 +174,7 @@
 ### 🛡️ Admin Panel (M10)
 | פיצ'ר | סטטוס | בדיקה אחרונה | הערות |
 |--------|--------|--------------|-------|
-| Admin login (`role=admin`) | 🔴 | 2026-05-28 | הרשאות admin קיימות, אבל admin accounts צריך password sync |
+| Admin login (`role=admin`) | ✅ | 2026-05-30 | **BUG-004 CLOSED** — E2E tests pass, admin routes verified (`43c43c3`) |
 | שינוי config | 🟡 | — | ADM-002 חדש |
 | ביטול נעילת משתמש | 🟡 | — | ADM-003 חדש |
 | Override KYC status | 🟡 | — | ADM-004 חדש |
@@ -198,14 +198,14 @@
 
 | # | תיאור | מטפל | מצב |
 |---|--------|------|-----|
-| BUG-005 | כל כפתורי המודעות לא עובדים | Antigravity + Claude Code | ✅ FIXED (`94b7e7b`) |
-| BUG-006 | ToS "אשר והמשך" לא עובד + אין חזרה | Antigravity | 🔴 OPEN |
-| BUG-007 | דשבורד פיקטיבי | Antigravity | 🔴 OPEN |
-| BUG-008 | לא ניתן להיכנס לצ'אטים | Antigravity | 🔴 OPEN |
-| BUG-003 | אישור ליד לא עובד מה-UI | Antigravity | 🔴 OPEN |
+| BUG-005 | כל כפתורי המודעות לא עובדים | Antigravity + Claude Code | 🏁 CLOSED |
+| BUG-006 | ToS "אשר והמשך" לא עובד + אין חזרה | Antigravity | 🏁 CLOSED |
+| BUG-007 | דשבורד פיקטיבי | Antigravity | 🏁 CLOSED |
+| BUG-008 | לא ניתן להיכנס לצ'אטים | Antigravity | 🏁 CLOSED |
+| BUG-003 | אישור ליד לא עובד מה-UI | Antigravity | 🏁 CLOSED |
 | BUG-002 | admin@dirapp.com 401 | Claude Code | 🏁 CLOSED |
-| BUG-009 | Trust Score מתחיל ב-0 | Cursor | 🔴 OPEN |
-| BUG-004 | Admin panel לא נבדק E2E | Cursor | 🔴 OPEN |
+| BUG-009 | Trust Score מתחיל ב-0 | Antigravity | 🏁 CLOSED |
+| BUG-004 | Admin panel לא נבדק E2E | Antigravity | 🏁 CLOSED |
 
 ---
 
@@ -240,3 +240,4 @@
 | 2026-05-28 | 1.3 | BUG-005 FIXED — tosAcceptedAt בlogin + stale cache delete fix (`94b7e7b`) | Claude Code |
 | 2026-05-28 | 1.3 | BUG-010 CLOSED — uploadService guard + RCA הושלם | Claude Code |
 | 2026-05-28 | — | Fix admin password sync (`ed0e874`) | Claude Code |
+| 2026-05-30 | 1.4 | ALL BUGS CLOSED — BUG-003/004/005/006/007/008/009 verified fixed by Antigravity (`43c43c3`→`6e56bce`) | Claude Code |

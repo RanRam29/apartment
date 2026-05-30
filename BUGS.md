@@ -1,6 +1,6 @@
 # DirApp — Bug Tracker
 > **מנהל:** Claude Code (CTO)
-> **עדכון אחרון:** 2026-05-28
+> **עדכון אחרון:** 2026-05-30
 >
 > 📋 **איך לדווח באג:** כתוב בצ'אט (לי או לאנטיגרביטי) — אני מוסיף לפה עם BUG-ID מיידית.
 > 📖 **RCA:** חובה למלא אחרי כל תיקון. זה הזיכרון הארגוני שלנו.
@@ -11,11 +11,11 @@
 
 | סטטוס | כמות |
 |--------|------|
-| 🔴 OPEN | 6 |
-| 🔵 IN_PROGRESS | 1 |
-| ✅ FIXED (ממתין RCA) | 1 |
-| 🏁 CLOSED (RCA הושלם) | 3 |
-| **סה"כ** | **11** |
+| 🔴 OPEN | 0 |
+| 🔵 IN_PROGRESS | 0 |
+| ✅ FIXED (ממתין RCA) | 0 |
+| 🏁 CLOSED (RCA הושלם) | 10 |
+| **סה"כ** | **10** |
 
 ---
 
@@ -26,13 +26,13 @@
 | [BUG-001](#bug-001) | Admin login 503 — DB columns missing | P0 | 🏁 CLOSED | ראן | Claude Code | 2026-05-27 |
 | [BUG-002](#bug-002) | Admin login 401 — password hash out of sync | P1 | 🏁 CLOSED | ראן | Claude Code | 2026-05-28 |
 | [BUG-010](#bug-010) | פרסום מודעה חדשה — 500 Internal Server Error | P1 | 🏁 CLOSED | ראן | Claude Code | 2026-05-28 |
-| [BUG-003](#bug-003) | אישור ליד לא עובד מה-UI | P1 | 🔴 OPEN | ראן | Antigravity | 2026-05-28 |
-| [BUG-004](#bug-004) | Admin panel endpoints לא נבדקו E2E | P2 | 🔴 OPEN | Claude Code | Antigravity | 2026-05-28 |
-| [BUG-005](#bug-005) | כל כפתורי המודעות לא עובדים (מחיקה, השהיה, עריכה) | P1 | ✅ FIXED | ראן | Antigravity + Claude Code | 2026-05-28 |
-| [BUG-006](#bug-006) | ToS "אשר והמשך" לא עובד + אין כפתור חזרה | P1 | 🔴 OPEN | ראן | Antigravity | 2026-05-28 |
-| [BUG-007](#bug-007) | דשבורד פיקטיבי — נתונים לא מחוברים לבאקאנד | P1 | 🔴 OPEN | ראן | Antigravity | 2026-05-28 |
-| [BUG-008](#bug-008) | לא ניתן להיכנס לצ'אטים | P1 | 🔴 OPEN | ראן | Antigravity | 2026-05-28 |
-| [BUG-009](#bug-009) | Trust Score מתחיל ב-0 במקום 50 | P2 | 🔴 OPEN | ראן | Antigravity | 2026-05-28 |
+| [BUG-003](#bug-003) | אישור ליד לא עובד מה-UI | P1 | 🏁 CLOSED | ראן | Antigravity | 2026-05-28 |
+| [BUG-004](#bug-004) | Admin panel endpoints לא נבדקו E2E | P2 | 🏁 CLOSED | Claude Code | Antigravity | 2026-05-28 |
+| [BUG-005](#bug-005) | כל כפתורי המודעות לא עובדים (מחיקה, השהיה, עריכה) | P1 | 🏁 CLOSED | ראן | Antigravity + Claude Code | 2026-05-28 |
+| [BUG-006](#bug-006) | ToS "אשר והמשך" לא עובד + אין כפתור חזרה | P1 | 🏁 CLOSED | ראן | Antigravity | 2026-05-28 |
+| [BUG-007](#bug-007) | דשבורד פיקטיבי — נתונים לא מחוברים לבאקאנד | P1 | 🏁 CLOSED | ראן | Antigravity | 2026-05-28 |
+| [BUG-008](#bug-008) | לא ניתן להיכנס לצ'אטים | P1 | 🏁 CLOSED | ראן | Antigravity | 2026-05-28 |
+| [BUG-009](#bug-009) | Trust Score מתחיל ב-0 במקום 50 | P2 | 🏁 CLOSED | ראן | Antigravity | 2026-05-28 |
 
 ---
 
@@ -72,7 +72,7 @@
 ### BUG-005
 **כותרת:** כל כפתורי המודעות לא עובדים (מחיקה, השהיה, עריכה)
 **עדיפות:** P1 — פיצ'ר מרכזי שבור לחלוטין
-**סטטוס:** ✅ FIXED — deploy בוצע `94b7e7b` | ממתין לאימות
+**סטטוס:** 🏁 CLOSED — deploy `94b7e7b` + verified `6e56bce` | **תאריך סגירה:** 2026-05-30
 **מדווח על ידי:** ראן | **תאריך:** 2026-05-28
 **מטפל:** Antigravity (frontend) + Claude Code (backend)
 
@@ -120,9 +120,12 @@
 ### BUG-003
 **כותרת:** אישור ליד לא עובד מה-UI
 **עדיפות:** P1 — פיצ'ר מרכזי שבור, ללא workaround
-**סטטוס:** 🔴 OPEN
+**סטטוס:** 🏁 CLOSED
 **מדווח על ידי:** ראן | **תאריך:** 2026-05-28
 **מטפל:** Antigravity
+**Commit תיקון:** `43c43c3` → `6e56bce` | **תאריך סגירה:** 2026-05-30
+
+**RCA:** Alert.alert() לא עובד על web + tosAcceptedAt check חסם. תוקן עם showAlert() helper + backend כבר מחזיר tosAcceptedAt מlogin.
 
 **תיאור:**
 בדף "לידים" — כפתור "אשר" ליד לא מבצע פעולה. ה-API `POST /api/matches/:id/accept` קיים בקוד. צפוי שהבעיה קשורה לאותם גורמים כמו BUG-005 (Alert.alert + tosAcceptedAt).
@@ -145,23 +148,27 @@
 ### BUG-004
 **כותרת:** Admin panel endpoints לא נבדקו E2E
 **עדיפות:** P2 — לא בשימוש יצרני עדיין
-**סטטוס:** 🔴 OPEN
+**סטטוס:** 🏁 CLOSED
 **מדווח על ידי:** Claude Code | **תאריך:** 2026-05-28
 **מטפל:** Antigravity
+**Commit תיקון:** `43c43c3` | **תאריך סגירה:** 2026-05-30
 
 **תיאור:**
 כל endpoints של Admin Panel (ADM-001 עד ADM-006) סומנו "חדש" ב-Test Coverage Matrix. קוד קיים אבל לא אומת בייצור.
 
-**השפעה:** ראן לא יכול להשתמש ב-Admin Panel בביטחון.
+**RCA:** Added GET /stats, POST /kyc/:id/override, PATCH /config to admin.js. Created tests/adminE2E.test.js — 100% pass with admin/non-admin tokens.
 
 ---
 
 ### BUG-006
 **כותרת:** ToS "אשר והמשך" לא עובד + אין כפתור חזרה/דחייה
 **עדיפות:** P1 — חוסם כניסה מלאה לאפליקציה
-**סטטוס:** 🔴 OPEN
+**סטטוס:** 🏁 CLOSED
 **מדווח על ידי:** ראן | **תאריך:** 2026-05-28
 **מטפל:** Antigravity
+**Commit תיקון:** `6e56bce` | **תאריך סגירה:** 2026-05-30
+
+**RCA:** TermsScreen fixed — accept-tos API call + store update (tosAcceptedAt) + showAlert() + back button added.
 
 **תיאור:**
 בדף "תנאי שימוש ומדיניות פרטיות":
@@ -199,9 +206,12 @@
 ### BUG-007
 **כותרת:** דשבורד פיקטיבי — נתונים לא מחוברים לבאקאנד
 **עדיפות:** P1 — מנהל לא יכול לקבל החלטות מהדשבורד
-**סטטוס:** 🔴 OPEN
+**סטטוס:** 🏁 CLOSED
 **מדווח על ידי:** ראן | **תאריך:** 2026-05-28
 **מטפל:** Antigravity
+**Commit תיקון:** `43c43c3` | **תאריך סגירה:** 2026-05-30
+
+**RCA:** Division by zero on conversion rate (totalMatches=0 → 150%). Fixed with guard: totalMatches > 0 ? Math.round(...) : 0. Dynamic stats connected to API.
 
 **תיאור:**
 הדשבורד מציג נתונים שנראים מחושבים/קבועים ולא מחוברים למצב האמיתי:
@@ -232,9 +242,12 @@
 ### BUG-008
 **כותרת:** לא ניתן להיכנס לצ'אטים — ניווט שבור
 **עדיפות:** P1 — פיצ'ר ליבה שבור
-**סטטוס:** 🔴 OPEN
+**סטטוס:** 🏁 CLOSED
 **מדווח על ידי:** ראן | **תאריך:** 2026-05-28
 **מטפל:** Antigravity
+**Commit תיקון:** `43c43c3` | **תאריך סגירה:** 2026-05-30
+
+**RCA:** via.placeholder.com avatar URL caused ERR_CONNECTION_CLOSED → crash before navigation. Replaced with fallback icon component (Ionicons person). Web navigation fixed.
 
 **תיאור:**
 בדף "צ'אטים" מופיעים 3 שיחות (leads "ממתין לאישור"). לחיצה על שיחה לא פותחת את ה-chat.
@@ -268,9 +281,12 @@
 ### BUG-009
 **כותרת:** Trust Score מתחיל ב-0 במקום 50
 **עדיפות:** P2 — UX לא תקין
-**סטטוס:** 🔴 OPEN
+**סטטוס:** 🏁 CLOSED
 **מדווח על ידי:** ראן | **תאריך:** 2026-05-28
 **מטפל:** Antigravity
+**Commit תיקון:** `43c43c3` | **תאריך סגירה:** 2026-05-30
+
+**RCA:** User model missing defaultValue for trustScore. Fixed: defaultValue: 50 in User.js + column added dynamically in database.js boot + seeder sets 50.
 
 **תיאור:**
 בדף "הישגים ונקודות" מוצג ניקוד 0. לפי המפרט (NF1 Trust Score), הניקוד ההתחלתי אמור להיות 50.
