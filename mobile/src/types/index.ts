@@ -96,7 +96,10 @@ export interface Match {
   apartmentId: string;
   status: MatchStatus;
   apartment?: Apartment;
-  tenant?: Pick<User, 'id' | 'firstName' | 'lastName' | 'avatarUrl'>;
+  tenant?: Pick<User, 'id' | 'firstName' | 'lastName' | 'avatarUrl' | 'isVerified'> & {
+    phone?: string | null;
+    email?: string | null;
+  };
   landlord?: Pick<User, 'id' | 'firstName' | 'lastName' | 'avatarUrl'>;
   tenantLikedAt: string | null;
   landlordLikedAt: string | null;

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   View, Text, FlatList, StyleSheet, SafeAreaView,
   TouchableOpacity, ActivityIndicator, Alert,
-  Platform,
+  Platform, Linking,
 } from 'react-native';
 import { useAuthStore } from '../store/useAuthStore';
 import { useNavigation } from '@react-navigation/native';
@@ -163,6 +163,51 @@ export default function LeadsScreen() {
   );
 }
 
+function TenantContactBar({ phone, email }: { phone?: string | null; email?: string | null }) {
+  if (!phone && !email) return null;
+
+  function call() {
+    if (!phone) return;
+    Linking.openURL(`tel:${phone}`);
+  }
+
+  function whatsapp() {
+    if (!phone) return;
+    // strip non-digits, prefix with Israel country code if local
+    const digits = phone.replace(/\D/g, '');
+    const international = digits.startsWith('0') ? `972${digits.slice(1)}` : digits;
+    Linking.openURL(`https://wa.me/${international}`);
+  }
+
+  function sendEmail() {
+    if (!email) return;
+    Linking.openURL(`mailto:${email}`);
+  }
+
+  return (
+    <View style={styles.contactBar}>
+      {phone && (
+        <>
+          <TouchableOpacity style={styles.contactBtn} onPress={call}>
+            <Ionicons name="call-outline" size={15} color={C.cyan} />
+            <Text style={styles.contactBtnText}>{phone}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.contactBtn, styles.waBtn]} onPress={whatsapp}>
+            <Ionicons name="logo-whatsapp" size={15} color="#25D366" />
+            <Text style={[styles.contactBtnText, { color: '#25D366' }]}>WhatsApp</Text>
+          </TouchableOpacity>
+        </>
+      )}
+      {email && !phone && (
+        <TouchableOpacity style={styles.contactBtn} onPress={sendEmail}>
+          <Ionicons name="mail-outline" size={15} color={C.cyan} />
+          <Text style={styles.contactBtnText}>{email}</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+}
+
 function LeadRow({ match, onAccept, onReject, showActions, onOpenChat }: {
   match: Match;
   onAccept: () => void;
@@ -172,6 +217,7 @@ function LeadRow({ match, onAccept, onReject, showActions, onOpenChat }: {
 }) {
   const isAcceptedChatRow = !showActions && match.status === 'accepted';
   const score = leadScoreStyle(match.leadScore);
+  const tenant = match.tenant;
 
   return (
     <TouchableOpacity
@@ -180,21 +226,30 @@ function LeadRow({ match, onAccept, onReject, showActions, onOpenChat }: {
       disabled={!isAcceptedChatRow}
       activeOpacity={isAcceptedChatRow ? 0.85 : 1}
     >
+      {/* ── שורה עליונה: אווטאר + שם + ציון ── */}
       <View style={styles.leadTop}>
-        {match.tenant?.avatarUrl ? (
-          <Image source={{ uri: match.tenant.avatarUrl }} style={styles.avatar} contentFit="cover" />
-        ) : (
-          <View style={[styles.avatar, styles.avatarPlaceholder]}>
-            <Ionicons name="person" size={20} color={C.textMut} />
-          </View>
-        )}
+        <View>
+          {tenant?.avatarUrl ? (
+            <Image source={{ uri: tenant.avatarUrl }} style={styles.avatar} contentFit="cover" />
+          ) : (
+            <View style={[styles.avatar, styles.avatarPlaceholder]}>
+              <Ionicons name="person" size={20} color={C.textMut} />
+            </View>
+          )}
+          {tenant?.isVerified && (
+            <View style={styles.verifiedBadge}>
+              <Ionicons name="checkmark-circle" size={16} color={C.cyan} />
+            </View>
+          )}
+        </View>
+
         <View style={styles.leadInfo}>
           <View style={styles.nameRow}>
             <View style={[styles.scoreBadge, { backgroundColor: score.bg }]}>
               <Text style={[styles.scoreText, { color: score.color }]}>{score.label}</Text>
             </View>
             <Text style={styles.tenantName}>
-              {match.tenant?.firstName} {match.tenant?.lastName}
+              {tenant?.firstName} {tenant?.lastName}
             </Text>
           </View>
           <Text style={styles.aptName} numberOfLines={1}>
@@ -206,6 +261,10 @@ function LeadRow({ match, onAccept, onReject, showActions, onOpenChat }: {
         </View>
       </View>
 
+      {/* ── פרטי יצירת קשר ── */}
+      <TenantContactBar phone={tenant?.phone} email={tenant?.email} />
+
+      {/* ── כפתורי פעולה ── */}
       {showActions && (
         <View style={styles.actions}>
           <TouchableOpacity style={styles.rejectBtn} onPress={onReject}>
@@ -293,4 +352,41 @@ const styles = StyleSheet.create({
   chatText: { color: dirApp.primary, fontWeight: '600' },
   empty: { alignItems: 'center', paddingTop: 60 },
   emptyText: { color: C.textMut, fontSize: 14 },
+
+  // tenant contact bar
+  contactBar: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    paddingTop: 4,
+    borderTopWidth: 1,
+    borderTopColor: Dark.border,
+  },
+  contactBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    backgroundColor: `${C.cyan}18`,
+  },
+  waBtn: {
+    backgroundColor: '#25D36618',
+  },
+  contactBtnText: {
+    color: C.cyan,
+    fontSize: 12,
+    fontWeight: '600',
+    direction: 'ltr',
+  },
+
+  // verified badge on avatar
+  verifiedBadge: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    backgroundColor: Dark.surface,
+    borderRadius: 8,
+  },
 });
