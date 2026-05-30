@@ -8,6 +8,41 @@ const { SYSTEM_CATEGORY, SYSTEM_SEVERITY, AUDIT_ACTIONS } = require('../constant
 
 let io;
 
+function chatRoom(matchId) {
+  return `chat:${matchId}`;
+}
+
+async function findAcceptedMatchForUser(matchId, userId) {
+  const { Match } = require('../models');
+  const match = await Match.findOne({
+    where: { id: matchId, status: 'accepted' },
+    attributes: ['id', 'tenantId', 'landlordId'],
+  });
+
+  if (!match || (match.tenantId !== userId && match.landlordId !== userId)) {
+    return null;
+  }
+
+  return match;
+}
+
+async function joinAcceptedChatRooms(socket, userId) {
+  const { Match } = require('../models');
+  const rows = await Match.findAll({
+    where: {
+      status: 'accepted',
+      [Op.or]: [{ tenantId: userId }, { landlordId: userId }],
+    },
+    attributes: ['id'],
+  });
+
+  for (const m of rows) {
+    socket.join(chatRoom(m.id));
+  }
+
+  return rows.length;
+}
+
 function initSocket(server) {
   io = new Server(server, {
     cors: { origin: '*', methods: ['GET', 'POST'] },
@@ -48,53 +83,33 @@ function initSocket(server) {
     });
 
     // Join all accepted-match chat rooms so messages arrive without opening Chat first
-    void (async () => {
-      try {
-        const { Match } = require('../models');
-        const rows = await Match.findAll({
-          where: {
-            status: 'accepted',
-            [Op.or]: [{ tenantId: userId }, { landlordId: userId }],
-          },
-          attributes: ['id'],
-        });
-        for (const m of rows) {
-          socket.join(`chat:${m.id}`);
-        }
-        if (rows.length) logger.debug(`User ${userId} auto-joined ${rows.length} chat rooms`);
-      } catch (err) {
+    void joinAcceptedChatRooms(socket, userId)
+      .then((count) => {
+        if (count) logger.debug(`User ${userId} auto-joined ${count} chat rooms`);
+      })
+      .catch((err) => {
         logger.warn(`Socket chat auto-join failed: ${err.message}`);
-      }
-    })();
-
-    // Join all accepted-match chat rooms so messages arrive without opening Chat first
-    void (async () => {
-      try {
-        const { Match } = require('../models');
-        const rows = await Match.findAll({
-          where: {
-            status: 'accepted',
-            [Op.or]: [{ tenantId: userId }, { landlordId: userId }],
-          },
-          attributes: ['id'],
-        });
-        for (const m of rows) {
-          socket.join(`chat:${m.id}`);
-        }
-        if (rows.length) logger.debug(`User ${userId} auto-joined ${rows.length} chat rooms`);
-      } catch (err) {
-        logger.warn(`Socket chat auto-join failed: ${err.message}`);
-      }
-    })();
+      });
 
     // Join a specific match chat room
-    socket.on('join_chat', (matchId) => {
-      socket.join(`chat:${matchId}`);
-      logger.debug(`User ${userId} joined chat:${matchId}`);
+    socket.on('join_chat', async (matchId, ack) => {
+      try {
+        if (!matchId) return ack?.({ error: 'matchId is required' });
+
+        const match = await findAcceptedMatchForUser(matchId, userId);
+        if (!match) return ack?.({ error: 'Unauthorized' });
+
+        socket.join(chatRoom(match.id));
+        logger.debug(`User ${userId} joined ${chatRoom(match.id)}`);
+        ack?.({ success: true });
+      } catch (err) {
+        logger.warn(`Socket join_chat failed: ${err.message}`);
+        ack?.({ error: 'Failed to join chat' });
+      }
     });
 
     socket.on('leave_chat', (matchId) => {
-      socket.leave(`chat:${matchId}`);
+      socket.leave(chatRoom(matchId));
     });
 
     // Primary message path — persist to MongoDB then broadcast
@@ -106,18 +121,14 @@ function initSocket(server) {
           return ack?.({ error: 'matchId and content are required' });
         }
 
-        // Lazy-require to avoid circular dependency at module load time
-        const { Message, Match } = require('../models');
-
         // Verify sender is a participant in an accepted match
-        const match = await Match.findOne({
-          where: { id: matchId, status: 'accepted' },
-          attributes: ['id', 'tenantId', 'landlordId'],
-        });
-
-        if (!match || (match.tenantId !== userId && match.landlordId !== userId)) {
+        const match = await findAcceptedMatchForUser(matchId, userId);
+        if (!match) {
           return ack?.({ error: 'Unauthorized' });
         }
+
+        // Lazy-require to avoid circular dependency at module load time
+        const { Message, Match } = require('../models');
 
         const message = await Message.create({
           matchId,
@@ -139,7 +150,7 @@ function initSocket(server) {
           createdAt: message.createdAt,
         };
 
-        io.to(`chat:${matchId}`).emit('new_message', payload);
+        io.to(chatRoom(matchId)).emit('new_message', payload);
         logAudit({
           actorId: userId,
           actorRole: socket.user.role,
@@ -168,11 +179,17 @@ function initSocket(server) {
 
     // Typing indicator — broadcast to other participants only
     socket.on('typing', ({ matchId }) => {
-      socket.to(`chat:${matchId}`).emit('user_typing', { userId, matchId });
+      const room = chatRoom(matchId);
+      if (socket.rooms?.has(room)) {
+        socket.to(room).emit('user_typing', { userId, matchId });
+      }
     });
 
     socket.on('stop_typing', ({ matchId }) => {
-      socket.to(`chat:${matchId}`).emit('user_stop_typing', { userId, matchId });
+      const room = chatRoom(matchId);
+      if (socket.rooms?.has(room)) {
+        socket.to(room).emit('user_stop_typing', { userId, matchId });
+      }
     });
 
     socket.on('disconnect', () => {

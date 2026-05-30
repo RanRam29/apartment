@@ -1,6 +1,14 @@
-const { ensureUserVerificationColumns } = require('../src/config/database');
+const {
+  sequelize,
+  ensureUserVerificationColumns,
+  ensureApartmentStreetColumn,
+} = require('../src/config/database');
 
 describe('Database schema compatibility', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('adds missing email verification columns to existing users tables', async () => {
     const queryInterface = {
       describeTable: jest.fn().mockResolvedValue({
@@ -34,5 +42,25 @@ describe('Database schema compatibility', () => {
 
     await expect(ensureUserVerificationColumns(queryInterface)).resolves.toBeUndefined();
     expect(queryInterface.addColumn).not.toHaveBeenCalled();
+  });
+
+  it('backfills legacy apartment neighborhoods when street is null or blank before dropping the column', async () => {
+    const querySpy = jest.spyOn(sequelize, 'query').mockResolvedValue(undefined);
+    const queryInterface = {
+      describeTable: jest.fn().mockResolvedValue({
+        id: {},
+        street: {},
+        neighborhood: {},
+      }),
+      addColumn: jest.fn(),
+      removeColumn: jest.fn().mockResolvedValue(undefined),
+    };
+
+    await ensureApartmentStreetColumn(queryInterface);
+
+    expect(queryInterface.addColumn).not.toHaveBeenCalled();
+    expect(querySpy).toHaveBeenCalledWith(expect.stringContaining("TRIM(street) = ''"));
+    expect(querySpy).toHaveBeenCalledWith(expect.stringContaining("TRIM(neighborhood) <> ''"));
+    expect(queryInterface.removeColumn).toHaveBeenCalledWith('apartments', 'neighborhood');
   });
 });

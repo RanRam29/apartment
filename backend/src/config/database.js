@@ -88,8 +88,9 @@ async function ensureApartmentStreetColumn(queryInterface = sequelize.getQueryIn
     await sequelize.query(`
       UPDATE apartments
       SET street = neighborhood
-      WHERE street IS NULL
+      WHERE (street IS NULL OR TRIM(street) = '')
         AND neighborhood IS NOT NULL
+        AND TRIM(neighborhood) <> ''
     `);
     await queryInterface.removeColumn('apartments', 'neighborhood');
     logger.info('Dropped legacy apartments.neighborhood column after backfill');
