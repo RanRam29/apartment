@@ -51,6 +51,12 @@ async function handleWebhook(rawBody, signature) {
 
   if (newStatus === 'APPROVED') {
     await checkAndUnlockContracts(kyc.userId);
+
+    // Trigger gamification!
+    try {
+      const gamificationService = require('./gamificationService');
+      await gamificationService.awardPoints(kyc.userId, 'identity_verified').catch(() => {});
+    } catch (_) {}
   }
 
   return { processed: true, status: newStatus };

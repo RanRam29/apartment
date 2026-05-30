@@ -107,10 +107,31 @@ async function ensureApartmentStreetColumn(queryInterface = sequelize.getQueryIn
   }
 }
 
+async function ensureContractAmendmentsTable(queryInterface = sequelize.getQueryInterface()) {
+  try {
+    await queryInterface.describeTable('contract_amendments');
+  } catch (err) {
+    await queryInterface.createTable('contract_amendments', {
+      id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
+      contract_id: { type: DataTypes.UUID, allowNull: false, references: { model: 'rental_agreements', key: 'id' }, onDelete: 'CASCADE' },
+      proposed_by: { type: DataTypes.ENUM('tenant', 'landlord'), allowNull: false },
+      field: { type: DataTypes.STRING(50), allowNull: false },
+      old_value: { type: DataTypes.STRING(256), allowNull: false },
+      new_value: { type: DataTypes.STRING(256), allowNull: false },
+      reason: { type: DataTypes.TEXT, allowNull: true },
+      status: { type: DataTypes.ENUM('pending', 'approved', 'rejected'), allowNull: false, defaultValue: 'pending' },
+      created_at: { type: DataTypes.DATE, allowNull: false },
+      updated_at: { type: DataTypes.DATE, allowNull: false },
+    });
+    logger.info('Created missing contract_amendments table dynamically');
+  }
+}
+
 async function initPostgres() {
   await sequelize.authenticate();
   await ensureUserVerificationColumns();
   await ensureApartmentStreetColumn();
+  await ensureContractAmendmentsTable();
   const syncAlter =
     process.env.NODE_ENV === 'development' ||
     process.env.POSTGRES_SYNC_ALTER === 'true';
@@ -118,4 +139,5 @@ async function initPostgres() {
   logger.info('PostgreSQL connected and synced');
 }
 
-module.exports = { sequelize, initPostgres, ensureUserVerificationColumns, ensureApartmentStreetColumn };
+module.exports = { sequelize, initPostgres, ensureUserVerificationColumns, ensureApartmentStreetColumn, ensureContractAmendmentsTable };
+

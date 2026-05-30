@@ -165,6 +165,13 @@ router.post('/', authenticate, requireRole('tenant'), requireVerified, swipeVali
       }
     }
 
+    // Wire gamification (fire-and-forget)
+    try {
+      const gamificationService = require('../services/gamificationService');
+      const action = direction === 'superlike' ? 'superlike' : 'swipe';
+      gamificationService.awardPoints(tenantId, action).catch(() => {});
+    } catch (_) {}
+
     const dailyUsed = isPremium ? null : await incrementDailyUsed(tenantId);
 
     res.status(created ? 201 : 200).json({

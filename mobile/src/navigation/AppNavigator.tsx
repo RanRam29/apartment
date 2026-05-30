@@ -57,6 +57,7 @@ import CheckOutScreen from '../screens/CheckOutScreen';
 import LedgerScreen from '../screens/LedgerScreen';
 import MaintenanceScreen from '../screens/MaintenanceScreen';
 import TermsScreen from '../screens/TermsScreen';
+import RenterJournalScreen from '../screens/RenterJournalScreen';
 
 
 const RootStack  = createNativeStackNavigator<RootStackParamList>();
@@ -404,6 +405,7 @@ function MainNavigator() {
       <MainStack.Screen name="Ledger" component={LedgerScreen} options={{ headerShown: false }} />
       <MainStack.Screen name="Maintenance" component={MaintenanceScreen} options={{ headerShown: false }} />
       <MainStack.Screen name="Terms" component={TermsScreen} options={{ headerShown: false }} />
+      <MainStack.Screen name="RenterJournal" component={RenterJournalScreen} options={{ headerShown: false }} />
     </MainStack.Navigator>
 
   );

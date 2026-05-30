@@ -353,6 +353,13 @@ router.post('/:id/sign', authenticate, async (req, res, next) => {
       return res.status(409).json({ error: 'Contract signature state changed, please retry' });
     }
     logger.info(`Contract signed contractId=${contract._id} by ${req.user.role} userId=${req.user.id}`);
+
+    // Wire gamification (fire-and-forget)
+    try {
+      const gamificationService = require('../services/gamificationService');
+      gamificationService.awardPoints(req.user.id, 'contract_signed').catch(() => {});
+    } catch (_) {}
+
     res.json({
       contract: sanitizeContractForClient(updated),
       contractText: buildContractText(updated),

@@ -187,4 +187,5 @@ export type MainStackParamList = {
   Services: undefined;
   IoT: undefined;
   LogsConsole: undefined;
+  RenterJournal: undefined;
 };

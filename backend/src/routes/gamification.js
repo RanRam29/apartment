@@ -54,13 +54,25 @@ function resolveBadges(existing, newPoints, action) {
   return toAdd;
 }
 
+const gamificationService = require('../services/gamificationService');
+
 // GET /api/gamification/me — get own points, level, badges
 router.get('/me', authenticate, async (req, res, next) => {
   try {
     const userId = String(req.user.id);
-    const doc = await UserPoints.findOne({ userId });
+    let doc = await UserPoints.findOne({ userId });
     if (!doc) {
-      return res.json({ userId, points: 0, level: 1, badges: [], lastActivityAt: null });
+      // Find starting trustScore from Postgres User
+      const user = await User.findByPk(userId, { attributes: ['trustScore'] });
+      const startingPoints = user ? (user.trustScore ?? 50) : 50;
+      doc = new UserPoints({
+        userId,
+        points: startingPoints,
+        level: computeLevel(startingPoints),
+        badges: [],
+        lastActivityAt: null,
+      });
+      await doc.save();
     }
     res.json({
       userId:         doc.userId,
@@ -87,38 +99,22 @@ router.post('/award', authenticate, async (req, res, next) => {
     }
 
     const userId = String(req.user.id);
-    const earned = ACTION_POINTS[action];
+    const prevDoc = await UserPoints.findOne({ userId });
+    const prevPoints = prevDoc ? prevDoc.points : (req.user.trustScore ?? 50);
 
-    // Find or create the points document
-    let doc = await UserPoints.findOne({ userId });
-    if (!doc) {
-      doc = new UserPoints({ userId, points: 0, level: 1, badges: [], lastActivityAt: null });
-    }
+    const result = await gamificationService.awardPoints(userId, action);
 
-    const prevPoints = doc.points;
-    doc.points += earned;
-    doc.level = computeLevel(doc.points);
-    doc.lastActivityAt = new Date();
-
-    const newBadges = resolveBadges(doc.badges, doc.points, action);
-    if (newBadges.length > 0) {
-      doc.badges.push(...newBadges);
-    }
-
-    await doc.save();
-
-    logger.info(`Gamification: user=${userId} action=${action} +${earned}pts total=${doc.points} level=${doc.level}`);
-
+    // Sync is already handled internally by the service, return the result
     res.json({
-      userId:         doc.userId,
+      userId:         result.userId,
       action,
-      pointsEarned:   earned,
-      totalPoints:    doc.points,
+      pointsEarned:   result.pointsEarned,
+      totalPoints:    result.totalPoints,
       previousPoints: prevPoints,
-      level:          doc.level,
-      badges:         doc.badges,
-      newBadges,
-      lastActivityAt: doc.lastActivityAt,
+      level:          result.level,
+      badges:         result.badges,
+      newBadges:      result.newBadges,
+      lastActivityAt: result.lastActivityAt,
     });
   } catch (err) {
     next(err);

@@ -113,6 +113,12 @@ router.post(
             { $set: { status: 'verified', verifiedAt: new Date() } }
           );
           logger.info(`[screening] Auto-verified userId=${req.user.id} (demo mode)`);
+
+          // Trigger gamification!
+          try {
+            const gamificationService = require('../services/gamificationService');
+            await gamificationService.awardPoints(req.user.id, 'identity_verified').catch(() => {});
+          } catch (_) {}
         } catch (err) {
           logger.error('[screening] Auto-verify failed:', err.message);
         }

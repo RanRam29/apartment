@@ -20,6 +20,9 @@ interface ContractState {
   reviewCheckout: (id: string, data: any) => Promise<void>;
   completeCheckout: (id: string) => Promise<void>;
   renewContract: (id: string, formData: FormData) => Promise<any>;
+  proposeAmendment: (id: string, field: string, newValue: any, reason: string) => Promise<void>;
+  approveAmendment: (id: string, aId: string) => Promise<void>;
+  rejectAmendment: (id: string, aId: string) => Promise<void>;
 }
 
 export const useContractStore = create<ContractState>((set, get) => ({
@@ -195,6 +198,39 @@ export const useContractStore = create<ContractState>((set, get) => ({
       return res.data;
     } catch (err: any) {
       set({ error: err?.message || 'Failed to renew contract', isLoading: false });
+      throw err;
+    }
+  },
+
+  proposeAmendment: async (id, field, newValue, reason) => {
+    set({ isLoading: true, error: null });
+    try {
+      await contractsV3Api.proposeAmendment(id, field, newValue, reason);
+      await get().fetchContract(id);
+    } catch (err: any) {
+      set({ error: err?.message || 'Failed to propose amendment', isLoading: false });
+      throw err;
+    }
+  },
+
+  approveAmendment: async (id, aId) => {
+    set({ isLoading: true, error: null });
+    try {
+      await contractsV3Api.approveAmendment(id, aId);
+      await get().fetchContract(id);
+    } catch (err: any) {
+      set({ error: err?.message || 'Failed to approve amendment', isLoading: false });
+      throw err;
+    }
+  },
+
+  rejectAmendment: async (id, aId) => {
+    set({ isLoading: true, error: null });
+    try {
+      await contractsV3Api.rejectAmendment(id, aId);
+      await get().fetchContract(id);
+    } catch (err: any) {
+      set({ error: err?.message || 'Failed to reject amendment', isLoading: false });
       throw err;
     }
   },

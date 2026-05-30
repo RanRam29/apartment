@@ -3,7 +3,7 @@ const multer = require('multer');
 const router = express.Router();
 const { authenticate, requireRole } = require('../middleware/auth');
 const { uploadAndExtract, transitionState, validateGate, renewContract, activateRenewal } = require('../services/contractServiceV3');
-const { RentalAgreement, AgreementParty, AgreementRoom, OwnershipVerification } = require('../models');
+const { RentalAgreement, AgreementParty, AgreementRoom, OwnershipVerification, ContractAmendment } = require('../models');
 const { getPresignedUrl, uploadFile, BUCKETS } = require('../services/r2Service');
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
@@ -35,6 +35,7 @@ router.get('/:id', async (req, res, next) => {
       include: [
         { model: AgreementParty, as: 'parties' },
         { model: AgreementRoom, as: 'rooms' },
+        { model: ContractAmendment, as: 'amendments' },
       ],
     });
     if (!agreement) return res.status(404).json({ error: 'Agreement not found' });
@@ -131,6 +132,12 @@ router.post('/:id/sign', async (req, res, next) => {
     if (party) {
       await party.update({ signedAt: new Date() });
     }
+
+    // Wire gamification (fire-and-forget)
+    try {
+      const gamificationService = require('../services/gamificationService');
+      gamificationService.awardPoints(req.user.id, 'contract_signed').catch(() => {});
+    } catch (_) {}
 
     const allParties = await AgreementParty.findAll({ where: { agreementId: agreement.id } });
     const allSigned = allParties.every(p => p.signedAt) && !!agreement.landlordSignedAt;
@@ -296,11 +303,133 @@ router.post('/:id/renew',
   }
 );
 
-// 15. Activate renewed contract (sets status ACTIVE and old to ENDED)
-router.post('/:id/activate-renewal', requireRole('landlord'), async (req, res, next) => {
+// 16. Propose contract amendment (restricted to ACTIVE status, max 10 amendments)
+router.post('/:id/amend/propose', async (req, res, next) => {
   try {
-    const agreement = await activateRenewal(req.params.id);
-    res.json(agreement);
+    const agreement = await RentalAgreement.findByPk(req.params.id);
+    if (!agreement) return res.status(404).json({ error: 'Agreement not found' });
+    if (agreement.status !== 'ACTIVE') {
+      return res.status(422).json({ error: 'Contract must be ACTIVE to propose amendments' });
+    }
+
+    const count = await ContractAmendment.count({ where: { contractId: agreement.id } });
+    if (count >= 10) {
+      return res.status(422).json({ error: 'Maximum limit of 10 amendments reached' });
+    }
+
+    const { field, newValue, reason } = req.body;
+    const allowedFields = ['monthlyRentIls', 'startDate', 'endDate', 'paymentDueDay'];
+    if (!allowedFields.includes(field)) {
+      return res.status(400).json({ error: `Field must be one of: ${allowedFields.join(', ')}` });
+    }
+
+    if (newValue === undefined || newValue === null || String(newValue).trim() === '') {
+      return res.status(400).json({ error: 'New value is required' });
+    }
+
+    let proposedBy = null;
+    if (req.user.id === agreement.landlordId) {
+      proposedBy = 'landlord';
+    } else {
+      const isTenant = await AgreementParty.findOne({
+        where: { agreementId: agreement.id, userId: req.user.id, role: 'tenant' },
+      });
+      if (!isTenant) return res.status(403).json({ error: 'Forbidden' });
+      proposedBy = 'tenant';
+    }
+
+    const amendment = await ContractAmendment.create({
+      contractId: agreement.id,
+      proposedBy,
+      field,
+      oldValue: String(agreement[field] !== undefined ? agreement[field] : ''),
+      newValue: String(newValue),
+      reason: reason || '',
+      status: 'pending',
+    });
+
+    res.status(201).json(amendment);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// 17. Approve contract amendment
+router.post('/:id/amend/:aId/approve', async (req, res, next) => {
+  try {
+    const agreement = await RentalAgreement.findByPk(req.params.id);
+    if (!agreement) return res.status(404).json({ error: 'Agreement not found' });
+    if (agreement.status !== 'ACTIVE') {
+      return res.status(422).json({ error: 'Contract must be ACTIVE to approve amendments' });
+    }
+
+    const amendment = await ContractAmendment.findByPk(req.params.aId);
+    if (!amendment || amendment.contractId !== agreement.id) {
+      return res.status(404).json({ error: 'Amendment not found' });
+    }
+
+    if (amendment.status !== 'pending') {
+      return res.status(422).json({ error: 'Amendment is not pending approval' });
+    }
+
+    if (amendment.proposedBy === 'tenant') {
+      if (req.user.id !== agreement.landlordId) {
+        return res.status(403).json({ error: 'Only the landlord can approve this amendment' });
+      }
+    } else {
+      const isTenant = await AgreementParty.findOne({
+        where: { agreementId: agreement.id, userId: req.user.id, role: 'tenant' },
+      });
+      if (!isTenant) {
+        return res.status(403).json({ error: 'Only the tenant can approve this amendment' });
+      }
+    }
+
+    let castedValue = amendment.newValue;
+    if (amendment.field === 'monthlyRentIls') {
+      castedValue = parseFloat(amendment.newValue);
+      if (isNaN(castedValue)) return res.status(400).json({ error: 'Invalid rent value' });
+    } else if (amendment.field === 'paymentDueDay') {
+      castedValue = parseInt(amendment.newValue, 10);
+      if (isNaN(castedValue) || castedValue < 1 || castedValue > 31) {
+        return res.status(400).json({ error: 'Invalid payment due day' });
+      }
+    }
+
+    await agreement.update({ [amendment.field]: castedValue });
+    await amendment.update({ status: 'approved' });
+
+    res.json(amendment);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// 18. Reject contract amendment
+router.post('/:id/amend/:aId/reject', async (req, res, next) => {
+  try {
+    const agreement = await RentalAgreement.findByPk(req.params.id);
+    if (!agreement) return res.status(404).json({ error: 'Agreement not found' });
+
+    const amendment = await ContractAmendment.findByPk(req.params.aId);
+    if (!amendment || amendment.contractId !== agreement.id) {
+      return res.status(404).json({ error: 'Amendment not found' });
+    }
+
+    if (amendment.status !== 'pending') {
+      return res.status(422).json({ error: 'Amendment is not pending' });
+    }
+
+    const isLandlord = req.user.id === agreement.landlordId;
+    const isTenant = await AgreementParty.findOne({
+      where: { agreementId: agreement.id, userId: req.user.id, role: 'tenant' },
+    });
+    if (!isLandlord && !isTenant) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    await amendment.update({ status: 'rejected' });
+    res.json(amendment);
   } catch (err) {
     next(err);
   }

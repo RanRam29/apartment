@@ -99,6 +99,13 @@ router.post('/:id/accept', authenticate, requireRole('landlord'), async (req, re
       });
     }).catch(() => {});
 
+    // Wire gamification (fire-and-forget)
+    try {
+      const gamificationService = require('../services/gamificationService');
+      gamificationService.awardPoints(match.tenantId, 'match').catch(() => {});
+      gamificationService.awardPoints(match.landlordId, 'match').catch(() => {});
+    } catch (_) {}
+
     // Ensure both parties join the Socket.io chat room for realtime messages
     try {
       const { getIO } = require('../config/socket');

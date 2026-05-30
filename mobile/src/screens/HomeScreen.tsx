@@ -169,6 +169,36 @@ function TenantHome() {
         </Text>
       </View>
 
+      {/* Renter Journal Card */}
+      <Pressable
+        style={[tenantStyles.journalHero, { width: INNER_W }]}
+        onPress={() => go('RenterJournal')}
+        accessibilityRole="button"
+        accessibilityLabel="יומן השכירות שלי"
+      >
+        <View style={tenantStyles.journalHeroContent}>
+          <View style={{ flexDirection: flexRow, alignItems: 'center', gap: 8, marginBottom: 8 }}>
+            <Ionicons name="calendar-outline" size={24} color={C.onInverse.primary} />
+            <Text style={[tenantStyles.journalHeroTitle, dirType.subhead, { color: C.onInverse.primary }]}>
+              יומן השכירות שלי
+            </Text>
+          </View>
+          <Text style={[tenantStyles.journalHeroSub, dirType.caption, { color: C.onInverse.secondary }]}>
+            ציר זמן של הדירה שלך: חוזה, תשלומים, צ'ק-אין, תקלות וצ'ק-אאוט.
+          </Text>
+          <View style={[tenantStyles.ctaSecondary, { flexDirection: flexRow }]}>
+            <Text style={[tenantStyles.ctaSecondaryText, dirType.label, { color: dirApp.primary }]}>
+              לצפייה בציר הזמן
+            </Text>
+            <Ionicons name="chevron-back-outline" size={16} color={dirApp.primary} />
+          </View>
+        </View>
+        <View style={tenantStyles.decorJournal} pointerEvents="none">
+          <Ionicons name="journal-outline" size={120} color={C.onInverse.faint} />
+        </View>
+      </Pressable>
+
+
       {/* Bento — חיפוש רחב */}
       <Pressable
         style={[tenantStyles.searchHero, { width: INNER_W }]}
@@ -410,6 +440,41 @@ const tenantStyles = StyleSheet.create({
   welcomeBlock: { marginBottom: 24 },
   welcomeTitle: { marginBottom: 6 },
   welcomeSub: {},
+  journalHero: {
+    alignSelf: 'center',
+    backgroundColor: C.accent.violet,
+    borderRadius: 12,
+    marginBottom: GAP,
+    minHeight: 140,
+    overflow: 'hidden',
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  journalHeroContent: { zIndex: 2, flex: 1, justifyContent: 'center' },
+  journalHeroTitle: { fontWeight: 'bold' },
+  journalHeroSub: { marginBottom: 12, maxWidth: 280, lineHeight: 18 },
+  ctaSecondary: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#ffffff',
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    gap: 4,
+  },
+  ctaSecondaryText: { fontWeight: '600' },
+  decorJournal: {
+    position: 'absolute',
+    left: -20,
+    bottom: -20,
+    opacity: 0.15,
+    transform: [{ rotate: '-15deg' }],
+    zIndex: 1,
+  },
   searchHero: {
     alignSelf: 'center',
     backgroundColor: dirApp.primary,

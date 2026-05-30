@@ -339,6 +339,9 @@ export const contractsV3Api = {
   reviewCheckout: (id: string, data: any) => api.post(`/v3/contracts/${id}/checkout/review`, data),
   completeCheckout: (id: string) => api.post(`/v3/contracts/${id}/checkout/complete`),
   renew: (id: string, formData: FormData) => api.post(`/v3/contracts/${id}/renew`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  proposeAmendment: (id: string, field: string, newValue: any, reason: string) => api.post(`/v3/contracts/${id}/amend/propose`, { field, newValue, reason }),
+  approveAmendment: (id: string, aId: string) => api.post(`/v3/contracts/${id}/amend/${aId}/approve`),
+  rejectAmendment: (id: string, aId: string) => api.post(`/v3/contracts/${id}/amend/${aId}/reject`),
 };
 
 export const ledgerApi = {
@@ -362,6 +365,10 @@ export const kycApi = {
 
 export const tosApi = {
   accept: () => api.post('/auth/accept-tos'),
+};
+
+export const tenantApi = {
+  getJournal: () => api.get('/tenant/journal'),
 };
 
 // ─── Token helpers ────────────────────────────────────────────────────────────

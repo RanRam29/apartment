@@ -64,6 +64,10 @@ AgreementRoom.belongsTo(RentalAgreement, { foreignKey: 'agreementId', as: 'agree
 RentalAgreement.hasMany(OwnershipVerification, { foreignKey: 'agreementId', as: 'ownershipVerifications' });
 OwnershipVerification.belongsTo(RentalAgreement, { foreignKey: 'agreementId', as: 'agreement' });
 
+const ContractAmendment = require('./pg/ContractAmendment');
+RentalAgreement.hasMany(ContractAmendment, { foreignKey: 'contractId', as: 'amendments' });
+ContractAmendment.belongsTo(RentalAgreement, { foreignKey: 'contractId', as: 'contract' });
+
 module.exports = {
   User,
   Apartment,
@@ -83,4 +87,6 @@ module.exports = {
   AgreementParty,
   AgreementRoom,
   OwnershipVerification,
+  ContractAmendment,
 };
+
