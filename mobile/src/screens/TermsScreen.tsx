@@ -12,6 +12,25 @@ import {
 import { useAuthStore } from '../store/useAuthStore';
 import { tosApi } from '../services/api';
 
+function showAlert(
+  title: string,
+  message: string,
+  buttons?: Array<{text:string; onPress?:()=>void; style?:'cancel'|'destructive'|'default'}>,
+  options?: {cancelable?:boolean}
+) {
+  if (Platform.OS === 'web') {
+    const action = buttons?.find(b => b.style !== 'cancel');
+    if (!buttons || !action) {
+      window.alert(`${title}\n\n${message}`);
+      buttons?.[0]?.onPress?.();
+      return;
+    }
+    if (window.confirm(`${title}\n\n${message}`)) action.onPress?.();
+    return;
+  }
+  Alert.alert(title, message, buttons as any, options);
+}
+
 export default function TermsScreen({ navigation }: any) {
   const { updateUser } = useAuthStore();
   const [accepted, setAccepted] = useState(false);
@@ -19,11 +38,7 @@ export default function TermsScreen({ navigation }: any) {
 
   const handleAccept = async () => {
     if (!accepted) {
-      if (Platform.OS === 'web') {
-        window.alert('אנא אשר כי קראת והסכמת לתנאי השימוש.');
-      } else {
-        Alert.alert('שגיאה', 'אנא אשר כי קראת והסכמת לתנאי השימוש.');
-      }
+      showAlert('שגיאה', 'אנא אשר כי קראת והסכמת לתנאי השימוש.');
       return;
     }
 
@@ -31,24 +46,20 @@ export default function TermsScreen({ navigation }: any) {
     try {
       const res = await tosApi.accept();
       updateUser({ tosAcceptedAt: res.data.tosAcceptedAt });
-      if (Platform.OS === 'web') {
-        window.alert('תנאי השימוש אושרו בהצלחה.');
-        if (navigation.canGoBack()) {
-          navigation.goBack();
-        } else {
-          navigation.navigate('Home');
+      showAlert('תודה', 'תנאי השימוש אושרו בהצלחה.', [
+        {
+          text: 'המשך',
+          onPress: () => {
+            if (navigation.canGoBack()) {
+              navigation.goBack();
+            } else {
+              navigation.navigate('Home');
+            }
+          }
         }
-      } else {
-        Alert.alert('תודה', 'תנאי השימוש אושרו בהצלחה.', [
-          { text: 'המשך', onPress: () => navigation.goBack() }
-        ]);
-      }
+      ]);
     } catch (err: any) {
-      if (Platform.OS === 'web') {
-        window.alert('אישור תנאי שימוש נכשל.');
-      } else {
-        Alert.alert('שגיאה', 'אישור תנאי השימוש נכשל.');
-      }
+      showAlert('שגיאה', 'אישור תנאי השימוש נכשל.');
     } finally {
       setIsSubmitting(false);
     }
