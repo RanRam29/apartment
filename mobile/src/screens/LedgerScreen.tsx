@@ -6,10 +6,10 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
 import { useLedgerStore } from '../store/useLedgerStore';
 import { useAuthStore } from '../store/useAuthStore';
+import { showAlert } from '../utils/alert';
 
 export default function LedgerScreen({ route }: any) {
   const { agreementId = '00000000-0000-4000-9000-000000000001' } = route.params || {};
@@ -23,19 +23,19 @@ export default function LedgerScreen({ route }: any) {
   const handleReport = async (rowId: string) => {
     try {
       await reportPayment(rowId);
-      Alert.alert('הושלם בהצלחה', 'דיווחת על ביצוע העברת התשלום בהצלחה. המשכיר יקבל התראה לאישור.');
+      showAlert('הושלם בהצלחה', 'דיווחת על ביצוע העברת התשלום בהצלחה. המשכיר יקבל התראה לאישור.');
       fetchLedgerForAgreement(agreementId).catch(() => {});
     } catch (err: any) {
-      Alert.alert('שגיאה', 'דיווח התשלום נכשל.');
+      showAlert('שגיאה', 'דיווח התשלום נכשל.');
     }
   };
 
   const handleConfirm = async (rowId: string) => {
     try {
       await confirmPayment(rowId);
-      Alert.alert('הצלחה', 'התשלום אושר ונרשם כ-PAID.');
+      showAlert('הצלחה', 'התשלום אושר ונרשם כ-PAID.');
     } catch (err: any) {
-      Alert.alert('שגיאה', 'אישור התשלום נכשל.');
+      showAlert('שגיאה', 'אישור התשלום נכשל.');
     }
   };
 

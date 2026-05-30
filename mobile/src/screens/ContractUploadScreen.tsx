@@ -5,10 +5,10 @@ import {
   Text,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
   ScrollView,
 } from 'react-native';
 import { useContractStore } from '../store/useContractStore';
+import { showAlert } from '../utils/alert';
 
 export default function ContractUploadScreen({ navigation, route }: any) {
   const { matchId } = route.params || {};
@@ -22,12 +22,12 @@ export default function ContractUploadScreen({ navigation, route }: any) {
       size: '2.4 MB',
       uri: 'file:///simulated/draft.pdf',
     });
-    Alert.alert('קובץ נבחר', 'הקובץ rental_agreement_draft.pdf נטען בהצלחה.');
+    showAlert('קובץ נבחר', 'הקובץ rental_agreement_draft.pdf נטען בהצלחה.');
   };
 
   const handleUploadAndAnalyze = async () => {
     if (!selectedFile) {
-      Alert.alert('שגיאה', 'אנא בחר קובץ חוזה תחילה.');
+      showAlert('שגיאה', 'אנא בחר קובץ חוזה תחילה.');
       return;
     }
 
@@ -44,7 +44,7 @@ export default function ContractUploadScreen({ navigation, route }: any) {
       } as any);
 
       const result = await uploadContract(formData);
-      Alert.alert('הצלחה', 'החוזה הועלה ונותח בהצלחה על ידי ה-AI של Gemini.', [
+      showAlert('הצלחה', 'החוזה הועלה ונותח בהצלחה על ידי ה-AI של Gemini.', [
         {
           text: 'צפה בפרטי החוזה',
           onPress: () => navigation.navigate('ContractDetail', { contractId: result.contract?.id || result.id }),
@@ -52,7 +52,7 @@ export default function ContractUploadScreen({ navigation, route }: any) {
       ]);
     } catch (err: any) {
       console.error(err);
-      Alert.alert('שגיאה', err?.message || 'העלאת החוזה נכשלה.');
+      showAlert('שגיאה', err?.message || 'העלאת החוזה נכשלה.');
     }
   };
 

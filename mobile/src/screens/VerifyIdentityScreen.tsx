@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  SafeAreaView, ScrollView, ActivityIndicator, Alert,
+  SafeAreaView, ScrollView, ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useMutation } from '@tanstack/react-query';
@@ -11,6 +11,7 @@ import { C, Dark } from '../theme';
 import { dirApp } from '../theme/dirAppTokens';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
 import { dirType } from '../theme/textStyles';
+import { showAlert } from '../utils/alert';
 
 type VerifStatus = 'pending' | 'verified' | 'rejected' | null;
 
@@ -49,24 +50,24 @@ export default function VerifyIdentityScreen() {
   const submitMutation = useMutation({
     mutationFn: () => screeningApi.submitIdentity({ idNumber, fullName, phone }),
     onSuccess: () => {
-      Alert.alert('הבקשה התקבלה', 'הפרטים נשלחו לאימות. הסטטוס יתעדכן תוך זמן קצר.');
+      showAlert('הבקשה התקבלה', 'הפרטים נשלחו לאימות. הסטטוס יתעדכן תוך זמן קצר.');
       refetch();
     },
     onError: (err: any) => {
       const msg = err?.response?.data?.error || err?.response?.data?.errors?.[0]?.msg || 'אירעה שגיאה. בדוק את הפרטים ונסה שוב.';
-      Alert.alert('שגיאה', msg);
+      showAlert('שגיאה', msg);
     },
   });
 
   function handleSubmit() {
     if (!/^\d{9}$/.test(idNumber.trim())) {
-      return Alert.alert('שגיאה', 'מספר תעודת זהות חייב להכיל 9 ספרות');
+      return showAlert('שגיאה', 'מספר תעודת זהות חייב להכיל 9 ספרות');
     }
     if (fullName.trim().length < 2) {
-      return Alert.alert('שגיאה', 'יש להזין שם מלא');
+      return showAlert('שגיאה', 'יש להזין שם מלא');
     }
     if (!/^(\+972|0)[0-9]{8,9}$/.test(phone.trim())) {
-      return Alert.alert('שגיאה', 'מספר טלפון ישראלי לא תקין (05X-XXXXXXX)');
+      return showAlert('שגיאה', 'מספר טלפון ישראלי לא תקין (05X-XXXXXXX)');
     }
     submitMutation.mutate();
   }

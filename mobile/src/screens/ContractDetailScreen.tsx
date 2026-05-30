@@ -7,8 +7,10 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  Platform,
 } from 'react-native';
 import { useContractStore } from '../store/useContractStore';
+import { showAlert } from '../utils/alert';
 
 export default function ContractDetailScreen({ route, navigation }: any) {
   const { contractId } = route.params || {};
@@ -18,7 +20,7 @@ export default function ContractDetailScreen({ route, navigation }: any) {
   useEffect(() => {
     if (contractId) {
       fetchContract(contractId).catch((err) => {
-        Alert.alert('שגיאה', 'טעינת החוזה נכשלה.');
+        showAlert('שגיאה', 'טעינת החוזה נכשלה.');
       });
     }
   }, [contractId]);
@@ -26,13 +28,20 @@ export default function ContractDetailScreen({ route, navigation }: any) {
   const handleSign = async () => {
     try {
       await signContract(contractId);
-      Alert.alert('הצלחה', 'חתמת על החוזה בהצלחה!');
+      showAlert('הצלחה', 'חתמת על החוזה בהצלחה!');
     } catch (err: any) {
-      Alert.alert('שגיאה', err?.message || 'החתימה נכשלה.');
+      showAlert('שגיאה', err?.message || 'החתימה נכשלה.');
     }
   };
 
   const handleInviteGuarantor = () => {
+    if (Platform.OS === 'web') {
+      const email = window.prompt('הזמנת ערב לחוזה\n\nהזן את כתובת האימייל של הערב המיועד:');
+      if (email) {
+        showAlert('הושלם בהצלחה', `הזמנת ערבות משפטית נשלחה לכתובת ${email}.`);
+      }
+      return;
+    }
     Alert.prompt(
       'הזמנת ערב לחוזה',
       'הזן את כתובת האימייל של הערב המיועד:',
@@ -45,7 +54,7 @@ export default function ContractDetailScreen({ route, navigation }: any) {
           text: 'שלח הזמנה',
           onPress: (email) => {
             if (!email) return;
-            Alert.alert('הושלם בהצלחה', `הזמנת ערבות משפטית נשלחה לכתובת ${email}.`);
+            showAlert('הושלם בהצלחה', `הזמנת ערבות משפטית נשלחה לכתובת ${email}.`);
           },
         },
       ],

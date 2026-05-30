@@ -7,11 +7,11 @@ import {
   TouchableOpacity,
   TextInput,
   ActivityIndicator,
-  Alert,
   Linking,
 } from 'react-native';
 import { useMaintenanceStore } from '../store/useMaintenanceStore';
 import { useAuthStore } from '../store/useAuthStore';
+import { showAlert } from '../utils/alert';
 
 export default function MaintenanceScreen({ route }: any) {
   const { agreementId = '00000000-0000-4000-9000-000000000001' } = route.params || {};
@@ -25,7 +25,7 @@ export default function MaintenanceScreen({ route }: any) {
 
   const handleOpenTicket = async () => {
     if (!description.trim()) {
-      Alert.alert('שגיאה', 'אנא הזן תיאור תקלה.');
+      showAlert('שגיאה', 'אנא הזן תיאור תקלה.');
       return;
     }
 
@@ -36,10 +36,10 @@ export default function MaintenanceScreen({ route }: any) {
       
       await createTicket(formData);
       setDescription('');
-      Alert.alert('הצלחה', 'קריאת השירות נפתחה בהצלחה! המשכיר קיבל התראה.');
+      showAlert('הצלחה', 'קריאת השירות נפתחה בהצלחה! המשכיר קיבל התראה.');
       fetchTicketsForAgreement(agreementId).catch(() => {});
     } catch (err: any) {
-      Alert.alert('שגיאה', 'פתיחת קריאת השירות נכשלה.');
+      showAlert('שגיאה', 'פתיחת קריאת השירות נכשלה.');
     }
   };
 
@@ -49,24 +49,24 @@ export default function MaintenanceScreen({ route }: any) {
         response: 'technician',
         note: 'הוזמן טכנאי מוסמך ממידרג.',
       });
-      Alert.alert('הצלחה', 'דיווחת שהטיפול בתקלה החל.');
+      showAlert('הצלחה', 'דיווחת שהטיפול בתקלה החל.');
     } catch (err: any) {
-      Alert.alert('שגיאה', 'עדכון הטיפול נכשל.');
+      showAlert('שגיאה', 'עדכון הטיפול נכשל.');
     }
   };
 
   const handleClose = async (ticketId: string) => {
     try {
       await closeTicket(ticketId);
-      Alert.alert('הצלחה', 'קריאת השירות נסגרה בהצלחה.');
+      showAlert('הצלחה', 'קריאת השירות נסגרה בהצלחה.');
     } catch (err: any) {
-      Alert.alert('שגיאה', 'סגירת הקריאה נכשלה.');
+      showAlert('שגיאה', 'סגירת הקריאה נכשלה.');
     }
   };
 
   const openMidrag = () => {
     Linking.openURL('https://www.midrag.co.il').catch(() => {
-      Alert.alert('שגיאה', 'לא ניתן לפתוח את הקישור.');
+      showAlert('שגיאה', 'לא ניתן לפתוח את הקישור.');
     });
   };
 

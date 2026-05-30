@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  SafeAreaView, ScrollView, Alert, ActivityIndicator, TextInput, Modal, Linking, Platform, Switch,
+  SafeAreaView, ScrollView, ActivityIndicator, TextInput, Modal, Linking, Platform, Switch,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
@@ -17,6 +17,7 @@ import type { MainStackParamList } from '../types';
 import SwipeHouseLogo from '../components/SwipeHouseLogo';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
 import { useColors, useTheme } from '../context/ThemeContext';
+import { showAlert } from '../utils/alert';
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
 
@@ -39,9 +40,9 @@ export default function ProfileScreen() {
     setSwitchingRole(true);
     try {
       await switchRole(targetRole);
-      Alert.alert('הצלחה', `החלפת לממשק ${targetRole === 'landlord' ? 'משכיר 🏠' : 'שוכר 👤'} בהצלחה!`);
+      showAlert('הצלחה', `החלפת לממשק ${targetRole === 'landlord' ? 'משכיר 🏠' : 'שוכר 👤'} בהצלחה!`);
     } catch (err) {
-      Alert.alert('שגיאה', 'החלפת התפקיד נכשלה');
+      showAlert('שגיאה', 'החלפת התפקיד נכשלה');
     } finally {
       setSwitchingRole(false);
     }
@@ -55,7 +56,7 @@ export default function ProfileScreen() {
   async function pickAndUploadAvatar() {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('הרשאה נדרשת', 'אפשר גישה לגלריה בהגדרות');
+      showAlert('הרשאה נדרשת', 'אפשר גישה לגלריה בהגדרות');
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -73,7 +74,7 @@ export default function ProfileScreen() {
       const res = await authApi.uploadAvatar(formData);
       updateUser({ avatarUrl: res.data.avatarUrl });
     } catch {
-      Alert.alert('שגיאה', 'העלאת התמונה נכשלה');
+      showAlert('שגיאה', 'העלאת התמונה נכשלה');
     } finally {
       setAvatarUploading(false);
     }
@@ -81,7 +82,7 @@ export default function ProfileScreen() {
 
   async function saveProfile() {
     if (!firstName.trim() || !lastName.trim()) {
-      Alert.alert('שגיאה', 'שם פרטי ושם משפחה הם שדות חובה');
+      showAlert('שגיאה', 'שם פרטי ושם משפחה הם שדות חובה');
       return;
     }
     setSavingProfile(true);
@@ -90,7 +91,7 @@ export default function ProfileScreen() {
       updateUser({ firstName: res.data.user.firstName, lastName: res.data.user.lastName });
       setEditVisible(false);
     } catch {
-      Alert.alert('שגיאה', 'עדכון הפרופיל נכשל');
+      showAlert('שגיאה', 'עדכון הפרופיל נכשל');
     } finally {
       setSavingProfile(false);
     }

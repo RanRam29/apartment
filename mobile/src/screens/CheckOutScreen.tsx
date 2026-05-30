@@ -6,10 +6,10 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
-  Alert,
   ActivityIndicator,
 } from 'react-native';
 import { useContractStore } from '../store/useContractStore';
+import { showAlert } from '../utils/alert';
 
 export default function CheckOutScreen({ route, navigation }: any) {
   const { contractId } = route.params || {};
@@ -29,17 +29,17 @@ export default function CheckOutScreen({ route, navigation }: any) {
       }
       return room;
     }));
-    Alert.alert('תמונה נוספה', 'צילום עזיבה נוסף בהצלחה לרשימת תמונות החדר.');
+    showAlert('תמונה נוספה', 'צילום עזיבה נוסף בהצלחה לרשימת תמונות החדר.');
   };
 
   const handleSave = async () => {
     try {
       await completeCheckout(contractId || 'mock-id');
-      Alert.alert('צ׳ק אאוט הושלם', 'כל התמונות הועלו בהצלחה וסטטוס הדירה לעזיבה תועד.', [
+      showAlert('צ׳ק אאוט הושלם', 'כל התמונות הועלו בהצלחה וסטטוס הדירה לעזיבה תועד.', [
         { text: 'אישור', onPress: () => navigation.goBack() }
       ]);
     } catch (err: any) {
-      Alert.alert('שגיאה', 'שמירת הצ׳ק אאוט נכשלה.');
+      showAlert('שגיאה', 'שמירת הצ׳ק אאוט נכשלה.');
     }
   };
 
