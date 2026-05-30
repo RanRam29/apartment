@@ -106,7 +106,7 @@ router.get('/leads', authenticate, requireRole('landlord'), async (req, res, nex
     const { rows: leads, count } = await Match.findAndCountAll({
       where: { landlordId: req.user.id, status },
       include: [
-        { model: User, as: 'tenant', attributes: ['id', 'firstName', 'lastName', 'avatarUrl', 'phone', 'isVerified'] },
+        { model: User, as: 'tenant', attributes: ['id', 'firstName', 'lastName', 'avatarUrl', 'phone', 'email', 'isVerified'] },
         { model: Apartment, as: 'apartment', attributes: ['id', 'title', 'price', 'city', 'images'] },
       ],
       order: [['createdAt', 'DESC']],
