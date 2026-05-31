@@ -212,6 +212,8 @@ function LandlordTabs() {
 function MainNavigator() {
   const { user, needsOnboarding } = useAuthStore();
   const appTheme = useAppTheme();
+  // Admin role always gets AdminTabs, regardless of activeRole
+  const isAdmin = user?.role === 'admin';
   const userRole = user?.activeRole || user?.role;
 
   useEffect(() => {
@@ -227,10 +229,10 @@ function MainNavigator() {
       <MainStack.Screen
         name="Tabs"
         component={
-          userRole === 'landlord'
-            ? LandlordTabs
-            : userRole === 'admin'
-              ? AdminTabs
+          isAdmin
+            ? AdminTabs
+            : userRole === 'landlord'
+              ? LandlordTabs
               : TenantTabs
         }
       />
