@@ -13,7 +13,7 @@
 | Task | Completed At | Commits | Notes |
 |------|-------------|---------|-------|
 | Fix W-1 — Missing Property Images in Swipe | 2026-05-31 | `[Local]` | Resolved property card blank background by introducing a beautiful local fallback illustration using Figma/Stitch design tokens. |
-| Admin-only Configuration Panel | 2026-05-31 | `f8dac32` | Integrated AdminConfigScreen, AdminUsersScreen, AdminStatsScreen, updated types & AppNavigator.tsx bottom tabs. |
+| Admin-only Configuration Panel | 2026-05-31 | `f8dac32`, `bfee9e8`, `410a405` | Integrated AdminConfigScreen, AdminUsersScreen, AdminStatsScreen, updated types & AppNavigator.tsx bottom tabs. Fixed bottom-tab overlap clipping and resolved empty-phone user update 422 validation failure. |
 | T3.0 New Feature Suite | 2026-05-30 | `d026b12` | Implemented trust score synced to Postgres, renter journal RTL vertical timeline, and contract amendments with comprehensive Jest verification. |
 | Triage & Fix BUG-003 to BUG-009 | 2026-05-28 | `43c43c3` | Resolved all 7 active P1 & P2 bugs, added web-safe alerts, calculated safe conversion rate, replaced placeholder avatars, default trustScore to 50, and created/passed Admin E2E tests. |
 | ToS Gating & Autocomplete Fixes | 2026-05-28 | `4797b7d` | Added UI checks, warnings, and redirect prompts to resolve ToS blocked actions (post/delete listing) and fixed street autocomplete. |

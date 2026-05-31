@@ -174,8 +174,10 @@ export default function AdminUsersScreen() {
     setError(null);
     setSuccessMessage(null);
     try {
+      const trimmedPhone = (editForm.phone || '').trim();
       const res = await adminApi.updateUser(userId, {
         ...editForm,
+        phone: trimmedPhone === '' ? null : trimmedPhone,
         trustScore: parseInt(editForm.trustScore) || 50,
       });
       const updatedUser: UserItem = res.data;
@@ -751,7 +753,7 @@ const styles = StyleSheet.create({
   listContainer: {
     padding: 16,
     gap: 12,
-    paddingBottom: 24,
+    paddingBottom: 120,
   },
   emptyText: {
     textAlign: 'center',

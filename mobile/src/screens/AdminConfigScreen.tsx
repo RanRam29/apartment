@@ -364,7 +364,7 @@ const styles = StyleSheet.create({
   scrollList: {
     padding: 16,
     gap: 12,
-    paddingBottom: 40,
+    paddingBottom: 120,
   },
   card: {
     borderWidth: 1,
