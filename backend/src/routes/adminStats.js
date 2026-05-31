@@ -98,7 +98,7 @@ router.get('/detailed', async (req, res, next) => {
       Swipe.count({ where: { direction: 'like' } }),
       Swipe.count({ where: { direction: 'dislike' } }),
       Swipe.count({ where: { direction: 'superlike' } }),
-      Swipe.findOne({ attributes: [[fn('AVG', col('seenDurationMs')), 'avg']], raw: true }),
+      Swipe.findOne({ attributes: [[fn('AVG', col('seen_duration_ms')), 'avg']], raw: true }),
       Match.count({ where: { status: 'accepted' } }),
       Match.count({ where: { status: 'pending' } }),
       Match.count({ where: { status: 'expired' } }),
@@ -130,7 +130,7 @@ router.get('/detailed', async (req, res, next) => {
     } catch (_) { /* MongoDB may not be connected */ }
 
     // Trust score avg from PG
-    const trustRow = await User.findOne({ attributes: [[fn('AVG', col('trustScore')), 'avg']], raw: true });
+    const trustRow = await User.findOne({ attributes: [[fn('AVG', col('trust_score')), 'avg']], raw: true });
     const avgTrustScore = Math.round(parseFloat(trustRow?.avg) || 50);
 
     // ── Security (Mongo + PG) ──
