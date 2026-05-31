@@ -242,3 +242,4 @@
 | 2026-05-28 | — | Fix admin password sync (`ed0e874`) | Claude Code |
 | 2026-05-30 | 1.4 | ALL BUGS CLOSED — BUG-003/004/005/006/007/008/009 verified fixed by Antigravity (`43c43c3`→`6e56bce`) | Claude Code |
 | 2026-05-30 | 1.5 | ALL YELLOW → GREEN — E2E verified all mobile screens + web compat (`81b2918`) | Antigravity |
+| 2026-05-31 | 1.6 | W-1 — Fallback illustration for missing property images in ApartmentCard | Antigravity |

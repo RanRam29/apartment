@@ -4,20 +4,18 @@
 > The orchestrator (Claude Code) reads this file to update the main DASHBOARD.md.
 
 ## Current Task
-**Task:** T3.0 New Feature Suite: NF1 (Trust Score Points), NF2 (Renter Journal), and V2-3 (Contract Amendments)
+**Task:** Fix W-1 — Missing Property Images in Swipe (P3)
 **Status:** 🟢 DONE
-**Progress:** Successfully implemented all three epics across both mobile and backend:
-- **NF1 — Trust Score**: Synchronized Postgres `User.trustScore` to awarded points dynamically. Wired swipes, matches, and KYCAPPROVED webhook events.
-- **NF2 — Renter Journal**: Added visual vertical RTL timeline Hebrew screen with room photos, rent ledgers, maintenance tickets, and check-out notes. Embedded journal cards inside `HomeScreen.tsx`.
-- **V2-3 — Contract Amendments**: Created model, associations, and self-healing PG table boots. Built proposing/approve/reject backend routes and unified ContractDetailScreen interactive proposal modals.
-- Pass 100% Jest E2E integration test suite (`tests/amendments.test.js`).
-All changes pushed to `main`.
-
+**Progress:** Successfully implemented fallback illustration for properties without images or using dead placeholder links:
+- Replaced the failing `via.placeholder.com` fallback image with a premium, custom React Native illustration matching Figma/Stitch design tokens.
+- Leveraged linear gradients, clean iconography, and clear Hebrew labels to maintain high aesthetic standards.
+- Fully validated with ESLint passing 100% clean.
 
 ## Completed Tasks
 
 | Task | Completed At | Commits | Notes |
 |------|-------------|---------|-------|
+| Fix W-1 — Missing Property Images in Swipe | 2026-05-31 | `[Local]` | Resolved property card blank background by introducing a beautiful local fallback illustration using Figma/Stitch design tokens. |
 | T3.0 New Feature Suite | 2026-05-30 | `d026b12` | Implemented trust score synced to Postgres, renter journal RTL vertical timeline, and contract amendments with comprehensive Jest verification. |
 | Triage & Fix BUG-003 to BUG-009 | 2026-05-28 | `43c43c3` | Resolved all 7 active P1 & P2 bugs, added web-safe alerts, calculated safe conversion rate, replaced placeholder avatars, default trustScore to 50, and created/passed Admin E2E tests. |
 | ToS Gating & Autocomplete Fixes | 2026-05-28 | `4797b7d` | Added UI checks, warnings, and redirect prompts to resolve ToS blocked actions (post/delete listing) and fixed street autocomplete. |
@@ -42,6 +40,7 @@ All changes pushed to `main`.
 ## Files Created/Modified (Cascade's OWN assigned files only)
 
 ```
+mobile/src/components/ApartmentCard.tsx (modified)
 mobile/src/screens/CreateListingScreen.tsx (modified)
 mobile/src/screens/EditListingScreen.tsx (modified)
 mobile/src/screens/LandlordDashboard.tsx (modified)
@@ -73,4 +72,4 @@ backend/tests/guarantor.test.js (created)
 ```
 
 ## Last Updated
-2026-05-28 (ToS UI integration and autocomplete hotfixes pushed to main)
+2026-05-31 (W-1 fallback illustration fix implemented on wind/qa-infrastructure)

@@ -19,16 +19,36 @@ interface Props {
 export default function ApartmentCard({ apartment, isTop: _isTop = false }: Props) {
   const firstImage = apartment.images?.[0]?.url;
   const street = apartment.street ?? apartment.neighborhood;
+  const hasValidImage = !!firstImage && firstImage.indexOf('via.placeholder.com') === -1;
 
   return (
     <View style={styles.card}>
-      <Image
-        source={{ uri: firstImage || 'https://via.placeholder.com/400x600?text=No+Image' }}
-        style={styles.image}
-        contentFit="cover"
-        transition={200}
-        accessibilityLabel={apartment.title ? `תמונת דירה: ${apartment.title}` : 'תמונת דירה'}
-      />
+      {hasValidImage ? (
+        <Image
+          source={{ uri: firstImage }}
+          style={styles.image}
+          contentFit="cover"
+          transition={200}
+          accessibilityLabel={apartment.title ? `תמונת דירה: ${apartment.title}` : 'תמונת דירה'}
+        />
+      ) : (
+        <View style={styles.noImageContainer}>
+          <LinearGradient
+            colors={[dirApp.surfaceContainerLowest, dirApp.surfaceContainerHigh]}
+            style={StyleSheet.absoluteFill}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          />
+          <View style={styles.noImageContent}>
+            <View style={styles.noImageIconWrapper}>
+              <Ionicons name="home" size={48} color={dirApp.primary} />
+              <Ionicons name="image-outline" size={24} color={dirApp.secondary} style={styles.noImageSubIcon} />
+            </View>
+            <Text style={styles.noImageTitle}>טרם הועלו תמונות</Text>
+            <Text style={styles.noImageSubtitle}>הפרטים המלאים מופיעים מטה</Text>
+          </View>
+        </View>
+      )}
 
       {/* Soft gradient — lighter than before */}
       <LinearGradient
@@ -111,6 +131,51 @@ const styles = StyleSheet.create({
   },
   image: { width: '100%', height: '100%', position: 'absolute' },
   gradient: { position: 'absolute', bottom: 0, left: 0, right: 0, height: '58%' },
+  noImageContainer: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: dirApp.surfaceContainer,
+  },
+  noImageContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+    marginBottom: 40,
+  },
+  noImageIconWrapper: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: `${dirApp.primary}12`,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+    position: 'relative',
+  },
+  noImageSubIcon: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: dirApp.surfaceContainerLowest,
+    borderRadius: 14,
+    padding: 4,
+    borderWidth: 2,
+    borderColor: dirApp.surfaceContainerHigh,
+  },
+  noImageTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: dirApp.primary,
+    textAlign: 'center',
+    marginBottom: 6,
+  },
+  noImageSubtitle: {
+    fontSize: 13,
+    color: C.textSub,
+    textAlign: 'center',
+    opacity: 0.8,
+  },
 
   verifiedBadge: {
     position: 'absolute', top: 16, left: 16,
