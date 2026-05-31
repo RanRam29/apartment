@@ -323,6 +323,15 @@ export const clientLogsApi = {
   }) => api.post('/logs/client-event', data, { headers: { 'x-client-log-no-report': '1' } }),
 };
 
+export const adminApi = {
+  getConfig: () => api.get('/v3/admin/config'),
+  updateConfig: (key: string, value: string) => api.put(`/v3/admin/config/${key}`, { value }),
+  getUsers: (page = 1, limit = 50) => api.get('/v3/admin/users', { params: { page, limit } }),
+  unlockUser: (id: string) => api.post(`/v3/admin/users/${id}/unlock`),
+  kycOverride: (id: string, status: string) => api.post(`/v3/admin/users/${id}/kyc-override`, { status }),
+  getStats: () => api.get('/v3/admin/stats'),
+};
+
 // ─── CASCADE V3 APIs ────────────────────────────────────────────────────────
 export const contractsV3Api = {
   upload: (formData: FormData) => api.post('/v3/contracts/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),

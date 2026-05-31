@@ -18,11 +18,8 @@ import type {
   TenantTabParamList,
   LandlordTabParamList,
   MainStackParamList,
+  AdminTabParamList,
 } from '../types';
-import {
-  AdminTenantShellProvider,
-  AdminLandlordShellProvider,
-} from './AdminAppModeContext';
 
 import AuthScreen from '../screens/AuthScreen';
 import SwipeScreen from '../screens/SwipeScreen';
@@ -49,6 +46,9 @@ import GamificationScreen from '../screens/GamificationScreen';
 import ServicesScreen from '../screens/ServicesScreen';
 import IoTScreen from '../screens/IoTScreen';
 import LogsConsoleScreen from '../screens/LogsConsoleScreen';
+import AdminConfigScreen from '../screens/AdminConfigScreen';
+import AdminUsersScreen from '../screens/AdminUsersScreen';
+import AdminStatsScreen from '../screens/AdminStatsScreen';
 
 import ContractUploadScreen from '../screens/ContractUploadScreen';
 import ContractDetailScreen from '../screens/ContractDetailScreen';
@@ -62,114 +62,52 @@ import TermsScreen from '../screens/TermsScreen';
 const RootStack  = createNativeStackNavigator<RootStackParamList>();
 const TenantTab  = createBottomTabNavigator<TenantTabParamList>();
 const LandlordTab = createBottomTabNavigator<LandlordTabParamList>();
+const AdminTab = createBottomTabNavigator<AdminTabParamList>();
 const MainStack  = createNativeStackNavigator<MainStackParamList>();
 
-function TenantTabsForAdmin() {
-  return (
-    <AdminTenantShellProvider>
-      <TenantTabs />
-    </AdminTenantShellProvider>
-  );
-}
-
-function LandlordTabsForAdmin() {
-  return (
-    <AdminLandlordShellProvider>
-      <LandlordTabs />
-    </AdminLandlordShellProvider>
-  );
-}
-
-/** Admin: pick tenant UI shell or landlord UI shell (each is the full existing tab navigator). */
 function AdminTabs() {
-  const insets = useSafeAreaInsets();
   const appTheme = useAppTheme();
-  const [mode, setMode] = useState<'tenant' | 'landlord'>('tenant');
-
   return (
-    <View style={{ flex: 1, backgroundColor: appTheme.colors.shellBackground }}>
-      <View
-        style={[
-          adminShellStyles.bar,
-          {
-            paddingTop: Math.max(insets.top, 8),
-            backgroundColor: appTheme.colors.tabBarBackground,
-            borderBottomColor: C.border,
-          },
-        ]}
-      >
-        <TouchableOpacity
-          style={[adminShellStyles.seg, mode === 'tenant' && adminShellStyles.segOn]}
-          onPress={() => setMode('tenant')}
-          accessibilityRole="tab"
-          accessibilityState={{ selected: mode === 'tenant' }}
-        >
-          <Ionicons
-            name="person-outline"
-            size={18}
-            color={mode === 'tenant' ? C.onInverse.primary : dirApp.primary}
-          />
-          <Text style={[adminShellStyles.segText, mode === 'tenant' && adminShellStyles.segTextOn]}>
-            ממשק שוכר
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[adminShellStyles.seg, mode === 'landlord' && adminShellStyles.segOn]}
-          onPress={() => setMode('landlord')}
-          accessibilityRole="tab"
-          accessibilityState={{ selected: mode === 'landlord' }}
-        >
-          <Ionicons
-            name="business-outline"
-            size={18}
-            color={mode === 'landlord' ? C.onInverse.primary : dirApp.primary}
-          />
-          <Text style={[adminShellStyles.segText, mode === 'landlord' && adminShellStyles.segTextOn]}>
-            ממשק משכיר
-          </Text>
-        </TouchableOpacity>
-      </View>
-      <View style={{ flex: 1 }}>
-        {mode === 'tenant' ? <TenantTabsForAdmin /> : <LandlordTabsForAdmin />}
-      </View>
-    </View>
+    <AdminTab.Navigator
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarActiveTintColor: C.cyan,
+        tabBarInactiveTintColor: C.textMut,
+        tabBarStyle: {
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 80,
+          paddingBottom: 20,
+          paddingTop: 8,
+          backgroundColor: appTheme.colors.tabBarBackground,
+          borderTopWidth: 0,
+          shadowColor: appTheme.colors.tabBarShadow,
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: 0.08,
+          shadowRadius: 20,
+          elevation: 20,
+        },
+        tabBarLabelStyle: { fontSize: 10, fontWeight: '600' },
+        tabBarIcon: ({ focused, color, size }) => {
+          const icons: Record<string, keyof typeof Ionicons.glyphMap> = {
+            AdminConfig: focused ? 'settings' : 'settings-outline',
+            AdminUsers:  focused ? 'people' : 'people-outline',
+            AdminStats:  focused ? 'stats-chart' : 'stats-chart-outline',
+            LogsConsole: focused ? 'document-text' : 'document-text-outline',
+          };
+          return <Ionicons name={icons[route.name]} size={size} color={color} />;
+        },
+      })}
+    >
+      <AdminTab.Screen name="AdminConfig" component={AdminConfigScreen} options={{ title: 'הגדרות' }} />
+      <AdminTab.Screen name="AdminUsers"  component={AdminUsersScreen}  options={{ title: 'משתמשים' }} />
+      <AdminTab.Screen name="AdminStats"  component={AdminStatsScreen}  options={{ title: 'סטטיסטיקות' }} />
+      <AdminTab.Screen name="LogsConsole" component={LogsConsoleScreen} options={{ title: 'לוגים' }} />
+    </AdminTab.Navigator>
   );
 }
-
-const adminShellStyles = StyleSheet.create({
-  bar: {
-    flexDirection: 'row',
-    gap: 10,
-    paddingHorizontal: 12,
-    paddingBottom: 10,
-    borderBottomWidth: 1,
-    alignItems: 'center',
-  },
-  seg: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 10,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: C.border,
-    backgroundColor: 'transparent',
-  },
-  segOn: {
-    backgroundColor: dirApp.primaryContainer,
-    borderColor: dirApp.primaryContainer,
-  },
-  segText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: dirApp.primary,
-  },
-  segTextOn: {
-    color: C.onInverse.primary,
-  },
-});
 
 function TenantTabs() {
   const appTheme = useAppTheme();

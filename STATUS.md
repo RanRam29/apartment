@@ -4,21 +4,15 @@
 > The orchestrator (Claude Code) reads this file to update the main DASHBOARD.md.
 
 ## Current Task
-**Task:** Triage and resolve all production bugs (BUG-003 to BUG-009)
+**Task:** Admin-only Configuration Panel (wind/admin-config-panel)
 **Status:** 🟢 DONE
-**Progress:** Successfully fixed and E2E tested all 7 prioritized bugs:
-- **BUG-005 + BUG-003**: Enforced `tosAcceptedAt`, `activeRole`, and `kycStatus` in login response. Moved `showAlert` to global helper in `ListingsScreen.tsx` and `LeadsScreen.tsx` to handle web-safe alerts.
-- **BUG-006**: Integrated ToS acceptance store hydration (`updateUser({ tosAcceptedAt: res.data.tosAcceptedAt })`) and added a beautiful back button.
-- **BUG-008**: Replaced `via.placeholder.com` with a robust styled fallback `<View>` in `MatchCard.tsx` and updated avatar size to 40x40.
-- **BUG-007**: Safe conversion rate calculations for the dashboard (`denominator === 0` displays `0%`).
-- **BUG-009**: Set User model default `trustScore` value to `50` (column dynamically added in `database.js` if missing) and initialized seeder data accordingly.
-- **BUG-004**: Implemented and passed a full integration test suite (`tests/adminE2E.test.js`) verifying all Admin Panel endpoints (`GET /users`, `GET /stats`, `POST /unlock`, `POST /kyc-override`, `PATCH /config`) with admin/non-admin tokens.
-All changes pushed to `main`.
+**Progress:** Rebuilt admin console screens, updated api routing, and verified typescript and test status. Fully completed!
 
 ## Completed Tasks
 
 | Task | Completed At | Commits | Notes |
 |------|-------------|---------|-------|
+| Admin-only Configuration Panel | 2026-05-31 | `pending` | Integrated AdminConfigScreen, AdminUsersScreen, AdminStatsScreen, updated types & AppNavigator.tsx bottom tabs. |
 | Triage & Fix BUG-003 to BUG-009 | 2026-05-28 | `43c43c3` | Resolved all 7 active P1 & P2 bugs, added web-safe alerts, calculated safe conversion rate, replaced placeholder avatars, default trustScore to 50, and created/passed Admin E2E tests. |
 | ToS Gating & Autocomplete Fixes | 2026-05-28 | `4797b7d` | Added UI checks, warnings, and redirect prompts to resolve ToS blocked actions (post/delete listing) and fixed street autocomplete. |
 | T2 | 2026-05-27 | `cfc19ed` | Resend email + unified notificationService |
@@ -65,6 +59,11 @@ backend/src/routes/guarantor.js (created)
 web/guarantor/ (created entire directory)
 mobile/src/store/ (created new stores)
 mobile/src/services/api.ts (modified)
+mobile/src/types/index.ts (modified)
+mobile/src/navigation/AppNavigator.tsx (modified)
+mobile/src/screens/AdminConfigScreen.tsx (created)
+mobile/src/screens/AdminUsersScreen.tsx (created)
+mobile/src/screens/AdminStatsScreen.tsx (created)
 backend/tests/resendService.test.js (created)
 backend/tests/kycV3.test.js (created)
 backend/tests/tosAndRole.test.js (created)
@@ -73,4 +72,4 @@ backend/tests/guarantor.test.js (created)
 ```
 
 ## Last Updated
-2026-05-28 (ToS UI integration and autocomplete hotfixes pushed to main)
+2026-05-31 (Admin-only Configuration Panel screens, type files, and bottom tab navigation implemented)

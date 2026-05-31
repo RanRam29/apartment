@@ -188,3 +188,10 @@ export type MainStackParamList = {
   IoT: undefined;
   LogsConsole: undefined;
 };
+
+export type AdminTabParamList = {
+  AdminConfig: undefined;
+  AdminUsers: undefined;
+  AdminStats: undefined;
+  LogsConsole: undefined;
+};
