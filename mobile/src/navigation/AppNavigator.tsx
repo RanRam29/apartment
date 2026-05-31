@@ -211,7 +211,7 @@ function LandlordTabs() {
 function MainNavigator() {
   const { user, needsOnboarding } = useAuthStore();
   const appTheme = useAppTheme();
-  const userRole = user?.activeRole || user?.role;
+  const userRole = user?.role === 'admin' ? 'admin' : (user?.activeRole || user?.role);
 
   useEffect(() => {
     useChatStore.getState().connect();
