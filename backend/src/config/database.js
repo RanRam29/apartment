@@ -136,7 +136,11 @@ async function initPostgres() {
     process.env.NODE_ENV === 'development' ||
     process.env.POSTGRES_SYNC_ALTER === 'true';
   await sequelize.sync({ alter: syncAlter });
-  logger.info('PostgreSQL connected and synced');
+
+  // Seed all AppConfig defaults (preserves existing values)
+  const AppConfig = require('../models/pg/AppConfig');
+  await AppConfig.seedAppConfig();
+  logger.info('PostgreSQL connected, synced, and AppConfig seeded');
 }
 
 module.exports = { sequelize, initPostgres, ensureUserVerificationColumns, ensureApartmentStreetColumn, ensureContractAmendmentsTable };

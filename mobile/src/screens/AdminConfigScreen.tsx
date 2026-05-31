@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   RefreshControl,
   SafeAreaView,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   TextInput,
   TouchableOpacity,
@@ -21,85 +21,155 @@ import { dirType } from '../theme/textStyles';
 import { useColors } from '../context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 
+// ─── Labels ─────────────────────────────────────────────────────────────────
 const KEY_LABELS: Record<string, string> = {
+  // Users
+  max_login_attempts: 'מקסימום נסיונות כניסה',
+  lockout_duration_minutes: 'זמן נעילה (דקות)',
+  session_timeout_hours: 'תפוגת session (שעות)',
+  initial_trust_score: 'ציון אמון התחלתי',
+  max_trust_score: 'ציון אמון מקסימלי',
+  inactive_user_days: 'ימים עד סימון לא פעיל',
+  blocking_threshold: 'סף חסימה',
+  // Listings
+  max_images_per_listing: 'מקסימום תמונות למודעה',
+  max_active_listings_per_landlord: 'מקסימום מודעות פעילות למשכיר',
+  listing_expiry_days: 'ימי תפוגת מודעה',
+  listing_boost_duration_days: 'משך קידום מודעה (ימים)',
+  min_listing_price_ils: 'מחיר מינימום למודעה ₪',
+  max_listing_price_ils: 'מחיר מקסימום למודעה ₪',
+  // Swipe & Match
+  daily_swipe_limit: 'מגבלת סוויפים יומית',
+  daily_superlike_limit: 'מגבלת סופר-לייק יומית',
+  match_expiry_days: 'ימי תפוגת התאמה',
+  premium_daily_swipe_limit: 'מגבלת סוויפים פרימיום',
+  // Payments
+  payment_autoconfirm_hours: 'שעות אישור תשלום אוטומטי',
+  late_fee_percentage: 'אחוז קנס איחור',
+  payment_reminder_days_before: 'ימים לתזכורת לפני תשלום',
+  payment_grace_period_days: 'ימי חסד לתשלום',
+  deposit_months_default: 'חודשי פיקדון ברירת מחדל',
+  cpi_auto_adjust: 'התאמת מדד אוטומטית',
+  overdue_alert_days: 'ימים להתראת פיגור',
+  // Contracts
   check_in_window_days: "ימי חלון צ'ק-אין",
-  checkin_photos_max: 'מקסימום תמונות צ\'ק-אין',
-  checkout_revision_rounds: 'סבבי תיקון צ\'ק-אאוט',
+  checkin_photos_max: "מקסימום תמונות צ'ק-אין",
+  checkout_revision_rounds: "סבבי תיקון צ'ק-אאוט",
   expiring_warning_days: 'התראה לפני תפוגת חוזה',
   guarantor_link_ttl_days: 'תוקף קישור ערב',
-  blocking_threshold: 'סף חסימה',
   contract_revision_max: 'מקסימום גרסאות חוזה',
-  payment_autoconfirm_hours: 'שעות אישור תשלום אוטומטי',
-  overdue_alert_days: 'ימים להתראת פיגור',
   kyc_renewal_years: 'שנים לחידוש KYC',
+  // Chat
+  max_message_length: 'אורך הודעה מקסימלי',
+  chat_image_max_size_mb: 'גודל תמונה מקסימלי בצ׳אט (MB)',
+  chat_history_retention_days: 'שמירת היסטוריית צ׳אט (ימים)',
+  // Notifications
+  email_digest_frequency_hours: 'תדירות דיגסט מייל (שעות)',
+  push_notifications_enabled: 'התראות Push מופעלות',
+  reminder_new_matches_hours: 'תזכורת התאמות חדשות (שעות)',
   maintenance_alert_hours_1: 'התראת תחזוקה ראשונה (שעות)',
   maintenance_alert_days_2: 'התראת תחזוקה שנייה (ימים)',
+  // Gamification
+  points_per_swipe: 'נקודות לסוויפ',
+  points_per_match: 'נקודות להתאמה',
+  points_per_contract_signed: 'נקודות לחתימת חוזה',
+  points_per_payment_on_time: 'נקודות לתשלום בזמן',
+  level_2_threshold: 'סף רמה 2',
+  level_3_threshold: 'סף רמה 3',
+  level_4_threshold: 'סף רמה 4',
   persona_monthly_quota: 'מכסת פרסונות חודשית',
+  // Security
+  api_rate_limit_per_minute: 'מגבלת API לדקה',
+  file_upload_max_size_mb: 'גודל העלאה מקסימלי (MB)',
+  require_email_verification: 'חובת אימות מייל',
+  audit_log_retention_days: 'שמירת לוגים (ימים)',
+  min_password_length: 'אורך סיסמה מינימלי',
 };
 
-const KEY_DESCRIPTIONS: Record<string, string> = {
-  check_in_window_days: "כמות הימים שלפני תחילת החוזה שבהם השוכר יכול להתחיל צ'ק-אין ולהעלות תמונות של הדירה.",
-  checkin_photos_max: "המספר המרבי של תמונות שהשוכר רשאי להעלות עבור כל חדר במהלך בדיקת הצ'ק-אין.",
-  checkout_revision_rounds: "מספר סבבי התיקון המרביים שבהם המשכיר רשאי לבקש מהשוכר לצלם מחדש או לתקן ליקויים בצ'ק-אאוט לפני אישור אוטומטי.",
-  expiring_warning_days: "מספר הימים לפני סיום החוזה שבהם תישלח התראה ראשונה על תפוגת החוזה והסטטוס ישתנה ל-EXPIRING.",
-  guarantor_link_ttl_days: "משך הזמן בימים שבהם קישור ההזמנה לחתימת הערב נשאר פעיל ותקף לשימוש לפני פקיעתו.",
-  blocking_threshold: "מספר הדיווחים/חסימות המרבי שמשתמש יכול לקבל לפני שחשבונו יינעל אוטומטית על ידי המערכת.",
-  contract_revision_max: "המספר המרבי של תיקונים ושינויי שדות שניתן לבצע בחוזה במהלך שלב ה-UPLOAD.",
-  payment_autoconfirm_hours: "פרק הזמן בשעות שלאחריו דיווח תשלום של שוכר יאושר אוטומטית כ-PAID אם המשכיר לא הגיב.",
-  overdue_alert_days: "מספר ימי הפיגור בתשלום שלאחריהם תישלח התראה דחופה לשוכר ולמנהל המערכת.",
-  kyc_renewal_years: "תוקף אימות הזהות (KYC) בשנים. לאחר תקופה זו, המשתמש יידרש לבצע אימות זהות מחדש מטעמי אבטחה.",
-  maintenance_alert_hours_1: "מספר השעות שעוברות מרגע פתיחת תקלת תחזוקה ללא תגובת משכיר, לפני שליחת התראת תזכורת ראשונה.",
-  maintenance_alert_days_2: "מספר הימים המרבי ללא טיפול בתקלת תחזוקה שלאחריו התקלה תוסלם ותועבר לטיפול מנהל המערכת.",
-  persona_monthly_quota: "מכסת שאילתות האימות החודשית מול שירות הזהות של Persona עבור האפליקציה כולה.",
-};
+const BOOLEAN_KEYS = new Set([
+  'cpi_auto_adjust',
+  'push_notifications_enabled',
+  'require_email_verification',
+]);
+
+// ─── Sections ───────────────────────────────────────────────────────────────
+const CONFIG_SECTIONS: { title: string; icon: keyof typeof Ionicons.glyphMap; keys: string[] }[] = [
+  {
+    title: 'ניהול משתמשים',
+    icon: 'people',
+    keys: ['max_login_attempts', 'lockout_duration_minutes', 'session_timeout_hours', 'initial_trust_score', 'max_trust_score', 'inactive_user_days', 'blocking_threshold'],
+  },
+  {
+    title: 'דירות ומודעות',
+    icon: 'home',
+    keys: ['max_images_per_listing', 'max_active_listings_per_landlord', 'listing_expiry_days', 'listing_boost_duration_days', 'min_listing_price_ils', 'max_listing_price_ils'],
+  },
+  {
+    title: 'סוויפ והתאמות',
+    icon: 'swap-horizontal',
+    keys: ['daily_swipe_limit', 'daily_superlike_limit', 'match_expiry_days', 'premium_daily_swipe_limit'],
+  },
+  {
+    title: 'תשלומים',
+    icon: 'card',
+    keys: ['payment_autoconfirm_hours', 'late_fee_percentage', 'payment_reminder_days_before', 'payment_grace_period_days', 'deposit_months_default', 'cpi_auto_adjust', 'overdue_alert_days'],
+  },
+  {
+    title: 'חוזים',
+    icon: 'document-text',
+    keys: ['check_in_window_days', 'checkin_photos_max', 'checkout_revision_rounds', 'expiring_warning_days', 'guarantor_link_ttl_days', 'contract_revision_max', 'kyc_renewal_years'],
+  },
+  {
+    title: 'צ׳אט',
+    icon: 'chatbubbles',
+    keys: ['max_message_length', 'chat_image_max_size_mb', 'chat_history_retention_days'],
+  },
+  {
+    title: 'התראות',
+    icon: 'notifications',
+    keys: ['email_digest_frequency_hours', 'push_notifications_enabled', 'reminder_new_matches_hours', 'maintenance_alert_hours_1', 'maintenance_alert_days_2'],
+  },
+  {
+    title: 'גיימיפיקציה',
+    icon: 'game-controller',
+    keys: ['points_per_swipe', 'points_per_match', 'points_per_contract_signed', 'points_per_payment_on_time', 'level_2_threshold', 'level_3_threshold', 'level_4_threshold', 'persona_monthly_quota'],
+  },
+  {
+    title: 'אבטחה',
+    icon: 'shield-checkmark',
+    keys: ['api_rate_limit_per_minute', 'file_upload_max_size_mb', 'require_email_verification', 'audit_log_retention_days', 'min_password_length'],
+  },
+];
 
 interface ConfigItem {
   key: string;
   value: string;
-  createdAt?: string;
-  updatedAt?: string;
 }
 
 export default function AdminConfigScreen() {
   const colors = useColors();
-  const [configs, setConfigs] = useState<ConfigItem[]>([]);
+  const [configMap, setConfigMap] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [savingKey, setSavingKey] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
 
   const fetchConfigs = async () => {
     try {
       setError(null);
       const res = await adminApi.getConfig();
       const data: ConfigItem[] = res.data ?? [];
-      
-      // Ensure all predefined keys are in the list, even if they aren't created in backend yet.
-      const existingKeys = new Set(data.map(item => item.key));
-      const mergedList = [...data];
-      
-      Object.keys(KEY_LABELS).forEach(key => {
-        if (!existingKeys.has(key)) {
-          mergedList.push({ key, value: '' });
-        }
+      const map: Record<string, string> = {};
+      const edit: Record<string, string> = {};
+      data.forEach(item => {
+        map[item.key] = String(item.value);
+        edit[item.key] = String(item.value);
       });
-
-      // Sort alphabetically by Hebrew label if possible, or by key
-      mergedList.sort((a, b) => {
-        const labelA = KEY_LABELS[a.key] || a.key;
-        const labelB = KEY_LABELS[b.key] || b.key;
-        return labelA.localeCompare(labelB, 'he');
-      });
-
-      setConfigs(mergedList);
-
-      const initialValues: Record<string, string> = {};
-      mergedList.forEach(item => {
-        initialValues[item.key] = String(item.value);
-      });
-      setEditValues(initialValues);
+      setConfigMap(map);
+      setEditValues(edit);
     } catch (err: any) {
       setError(err?.response?.data?.error || 'שגיאה בטעינת הגדרות המערכת');
     } finally {
@@ -108,31 +178,20 @@ export default function AdminConfigScreen() {
     }
   };
 
-  useEffect(() => {
-    fetchConfigs();
-  }, []);
+  useEffect(() => { fetchConfigs(); }, []);
 
-  const onRefresh = () => {
-    setRefreshing(true);
-    fetchConfigs();
-  };
+  const onRefresh = () => { setRefreshing(true); fetchConfigs(); };
 
   const handleSave = async (key: string) => {
-    const newValue = editValues[key]?.trim();
-    if (newValue === undefined) return;
-
+    const newValue = editValues[key]?.trim() ?? '';
     setSavingKey(key);
     setError(null);
     setSuccessMessage(null);
-
     try {
       await adminApi.updateConfig(key, newValue);
-      setSuccessMessage(`ההגדרה "${KEY_LABELS[key] || key}" נשמרה בהצלחה!`);
-      
-      // Hide success message after 3 seconds
-      setTimeout(() => {
-        setSuccessMessage(prev => prev?.includes(KEY_LABELS[key] || key) ? null : prev);
-      }, 3000);
+      setConfigMap(prev => ({ ...prev, [key]: newValue }));
+      setSuccessMessage(`"${KEY_LABELS[key] || key}" נשמרה בהצלחה`);
+      setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err: any) {
       setError(err?.response?.data?.error || 'שגיאה בעדכון ההגדרה');
     } finally {
@@ -140,19 +199,94 @@ export default function AdminConfigScreen() {
     }
   };
 
-  const handleInputChange = (key: string, text: string) => {
-    setEditValues(prev => ({
-      ...prev,
-      [key]: text,
-    }));
+  const handleToggle = async (key: string, val: boolean) => {
+    const newValue = val ? 'true' : 'false';
+    setEditValues(prev => ({ ...prev, [key]: newValue }));
+    setSavingKey(key);
+    try {
+      await adminApi.updateConfig(key, newValue);
+      setConfigMap(prev => ({ ...prev, [key]: newValue }));
+    } catch (err: any) {
+      setError(err?.response?.data?.error || 'שגיאה בעדכון ההגדרה');
+    } finally {
+      setSavingKey(null);
+    }
+  };
+
+  const toggleSection = (title: string) => {
+    setCollapsed(prev => ({ ...prev, [title]: !prev[title] }));
+  };
+
+  const renderConfigItem = (key: string) => {
+    const label = KEY_LABELS[key] || key;
+    const isSaving = savingKey === key;
+    const savedValue = configMap[key] ?? '';
+    const editValue = editValues[key] ?? '';
+    const hasChanged = editValue !== savedValue;
+    const isBoolean = BOOLEAN_KEYS.has(key);
+
+    if (isBoolean) {
+      const isOn = editValue === 'true';
+      return (
+        <View key={key} style={[styles.boolRow, { borderBottomColor: colors.border }]}>
+          <Switch
+            value={isOn}
+            onValueChange={(val) => handleToggle(key, val)}
+            disabled={isSaving}
+            trackColor={{ false: colors.border, true: dirApp.secondaryContainer }}
+            thumbColor={isOn ? dirApp.secondary : '#ccc'}
+          />
+          <Text style={[styles.boolLabel, { color: colors.text }]}>{label}</Text>
+        </View>
+      );
+    }
+
+    return (
+      <View key={key} style={[styles.fieldRow, { borderBottomColor: colors.border }]}>
+        <View style={styles.fieldHeader}>
+          <Text style={[styles.fieldLabel, { color: colors.text }]}>{label}</Text>
+          <Text style={[styles.fieldKey, { color: colors.textMut }]}>{key}</Text>
+        </View>
+        <View style={styles.fieldAction}>
+          <TextInput
+            style={[
+              styles.input,
+              {
+                backgroundColor: colors.bg,
+                borderColor: hasChanged ? dirApp.secondary : colors.border,
+                borderWidth: hasChanged ? 1.5 : 1,
+                color: colors.text,
+                textAlign: 'right',
+              },
+            ]}
+            value={editValue}
+            onChangeText={text => setEditValues(prev => ({ ...prev, [key]: text }))}
+            placeholder={savedValue || '—'}
+            placeholderTextColor={colors.textMut}
+            keyboardType="numeric"
+            autoCapitalize="none"
+            autoCorrect={false}
+            editable={!isSaving}
+          />
+          <TouchableOpacity
+            style={[styles.saveBtn, { backgroundColor: isSaving ? dirApp.outlineVariant : dirApp.secondary, opacity: isSaving ? 0.7 : 1 }]}
+            onPress={() => handleSave(key)}
+            disabled={isSaving}
+          >
+            {isSaving ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Ionicons name="checkmark" size={18} color="#fff" />
+            )}
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
   };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={{ flex: 1 }}
-      >
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
         <ResponsiveContainer style={{ flex: 1 }}>
           <View style={styles.header}>
             <View style={styles.titleRow}>
@@ -160,21 +294,20 @@ export default function AdminConfigScreen() {
               <Text style={[styles.title, dirType.title]}>הגדרות מערכת</Text>
             </View>
             <Text style={[styles.subtitle, dirType.caption, { color: colors.textSub }]}>
-              ניהול ערכים ופרמטרים גלובליים של אפליקציית DirApp
+              50 פרמטרים · 9 קטגוריות
             </Text>
           </View>
 
           {error && (
-            <View style={styles.errorBanner}>
-              <Ionicons name="alert-circle-outline" size={20} color={C.danger} />
-              <Text style={[styles.errorText, { color: C.danger }]}>{error}</Text>
+            <View style={styles.banner}>
+              <Ionicons name="alert-circle-outline" size={18} color={C.danger} />
+              <Text style={[styles.bannerText, { color: C.danger }]}>{error}</Text>
             </View>
           )}
-
           {successMessage && (
-            <View style={styles.successBanner}>
-              <Ionicons name="checkmark-circle-outline" size={20} color={C.success} />
-              <Text style={[styles.successText, { color: C.success }]}>{successMessage}</Text>
+            <View style={[styles.banner, { backgroundColor: '#F0FDF4', borderColor: '#BBF7D0' }]}>
+              <Ionicons name="checkmark-circle-outline" size={18} color={C.success} />
+              <Text style={[styles.bannerText, { color: C.success }]}>{successMessage}</Text>
             </View>
           )}
 
@@ -184,110 +317,42 @@ export default function AdminConfigScreen() {
             </View>
           ) : (
             <ScrollView
-              contentContainerStyle={styles.scrollList}
+              contentContainerStyle={styles.scrollContent}
               refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[dirApp.secondary]} />}
               keyboardShouldPersistTaps="handled"
             >
-              {configs.map(item => {
-                const label = KEY_LABELS[item.key] || item.key;
-                const isSaving = savingKey === item.key;
-                const hasChanged = editValues[item.key] !== String(item.value);
-
+              {CONFIG_SECTIONS.map(section => {
+                const isCollapsed = collapsed[section.title] ?? false;
                 return (
-                  <View
-                    key={item.key}
-                    style={[
-                      styles.card,
-                      {
-                        backgroundColor: colors.bgCard,
-                        borderColor: colors.border,
-                      },
-                    ]}
-                  >
-                    <View style={styles.rowHeader}>
-                      <Text style={[styles.cardLabel, dirType.label, { color: colors.text }]}>
-                        {label}
-                      </Text>
-                      <Text style={[styles.cardKey, dirType.micro, { color: colors.textMut }]}>
-                        {item.key}
-                      </Text>
-                    </View>
-
-                    {/* Description of what the setting changes */}
-                    <Text style={[styles.cardDescription, { color: colors.textSub }]}>
-                      {KEY_DESCRIPTIONS[item.key] || 'פרמטר הגדרה גלובלי למערכת.'}
-                    </Text>
-
-                    {/* Current Saved Active Value Display */}
-                    <View style={styles.currentValueRow}>
-                      <Text style={[styles.currentValueLabel, { color: colors.textMut }]}>
-                        ערך פעיל כרגע:
-                      </Text>
-                      <View style={[styles.currentValueBadge, { backgroundColor: colors.bg, borderColor: colors.border }]}>
-                        <Text style={[styles.currentValueText, { color: dirApp.secondary }]}>
-                          {item.value !== undefined && item.value !== '' ? item.value : 'לא מוגדר'}
-                        </Text>
-                      </View>
-
-                      {hasChanged && (
-                        <>
-                          <View style={{ flex: 1 }} />
-                          <View style={[styles.unsavedBadge, { backgroundColor: '#FEF3C7', borderColor: '#F59E0B' }]}>
-                            <Ionicons name="warning-outline" size={12} color="#D97706" style={{ marginLeft: 4 }} />
-                            <Text style={styles.unsavedText}>שינוי לא שמור</Text>
-                          </View>
-                        </>
-                      )}
-                    </View>
-
-                    <View style={styles.actionRow}>
-                      <TextInput
-                        style={[
-                          styles.input,
-                          {
-                            backgroundColor: colors.bg,
-                            borderColor: hasChanged ? dirApp.secondary : colors.border,
-                            borderWidth: hasChanged ? 1.5 : 1,
-                            color: colors.text,
-                            textAlign: 'right',
-                          },
-                        ]}
-                        value={editValues[item.key]}
-                        onChangeText={text => handleInputChange(item.key, text)}
-                        placeholder="הזן ערך..."
-                        placeholderTextColor={colors.textMut}
-                        keyboardType="numeric"
-                        autoCapitalize="none"
-                        autoCorrect={false}
-                        editable={!isSaving}
+                  <View key={section.title} style={[styles.section, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                    <TouchableOpacity
+                      style={styles.sectionHeader}
+                      onPress={() => toggleSection(section.title)}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons
+                        name={isCollapsed ? 'chevron-back' : 'chevron-down'}
+                        size={18}
+                        color={colors.textMut}
                       />
-
-                      <TouchableOpacity
-                        style={[
-                          styles.saveButton,
-                          {
-                            backgroundColor: isSaving
-                              ? dirApp.outlineVariant
-                              : dirApp.secondary,
-                            opacity: isSaving ? 0.7 : 1,
-                          },
-                        ]}
-                        onPress={() => handleSave(item.key)}
-                        disabled={isSaving}
-                      >
-                        {isSaving ? (
-                          <ActivityIndicator size="small" color="#ffffff" />
-                        ) : (
-                          <>
-                            <Ionicons name="checkmark-sharp" size={16} color="#ffffff" style={styles.saveIcon} />
-                            <Text style={styles.saveButtonText}>שמור</Text>
-                          </>
-                        )}
-                      </TouchableOpacity>
-                    </View>
+                      <Text style={[styles.sectionCount, { color: colors.textMut }]}>
+                        {section.keys.length}
+                      </Text>
+                      <View style={{ flex: 1 }} />
+                      <Text style={[styles.sectionTitle, { color: dirApp.primary }]}>
+                        {section.title}
+                      </Text>
+                      <Ionicons name={section.icon} size={20} color={dirApp.secondary} />
+                    </TouchableOpacity>
+                    {!isCollapsed && (
+                      <View style={styles.sectionBody}>
+                        {section.keys.map(renderConfigItem)}
+                      </View>
+                    )}
                   </View>
                 );
               })}
+              <View style={{ height: 100 }} />
             </ScrollView>
           )}
         </ResponsiveContainer>
@@ -297,171 +362,46 @@ export default function AdminConfigScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  container: { flex: 1 },
+  header: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8, alignItems: 'flex-end' },
+  titleRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8 },
+  title: { fontSize: 22, fontWeight: '800', color: dirApp.primary },
+  subtitle: { marginTop: 4, textAlign: 'right' },
+  banner: {
+    flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: '#FDF2F2',
+    borderWidth: 1, borderColor: '#F8B4B4', borderRadius: 10,
+    marginHorizontal: 16, marginBottom: 8, padding: 10, gap: 8,
   },
-  header: {
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 12,
-    alignItems: 'flex-end', // RTL
+  bannerText: { fontSize: 13, fontWeight: '600', flex: 1, textAlign: 'right' },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  scrollContent: { padding: 12, gap: 10 },
+  // Section
+  section: { borderWidth: 1, borderRadius: 14, overflow: 'hidden' },
+  sectionHeader: {
+    flexDirection: 'row', alignItems: 'center', paddingVertical: 14,
+    paddingHorizontal: 14, gap: 8,
   },
-  titleRow: {
-    flexDirection: 'row-reverse', // RTL
-    alignItems: 'center',
-    gap: 8,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: dirApp.primary,
-  },
-  subtitle: {
-    marginTop: 4,
-    textAlign: 'right', // RTL
-  },
-  errorBanner: {
-    flexDirection: 'row-reverse', // RTL
-    alignItems: 'center',
-    backgroundColor: '#FDF2F2',
-    borderWidth: 1,
-    borderColor: '#F8B4B4',
-    borderRadius: 10,
-    marginHorizontal: 16,
-    marginBottom: 10,
-    padding: 10,
-    gap: 8,
-  },
-  errorText: {
-    fontSize: 13,
-    fontWeight: '600',
-    flex: 1,
-    textAlign: 'right', // RTL
-  },
-  successBanner: {
-    flexDirection: 'row-reverse', // RTL
-    alignItems: 'center',
-    backgroundColor: '#F0FDF4',
-    borderWidth: 1,
-    borderColor: '#BBF7D0',
-    borderRadius: 10,
-    marginHorizontal: 16,
-    marginBottom: 10,
-    padding: 10,
-    gap: 8,
-  },
-  successText: {
-    fontSize: 13,
-    fontWeight: '600',
-    flex: 1,
-    textAlign: 'right', // RTL
-  },
-  center: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  scrollList: {
-    padding: 16,
-    gap: 12,
-    paddingBottom: 120,
-  },
-  card: {
-    borderWidth: 1,
-    borderRadius: 14,
-    padding: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  cardDescription: {
-    fontSize: 12,
-    lineHeight: 18,
-    textAlign: 'right', // RTL
-    marginBottom: 10,
-  },
-  currentValueRow: {
-    flexDirection: 'row-reverse', // RTL
-    alignItems: 'center',
-    marginBottom: 12,
-    gap: 6,
-  },
-  currentValueLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    textAlign: 'right', // RTL
-  },
-  currentValueBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  currentValueText: {
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  unsavedBadge: {
-    flexDirection: 'row-reverse', // RTL
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-    borderWidth: 1,
-  },
-  unsavedText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#B45309',
-  },
-  rowHeader: {
-    alignItems: 'flex-end', // RTL
-    marginBottom: 10,
-  },
-  cardLabel: {
-    fontSize: 15,
-    fontWeight: '700',
-    textAlign: 'right', // RTL
-  },
-  cardKey: {
-    marginTop: 2,
-    fontSize: 10,
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
-  },
-  actionRow: {
-    flexDirection: 'row', // Horizontal input + button
-    alignItems: 'center',
-    gap: 10,
-  },
+  sectionTitle: { fontSize: 16, fontWeight: '800' },
+  sectionCount: { fontSize: 12, fontWeight: '600' },
+  sectionBody: { paddingHorizontal: 14, paddingBottom: 8 },
+  // Fields
+  fieldRow: { paddingVertical: 10, borderBottomWidth: StyleSheet.hairlineWidth },
+  fieldHeader: { alignItems: 'flex-end', marginBottom: 6 },
+  fieldLabel: { fontSize: 14, fontWeight: '700', textAlign: 'right' },
+  fieldKey: { fontSize: 9, fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace', marginTop: 1 },
+  fieldAction: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   input: {
-    flex: 1,
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 14,
-    fontWeight: '600',
+    flex: 1, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 8,
+    fontSize: 14, fontWeight: '600',
   },
-  saveButton: {
-    flexDirection: 'row-reverse', // RTL inside button
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 11,
-    paddingHorizontal: 16,
-    borderRadius: 10,
-    minWidth: 80,
-    height: 42,
+  saveBtn: {
+    width: 40, height: 40, borderRadius: 10,
+    alignItems: 'center', justifyContent: 'center',
   },
-  saveIcon: {
-    marginLeft: 4,
+  // Boolean
+  boolRow: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  saveButtonText: {
-    color: '#ffffff',
-    fontSize: 13,
-    fontWeight: '700',
-  },
+  boolLabel: { fontSize: 14, fontWeight: '700', textAlign: 'right', flex: 1, marginRight: 12 },
 });
