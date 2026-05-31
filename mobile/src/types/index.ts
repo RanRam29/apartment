@@ -189,3 +189,10 @@ export type MainStackParamList = {
   LogsConsole: undefined;
   RenterJournal: undefined;
 };
+
+export type AdminTabParamList = {
+  AdminConfig: undefined;
+  AdminUsers: undefined;
+  AdminStats: undefined;
+  LogsConsole: undefined;
+};

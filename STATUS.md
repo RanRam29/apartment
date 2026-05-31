@@ -4,18 +4,16 @@
 > The orchestrator (Claude Code) reads this file to update the main DASHBOARD.md.
 
 ## Current Task
-**Task:** Fix W-1 — Missing Property Images in Swipe (P3)
+**Task:** Admin-only Configuration Panel (wind/admin-config-panel)
 **Status:** 🟢 DONE
-**Progress:** Successfully implemented fallback illustration for properties without images or using dead placeholder links:
-- Replaced the failing `via.placeholder.com` fallback image with a premium, custom React Native illustration matching Figma/Stitch design tokens.
-- Leveraged linear gradients, clean iconography, and clear Hebrew labels to maintain high aesthetic standards.
-- Fully validated with ESLint passing 100% clean.
+**Progress:** Rebuilt admin console screens, updated api routing, and verified typescript and test status. Fully completed!
 
 ## Completed Tasks
 
 | Task | Completed At | Commits | Notes |
 |------|-------------|---------|-------|
 | Fix W-1 — Missing Property Images in Swipe | 2026-05-31 | `[Local]` | Resolved property card blank background by introducing a beautiful local fallback illustration using Figma/Stitch design tokens. |
+| Admin-only Configuration Panel | 2026-05-31 | `f8dac32` | Integrated AdminConfigScreen, AdminUsersScreen, AdminStatsScreen, updated types & AppNavigator.tsx bottom tabs. |
 | T3.0 New Feature Suite | 2026-05-30 | `d026b12` | Implemented trust score synced to Postgres, renter journal RTL vertical timeline, and contract amendments with comprehensive Jest verification. |
 | Triage & Fix BUG-003 to BUG-009 | 2026-05-28 | `43c43c3` | Resolved all 7 active P1 & P2 bugs, added web-safe alerts, calculated safe conversion rate, replaced placeholder avatars, default trustScore to 50, and created/passed Admin E2E tests. |
 | ToS Gating & Autocomplete Fixes | 2026-05-28 | `4797b7d` | Added UI checks, warnings, and redirect prompts to resolve ToS blocked actions (post/delete listing) and fixed street autocomplete. |
@@ -64,6 +62,11 @@ backend/src/routes/guarantor.js (created)
 web/guarantor/ (created entire directory)
 mobile/src/store/ (created new stores)
 mobile/src/services/api.ts (modified)
+mobile/src/types/index.ts (modified)
+mobile/src/navigation/AppNavigator.tsx (modified)
+mobile/src/screens/AdminConfigScreen.tsx (created)
+mobile/src/screens/AdminUsersScreen.tsx (created)
+mobile/src/screens/AdminStatsScreen.tsx (created)
 backend/tests/resendService.test.js (created)
 backend/tests/kycV3.test.js (created)
 backend/tests/tosAndRole.test.js (created)
@@ -72,4 +75,4 @@ backend/tests/guarantor.test.js (created)
 ```
 
 ## Last Updated
-2026-05-31 (W-1 fallback illustration fix implemented on wind/qa-infrastructure)
+2026-05-31 (Admin-only Configuration Panel merged to main)
