@@ -12,7 +12,7 @@
 
 | Task | Completed At | Commits | Notes |
 |------|-------------|---------|-------|
-| Admin-only Configuration Panel | 2026-05-31 | `pending` | Integrated AdminConfigScreen, AdminUsersScreen, AdminStatsScreen, updated types & AppNavigator.tsx bottom tabs. |
+| Admin-only Configuration Panel | 2026-05-31 | `bfee9e8`, `410a405` | Integrated AdminConfigScreen, AdminUsersScreen, AdminStatsScreen, updated types & AppNavigator.tsx bottom tabs. Fixed bottom-tab overlap clipping and resolved empty-phone user update 422 validation failure. |
 | Triage & Fix BUG-003 to BUG-009 | 2026-05-28 | `43c43c3` | Resolved all 7 active P1 & P2 bugs, added web-safe alerts, calculated safe conversion rate, replaced placeholder avatars, default trustScore to 50, and created/passed Admin E2E tests. |
 | ToS Gating & Autocomplete Fixes | 2026-05-28 | `4797b7d` | Added UI checks, warnings, and redirect prompts to resolve ToS blocked actions (post/delete listing) and fixed street autocomplete. |
 | T2 | 2026-05-27 | `cfc19ed` | Resend email + unified notificationService |
