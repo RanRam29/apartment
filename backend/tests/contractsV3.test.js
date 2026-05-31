@@ -3,7 +3,7 @@ const request = require('supertest');
 const app = require('../src/app');
 const { User, RentalAgreement, AgreementParty, UserKycProfile, LedgerRow } = require('../src/models');
 const { sequelize } = require('../src/config/database');
-const { initRedis } = require('../src/config/redis');
+const { initRedis, getRedisClient } = require('../src/config/redis');
 
 // Mock R2 Service
 jest.mock('../src/services/r2Service', () => ({
@@ -198,5 +198,6 @@ describe('Contract Upload & AI Extraction (M1/M2)', () => {
 
   afterAll(async () => {
     await sequelize.close();
+    getRedisClient().disconnect();
   });
 });

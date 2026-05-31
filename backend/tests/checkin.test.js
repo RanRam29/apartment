@@ -3,7 +3,7 @@ const request = require('supertest');
 const app = require('../src/app');
 const { User, RentalAgreement, AgreementRoom, UserKycProfile } = require('../src/models');
 const { sequelize } = require('../src/config/database');
-const { initRedis } = require('../src/config/redis');
+const { initRedis, getRedisClient } = require('../src/config/redis');
 
 // Mock R2 Service
 jest.mock('../src/services/r2Service', () => ({
@@ -129,5 +129,6 @@ describe('Check-In Flow (M3)', () => {
 
   afterAll(async () => {
     await sequelize.close();
+    getRedisClient().disconnect();
   });
 });

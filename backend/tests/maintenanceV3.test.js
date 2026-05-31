@@ -13,9 +13,9 @@ jest.mock('../src/services/r2Service', () => ({
 
 const request = require('supertest');
 const app = require('../src/app');
-const { User, MaintenanceTicket, TicketInvoice } = require('../src/models');
+const { User, MaintenanceTicket, TicketInvoice, RentalAgreement } = require('../src/models');
 const { sequelize } = require('../src/config/database');
-const { initRedis } = require('../src/config/redis');
+const { initRedis, getRedisClient } = require('../src/config/redis');
 
 describe('Maintenance Ticket Flow (M15)', () => {
   let tenantToken = '';
@@ -23,7 +23,7 @@ describe('Maintenance Ticket Flow (M15)', () => {
   let tenant = null;
   let landlord = null;
   let ticketId = '';
-  const agreementId = '00000000-0000-4000-9000-000000000001'; // Mock agreement ID
+  const agreementId = '00000000-0000-4000-9000-000000000015'; // Mock agreement ID
 
   beforeAll(async () => {
     await sequelize.getQueryInterface().dropTable('ticket_invoices').catch(() => {});
@@ -63,6 +63,17 @@ describe('Maintenance Ticket Flow (M15)', () => {
     tenantToken = tRes.body.token;
     tenant = await User.findOne({ where: { email: tenantEmail } });
     await tenant.update({ isVerified: true });
+
+    // Seed mock active agreement to satisfy postgres foreign key check
+    await RentalAgreement.create({
+      id: agreementId,
+      landlordId: landlord.id,
+      propertyId: '00000000-0000-4000-8000-000000000001',
+      monthlyRentIls: 5000,
+      startDate: '2026-07-01',
+      endDate: '2027-06-30',
+      status: 'ACTIVE',
+    });
   });
 
   it('allows tenant to open a maintenance ticket', async () => {
@@ -131,6 +142,7 @@ describe('Maintenance Ticket Flow (M15)', () => {
 
   afterAll(async () => {
     await sequelize.close();
+    getRedisClient().disconnect();
   });
 });
 

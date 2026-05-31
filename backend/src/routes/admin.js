@@ -1,7 +1,23 @@
 const express = require('express');
 const router = express.Router();
+const { Op } = require('sequelize');
+const { sequelize } = require('../config/database');
 const { authenticate, requireRole } = require('../middleware/auth');
-const { AppConfig, User, RentalAgreement, LedgerRow, MaintenanceTicket, UserKycProfile, Apartment } = require('../models');
+const {
+  AppConfig,
+  User,
+  RentalAgreement,
+  LedgerRow,
+  MaintenanceTicket,
+  UserKycProfile,
+  Apartment,
+  TicketInvoice,
+  AgreementParty,
+  AgreementRoom,
+  OwnershipVerification,
+  Match,
+  Swipe
+} = require('../models');
 
 router.use(authenticate);
 router.use(requireRole('admin'));
@@ -47,9 +63,142 @@ router.post('/users/:id/unlock', async (req, res, next) => {
 router.post('/users/:id/kyc-override', async (req, res, next) => {
   try {
     const { status } = req.body;
-    await UserKycProfile.upsert({ userId: req.params.id, status });
+    if (status === 'NONE') {
+      await UserKycProfile.destroy({ where: { userId: req.params.id } });
+    } else {
+      const [profile, created] = await UserKycProfile.findOrCreate({
+        where: { userId: req.params.id },
+        defaults: { status }
+      });
+      if (!created) {
+        await profile.update({ status });
+      }
+    }
     res.json({ overridden: true });
   } catch (err) { next(err); }
+});
+
+// Update User (Admin Edit)
+router.put('/users/:id', async (req, res, next) => {
+  try {
+    const user = await User.findByPk(req.params.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const {
+      firstName,
+      lastName,
+      email,
+      phone,
+      role,
+      activeRole,
+      trustScore,
+      isPremium,
+      isVerified,
+      isLocked,
+      blockedCount,
+    } = req.body;
+
+    const updateData = {};
+    if (firstName !== undefined) updateData.firstName = firstName;
+    if (lastName !== undefined) updateData.lastName = lastName;
+    if (email !== undefined) updateData.email = email;
+    if (phone !== undefined) updateData.phone = phone;
+    if (role !== undefined) updateData.role = role;
+    if (activeRole !== undefined) updateData.activeRole = activeRole;
+    if (trustScore !== undefined) updateData.trustScore = parseInt(trustScore);
+    if (isPremium !== undefined) updateData.isPremium = !!isPremium;
+    if (isVerified !== undefined) updateData.isVerified = !!isVerified;
+    if (isLocked !== undefined) updateData.isLocked = !!isLocked;
+    if (blockedCount !== undefined) updateData.blockedCount = parseInt(blockedCount);
+
+    await user.update(updateData);
+    
+    const updatedUser = await User.findByPk(user.id, {
+      include: [{ model: UserKycProfile, as: 'kycProfile', attributes: ['status'] }],
+    });
+    
+    res.json(updatedUser);
+  } catch (err) { next(err); }
+});
+
+// Delete User (Admin Cascading Delete)
+router.delete('/users/:id', async (req, res, next) => {
+  const transaction = await sequelize.transaction();
+  try {
+    const userId = req.params.id;
+    const user = await User.findByPk(userId, { transaction });
+    if (!user) {
+      await transaction.rollback();
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // 1. Delete matches
+    await Match.destroy({ where: { [Op.or]: [{ tenantId: userId }, { landlordId: userId }] }, transaction }).catch(() => {});
+
+    // 2. Delete swipes
+    await Swipe.destroy({ where: { tenantId: userId }, transaction }).catch(() => {});
+
+    // 3. Delete agreements, maintenance tickets, ledger rows
+    const userAgreements = await RentalAgreement.findAll({
+      where: { landlordId: userId },
+      attributes: ['id'],
+      transaction
+    });
+    const agreementIds = userAgreements.map(a => a.id);
+    
+    const partyAgreements = await AgreementParty.findAll({
+      where: { userId },
+      attributes: ['agreementId'],
+      transaction
+    });
+    partyAgreements.forEach(pa => {
+      if (!agreementIds.includes(pa.agreementId)) {
+        agreementIds.push(pa.agreementId);
+      }
+    });
+
+    if (agreementIds.length > 0) {
+      const tickets = await MaintenanceTicket.findAll({
+        where: { agreementId: { [Op.in]: agreementIds } },
+        attributes: ['id'],
+        transaction
+      });
+      const ticketIds = tickets.map(t => t.id);
+      
+      if (ticketIds.length > 0) {
+        await TicketInvoice.destroy({ where: { ticketId: { [Op.in]: ticketIds } }, transaction });
+        await MaintenanceTicket.destroy({ where: { id: { [Op.in]: ticketIds } }, transaction });
+      }
+      
+      await LedgerRow.destroy({ where: { agreementId: { [Op.in]: agreementIds } }, transaction });
+      await AgreementParty.destroy({ where: { agreementId: { [Op.in]: agreementIds } }, transaction });
+      await AgreementRoom.destroy({ where: { agreementId: { [Op.in]: agreementIds } }, transaction });
+      await OwnershipVerification.destroy({ where: { agreementId: { [Op.in]: agreementIds } }, transaction });
+      await RentalAgreement.destroy({ where: { id: { [Op.in]: agreementIds } }, transaction });
+    }
+
+    // 4. Delete user specific rows
+    await AgreementParty.destroy({ where: { userId }, transaction });
+    await UserKycProfile.destroy({ where: { userId }, transaction });
+
+    // 5. Delete listings (apartments) owned by user
+    const apartments = await Apartment.findAll({ where: { landlordId: userId }, attributes: ['id'], transaction });
+    const apartmentIds = apartments.map(ap => ap.id);
+    if (apartmentIds.length > 0) {
+      await Swipe.destroy({ where: { apartmentId: { [Op.in]: apartmentIds } }, transaction });
+      await Match.destroy({ where: { apartmentId: { [Op.in]: apartmentIds } }, transaction });
+      await Apartment.destroy({ where: { id: { [Op.in]: apartmentIds } }, transaction });
+    }
+
+    // 6. Finally destroy user
+    await user.destroy({ transaction });
+
+    await transaction.commit();
+    res.json({ deleted: true });
+  } catch (err) {
+    await transaction.rollback();
+    next(err);
+  }
 });
 
 // Contract overview
@@ -119,7 +268,17 @@ router.get('/stats', async (req, res, next) => {
 router.post('/kyc/:id/override', async (req, res, next) => {
   try {
     const { status = 'APPROVED' } = req.body;
-    await UserKycProfile.upsert({ userId: req.params.id, status });
+    if (status === 'NONE') {
+      await UserKycProfile.destroy({ where: { userId: req.params.id } });
+    } else {
+      const [profile, created] = await UserKycProfile.findOrCreate({
+        where: { userId: req.params.id },
+        defaults: { status }
+      });
+      if (!created) {
+        await profile.update({ status });
+      }
+    }
     res.json({ overridden: true });
   } catch (err) { next(err); }
 });

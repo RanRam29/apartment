@@ -20,7 +20,7 @@ const DEMO_SEED_ENABLED_VALUE = 'true';
 const ADMIN_ACCOUNTS = [
   { email: 'admin1@dirapp.com', firstName: 'Admin', lastName: 'One', password: 'Admin1234!', role: 'landlord' },
   { email: 'admin@dirapp.com', firstName: 'Admin', lastName: 'Main', password: 'Admin1234!', role: 'landlord' },
-  { email: 'admin2@dirapp.com', firstName: 'Admin', lastName: 'Two', password: 'Admin1234!', role: 'tenant' },
+  { email: 'admin2@dirapp.com', firstName: 'Admin', lastName: 'Two', password: 'Admin1234!', role: 'admin' },
 ];
 
 const LANDLORDS = [

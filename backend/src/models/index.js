@@ -68,6 +68,9 @@ const ContractAmendment = require('./pg/ContractAmendment');
 RentalAgreement.hasMany(ContractAmendment, { foreignKey: 'contractId', as: 'amendments' });
 ContractAmendment.belongsTo(RentalAgreement, { foreignKey: 'contractId', as: 'contract' });
 
+MaintenanceTicket.belongsTo(RentalAgreement, { foreignKey: 'agreementId', as: 'agreement' });
+RentalAgreement.hasMany(MaintenanceTicket, { foreignKey: 'agreementId', as: 'maintenanceTickets' });
+
 module.exports = {
   User,
   Apartment,

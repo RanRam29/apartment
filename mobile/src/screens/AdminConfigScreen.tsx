@@ -37,6 +37,22 @@ const KEY_LABELS: Record<string, string> = {
   persona_monthly_quota: 'מכסת פרסונות חודשית',
 };
 
+const KEY_DESCRIPTIONS: Record<string, string> = {
+  check_in_window_days: "כמות הימים שלפני תחילת החוזה שבהם השוכר יכול להתחיל צ'ק-אין ולהעלות תמונות של הדירה.",
+  checkin_photos_max: "המספר המרבי של תמונות שהשוכר רשאי להעלות עבור כל חדר במהלך בדיקת הצ'ק-אין.",
+  checkout_revision_rounds: "מספר סבבי התיקון המרביים שבהם המשכיר רשאי לבקש מהשוכר לצלם מחדש או לתקן ליקויים בצ'ק-אאוט לפני אישור אוטומטי.",
+  expiring_warning_days: "מספר הימים לפני סיום החוזה שבהם תישלח התראה ראשונה על תפוגת החוזה והסטטוס ישתנה ל-EXPIRING.",
+  guarantor_link_ttl_days: "משך הזמן בימים שבהם קישור ההזמנה לחתימת הערב נשאר פעיל ותקף לשימוש לפני פקיעתו.",
+  blocking_threshold: "מספר הדיווחים/חסימות המרבי שמשתמש יכול לקבל לפני שחשבונו יינעל אוטומטית על ידי המערכת.",
+  contract_revision_max: "המספר המרבי של תיקונים ושינויי שדות שניתן לבצע בחוזה במהלך שלב ה-UPLOAD.",
+  payment_autoconfirm_hours: "פרק הזמן בשעות שלאחריו דיווח תשלום של שוכר יאושר אוטומטית כ-PAID אם המשכיר לא הגיב.",
+  overdue_alert_days: "מספר ימי הפיגור בתשלום שלאחריהם תישלח התראה דחופה לשוכר ולמנהל המערכת.",
+  kyc_renewal_years: "תוקף אימות הזהות (KYC) בשנים. לאחר תקופה זו, המשתמש יידרש לבצע אימות זהות מחדש מטעמי אבטחה.",
+  maintenance_alert_hours_1: "מספר השעות שעוברות מרגע פתיחת תקלת תחזוקה ללא תגובת משכיר, לפני שליחת התראת תזכורת ראשונה.",
+  maintenance_alert_days_2: "מספר הימים המרבי ללא טיפול בתקלת תחזוקה שלאחריו התקלה תוסלם ותועבר לטיפול מנהל המערכת.",
+  persona_monthly_quota: "מכסת שאילתות האימות החודשית מול שירות הזהות של Persona עבור האפליקציה כולה.",
+};
+
 interface ConfigItem {
   key: string;
   value: string;
@@ -197,13 +213,41 @@ export default function AdminConfigScreen() {
                       </Text>
                     </View>
 
+                    {/* Description of what the setting changes */}
+                    <Text style={[styles.cardDescription, { color: colors.textSub }]}>
+                      {KEY_DESCRIPTIONS[item.key] || 'פרמטר הגדרה גלובלי למערכת.'}
+                    </Text>
+
+                    {/* Current Saved Active Value Display */}
+                    <View style={styles.currentValueRow}>
+                      <Text style={[styles.currentValueLabel, { color: colors.textMut }]}>
+                        ערך פעיל כרגע:
+                      </Text>
+                      <View style={[styles.currentValueBadge, { backgroundColor: colors.bg, borderColor: colors.border }]}>
+                        <Text style={[styles.currentValueText, { color: dirApp.secondary }]}>
+                          {item.value !== undefined && item.value !== '' ? item.value : 'לא מוגדר'}
+                        </Text>
+                      </View>
+
+                      {hasChanged && (
+                        <>
+                          <View style={{ flex: 1 }} />
+                          <View style={[styles.unsavedBadge, { backgroundColor: '#FEF3C7', borderColor: '#F59E0B' }]}>
+                            <Ionicons name="warning-outline" size={12} color="#D97706" style={{ marginLeft: 4 }} />
+                            <Text style={styles.unsavedText}>שינוי לא שמור</Text>
+                          </View>
+                        </>
+                      )}
+                    </View>
+
                     <View style={styles.actionRow}>
                       <TextInput
                         style={[
                           styles.input,
                           {
                             backgroundColor: colors.bg,
-                            borderColor: colors.border,
+                            borderColor: hasChanged ? dirApp.secondary : colors.border,
+                            borderWidth: hasChanged ? 1.5 : 1,
                             color: colors.text,
                             textAlign: 'right',
                           },
@@ -331,6 +375,48 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.04,
     shadowRadius: 8,
     elevation: 2,
+  },
+  cardDescription: {
+    fontSize: 12,
+    lineHeight: 18,
+    textAlign: 'right', // RTL
+    marginBottom: 10,
+  },
+  currentValueRow: {
+    flexDirection: 'row-reverse', // RTL
+    alignItems: 'center',
+    marginBottom: 12,
+    gap: 6,
+  },
+  currentValueLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    textAlign: 'right', // RTL
+  },
+  currentValueBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  currentValueText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  unsavedBadge: {
+    flexDirection: 'row-reverse', // RTL
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    borderWidth: 1,
+  },
+  unsavedText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#B45309',
   },
   rowHeader: {
     alignItems: 'flex-end', // RTL
