@@ -87,6 +87,10 @@ const User = sequelize.define('User', {
     type: DataTypes.INTEGER,
     defaultValue: 50,
   },
+  bio: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
 }, {
   tableName: 'users',
   indexes: [

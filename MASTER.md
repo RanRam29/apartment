@@ -181,14 +181,15 @@
 
 ---
 
-## 🆕 Next Features — לא התחיל
+## 🆕 Next Features
 
 | פיצ'ר | תלויות | אחריות | סטטוס |
 |--------|---------|---------|--------|
-| **NF1 — Trust Score** | M5 ✅ קוד + M6 ✅ קוד | TBD | ❌ לא התחיל |
-| **NF2 — Renter Journal** | M1+M3+M4+M8+M9 | TBD | ❌ לא התחיל |
-| V2-1 — Stripe Connect | M5 | TBD | ❌ לא התחיל |
-| V2-3 — Contract Amendment | M2 | TBD | ❌ לא התחיל |
+| **NF1 — Trust Score** | M5 ✅ קוד + M6 ✅ קוד | Antigravity | ✅ אומת בייצור (2026-05-30) |
+| **NF2 — Renter Journal** | M1+M3+M4+M8+M9 | Antigravity | ✅ אומת בייצור (2026-05-31) |
+| V2-1 — Stripe Connect | M5 | TBD | ❌ לא התחיל (Blocked) |
+| V2-3 — Contract Amendment | M2 | Antigravity | ✅ אומת בייצור (2026-05-30) |
+
 
 ---
 
@@ -242,3 +243,5 @@
 | 2026-05-28 | — | Fix admin password sync (`ed0e874`) | Claude Code |
 | 2026-05-30 | 1.4 | ALL BUGS CLOSED — BUG-003/004/005/006/007/008/009 verified fixed by Antigravity (`43c43c3`→`6e56bce`) | Claude Code |
 | 2026-05-30 | 1.5 | ALL YELLOW → GREEN — E2E verified all mobile screens + web compat (`81b2918`) | Antigravity |
+| 2026-05-31 | 1.6 | NF2 — Renter Journal completed E2E, integrated in LeadsScreen + tenant edits modal | Antigravity |
+

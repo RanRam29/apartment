@@ -215,6 +215,7 @@ function LeadRow({ match, onAccept, onReject, showActions, onOpenChat }: {
   showActions: boolean;
   onOpenChat: () => void;
 }) {
+  const navigation = useNavigation<any>();
   const isAcceptedChatRow = !showActions && match.status === 'accepted';
   const score = leadScoreStyle(match.leadScore);
   const tenant = match.tenant;
@@ -227,7 +228,11 @@ function LeadRow({ match, onAccept, onReject, showActions, onOpenChat }: {
       activeOpacity={isAcceptedChatRow ? 0.85 : 1}
     >
       {/* ── שורה עליונה: אווטאר + שם + ציון ── */}
-      <View style={styles.leadTop}>
+      <TouchableOpacity
+        style={styles.leadTop}
+        activeOpacity={0.7}
+        onPress={() => navigation.navigate('RenterJournal', { userId: tenant?.id })}
+      >
         <View>
           {tenant?.avatarUrl ? (
             <Image source={{ uri: tenant.avatarUrl }} style={styles.avatar} contentFit="cover" />
@@ -259,7 +264,7 @@ function LeadRow({ match, onAccept, onReject, showActions, onOpenChat }: {
             {match.apartment?.city} · ₪{match.apartment?.price?.toLocaleString()}/חודש
           </Text>
         </View>
-      </View>
+      </TouchableOpacity>
 
       {/* ── פרטי יצירת קשר ── */}
       <TenantContactBar phone={tenant?.phone} email={tenant?.email} />

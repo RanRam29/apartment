@@ -165,6 +165,7 @@ app.use('/api/v3/maintenance', require('./routes/maintenanceV3'));
 app.use('/api/v3/guarantor', require('./routes/guarantor'));
 app.use('/api/v3/ledger', require('./routes/ledger'));
 app.use('/api/v3/admin', require('./routes/admin'));
+app.use('/api/v3/renter-journal', require('./routes/renterJournal'));
 
 // v3 routes (Cursor Agent: Financial + Admin)
 const ledgerRoutes = require('./routes/ledger');
