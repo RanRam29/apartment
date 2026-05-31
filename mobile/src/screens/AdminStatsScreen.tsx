@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
   scrollContainer: {
     padding: 16,
     gap: 16,
-    paddingBottom: 40,
+    paddingBottom: 120,
   },
   welcomeCard: {
     borderRadius: 18,
