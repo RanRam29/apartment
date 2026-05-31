@@ -10,7 +10,11 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { apartmentsApi } from '../services/api';
 import { C } from '../theme';
 import type { Amenity, MainStackParamList } from '../types';
-import { CITY_CENTER_BY_NAME } from '../constants/cityCenters';
+import {
+  getCityMatches,
+  hasCompleteListingAddress,
+  normalizeListingAddressText,
+} from '../utils/listingAddress';
 
 const AMENITY_OPTIONS: { key: Amenity; label: string }[] = [
   { key: 'parking',      label: '🚗 חניה' },
@@ -22,7 +26,6 @@ const AMENITY_OPTIONS: { key: Amenity; label: string }[] = [
   { key: 'sun_boiler',   label: '☀️ דוד שמש' },
   { key: 'pets_allowed', label: '🐾 חיות מותרות' },
 ];
-const ISRAELI_CITIES = Object.keys(CITY_CENTER_BY_NAME).sort((a, b) => a.localeCompare(b, 'he'));
 
 type Props = NativeStackScreenProps<MainStackParamList, 'EditListing'>;
 
@@ -82,48 +85,7 @@ export default function EditListingScreen({ route, navigation }: Props) {
     return withoutCodeChars.slice(0, 100);
   }
 
-  function normalizeText(value: string) {
-    return value.trim().toLowerCase();
-  }
-
-  function getCityMatches(query: string) {
-    const q = normalizeText(query);
-    if (q.length < 2) return [];
-    const startsWith = ISRAELI_CITIES.filter((name) => normalizeText(name).startsWith(q));
-    const contains = ISRAELI_CITIES.filter((name) => {
-      const norm = normalizeText(name);
-      return !norm.startsWith(q) && norm.includes(q);
-    });
-    return [...startsWith, ...contains].slice(0, 8);
-  }
-
   const canSearchStreet = useMemo(() => city.trim().length > 0, [city]);
-
-  async function validateIsraeliCity(cityName: string) {
-    const cityNorm = normalizeText(cityName);
-    return ISRAELI_CITIES.some((candidate) => normalizeText(candidate) === cityNorm);
-  }
-
-  async function validateStreetInCity(cityName: string, streetName: string) {
-    try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=il&addressdetails=1&accept-language=he&limit=10&street=${encodeURIComponent(streetName)}&city=${encodeURIComponent(cityName)}`,
-        { headers: { 'User-Agent': 'ApartmentApp/1.0 (EditListing)' } }
-      );
-      const data = await res.json();
-      if (!Array.isArray(data)) return false;
-      const cityNorm = normalizeText(cityName);
-      const streetNorm = normalizeText(streetName);
-      return data.some((item: any) => {
-        const address = item?.address || {};
-        const candidateCity = normalizeText(address.city || address.town || address.village || address.municipality || '');
-        const candidateStreet = normalizeText(address.road || '');
-        return candidateCity === cityNorm && candidateStreet === streetNorm;
-      });
-    } catch {
-      return false;
-    }
-  }
 
   useEffect(() => {
     setIsLoadingCities(false);
@@ -155,9 +117,9 @@ export default function EditListingScreen({ route, navigation }: Props) {
               .map((item: any) => item?.address)
               .filter(Boolean)
               .filter((address: any) => {
-                const addressCity = normalizeText(address?.city || address?.town || address?.village || address?.municipality || '');
-                const streetName = normalizeText(address?.road || '');
-                return addressCity === normalizeText(selectedCity) && streetName.startsWith(normalizeText(q));
+                const addressCity = normalizeListingAddressText(address?.city || address?.town || address?.village || address?.municipality || '');
+                const streetName = normalizeListingAddressText(address?.road || '');
+                return addressCity === normalizeListingAddressText(selectedCity) && streetName.startsWith(normalizeListingAddressText(q));
               })
               .map((address: any) => address?.road)
               .filter(Boolean)
@@ -181,7 +143,7 @@ export default function EditListingScreen({ route, navigation }: Props) {
     const cityValue = city.trim();
     const streetValue = street.trim();
 
-    if (!titleValue || !price || !rooms || !cityValue || !streetValue) {
+    if (!titleValue || !price || !rooms || !hasCompleteListingAddress(cityValue, streetValue)) {
       Alert.alert('שגיאה', 'נא למלא: כותרת, מחיר, חדרים, עיר ורחוב');
       return;
     }
@@ -195,16 +157,6 @@ export default function EditListingScreen({ route, navigation }: Props) {
     }
     if (!/^\d+$/.test(price) || !/^\d+$/.test(rooms) || (sizeSqm && !/^\d+$/.test(sizeSqm)) || (floor && !/^\d+$/.test(floor))) {
       Alert.alert('שגיאה', 'שדות מחיר, חדרים, קומה וגודל חייבים להכיל מספרים בלבד');
-      return;
-    }
-    const isCityValid = await validateIsraeliCity(cityValue);
-    if (!isCityValid) {
-      Alert.alert('שגיאה', 'יש לבחור עיר קיימת בישראל מתוך ההצעות');
-      return;
-    }
-    const isStreetValid = await validateStreetInCity(cityValue, streetValue);
-    if (!isStreetValid) {
-      Alert.alert('שגיאה', 'יש לבחור רחוב שקיים בעיר שנבחרה');
       return;
     }
     setSaving(true);
