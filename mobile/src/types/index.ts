@@ -35,6 +35,7 @@ export interface SystemEventItem {
   severity: 'debug' | 'info' | 'warn' | 'error' | 'critical';
   event: string;
   message: string;
+  requestId?: string | null;
   actorId?: string | null;
   metadata?: Record<string, unknown>;
 }
