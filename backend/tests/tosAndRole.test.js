@@ -3,7 +3,7 @@ const request = require('supertest');
 const app = require('../src/app');
 const { User } = require('../src/models');
 const { sequelize } = require('../src/config/database');
-const { initRedis } = require('../src/config/redis');
+const { initRedis, getRedisClient } = require('../src/config/redis');
 
 describe('Terms of Service and Role Switching', () => {
   let userToken = '';
@@ -187,6 +187,7 @@ describe('Terms of Service and Role Switching', () => {
 
   afterAll(async () => {
     await sequelize.close();
+    getRedisClient().disconnect();
   });
 });
 

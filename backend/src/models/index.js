@@ -64,6 +64,9 @@ AgreementRoom.belongsTo(RentalAgreement, { foreignKey: 'agreementId', as: 'agree
 RentalAgreement.hasMany(OwnershipVerification, { foreignKey: 'agreementId', as: 'ownershipVerifications' });
 OwnershipVerification.belongsTo(RentalAgreement, { foreignKey: 'agreementId', as: 'agreement' });
 
+MaintenanceTicket.belongsTo(RentalAgreement, { foreignKey: 'agreementId', as: 'agreement' });
+RentalAgreement.hasMany(MaintenanceTicket, { foreignKey: 'agreementId', as: 'maintenanceTickets' });
+
 module.exports = {
   User,
   Apartment,

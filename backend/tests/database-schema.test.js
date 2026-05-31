@@ -13,7 +13,7 @@ describe('Database schema compatibility', () => {
 
     await ensureUserVerificationColumns(queryInterface);
 
-    expect(queryInterface.addColumn).toHaveBeenCalledTimes(2);
+    expect(queryInterface.addColumn).toHaveBeenCalledTimes(8);
     expect(queryInterface.addColumn).toHaveBeenCalledWith(
       'users',
       'verification_token',

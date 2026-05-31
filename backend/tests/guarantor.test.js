@@ -3,7 +3,7 @@ const request = require('supertest');
 const app = require('../src/app');
 const { User, AgreementGuarantor, RentalAgreement } = require('../src/models');
 const { sequelize } = require('../src/config/database');
-const { initRedis } = require('../src/config/redis');
+const { initRedis, getRedisClient } = require('../src/config/redis');
 
 describe('Guarantor Flow (M7)', () => {
   let landlordToken = '';
@@ -97,6 +97,7 @@ describe('Guarantor Flow (M7)', () => {
 
   afterAll(async () => {
     await sequelize.close();
+    getRedisClient().disconnect();
   });
 });
 
