@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { authApi, tokenStorage } from '../services/api';
+import { setUnauthorizedSessionHandler } from '../services/authSession';
 import type { User } from '../types';
 
 interface AuthState {
@@ -88,3 +89,13 @@ export const useAuthStore = create<AuthState>((set) => ({
     await authApi.resendVerification(target);
   },
 }));
+
+setUnauthorizedSessionHandler(() => {
+  useAuthStore.setState({
+    user: null,
+    token: null,
+    isLoading: false,
+    isAuthenticated: false,
+    needsOnboarding: false,
+  });
+});

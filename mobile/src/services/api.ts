@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import { Platform } from 'react-native';
+import { clearUnauthorizedSession } from './authSession';
 import { getApiBaseUrl } from './apiConfig';
 
 const BASE_URL = getApiBaseUrl();
@@ -65,7 +66,7 @@ api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
   return config;
 });
 
-// On 401, clear token and redirect to auth
+// On 401, clear token and reset auth state so navigation returns to auth.
 api.interceptors.response.use(
   (res) => res,
   async (error) => {
@@ -104,6 +105,7 @@ api.interceptors.response.use(
     }
     if (error.response?.status === 401) {
       await storage.deleteItemAsync(TOKEN_KEY);
+      await clearUnauthorizedSession();
     }
     return Promise.reject(error);
   }
