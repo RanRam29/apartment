@@ -27,13 +27,22 @@ jest.mock('../src/services/emailService', () => ({
   sendVerificationEmail: (...args) => mockSendVerificationEmail(...args),
 }));
 
+// Mock UserPreferences to prevent Mongoose connection timeouts
+jest.mock('../src/models/mongo/UserPreferences', () => {
+  return {
+    create: jest.fn(async () => ({})),
+    findOne: jest.fn(async () => ({})),
+    updateOne: jest.fn(async () => ({})),
+  };
+});
+
 const { sequelize } = require('../src/config/database');
 const { User, Apartment } = require('../src/models');
 const app = require('../src/app');
 
 describe('Email verification + auth rate limiting', () => {
   beforeAll(async () => {
-    await sequelize.sync({ force: false, alter: true });
+    await sequelize.sync({ force: false });
   }, 30_000);
 
   afterAll(async () => {
