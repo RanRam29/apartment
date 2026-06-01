@@ -1,4 +1,8 @@
-const { ensureUserVerificationColumns } = require('../src/config/database');
+const {
+  ensureApartmentStreetColumn,
+  ensureUserVerificationColumns,
+  sequelize,
+} = require('../src/config/database');
 
 describe('Database schema compatibility', () => {
   it('adds missing email verification columns to existing users tables', async () => {
@@ -34,5 +38,59 @@ describe('Database schema compatibility', () => {
 
     await expect(ensureUserVerificationColumns(queryInterface)).resolves.toBeUndefined();
     expect(queryInterface.addColumn).not.toHaveBeenCalled();
+  });
+
+  describe('apartment street compatibility migration', () => {
+    let querySpy;
+
+    beforeEach(() => {
+      querySpy = jest.spyOn(sequelize, 'query').mockResolvedValue(undefined);
+    });
+
+    afterEach(() => {
+      querySpy.mockRestore();
+    });
+
+    it('continues when another instance already added the street column', async () => {
+      const queryInterface = {
+        describeTable: jest.fn().mockResolvedValue({
+          id: {},
+          city: {},
+        }),
+        addColumn: jest.fn().mockRejectedValue(Object.assign(
+          new Error('column "street" of relation "apartments" already exists'),
+          { parent: { code: '42701' } }
+        )),
+        removeColumn: jest.fn(),
+      };
+
+      await expect(ensureApartmentStreetColumn(queryInterface)).resolves.toBeUndefined();
+      expect(queryInterface.addColumn).toHaveBeenCalledWith(
+        'apartments',
+        'street',
+        expect.objectContaining({ allowNull: true })
+      );
+      expect(querySpy).not.toHaveBeenCalled();
+    });
+
+    it('continues when another instance already removed the legacy neighborhood column', async () => {
+      querySpy.mockRejectedValueOnce(Object.assign(
+        new Error('column "neighborhood" does not exist'),
+        { parent: { code: '42703' } }
+      ));
+      const queryInterface = {
+        describeTable: jest.fn().mockResolvedValue({
+          id: {},
+          street: {},
+          neighborhood: {},
+        }),
+        addColumn: jest.fn(),
+        removeColumn: jest.fn(),
+      };
+
+      await expect(ensureApartmentStreetColumn(queryInterface)).resolves.toBeUndefined();
+      expect(queryInterface.addColumn).not.toHaveBeenCalled();
+      expect(queryInterface.removeColumn).not.toHaveBeenCalled();
+    });
   });
 });
