@@ -1,9 +1,11 @@
 import 'react-native-gesture-handler';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, Linking } from 'react-native';
+import { Alert, Linking, ActivityIndicator, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StatusBar } from 'expo-status-bar';
+import { useFonts } from 'expo-font';
+import { rubikFonts } from './src/theme/fonts';
 import AppNavigator from './src/navigation/AppNavigator';
 import { usePushNotifications } from './src/hooks/usePushNotifications';
 import { ErrorBoundary } from './src/components/ErrorBoundary';
@@ -51,8 +53,17 @@ function AppInner() {
 }
 
 export default function App() {
+  const [fontsLoaded] = useFonts(rubikFonts);
   const [startupDone, setStartupDone] = useState(false);
   const finishStartup = useCallback(() => setStartupDone(true), []);
+
+  if (!fontsLoaded) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0F172A' }}>
+        <ActivityIndicator size="large" color="#00CBA9" />
+      </View>
+    );
+  }
 
   return (
     <ErrorBoundary>

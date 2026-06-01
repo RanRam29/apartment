@@ -12,6 +12,22 @@ import SwipeHouseLogo from '../components/SwipeHouseLogo';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
 import { dirType } from '../theme/textStyles';
 import { useColors } from '../context/ThemeContext';
+import { fontFamily } from '../theme/fonts';
+
+function translateRegisterError(msg: string): string {
+  const translations: Record<string, string> = {
+    'Invalid email address': 'כתובת אימייל לא תקינה.',
+    'Password must be at least 8 characters': 'הסיסמה חייבת להכיל לפחות 8 תווים.',
+    'Password must contain at least one uppercase letter': 'הסיסמה חייבת להכיל לפחות אות גדולה אחת באנגלית (A-Z).',
+    'Password must contain at least one number': 'הסיסמה חייבת להכיל לפחות מספר אחד (0-9).',
+    'First name must be 2-100 characters': 'שם פרטי חייב להכיל בין 2 ל-100 תווים.',
+    'Last name must be 2-100 characters': 'שם משפחה חייב להכיל בין 2 ל-100 תווים.',
+    'Role must be tenant or landlord': 'תפקיד חייב להיות שוכר או משכיר.',
+    'Invalid Israeli phone number': 'מספר טלפון ישראלי לא תקין.',
+    'Email already registered': 'כתובת האימייל כבר רשומה במערכת.',
+  };
+  return translations[msg] || msg;
+}
 
 interface Props {
   onSwitch: () => void;
@@ -35,28 +51,50 @@ export default function RegisterScreen({ onSwitch }: Props) {
   async function handleRegister() {
     setError('');
     setSuccess('');
-    if (!firstName || !lastName || !email || !password) {
-      setError('נא למלא את כל השדות החובה');
+    if (!firstName.trim() || !lastName.trim() || !email.trim() || !password) {
+      setError('נא למלא את כל שדות החובה');
       return;
     }
     if (password.length < 8) {
       setError('הסיסמה חייבת להכיל לפחות 8 תווים');
       return;
     }
+    if (!/[A-Z]/.test(password)) {
+      setError('הסיסמה חייבת להכיל לפחות אות גדולה אחת באנגלית (A-Z)');
+      return;
+    }
+    if (!/[0-9]/.test(password)) {
+      setError('הסיסמה חייבת להכיל לפחות ספרה אחת (0-9)');
+      return;
+    }
+
+    let cleanedPhone = phone.trim().replace(/[-\s]/g, '');
+    if (cleanedPhone && !/^(\+972|0)[0-9]{8,9}$/.test(cleanedPhone)) {
+      setError('מספר טלפון ישראלי לא תקין (למשל: 0501234567)');
+      return;
+    }
+
     setLoading(true);
     try {
-      await register({ firstName, lastName, email: email.trim().toLowerCase(), password, role, phone: phone || undefined });
+      await register({
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email: email.trim().toLowerCase(),
+        password,
+        role,
+        phone: cleanedPhone || undefined
+      });
       setSuccess('נרשמת בהצלחה! שלחנו קישור אימות למייל שלך.');
     } catch (err: unknown) {
-      const ax = err as { response?: { data?: { errors?: Array<{ msg: string }> } } };
+      const ax = err as { response?: { data?: { error?: string; errors?: Array<{ msg: string }> } } };
       if (!ax?.response) {
         setError('לא ניתן להתחבר לשרת. בדוק את החיבור לאינטרנט.');
         return;
       }
       const errors = ax.response?.data?.errors;
       const msg = errors?.length
-        ? errors.map((e) => e.msg).join('\n')
-        : formatLoginError(err, 'שגיאה בהרשמה');
+        ? errors.map((e) => translateRegisterError(e.msg)).join('\n')
+        : translateRegisterError(ax.response?.data?.error || formatLoginError(err, 'שגיאה בהרשמה'));
       setError(msg);
     } finally {
       setLoading(false);
@@ -168,8 +206,8 @@ export default function RegisterScreen({ onSwitch }: Props) {
 const styles = StyleSheet.create({
   container: { flexGrow: 1, justifyContent: 'center', padding: 28 },
   brandRow: { alignItems: 'center', marginBottom: 16 },
-  title: { fontSize: 26, fontWeight: '700', color: dirApp.primary, textAlign: 'right', marginBottom: 4 },
-  subtitle: { fontSize: 14, color: dirApp.outline, textAlign: 'right', marginBottom: 24 },
+  title: { fontSize: 26, fontWeight: '700', color: dirApp.primary, textAlign: 'right', marginBottom: 4, fontFamily: fontFamily.bold },
+  subtitle: { fontSize: 14, color: dirApp.outline, textAlign: 'right', marginBottom: 24, fontFamily: fontFamily.regular },
 
   roleRow: { flexDirection: 'row', marginBottom: 20, gap: 10 },
   roleBtn: {
@@ -182,7 +220,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   roleBtnActive: { backgroundColor: dirApp.secondaryContainer, borderColor: dirApp.secondary },
-  roleBtnText: { color: dirApp.outline, fontWeight: '600', fontSize: 14 },
+  roleBtnText: { color: dirApp.outline, fontWeight: '600', fontSize: 14, fontFamily: fontFamily.semibold },
   roleBtnTextActive: { color: dirApp.onSecondaryContainer },
 
   row: { flexDirection: 'row', marginBottom: 0 },
@@ -195,6 +233,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderWidth: 1.5,
     borderColor: `${dirApp.outlineVariant}AA`,
+    fontFamily: fontFamily.regular,
   },
   button: {
     backgroundColor: dirApp.primaryContainer,
@@ -209,10 +248,10 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   buttonDisabled: { opacity: 0.6 },
-  buttonText: { color: C.onInverse.primary, fontSize: 16, fontWeight: '700' },
-  errorText: { color: C.danger, fontSize: 13, textAlign: 'right', marginBottom: 10, lineHeight: 20 },
-  successText: { color: C.success, fontSize: 13, textAlign: 'right', marginBottom: 10, lineHeight: 20 },
+  buttonText: { color: C.onInverse.primary, fontSize: 16, fontWeight: '700', fontFamily: fontFamily.bold },
+  errorText: { color: C.danger, fontSize: 13, textAlign: 'right', marginBottom: 10, lineHeight: 20, fontFamily: fontFamily.regular },
+  successText: { color: C.success, fontSize: 13, textAlign: 'right', marginBottom: 10, lineHeight: 20, fontFamily: fontFamily.regular },
   switchRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 24 },
-  switchText: { color: dirApp.outline, fontSize: 14 },
-  switchLink: { color: dirApp.secondary, fontWeight: '700' },
+  switchText: { color: dirApp.outline, fontSize: 14, fontFamily: fontFamily.regular },
+  switchLink: { color: dirApp.secondary, fontWeight: '700', fontFamily: fontFamily.bold },
 });

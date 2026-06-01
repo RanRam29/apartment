@@ -10,6 +10,7 @@ import { C } from '../theme';
 import { dirApp } from '../theme/dirAppTokens';
 import SwipeHouseLogo from '../components/SwipeHouseLogo';
 import { useColors } from '../context/ThemeContext';
+import { fontFamily } from '../theme/fonts';
 
 interface Props {
   onSwitch: () => void;
@@ -105,8 +106,8 @@ export default function LoginScreen({ onSwitch }: Props) {
 const styles = StyleSheet.create({
   container: { flexGrow: 1, justifyContent: 'center', padding: 28 },
   brandRow: { alignItems: 'center', marginBottom: 20 },
-  title: { fontSize: 26, fontWeight: '700', color: dirApp.primary, textAlign: 'right', marginBottom: 4 },
-  subtitle: { fontSize: 14, color: dirApp.outline, textAlign: 'right', marginBottom: 28 },
+  title: { fontSize: 26, fontWeight: '700', color: dirApp.primary, textAlign: 'right', marginBottom: 4, fontFamily: fontFamily.bold },
+  subtitle: { fontSize: 14, color: dirApp.outline, textAlign: 'right', marginBottom: 28, fontFamily: fontFamily.regular },
   input: {
     backgroundColor: dirApp.surfaceContainerLowest,
     borderRadius: 14,
@@ -117,6 +118,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: `${dirApp.outlineVariant}AA`,
     textAlign: 'right',
+    fontFamily: fontFamily.regular,
   },
   button: {
     backgroundColor: dirApp.primaryContainer,
@@ -131,10 +133,10 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   buttonDisabled: { opacity: 0.6 },
-  buttonText: { color: C.onInverse.primary, fontSize: 16, fontWeight: '700' },
-  errorText: { color: C.danger, fontSize: 13, textAlign: 'right', marginBottom: 10, lineHeight: 20 },
-  infoText: { color: C.success, fontSize: 13, textAlign: 'right', marginBottom: 10, lineHeight: 20 },
+  buttonText: { color: C.onInverse.primary, fontSize: 16, fontWeight: '700', fontFamily: fontFamily.bold },
+  errorText: { color: C.danger, fontSize: 13, textAlign: 'right', marginBottom: 10, lineHeight: 20, fontFamily: fontFamily.regular },
+  infoText: { color: C.success, fontSize: 13, textAlign: 'right', marginBottom: 10, lineHeight: 20, fontFamily: fontFamily.regular },
   switchRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 24 },
-  switchText: { color: dirApp.outline, fontSize: 14 },
-  switchLink: { color: dirApp.secondary, fontWeight: '700' },
+  switchText: { color: dirApp.outline, fontSize: 14, fontFamily: fontFamily.regular },
+  switchLink: { color: dirApp.secondary, fontWeight: '700', fontFamily: fontFamily.bold },
 });
