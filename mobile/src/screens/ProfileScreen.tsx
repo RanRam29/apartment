@@ -18,6 +18,7 @@ import SwipeHouseLogo from '../components/SwipeHouseLogo';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
 import { useColors, useTheme } from '../context/ThemeContext';
 import { showAlert } from '../utils/alert';
+import { fontFamily } from '../theme/fonts';
 
 type Nav = NativeStackNavigationProp<MainStackParamList>;
 
@@ -360,7 +361,7 @@ const styles = StyleSheet.create({
     borderWidth: 3, borderColor: `${dirApp.secondaryContainer}DD`,
   },
   avatarImg: { width: 88, height: 88, borderRadius: 44, borderWidth: 3, borderColor: `${dirApp.secondaryContainer}DD` },
-  initials:  { fontSize: 30, fontWeight: '800', color: C.onInverse.primary },
+  initials:  { fontSize: 30, fontWeight: '800', color: C.onInverse.primary, fontFamily: fontFamily.bold },
   cameraOverlay: {
     position: 'absolute', bottom: 0, right: 0,
     width: 28, height: 28, borderRadius: 14,
@@ -374,18 +375,18 @@ const styles = StyleSheet.create({
     borderRadius: 10, marginBottom: 6,
     borderWidth: 1, borderColor: C.cyanAlpha(0.25),
   },
-  verifiedText: { color: dirApp.primary, fontSize: 11, fontWeight: '600' },
+  verifiedText: { color: dirApp.primary, fontSize: 11, fontWeight: '600', fontFamily: fontFamily.semibold },
 
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
-  name:    { fontSize: 22, fontWeight: '800', color: dirApp.primary },
-  email:   { fontSize: 13, color: C.textSub, marginBottom: 10 },
+  name:    { fontSize: 22, fontWeight: '800', color: dirApp.primary, fontFamily: fontFamily.bold },
+  email:   { fontSize: 13, color: C.textSub, marginBottom: 10, fontFamily: fontFamily.regular },
 
   roleBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     backgroundColor: `${dirApp.primary}0F`, paddingHorizontal: 14, paddingVertical: 6,
     borderRadius: 20, borderWidth: 1, borderColor: `${dirApp.primary}26`, marginBottom: 20,
   },
-  roleText: { color: dirApp.primary, fontWeight: '600', fontSize: 13 },
+  roleText: { color: dirApp.primary, fontWeight: '600', fontSize: 13, fontFamily: fontFamily.semibold },
 
   premiumBanner: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
@@ -393,7 +394,7 @@ const styles = StyleSheet.create({
     borderRadius: 14, borderWidth: 1, borderColor: 'rgba(245,158,11,0.25)',
     marginBottom: 20, width: '100%', justifyContent: 'center',
   },
-  premiumText: { color: C.gold, fontWeight: '700', fontSize: 14 },
+  premiumText: { color: C.gold, fontWeight: '700', fontSize: 14, fontFamily: fontFamily.bold },
 
   upgradeBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
@@ -404,8 +405,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05, shadowRadius: 6, elevation: 2,
   },
   upgradeBtnTextBox: { flex: 1 },
-  upgradeBtnTitle: { color: C.gold, fontWeight: '700', fontSize: 14, textAlign: 'right' },
-  upgradeBtnSub:   { color: C.textSub, fontSize: 11, textAlign: 'right', marginTop: 2 },
+  upgradeBtnTitle: { color: C.gold, fontWeight: '700', fontSize: 14, textAlign: 'right', fontFamily: fontFamily.bold },
+  upgradeBtnSub:   { color: C.textSub, fontSize: 11, textAlign: 'right', marginTop: 2, fontFamily: fontFamily.regular },
 
   menuCard: {
     width: '100%', backgroundColor: dirApp.surfaceContainerLowest, borderRadius: 16,
@@ -424,14 +425,14 @@ const styles = StyleSheet.create({
     backgroundColor: `${dirApp.secondaryContainer}44`, justifyContent: 'center', alignItems: 'center',
     marginLeft: 12,
   },
-  menuLabel: { flex: 1, color: C.text, fontSize: 14, textAlign: 'right', marginRight: 10 },
+  menuLabel: { flex: 1, color: C.text, fontSize: 14, textAlign: 'right', marginRight: 10, fontFamily: fontFamily.regular },
 
   darkModeRow: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
     borderRadius: 14, padding: 16, marginBottom: 16, width: '100%',
     borderWidth: 1,
   },
-  darkModeLabel: { flex: 1, fontSize: 14, fontWeight: '600', textAlign: 'right' },
+  darkModeLabel: { flex: 1, fontSize: 14, fontWeight: '600', textAlign: 'right', fontFamily: fontFamily.semibold },
 
   logoutBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
@@ -439,8 +440,8 @@ const styles = StyleSheet.create({
     paddingVertical: 13, paddingHorizontal: 28,
     borderWidth: 1, borderColor: 'rgba(239,68,68,0.2)', marginBottom: 18,
   },
-  logoutText: { color: C.danger, fontWeight: '700', fontSize: 15 },
-  version:    { color: C.textMut, fontSize: 11 },
+  logoutText: { color: C.danger, fontWeight: '700', fontSize: 15, fontFamily: fontFamily.bold },
+  version:    { color: C.textMut, fontSize: 11, fontFamily: fontFamily.regular },
 
   // Modal
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
@@ -448,21 +449,22 @@ const styles = StyleSheet.create({
     backgroundColor: C.bgCard, borderTopLeftRadius: 24, borderTopRightRadius: 24,
     padding: 24, gap: 10,
   },
-  modalTitle: { fontSize: 17, fontWeight: '800', color: C.text, textAlign: 'right', marginBottom: 8 },
-  fieldLabel: { color: C.textSub, fontSize: 11, fontWeight: '700', textAlign: 'right', textTransform: 'uppercase', letterSpacing: 0.5 },
+  modalTitle: { fontSize: 17, fontWeight: '800', color: C.text, textAlign: 'right', marginBottom: 8, fontFamily: fontFamily.bold },
+  fieldLabel: { color: C.textSub, fontSize: 11, fontWeight: '700', textAlign: 'right', textTransform: 'uppercase', letterSpacing: 0.5, fontFamily: fontFamily.bold },
   fieldInput: {
     backgroundColor: C.bg, borderRadius: 12, padding: 14,
     color: C.text, fontSize: 15, borderWidth: 1.5, borderColor: C.border,
+    fontFamily: fontFamily.regular,
   },
   modalActions: { flexDirection: 'row', gap: 10, marginTop: 8 },
   cancelBtn: {
     flex: 1, borderRadius: 12, paddingVertical: 13, alignItems: 'center',
     backgroundColor: C.bg, borderWidth: 1.5, borderColor: C.border,
   },
-  cancelBtnText: { color: C.textSub, fontWeight: '600', fontSize: 15 },
+  cancelBtnText: { color: C.textSub, fontWeight: '600', fontSize: 15, fontFamily: fontFamily.semibold },
   saveBtn: {
     flex: 2, borderRadius: 12, paddingVertical: 13, alignItems: 'center',
     backgroundColor: dirApp.primaryContainer,
   },
-  saveBtnText: { color: C.onInverse.primary, fontWeight: '700', fontSize: 15 },
+  saveBtnText: { color: C.onInverse.primary, fontWeight: '700', fontSize: 15, fontFamily: fontFamily.bold },
 });

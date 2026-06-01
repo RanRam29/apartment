@@ -16,6 +16,7 @@ import { dirApp } from '../theme/dirAppTokens';
 import { CITY_CENTER_BY_NAME } from '../constants/cityCenters';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
 import { useColors } from '../context/ThemeContext';
+import { fontFamily } from '../theme/fonts';
 
 const AMENITY_OPTIONS: { key: Amenity; label: string }[] = [
   { key: 'parking',     label: '🚗 חניה' },
@@ -486,9 +487,9 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
     elevation: 4,
   },
-  header: { fontSize: 22, fontWeight: '800', color: dirApp.primary, textAlign: 'right', marginBottom: 20 },
+  header: { fontSize: 22, fontWeight: '800', color: dirApp.primary, textAlign: 'right', marginBottom: 20, fontFamily: fontFamily.bold },
   row: { flexDirection: 'row-reverse', marginBottom: 0, columnGap: 8, alignItems: 'flex-start' },
-  fieldLabel: { color: dirApp.outline, fontSize: 12, fontWeight: '600', textAlign: 'right', marginBottom: 6 },
+  fieldLabel: { color: dirApp.outline, fontSize: 12, fontWeight: '600', textAlign: 'right', marginBottom: 6, fontFamily: fontFamily.bold },
   input: {
     backgroundColor: dirApp.background,
     borderRadius: 12,
@@ -498,9 +499,10 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: `${dirApp.outlineVariant}AA`,
     writingDirection: 'rtl',
+    fontFamily: fontFamily.regular,
   },
   textarea: { height: 100, textAlignVertical: 'top' },
-  helperText: { marginTop: 4, textAlign: 'right', color: dirApp.outline, fontSize: 11 },
+  helperText: { marginTop: 4, textAlign: 'right', color: dirApp.outline, fontSize: 11, fontFamily: fontFamily.regular },
   loader: { marginTop: 6 },
   suggestionsBox: {
     marginTop: 4,
@@ -519,7 +521,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: `${dirApp.outlineVariant}44`,
   },
-  suggestionText: { textAlign: 'right', color: dirApp.onSurface, fontSize: 14 },
+  suggestionText: { textAlign: 'right', color: dirApp.onSurface, fontSize: 14, fontFamily: fontFamily.regular },
   amenitiesGrid: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: 8, marginBottom: 20, justifyContent: 'flex-start' },
   amenityChip: {
     paddingHorizontal: 12,
@@ -530,8 +532,8 @@ const styles = StyleSheet.create({
     borderColor: `${dirApp.outlineVariant}AA`,
   },
   amenityChipActive: { backgroundColor: dirApp.secondary, borderColor: dirApp.secondary },
-  amenityText: { color: dirApp.outline, fontSize: 13, textAlign: 'right' },
-  amenityTextActive: { color: dirApp.onSecondary, fontWeight: '600' },
+  amenityText: { color: dirApp.outline, fontSize: 13, textAlign: 'right', fontFamily: fontFamily.regular },
+  amenityTextActive: { color: dirApp.onSecondary, fontWeight: '600', fontFamily: fontFamily.bold },
   imagesRow: { marginBottom: 24 },
   imagesRowContent: { flexDirection: 'row-reverse', alignItems: 'center' },
   addImageBtn: {
@@ -546,7 +548,7 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     backgroundColor: `${dirApp.secondaryContainer}33`,
   },
-  addImageText: { color: dirApp.secondary, fontSize: 11, marginTop: 2 },
+  addImageText: { color: dirApp.secondary, fontSize: 11, marginTop: 2, fontFamily: fontFamily.semibold },
   imageThumb: { width: 80, height: 80, borderRadius: 12, marginLeft: 8, position: 'relative' },
   imageThumbImg: { width: 80, height: 80, borderRadius: 12 },
   removeImageBtn: { position: 'absolute', top: -6, left: -6 },
@@ -558,5 +560,5 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   submitBtnDisabled: { opacity: 0.6 },
-  submitText: { color: C.onInverse.primary, fontSize: 16, fontWeight: '800' },
+  submitText: { color: C.onInverse.primary, fontSize: 16, fontWeight: '800', fontFamily: fontFamily.bold },
 });
