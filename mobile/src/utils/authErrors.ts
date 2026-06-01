@@ -8,12 +8,17 @@ export function formatLoginError(
   const e = err as {
     response?: { status?: number; data?: { error?: string; code?: string } };
     message?: string;
+    code?: string;
   };
   const status = e?.response?.status;
   const data = e?.response?.data;
   const code = data?.code;
 
   if (!e?.response) {
+    // Distinguish timeout (cold start) from general network errors
+    if (e?.code === 'ECONNABORTED' || e?.message?.includes('timeout')) {
+      return 'השרת מתעורר (זה לוקח עד 30 שניות בפעם הראשונה). לחצו שוב על כניסה.';
+    }
     return 'לא ניתן להתחבר לשרת. בדקו את הרשת ואת כתובת ה־API.';
   }
 

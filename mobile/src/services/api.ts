@@ -47,7 +47,7 @@ const storage = {
 
 const api: AxiosInstance = axios.create({
   baseURL: `${BASE_URL}/api`,
-  timeout: 15000,
+  timeout: 30000,
   headers: { 'Content-Type': 'application/json' },
 });
 

@@ -6,6 +6,7 @@ import {
 import { useAuthStore } from '../store/useAuthStore';
 import { getVerificationPromptEmail, type MaybeAuthError } from '../services/verificationUx';
 import { formatLoginError } from '../utils/authErrors';
+import { isTimeoutError } from '../utils/networkUtils';
 import { C } from '../theme';
 import { dirApp } from '../theme/dirAppTokens';
 import SwipeHouseLogo from '../components/SwipeHouseLogo';
@@ -35,6 +36,20 @@ export default function LoginScreen({ onSwitch }: Props) {
     try {
       await login(email.trim().toLowerCase(), password);
     } catch (err: unknown) {
+      // If timeout (Render cold start), auto-retry once after warmup
+      if (isTimeoutError(err)) {
+        setInfo('השרת מתעורר... מנסה שוב אוטומטית');
+        setError('');
+        try {
+          await login(email.trim().toLowerCase(), password);
+          return; // success on retry
+        } catch (retryErr: unknown) {
+          setInfo('');
+          setError(formatLoginError(retryErr));
+          setLoading(false);
+          return;
+        }
+      }
       const unverifiedEmail = getVerificationPromptEmail(err as MaybeAuthError);
       if (unverifiedEmail) {
         setInfo('האימייל לא אומת. שלחנו לך מייל אימות — בדוק את תיבת הדואר.');
