@@ -224,7 +224,7 @@ function MainNavigator() {
   return (
     <MainStack.Navigator
       screenOptions={{ headerShown: false }}
-      initialRouteName={needsOnboarding ? 'Onboarding' : 'Tabs'}
+      initialRouteName={needsOnboarding ? 'Onboarding' : (!isAdmin && !user?.tosAcceptedAt) ? 'Terms' : 'Tabs'}
     >
       <MainStack.Screen
         name="Tabs"

@@ -188,6 +188,7 @@ export type MainStackParamList = {
   IoT: undefined;
   LogsConsole: undefined;
   RenterJournal: undefined;
+  Terms: undefined;
 };
 
 export type AdminTabParamList = {
