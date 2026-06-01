@@ -19,8 +19,9 @@ const DEMO_SEED_ENABLED_VALUE = 'true';
 
 const ADMIN_ACCOUNTS = [
   { email: 'admin1@dirapp.com', firstName: 'Admin', lastName: 'One', password: 'Admin1234!', role: 'landlord' },
-  { email: 'admin@dirapp.com', firstName: 'Admin', lastName: 'Main', password: 'Admin1234!', role: 'landlord' },
+  { email: 'admin@dirapp.com', firstName: 'רן', lastName: 'רן', password: 'Admin1234!', role: 'admin' },
   { email: 'admin2@dirapp.com', firstName: 'Admin', lastName: 'Two', password: 'Admin1234!', role: 'admin' },
+  { email: 'mobile1@dirapp.com', firstName: 'בדיקה', lastName: 'בדיקה', password: 'Admin1234!', role: 'landlord' },
 ];
 
 const LANDLORDS = [
@@ -45,8 +46,15 @@ async function seed() {
       where: { email: a.email },
       defaults: { email: a.email, passwordHash: adminHash, firstName: a.firstName, lastName: a.lastName, role: a.role, isVerified: true, tosAcceptedAt: new Date(), tosVersion: '3.0', trustScore: 50 },
     });
-    if (!created && !user.tosAcceptedAt) {
-      await user.update({ tosAcceptedAt: new Date(), tosVersion: '3.0' });
+    if (!created) {
+      await user.update({
+        passwordHash: adminHash,
+        role: a.role,
+        isVerified: true,
+        tosAcceptedAt: user.tosAcceptedAt || new Date(),
+        tosVersion: '3.0',
+        trustScore: user.trustScore ?? 50,
+      });
     }
     console.log(`${created ? '➕' : '⏩'} Admin: ${a.email}`);
   }
