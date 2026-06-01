@@ -47,7 +47,7 @@ const storage = {
 
 const api: AxiosInstance = axios.create({
   baseURL: `${BASE_URL}/api`,
-  timeout: 15000,
+  timeout: 30000,
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -332,6 +332,7 @@ export const adminApi = {
   updateUser: (id: string, data: any) => api.put(`/v3/admin/users/${id}`, data),
   deleteUser: (id: string) => api.delete(`/v3/admin/users/${id}`),
   getStats: () => api.get('/v3/admin/stats'),
+  getDetailedStats: () => api.get('/v3/admin/stats/detailed'),
 };
 
 // ─── CASCADE V3 APIs ────────────────────────────────────────────────────────

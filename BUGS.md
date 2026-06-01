@@ -1,6 +1,6 @@
 # DirApp — Bug Tracker
 > **מנהל:** Claude Code (CTO)
-> **עדכון אחרון:** 2026-05-30
+> **עדכון אחרון:** 2026-06-01
 >
 > 📋 **איך לדווח באג:** כתוב בצ'אט (לי או לאנטיגרביטי) — אני מוסיף לפה עם BUG-ID מיידית.
 > 📖 **RCA:** חובה למלא אחרי כל תיקון. זה הזיכרון הארגוני שלנו.
@@ -13,9 +13,9 @@
 |--------|------|
 | 🔴 OPEN | 0 |
 | 🔵 IN_PROGRESS | 0 |
-| ✅ FIXED (ממתין RCA) | 0 |
+| ✅ FIXED (ממתין אימות) | 1 |
 | 🏁 CLOSED (RCA הושלם) | 10 |
-| **סה"כ** | **10** |
+| **סה"כ** | **11** |
 
 ---
 
@@ -33,6 +33,7 @@
 | [BUG-007](#bug-007) | דשבורד פיקטיבי — נתונים לא מחוברים לבאקאנד | P1 | 🏁 CLOSED | ראן | Antigravity | 2026-05-28 |
 | [BUG-008](#bug-008) | לא ניתן להיכנס לצ'אטים | P1 | 🏁 CLOSED | ראן | Antigravity | 2026-05-28 |
 | [BUG-009](#bug-009) | Trust Score מתחיל ב-0 במקום 50 | P2 | 🏁 CLOSED | ראן | Antigravity | 2026-05-28 |
+| [BUG-011](#bug-011) | Login fails on Render cold start (timeout) | P2 | ✅ FIXED | ראן | Claude Code | 2026-06-01 |
 
 ---
 
@@ -309,6 +310,34 @@
 
 ---
 
+
+### BUG-011
+**כותרת:** Login fails on Render cold start — timeout 15s too short
+**עדיפות:** P2
+**סטטוס:** ✅ FIXED (ממתין deploy)
+**מדווח על ידי:** ראן | **תאריך:** 2026-06-01
+**מטפל:** Claude Code
+
+**תיאור:**
+Login button shows "לא ניתן להתחבר לשרת" when Render free-tier instance is cold (spun down after ~15 min inactivity). Cold starts take 30-60 seconds; Axios timeout was only 15 seconds → request times out → no response → generic error message.
+
+**Root Cause:**
+`mobile/src/services/api.ts` had `timeout: 15000` (15s). Render free-tier cold start takes 30-60s. Axios aborts with `ECONNABORTED` before backend wakes up.
+
+**Fix שיושם:**
+
+| קובץ | שינוי |
+|------|--------|
+| `mobile/src/services/api.ts` | Increased Axios timeout from 15s → 30s |
+| `mobile/src/utils/networkUtils.ts` | NEW — `isTimeoutError()` utility |
+| `mobile/src/utils/authErrors.ts` | Detect timeout → show "server waking up" message instead of generic error |
+| `mobile/src/screens/LoginScreen.tsx` | Auto-retry once on timeout with "שרת מתעורר" UX feedback |
+| `mobile/src/screens/RegisterScreen.tsx` | Timeout-specific error message |
+
+**למה זה קרה — Design Gap:**
+Free-tier Render sleeps after inactivity. The default 15s timeout was set for normal operation, not cold starts.
+
+---
 
 ## 🏁 CLOSED — RCA הושלם
 

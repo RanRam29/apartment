@@ -6,6 +6,7 @@ import {
 } from 'react-native';
 import { useAuthStore } from '../store/useAuthStore';
 import { formatLoginError } from '../utils/authErrors';
+import { isTimeoutError } from '../utils/networkUtils';
 import { C } from '../theme';
 import { dirApp } from '../theme/dirAppTokens';
 import SwipeHouseLogo from '../components/SwipeHouseLogo';
@@ -88,7 +89,11 @@ export default function RegisterScreen({ onSwitch }: Props) {
     } catch (err: unknown) {
       const ax = err as { response?: { data?: { error?: string; errors?: Array<{ msg: string }> } } };
       if (!ax?.response) {
-        setError('לא ניתן להתחבר לשרת. בדוק את החיבור לאינטרנט.');
+        if (isTimeoutError(err)) {
+          setError('השרת מתעורר (עד 30 שניות). נסו שוב בעוד רגע.');
+        } else {
+          setError('לא ניתן להתחבר לשרת. בדוק את החיבור לאינטרנט.');
+        }
         return;
       }
       const errors = ax.response?.data?.errors;
