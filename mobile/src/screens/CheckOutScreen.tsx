@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useContractStore } from '../store/useContractStore';
 import { showAlert } from '../utils/alert';
+import { fontFamily } from '../theme/fonts';
 
 export default function CheckOutScreen({ route, navigation }: any) {
   const { contractId } = route.params || {};
@@ -96,6 +97,7 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     textAlign: 'right',
     marginBottom: 8,
+    fontFamily: fontFamily.bold,
   },
   subtitle: {
     fontSize: 13,
@@ -103,6 +105,7 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     lineHeight: 18,
     marginBottom: 30,
+    fontFamily: fontFamily.regular,
   },
   roomCard: {
     backgroundColor: 'rgba(255, 255, 255, 0.02)',
@@ -122,6 +125,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: '#ffffff',
+    fontFamily: fontFamily.bold,
   },
   addPhotoBtn: {
     backgroundColor: 'rgba(95, 92, 229, 0.1)',
@@ -135,6 +139,7 @@ const styles = StyleSheet.create({
     color: '#a5b4fc',
     fontSize: 12,
     fontWeight: '700',
+    fontFamily: fontFamily.semibold,
   },
   photoList: {
     marginTop: 8,
@@ -162,6 +167,7 @@ const styles = StyleSheet.create({
   noPhotosText: {
     color: '#9aa0b9',
     fontSize: 12,
+    fontFamily: fontFamily.regular,
   },
   saveBtn: {
     marginTop: 20,
@@ -175,5 +181,6 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 16,
     fontWeight: 'bold',
+    fontFamily: fontFamily.bold,
   },
 });

@@ -6,8 +6,8 @@ import { C } from '../theme';
 const LOGO = require('../../assets/logo.png');
 
 /** Pixel size of `assets/logo.png` (width × height). Used for `aspectRatio` = W/H. */
-const LOGO_W = 134;
-const LOGO_H = 117;
+const LOGO_W = 558;
+const LOGO_H = 539;
 const LOGO_ASPECT = LOGO_W / LOGO_H;
 
 const WIDTH = { xs: 72, sm: 96, md: 128, lg: 176 };
@@ -17,8 +17,8 @@ interface Props {
   /** Kept for API compatibility; the raster logo already includes the wordmark. */
   showLabel?: boolean;
   /**
-   * When true (default), draws a neutral gray rounded “plate” behind the mark so
-   * transparent pixels read clearly on any page background (instead of checkerboard art).
+   * When true (default), draws a clean premium rounded “plate” behind the mark so
+   * transparent/white pixels read clearly on any page background.
    */
   plate?: boolean;
 }
@@ -62,17 +62,17 @@ const styles = StyleSheet.create({
   wrapperPlate: {
     alignItems: 'center',
     alignSelf: 'center',
-    backgroundColor: '#D8DADF',
-    borderRadius: 16,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: C.border,
-    // Light “tile” feel without literal checker PNG
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    // Premium soft card shadow
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
 });

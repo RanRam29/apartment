@@ -11,6 +11,7 @@ import { C, Dark } from '../theme';
 import { dirApp } from '../theme/dirAppTokens';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
 import { dirType } from '../theme/textStyles';
+import { fontFamily } from '../theme/fonts';
 import { showAlert } from '../utils/alert';
 
 type VerifStatus = 'pending' | 'verified' | 'rejected' | null;
@@ -190,28 +191,28 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Dark.bg },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14 },
   backBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: Dark.surface, justifyContent: 'center', alignItems: 'center' },
-  headerTitle: { color: dirApp.primary, fontSize: 18, fontWeight: '800' },
+  headerTitle: { color: dirApp.primary, fontSize: 18, fontWeight: '800', fontFamily: fontFamily.bold },
   scroll: { flex: 1 },
   content: { padding: 16, paddingBottom: 48 },
   infoCard: { backgroundColor: Dark.surface, borderRadius: 16, padding: 20, alignItems: 'center', marginBottom: 20, borderWidth: 1, borderColor: Dark.border },
-  infoTitle: { color: C.onInverse.primary, fontSize: 17, fontWeight: '800', marginBottom: 8 },
-  infoText: { color: C.textMut, fontSize: 13, lineHeight: 20, textAlign: 'center' },
+  infoTitle: { color: C.onInverse.primary, fontSize: 17, fontWeight: '800', marginBottom: 8, fontFamily: fontFamily.bold },
+  infoText: { color: C.textMut, fontSize: 13, lineHeight: 20, textAlign: 'center', fontFamily: fontFamily.regular },
   statusRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 10, marginBottom: 6 },
-  statusRowLabel: { color: C.textMut, fontSize: 14 },
+  statusRowLabel: { color: C.textMut, fontSize: 14, fontFamily: fontFamily.regular },
   badge: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
   badgeIcon: { fontSize: 14 },
-  badgeLabel: { fontWeight: '700', fontSize: 14 },
-  verifiedAt: { color: C.textMut, fontSize: 12, textAlign: 'right', marginBottom: 2 },
-  idHint: { color: C.textMut, fontSize: 12, textAlign: 'right', marginBottom: 16 },
+  badgeLabel: { fontWeight: '700', fontSize: 14, fontFamily: fontFamily.bold },
+  verifiedAt: { color: C.textMut, fontSize: 12, textAlign: 'right', marginBottom: 2, fontFamily: fontFamily.regular },
+  idHint: { color: C.textMut, fontSize: 12, textAlign: 'right', marginBottom: 16, fontFamily: fontFamily.regular },
   form: { marginTop: 8 },
-  sectionTitle: { color: C.onInverse.primary, fontSize: 16, fontWeight: '700', textAlign: 'right', marginBottom: 14 },
-  label: { color: C.textMut, fontSize: 13, fontWeight: '600', textAlign: 'right', marginBottom: 6 },
-  input: { backgroundColor: Dark.surface, borderRadius: 12, padding: 14, color: C.onInverse.primary, fontSize: 15, marginBottom: 14, borderWidth: 1, borderColor: Dark.border },
-  disclaimer: { color: C.textMut, fontSize: 11, textAlign: 'right', lineHeight: 16, marginBottom: 20 },
+  sectionTitle: { color: C.onInverse.primary, fontSize: 16, fontWeight: '700', textAlign: 'right', marginBottom: 14, fontFamily: fontFamily.bold },
+  label: { color: C.textMut, fontSize: 13, fontWeight: '600', textAlign: 'right', marginBottom: 6, fontFamily: fontFamily.semibold },
+  input: { backgroundColor: Dark.surface, borderRadius: 12, padding: 14, color: C.onInverse.primary, fontSize: 15, marginBottom: 14, borderWidth: 1, borderColor: Dark.border, textAlign: 'right', fontFamily: fontFamily.regular },
+  disclaimer: { color: C.textMut, fontSize: 11, textAlign: 'right', lineHeight: 16, marginBottom: 20, fontFamily: fontFamily.regular },
   submitBtn: { backgroundColor: C.statusTone.positive, paddingVertical: 14, borderRadius: 14, alignItems: 'center' },
   submitBtnDisabled: { opacity: 0.6 },
   submitInner: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  submitBtnText: { color: C.onInverse.primary, fontWeight: '800', fontSize: 15 },
+  submitBtnText: { color: C.onInverse.primary, fontWeight: '800', fontSize: 15, fontFamily: fontFamily.bold },
   verifiedCard: { backgroundColor: C.successAlpha(0.12), borderRadius: 14, padding: 18, borderWidth: 1, borderColor: C.statusTone.positive, marginTop: 16 },
-  verifiedCardText: { color: C.statusTone.positive, textAlign: 'center', fontSize: 14, fontWeight: '600', lineHeight: 20 },
+  verifiedCardText: { color: C.statusTone.positive, textAlign: 'center', fontSize: 14, fontWeight: '600', lineHeight: 20, fontFamily: fontFamily.semibold },
 });

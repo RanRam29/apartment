@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useAuthStore } from '../store/useAuthStore';
 import { tosApi } from '../services/api';
+import { fontFamily } from '../theme/fonts';
 
 function showAlert(
   title: string,
@@ -137,6 +138,7 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     marginBottom: 20,
     marginTop: 10,
+    fontFamily: fontFamily.bold,
   },
   termsBox: {
     flex: 1,
@@ -152,6 +154,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 20,
     textAlign: 'right',
+    fontFamily: fontFamily.regular,
   },
   footer: {
     gap: 16,
@@ -186,6 +189,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#ffffff',
     fontWeight: '500',
+    fontFamily: fontFamily.medium,
   },
   acceptBtn: {
     height: 52,
@@ -201,6 +205,7 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 15,
     fontWeight: 'bold',
+    fontFamily: fontFamily.bold,
   },
   backBtn: {
     height: 52,
@@ -216,5 +221,6 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 15,
     fontWeight: 'bold',
+    fontFamily: fontFamily.bold,
   },
 });
