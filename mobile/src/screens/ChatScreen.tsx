@@ -14,6 +14,7 @@ import { C, Dark } from '../theme';
 import { dirApp } from '../theme/dirAppTokens';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
 import { dirType } from '../theme/textStyles';
+import { fontFamily } from '../theme/fonts';
 
 type ChatRoute = RouteProp<{ Chat: { matchId: string; title: string } }, 'Chat'>;
 
@@ -211,11 +212,11 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start', backgroundColor: Dark.surface,
     borderBottomLeftRadius: 4,
   },
-  bubbleText: { fontSize: 15, lineHeight: 20 },
+  bubbleText: { fontSize: 15, lineHeight: 20, fontFamily: fontFamily.regular },
   bubbleTextMe: { color: dirApp.primary },
   bubbleTextThem: { color: C.onInverse.secondary },
   bubbleMeta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 3, marginTop: 3 },
-  bubbleTime: { fontSize: 10, color: C.onInverse.faint },
+  bubbleTime: { fontSize: 10, color: C.onInverse.faint, fontFamily: fontFamily.regular },
   typingBubble: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     marginHorizontal: 16, marginBottom: 8,
@@ -224,7 +225,7 @@ const styles = StyleSheet.create({
   },
   typingDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: C.textMut },
   emptyChat: { flex: 1, alignItems: 'center', paddingTop: 60 },
-  emptyChatText: { color: C.textMut, fontSize: 14 },
+  emptyChatText: { color: C.textMut, fontSize: 14, fontFamily: fontFamily.regular },
   inputBar: {
     flexDirection: 'row', alignItems: 'flex-end',
     padding: 10, borderTopWidth: 1, borderTopColor: Dark.surface,
@@ -236,6 +237,7 @@ const styles = StyleSheet.create({
     color: C.onInverse.primary, fontSize: 15, maxHeight: 100,
     borderWidth: 1,
     borderColor: Dark.border,
+    fontFamily: fontFamily.regular,
   },
   sendBtn: {
     width: 42, height: 42, borderRadius: 21,
