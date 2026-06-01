@@ -195,4 +195,5 @@ export type AdminTabParamList = {
   AdminUsers: undefined;
   AdminStats: undefined;
   LogsConsole: undefined;
+  Profile: undefined;
 };
