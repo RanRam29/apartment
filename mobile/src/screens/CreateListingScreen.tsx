@@ -60,6 +60,7 @@ export default function CreateListingScreen({ navigation }: any) {
   const [rooms, setRooms]             = useState('');
   const [city, setCity]               = useState('');
   const [street, setStreet]             = useState('');
+  const [houseNumber, setHouseNumber]   = useState('');
   const [floor, setFloor]             = useState('');
   const [sizeSqm, setSizeSqm]         = useState('');
   const [amenities, setAmenities]     = useState<Amenity[]>([]);
@@ -230,6 +231,9 @@ export default function CreateListingScreen({ navigation }: any) {
       form.append('rooms', rooms);
       form.append('city', cityValue);
       form.append('street', streetValue);
+      if (houseNumber.trim()) {
+        form.append('address', `${streetValue} ${houseNumber.trim()}, ${cityValue}`);
+      }
       form.append('floor', floor);
       form.append('sizeSqm', sizeSqm);
       form.append('amenities', JSON.stringify(amenities));
@@ -370,6 +374,18 @@ export default function CreateListingScreen({ navigation }: any) {
                 )}
               </Field>
             </View>
+
+            <Field label="מספר בית">
+              <TextInput
+                style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border, maxWidth: 120 }]}
+                value={houseNumber}
+                onChangeText={(value) => setHouseNumber(keepDigitsOnly(value))}
+                keyboardType="numeric"
+                placeholder="12"
+                placeholderTextColor={colors.textMut}
+                textAlign="right"
+              />
+            </Field>
 
             <View style={styles.row}>
               <Field label="קומה" style={{ flex: 1 }}>
