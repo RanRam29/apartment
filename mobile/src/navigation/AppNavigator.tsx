@@ -150,7 +150,7 @@ function TenantTabs() {
         },
       })}
     >
-      <TenantTab.Screen name="Home"    component={HomeScreen}    options={{ title: 'Home' }} />
+      <TenantTab.Screen name="Home"    component={HomeScreen}    options={{ title: 'בית' }} />
       <TenantTab.Screen name="Swipe"   component={SwipeScreen}   options={{ title: 'דירות' }} />
       <TenantTab.Screen name="Matches" component={MatchesScreen} options={{ title: 'התאמות' }} />
       <TenantTab.Screen name="Search"  component={SearchScreen}  options={{ title: 'חיפוש' }} />
@@ -200,7 +200,7 @@ function LandlordTabs() {
         },
       })}
     >
-      <LandlordTab.Screen name="Home"      component={HomeScreen}        options={{ title: 'Home' }} />
+      <LandlordTab.Screen name="Home"      component={HomeScreen}        options={{ title: 'בית' }} />
       <LandlordTab.Screen name="Dashboard" component={LandlordDashboard} options={{ title: 'דשבורד' }} />
       <LandlordTab.Screen name="Leads"     component={LeadsScreen}       options={{ title: 'לידים' }} />
       <LandlordTab.Screen name="Matches"   component={MatchesScreen}     options={{ title: 'צ׳אטים' }} />

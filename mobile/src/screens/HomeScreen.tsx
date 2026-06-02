@@ -442,7 +442,7 @@ const tenantStyles = StyleSheet.create({
   welcomeSub: {},
   journalHero: {
     alignSelf: 'center',
-    backgroundColor: C.accent.violet,
+    backgroundColor: dirApp.primaryContainer,
     borderRadius: 12,
     marginBottom: GAP,
     minHeight: 140,
