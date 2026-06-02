@@ -301,7 +301,7 @@ export default function CreateListingScreen({ navigation }: any) {
             </Field>
 
             <View style={styles.row}>
-              <Field label="עיר *" style={{ flex: 1 }}>
+              <Field label="עיר *" style={{ flex: 2 }}>
                 <TextInput
                   style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
                   value={city}
@@ -332,7 +332,7 @@ export default function CreateListingScreen({ navigation }: any) {
                   </View>
                 )}
               </Field>
-              <Field label="רחוב *" style={{ flex: 1 }}>
+              <Field label="רחוב *" style={{ flex: 2 }}>
                 <TextInput
                   style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
                   value={street}
@@ -360,19 +360,18 @@ export default function CreateListingScreen({ navigation }: any) {
                   </View>
                 )}
               </Field>
+              <Field label="מספר בית" style={{ flex: 1 }}>
+                <TextInput
+                  style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
+                  value={houseNumber}
+                  onChangeText={(value) => setHouseNumber(keepDigitsOnly(value))}
+                  keyboardType="numeric"
+                  placeholder="12"
+                  placeholderTextColor={colors.textMut}
+                  textAlign="right"
+                />
+              </Field>
             </View>
-
-            <Field label="מספר בית">
-              <TextInput
-                style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border, maxWidth: 120 }]}
-                value={houseNumber}
-                onChangeText={(value) => setHouseNumber(keepDigitsOnly(value))}
-                keyboardType="numeric"
-                placeholder="12"
-                placeholderTextColor={colors.textMut}
-                textAlign="right"
-              />
-            </Field>
 
             <View style={styles.row}>
               <Field label="חדרים *" style={{ flex: 1 }}>
@@ -543,17 +542,17 @@ const styles = StyleSheet.create({
     borderBottomColor: `${dirApp.outlineVariant}44`,
   },
   suggestionText: { textAlign: 'right', color: dirApp.onSurface, fontSize: 14, fontFamily: fontFamily.regular },
-  amenitiesGrid: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: 6, marginBottom: 20, justifyContent: 'flex-start' },
+  amenitiesGrid: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: 4, marginBottom: 20, justifyContent: 'flex-start' },
   amenityChip: {
-    paddingHorizontal: 8,
-    paddingVertical: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 4,
     borderRadius: 10,
     backgroundColor: dirApp.surfaceContainerLow,
     borderWidth: 1.5,
     borderColor: `${dirApp.outlineVariant}AA`,
   },
   amenityChipActive: { backgroundColor: dirApp.secondary, borderColor: dirApp.secondary },
-  amenityText: { color: dirApp.outline, fontSize: 11, textAlign: 'right', fontFamily: fontFamily.regular },
+  amenityText: { color: dirApp.outline, fontSize: 10, textAlign: 'right', fontFamily: fontFamily.regular },
   amenityTextActive: { color: dirApp.onSecondary, fontWeight: '600', fontFamily: fontFamily.bold },
   imagesRow: { marginBottom: 24 },
   imagesRowContent: { flexDirection: 'row-reverse', alignItems: 'center' },
