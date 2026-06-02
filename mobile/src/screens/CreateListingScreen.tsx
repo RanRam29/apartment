@@ -100,7 +100,7 @@ export default function CreateListingScreen({ navigation }: any) {
 
   function getCityMatches(query: string) {
     const q = normalizeText(query);
-    if (q.length < 2) return [];
+    if (q.length < 1) return [];
     const startsWith = ISRAELI_CITIES.filter((name) => normalizeText(name).startsWith(q));
     const contains = ISRAELI_CITIES.filter((name) => {
       const norm = normalizeText(name);
@@ -137,7 +137,7 @@ export default function CreateListingScreen({ navigation }: any) {
   useEffect(() => {
     const q = street.trim();
     const selectedCity = city.trim();
-    if (!selectedCity || q.length < 2) {
+    if (!selectedCity || q.length < 1) {
       setStreetSuggestions([]);
       setIsLoadingStreets(false);
       return;
@@ -147,7 +147,7 @@ export default function CreateListingScreen({ navigation }: any) {
       setIsLoadingStreets(true);
       try {
         const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=il&addressdetails=1&accept-language=he&limit=25&q=${encodeURIComponent(`${q}, ${selectedCity}, ישראל`)}`,
+          `https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=il&addressdetails=1&accept-language=he&limit=100&q=${encodeURIComponent(`${q}, ${selectedCity}, ישראל`)}`,
           {
             signal: controller.signal,
             headers: { 'User-Agent': 'ApartmentApp/1.0 (CreateListing)' },
@@ -156,7 +156,7 @@ export default function CreateListingScreen({ navigation }: any) {
         const data = await res.json();
         const parsed = Array.isArray(data)
           ? data
-              .map((item: any) => item?.address?.road)
+              .map((item: any) => item?.address?.road || item?.address?.pedestrian || item?.address?.living_street || item?.address?.footway || item?.name)
               .filter(Boolean)
               .filter((road: string) => {
                 const qNorm = normalizeText(q);
