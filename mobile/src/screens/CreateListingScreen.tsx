@@ -288,30 +288,17 @@ export default function CreateListingScreen({ navigation }: any) {
               <Text style={styles.helperText}>{title.length}/100</Text>
             </Field>
 
-            <View style={styles.row}>
-              <Field label="מחיר ₪ *" style={{ flex: 1 }}>
-                <TextInput
-                  style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
-                  value={price}
-                  onChangeText={(value) => setPrice(keepDigitsOnly(value))}
-                  keyboardType="numeric"
-                  placeholder="6500"
-                  placeholderTextColor={colors.textMut}
-                  textAlign="right"
-                />
-              </Field>
-              <Field label="חדרים *" style={{ flex: 1 }}>
-                <TextInput
-                  style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
-                  value={rooms}
-                  onChangeText={(value) => setRooms(keepDigitsOnly(value))}
-                  keyboardType="numeric"
-                  placeholder="3"
-                  placeholderTextColor={colors.textMut}
-                  textAlign="right"
-                />
-              </Field>
-            </View>
+            <Field label="מחיר ₪ *">
+              <TextInput
+                style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
+                value={price}
+                onChangeText={(value) => setPrice(keepDigitsOnly(value))}
+                keyboardType="numeric"
+                placeholder="6500"
+                placeholderTextColor={colors.textMut}
+                textAlign="right"
+              />
+            </Field>
 
             <View style={styles.row}>
               <Field label="עיר *" style={{ flex: 1 }}>
@@ -388,6 +375,17 @@ export default function CreateListingScreen({ navigation }: any) {
             </Field>
 
             <View style={styles.row}>
+              <Field label="חדרים *" style={{ flex: 1 }}>
+                <TextInput
+                  style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
+                  value={rooms}
+                  onChangeText={(value) => setRooms(keepDigitsOnly(value))}
+                  keyboardType="numeric"
+                  placeholder="3"
+                  placeholderTextColor={colors.textMut}
+                  textAlign="right"
+                />
+              </Field>
               <Field label="קומה" style={{ flex: 1 }}>
                 <TextInput
                   style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
@@ -441,23 +439,30 @@ export default function CreateListingScreen({ navigation }: any) {
             </View>
 
             <Text style={styles.fieldLabel}>תמונות ({images.length}/10)</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imagesRow} contentContainerStyle={styles.imagesRowContent}>
-              <TouchableOpacity style={styles.addImageBtn} onPress={pickImages}>
-                <Ionicons name="camera-outline" size={28} color={dirApp.secondary} />
-                <Text style={styles.addImageText}>הוסף</Text>
+            {images.length === 0 ? (
+              <TouchableOpacity style={styles.uploadPlaceholder} onPress={pickImages}>
+                <Ionicons name="add" size={20} color={dirApp.secondary} style={{ marginLeft: 6 }} />
+                <Text style={styles.uploadPlaceholderText}>להוספת תמונה לחצ/י פה</Text>
               </TouchableOpacity>
-              {images.map((img, i) => (
-                <View key={i} style={styles.imageThumb}>
-                  <Image source={img} style={styles.imageThumbImg} contentFit="cover" />
-                  <TouchableOpacity
-                    style={styles.removeImageBtn}
-                    onPress={() => setImages((prev) => prev.filter((_, idx) => idx !== i))}
-                  >
-                    <Ionicons name="close-circle" size={18} color={C.danger} />
-                  </TouchableOpacity>
-                </View>
-              ))}
-            </ScrollView>
+            ) : (
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imagesRow} contentContainerStyle={styles.imagesRowContent}>
+                <TouchableOpacity style={styles.addImageBtn} onPress={pickImages}>
+                  <Ionicons name="camera-outline" size={28} color={dirApp.secondary} />
+                  <Text style={styles.addImageText}>הוסף</Text>
+                </TouchableOpacity>
+                {images.map((img, i) => (
+                  <View key={i} style={styles.imageThumb}>
+                    <Image source={img} style={styles.imageThumbImg} contentFit="cover" />
+                    <TouchableOpacity
+                      style={styles.removeImageBtn}
+                      onPress={() => setImages((prev) => prev.filter((_, idx) => idx !== i))}
+                    >
+                      <Ionicons name="close-circle" size={18} color={C.danger} />
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </ScrollView>
+            )}
 
             <TouchableOpacity
               style={[styles.submitBtn, loading && styles.submitBtnDisabled]}
@@ -538,20 +543,38 @@ const styles = StyleSheet.create({
     borderBottomColor: `${dirApp.outlineVariant}44`,
   },
   suggestionText: { textAlign: 'right', color: dirApp.onSurface, fontSize: 14, fontFamily: fontFamily.regular },
-  amenitiesGrid: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: 8, marginBottom: 20, justifyContent: 'flex-start' },
+  amenitiesGrid: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: 6, marginBottom: 20, justifyContent: 'flex-start' },
   amenityChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
     borderRadius: 10,
     backgroundColor: dirApp.surfaceContainerLow,
     borderWidth: 1.5,
     borderColor: `${dirApp.outlineVariant}AA`,
   },
   amenityChipActive: { backgroundColor: dirApp.secondary, borderColor: dirApp.secondary },
-  amenityText: { color: dirApp.outline, fontSize: 13, textAlign: 'right', fontFamily: fontFamily.regular },
+  amenityText: { color: dirApp.outline, fontSize: 11, textAlign: 'right', fontFamily: fontFamily.regular },
   amenityTextActive: { color: dirApp.onSecondary, fontWeight: '600', fontFamily: fontFamily.bold },
   imagesRow: { marginBottom: 24 },
   imagesRowContent: { flexDirection: 'row-reverse', alignItems: 'center' },
+  uploadPlaceholder: {
+    width: '100%',
+    height: 54,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: dirApp.secondary,
+    borderStyle: 'dashed',
+    flexDirection: 'row-reverse',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: `${dirApp.secondaryContainer}11`,
+    marginBottom: 24,
+  },
+  uploadPlaceholderText: {
+    color: dirApp.secondary,
+    fontSize: 14,
+    fontFamily: fontFamily.semibold,
+  },
   addImageBtn: {
     width: 80,
     height: 80,

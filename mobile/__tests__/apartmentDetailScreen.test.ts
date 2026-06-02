@@ -72,7 +72,7 @@ function renderScreen() {
       { client: queryClient },
       React.createElement(ApartmentDetailScreen, {
         route: { params: { apartmentId: apartment.id } },
-        navigation: { goBack: jest.fn() },
+        navigation: { goBack: jest.fn(), setOptions: jest.fn() },
       } as any)
     )
   );

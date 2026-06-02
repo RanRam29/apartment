@@ -112,7 +112,7 @@ export default function TermsScreen({ navigation }: any) {
             if (navigation.canGoBack()) {
               navigation.goBack();
             } else {
-              navigation.navigate('Home');
+              navigation.navigate('Tabs');
             }
           }} 
           style={styles.backBtn}

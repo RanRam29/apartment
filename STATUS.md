@@ -4,9 +4,9 @@
 > The orchestrator (Claude Code) reads this file to update the main DASHBOARD.md.
 
 ## Current Task
-**Task:** WhatsApp Integration & Mobile UI Features (Phases 1-6)
+**Task:** Refine Create/Edit Listing Layout, Card Click Navigation, and Clean Up Navigation Tabs
 **Status:** 🟢 DONE
-**Progress:** Implemented WhatsApp notifications opt-in preference settings, debounced advanced NLP search with cache, GDPR compliance settings, redesigned Landlord Dashboard V2, circular Trust Score widget on profile, verified landlord listing shields, custom error boundaries, pull-to-refresh list controls, haptics, and glowing card skeleton placeholders. Fully completed and verified via tests!
+**Progress:** Reordered fields in Create/Edit Listing screens (Price full width, City/Street in one row, Rooms/Floor/Size in one row). Shrank amenities chips to fit in a single row. Replaced empty image picker square with a dashed full-width button containing "+" and "להוספת תמונה לחצ/י פה". Added tap gesture handler on SwipeableCard to navigate directly to the ApartmentDetail screen when tapped. Removed the static mock "Home" (בית) tab screen entirely, so the app now defaults directly to the Swipe/Explore interface (for tenants) and Dashboard (for landlords). Verified everything with eslint and Jest tests!
 
 ## Completed Tasks
 

@@ -96,8 +96,8 @@ export default function SwipeScreen() {
         <Text style={[styles.emptySubtitle, styles.feedErrorDetail]}>
           גלילת דירות זמינה בממשק שוכר. עבור לשורת הבחירה למעלה ובחר “ממשק שוכר”, או השתמש בחשבון שוכר.
         </Text>
-        <TouchableOpacity style={styles.reloadBtn} onPress={() => navigation.navigate('Home')}>
-          <Text style={styles.reloadText}>חזרה לדף הבית</Text>
+        <TouchableOpacity style={styles.reloadBtn} onPress={() => navigation.navigate('Dashboard')}>
+          <Text style={styles.reloadText}>חזרה לדשבורד</Text>
         </TouchableOpacity>
       </SafeAreaView>
     );
@@ -264,6 +264,7 @@ export default function SwipeScreen() {
               apartment={apartment}
               isTop={isTop}
               onSwipe={(dir) => handleSwipe(apartment, dir)}
+              onPress={() => navigation.navigate('ApartmentDetail', { apartmentId: apartment.id })}
             />
           );
         })}

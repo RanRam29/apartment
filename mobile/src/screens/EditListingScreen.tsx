@@ -271,16 +271,10 @@ export default function EditListingScreen({ route, navigation }: Props) {
             <Text style={styles.helperText}>{title.length}/100</Text>
           </Field>
 
-          <View style={styles.row}>
-            <Field label="מחיר ₪ *" style={{ flex: 1, marginLeft: 8 }}>
-              <TextInput style={[styles.input, { backgroundColor: colors.bgCard, color: colors.text, borderColor: colors.border }]} value={price} onChangeText={(value) => setPrice(keepDigitsOnly(value))}
-                keyboardType="numeric" placeholder="6500" placeholderTextColor={colors.textMut} textAlign="right" />
-            </Field>
-            <Field label="חדרים *" style={{ flex: 1 }}>
-              <TextInput style={[styles.input, { backgroundColor: colors.bgCard, color: colors.text, borderColor: colors.border }]} value={rooms} onChangeText={(value) => setRooms(keepDigitsOnly(value))}
-                keyboardType="numeric" placeholder="3" placeholderTextColor={colors.textMut} textAlign="right" />
-            </Field>
-          </View>
+          <Field label="מחיר ₪ *">
+            <TextInput style={[styles.input, { backgroundColor: colors.bgCard, color: colors.text, borderColor: colors.border }]} value={price} onChangeText={(value) => setPrice(keepDigitsOnly(value))}
+              keyboardType="numeric" placeholder="6500" placeholderTextColor={colors.textMut} textAlign="right" />
+          </Field>
 
           <View style={styles.row}>
             <Field label="עיר *" style={{ flex: 1, marginLeft: 8 }}>
@@ -332,6 +326,10 @@ export default function EditListingScreen({ route, navigation }: Props) {
           </View>
 
           <View style={styles.row}>
+            <Field label="חדרים *" style={{ flex: 1, marginLeft: 8 }}>
+              <TextInput style={[styles.input, { backgroundColor: colors.bgCard, color: colors.text, borderColor: colors.border }]} value={rooms} onChangeText={(value) => setRooms(keepDigitsOnly(value))}
+                keyboardType="numeric" placeholder="3" placeholderTextColor={colors.textMut} textAlign="right" />
+            </Field>
             <Field label="קומה" style={{ flex: 1, marginLeft: 8 }}>
               <TextInput style={[styles.input, { backgroundColor: colors.bgCard, color: colors.text, borderColor: colors.border }]} value={floor} onChangeText={(value) => setFloor(keepDigitsOnly(value))}
                 keyboardType="numeric" placeholder="3" placeholderTextColor={colors.textMut} textAlign="right" />
@@ -435,17 +433,17 @@ const styles = StyleSheet.create({
     borderBottomColor: `${dirApp.outlineVariant}44`,
   },
   suggestionText: { textAlign: 'right', color: dirApp.onSurface, fontSize: 14, fontFamily: fontFamily.regular },
-  amenitiesGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 },
+  amenitiesGrid: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: 6, marginBottom: 20 },
   amenityChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
     borderRadius: 10,
     backgroundColor: dirApp.surfaceContainerLow,
     borderWidth: 1.5,
     borderColor: `${dirApp.outlineVariant}AA`,
   },
   amenityChipActive: { backgroundColor: dirApp.secondary, borderColor: dirApp.secondary },
-  amenityText: { color: dirApp.outline, fontSize: 13, fontFamily: fontFamily.regular },
+  amenityText: { color: dirApp.outline, fontSize: 11, fontFamily: fontFamily.regular },
   amenityTextActive: { color: dirApp.onSecondary, fontWeight: '600', fontFamily: fontFamily.bold },
   petsRow: {
     flexDirection: 'row',

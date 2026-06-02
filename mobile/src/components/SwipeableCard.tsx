@@ -22,9 +22,10 @@ interface Props {
   apartment: Apartment;
   onSwipe: (direction: SwipeDirection) => void;
   isTop: boolean;
+  onPress?: () => void;
 }
 
-export default function SwipeableCard({ apartment, onSwipe, isTop }: Props) {
+export default function SwipeableCard({ apartment, onSwipe, isTop, onPress }: Props) {
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
   const startTime  = useSharedValue(Date.now());
@@ -58,6 +59,16 @@ export default function SwipeableCard({ apartment, onSwipe, isTop }: Props) {
         translateY.value = withSpring(0);
       }
     });
+
+  const tap = Gesture.Tap()
+    .enabled(isTop)
+    .onEnd(() => {
+      if (onPress) {
+        runOnJS(onPress)();
+      }
+    });
+
+  const gesture = Gesture.Exclusive(pan, tap);
 
   const animatedStyle = useAnimatedStyle(() => {
     const rotate = interpolate(
@@ -95,7 +106,7 @@ export default function SwipeableCard({ apartment, onSwipe, isTop }: Props) {
   }));
 
   return (
-    <GestureDetector gesture={pan}>
+    <GestureDetector gesture={gesture}>
       <Animated.View style={[styles.container, animatedStyle]}>
         <ApartmentCard apartment={apartment} isTop={isTop} />
 

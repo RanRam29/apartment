@@ -38,7 +38,6 @@ import RoommateScreen from '../screens/RoommateScreen';
 import VerifyIdentityScreen from '../screens/VerifyIdentityScreen';
 import ContractsScreen from '../screens/ContractsScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
-import HomeScreen from '../screens/HomeScreen';
 import MapScreen from '../screens/MapScreen';
 import RentPaymentsScreen from '../screens/RentPaymentsScreen';
 import CommercialScreen from '../screens/CommercialScreen';
@@ -142,7 +141,6 @@ function TenantTabs() {
         tabBarLabelStyle: { fontSize: 10, fontWeight: '600' },
         tabBarIcon: ({ focused, color, size }) => {
           const icons: Record<string, keyof typeof Ionicons.glyphMap> = {
-            Home:    focused ? 'compass'  : 'compass-outline',
             Swipe:   focused ? 'home'   : 'home-outline',
             Matches: focused ? 'heart'  : 'heart-outline',
             Search:  focused ? 'search' : 'search-outline',
@@ -153,7 +151,6 @@ function TenantTabs() {
         },
       })}
     >
-      <TenantTab.Screen name="Home"    component={HomeScreen}    options={{ title: 'בית' }} />
       <TenantTab.Screen name="Swipe"   component={SwipeScreen}   options={{ title: 'דירות' }} />
       <TenantTab.Screen name="Matches" component={MatchesScreen} options={{ title: 'התאמות' }} />
       <TenantTab.Screen name="Search"  component={SearchScreen}  options={{ title: 'חיפוש' }} />
@@ -192,7 +189,6 @@ function LandlordTabs() {
         tabBarLabelStyle: { fontSize: 10, fontWeight: '600' },
         tabBarIcon: ({ focused, color, size }) => {
           const icons: Record<string, keyof typeof Ionicons.glyphMap> = {
-            Home:      focused ? 'compass'       : 'compass-outline',
             Dashboard: focused ? 'stats-chart'   : 'stats-chart-outline',
             Leads:     focused ? 'people'        : 'people-outline',
             Matches:   focused ? 'chatbubbles'   : 'chatbubbles-outline',
@@ -203,7 +199,6 @@ function LandlordTabs() {
         },
       })}
     >
-      <LandlordTab.Screen name="Home"      component={HomeScreen}        options={{ title: 'בית' }} />
       <LandlordTab.Screen name="Dashboard" component={LandlordDashboard} options={{ title: 'דשבורד' }} />
       <LandlordTab.Screen name="Leads"     component={LeadsScreen}       options={{ title: 'לידים' }} />
       <LandlordTab.Screen name="Matches"   component={MatchesScreen}     options={{ title: 'צ׳אטים' }} />
