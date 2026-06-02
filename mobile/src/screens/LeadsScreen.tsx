@@ -13,6 +13,7 @@ import { landlordApi, matchesApi } from '../services/api';
 import type { Match } from '../types';
 import { C, Dark } from '../theme';
 import { dirApp } from '../theme/dirAppTokens';
+import { fontFamily } from '../theme/fonts';
 
 const STATUS_TABS = ['pending', 'accepted', 'rejected'] as const;
 type StatusTab = typeof STATUS_TABS[number];
@@ -297,7 +298,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 12,
   },
-  header: { fontSize: 22, fontWeight: '800', color: C.onInverse.primary, textAlign: 'right', flex: 1 },
+  header: { fontSize: 22, fontWeight: '800', color: C.onInverse.primary, textAlign: 'right', flex: 1, fontFamily: fontFamily.bold },
   aiBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -307,14 +308,14 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     backgroundColor: `${dirApp.secondaryContainer}55`,
   },
-  aiBadgeText: { color: dirApp.secondary, fontSize: 11, fontWeight: '700' },
+  aiBadgeText: { color: dirApp.secondary, fontSize: 11, fontWeight: '700', fontFamily: fontFamily.bold },
   tabs: { flexDirection: 'row', paddingHorizontal: 16, gap: 8, marginBottom: 8 },
   tab: {
     flex: 1, paddingVertical: 8, borderRadius: 10,
     backgroundColor: Dark.surface, alignItems: 'center',
   },
   tabActive: { backgroundColor: C.cyan },
-  tabText: { color: C.textMut, fontSize: 13, fontWeight: '600' },
+  tabText: { color: C.textMut, fontSize: 13, fontWeight: '600', fontFamily: fontFamily.semibold },
   tabTextActive: { color: dirApp.primary },
   list: { padding: 16, gap: 10 },
   leadCard: { backgroundColor: Dark.surface, borderRadius: 16, padding: 14, gap: 12, borderWidth: 1, borderColor: Dark.border },
@@ -324,22 +325,22 @@ const styles = StyleSheet.create({
   leadInfo: { flex: 1 },
   nameRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 8 },
   scoreBadge: { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 },
-  scoreText: { fontSize: 11, fontWeight: '800' },
-  tenantName: { color: C.onInverse.primary, fontSize: 15, fontWeight: '700', textAlign: 'right' },
-  aptName: { color: C.textMut, fontSize: 13, textAlign: 'right', marginTop: 2 },
-  aptMeta: { color: C.cyan, fontSize: 12, textAlign: 'right', marginTop: 2 },
+  scoreText: { fontSize: 11, fontWeight: '800', fontFamily: fontFamily.bold },
+  tenantName: { color: C.onInverse.primary, fontSize: 15, fontWeight: '700', textAlign: 'right', fontFamily: fontFamily.bold },
+  aptName: { color: C.textMut, fontSize: 13, textAlign: 'right', marginTop: 2, fontFamily: fontFamily.regular },
+  aptMeta: { color: C.cyan, fontSize: 12, textAlign: 'right', marginTop: 2, fontFamily: fontFamily.semibold },
   actions: { flexDirection: 'row', gap: 10 },
   rejectBtn: {
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: 6, paddingVertical: 10, borderRadius: 10,
     borderWidth: 1, borderColor: C.danger,
   },
-  rejectText: { color: C.danger, fontWeight: '600' },
+  rejectText: { color: C.danger, fontWeight: '600', fontFamily: fontFamily.semibold },
   acceptBtn: {
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: 6, paddingVertical: 10, borderRadius: 10, backgroundColor: C.cyan,
   },
-  acceptText: { color: dirApp.primary, fontWeight: '600' },
+  acceptText: { color: dirApp.primary, fontWeight: '600', fontFamily: fontFamily.semibold },
   chatBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -349,9 +350,9 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: C.cyan,
   },
-  chatText: { color: dirApp.primary, fontWeight: '600' },
+  chatText: { color: dirApp.primary, fontWeight: '600', fontFamily: fontFamily.semibold },
   empty: { alignItems: 'center', paddingTop: 60 },
-  emptyText: { color: C.textMut, fontSize: 14 },
+  emptyText: { color: C.textMut, fontSize: 14, fontFamily: fontFamily.regular },
 
   // tenant contact bar
   contactBar: {
@@ -379,6 +380,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     direction: 'ltr',
+    fontFamily: fontFamily.semibold,
   },
 
   // verified badge on avatar

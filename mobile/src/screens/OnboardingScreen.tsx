@@ -13,6 +13,7 @@ import { C, Dark } from '../theme';
 import { dirApp } from '../theme/dirAppTokens';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
 import { dirType } from '../theme/textStyles';
+import SwipeHouseLogo from '../components/SwipeHouseLogo';
 
 const CITIES = ['תל אביב', 'ירושלים', 'חיפה', 'ראשון לציון', 'פתח תקווה',
   'נתניה', 'באר שבע', 'בני ברק', 'רמת גן', 'הרצליה'];
@@ -52,8 +53,7 @@ export default function OnboardingScreen({ navigation }: Props) {
     <SafeAreaView style={styles.container}>
       {/* DirApp logo header */}
       <View style={styles.logoHeader}>
-        <View style={styles.logoDot} />
-        <Text style={styles.logoText}>DirApp</Text>
+        <SwipeHouseLogo size="sm" plate={true} />
       </View>
 
       {/* Progress pills */}
@@ -208,8 +208,6 @@ function NavButtons({ onNext, onBack }: { onNext: () => void; onBack: () => void
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Dark.bg },
   logoHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingTop: 16 },
-  logoDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: C.cyan },
-  logoText: { fontSize: 18, fontWeight: '800', color: C.onInverse.primary, letterSpacing: 1 },
   dotsRow: { flexDirection: 'row', justifyContent: 'center', gap: 6, paddingTop: 12 },
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.15)' },
   dotActive: { backgroundColor: C.cyan, width: 24, borderRadius: 4 },

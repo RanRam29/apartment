@@ -10,6 +10,7 @@ import { C, Dark } from '../theme';
 import { dirApp } from '../theme/dirAppTokens';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
 import { dirType } from '../theme/textStyles';
+import { fontFamily } from '../theme/fonts';
 
 // ─── Theme constants ──────────────────────────────────────────────────────────
 const BG       = Dark.bg;
@@ -247,7 +248,7 @@ const styles = StyleSheet.create({
     borderBottomColor: BORDER,
   },
   backBtn:     { padding: 4, width: 32 },
-  headerTitle: { color: TEXT, fontSize: 17, fontWeight: '700' },
+  headerTitle: { color: TEXT, fontSize: 17, fontWeight: '700', fontFamily: fontFamily.bold },
 
   scroll: { padding: 16, gap: 8, paddingBottom: 40 },
   center: { paddingVertical: 40, alignItems: 'center' },
@@ -268,12 +269,14 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: ACCENT,
     letterSpacing: -2,
+    fontFamily: fontFamily.extrabold,
   },
   pointsLabel: {
     color: TEXT_SUB,
     fontSize: 14,
     fontWeight: '600',
     marginTop: -4,
+    fontFamily: fontFamily.semibold,
   },
   levelBadge: {
     flexDirection: 'row',
@@ -285,7 +288,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     marginTop: 4,
   },
-  levelBadgeText: { fontSize: 13, fontWeight: '700' },
+  levelBadgeText: { fontSize: 13, fontWeight: '700', fontFamily: fontFamily.bold },
 
   // Progress bar
   progressWrap: { width: '100%', marginTop: 12, gap: 6 },
@@ -300,7 +303,7 @@ const styles = StyleSheet.create({
     borderRadius: 3,
     backgroundColor: ACCENT,
   },
-  progressLabel: { color: TEXT_SUB, fontSize: 11, textAlign: 'center' },
+  progressLabel: { color: TEXT_SUB, fontSize: 11, textAlign: 'center', fontFamily: fontFamily.regular },
 
   // Section title
   sectionTitle: {
@@ -312,6 +315,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 4,
     textAlign: 'right',
+    fontFamily: fontFamily.bold,
   },
 
   // Empty state
@@ -325,7 +329,7 @@ const styles = StyleSheet.create({
     borderColor: BORDER,
     marginBottom: 8,
   },
-  emptyText: { color: TEXT_SUB, fontSize: 14 },
+  emptyText: { color: TEXT_SUB, fontSize: 14, fontFamily: fontFamily.regular },
 
   // Badges grid
   badgesGrid: {
@@ -353,8 +357,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  badgeName: { color: TEXT,     fontSize: 12, fontWeight: '700', textAlign: 'center' },
-  badgeDate: { color: TEXT_SUB, fontSize: 10, textAlign: 'center' },
+  badgeName: { color: TEXT,     fontSize: 12, fontWeight: '700', textAlign: 'center', fontFamily: fontFamily.bold },
+  badgeDate: { color: TEXT_SUB, fontSize: 10, textAlign: 'center', fontFamily: fontFamily.regular },
 
   // Leaderboard
   leaderCard: {
@@ -372,9 +376,9 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     gap: 10,
   },
-  leaderRank:   { color: TEXT_SUB, fontSize: 13, fontWeight: '800', width: 28 },
-  leaderName:   { color: TEXT, fontSize: 14, fontWeight: '600', flex: 1 },
-  leaderPoints: { color: ACCENT, fontSize: 13, fontWeight: '700' },
+  leaderRank:   { color: TEXT_SUB, fontSize: 13, fontWeight: '800', width: 28, fontFamily: fontFamily.extrabold },
+  leaderName:   { color: TEXT, fontSize: 14, fontWeight: '600', flex: 1, fontFamily: fontFamily.semibold },
+  leaderPoints: { color: ACCENT, fontSize: 13, fontWeight: '700', fontFamily: fontFamily.bold },
   divider:      { height: 1, backgroundColor: BORDER, marginHorizontal: 16 },
 
   // Level chip (used in leaderboard)
@@ -384,5 +388,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 7,
     paddingVertical: 2,
   },
-  levelChipText: { fontSize: 10, fontWeight: '700' },
+  levelChipText: { fontSize: 10, fontWeight: '700', fontFamily: fontFamily.bold },
 });

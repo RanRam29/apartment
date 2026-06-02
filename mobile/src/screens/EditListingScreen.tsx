@@ -16,6 +16,7 @@ import { CITY_CENTER_BY_NAME } from '../constants/cityCenters';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
 import { dirType } from '../theme/textStyles';
 import { useColors } from '../context/ThemeContext';
+import { fontFamily } from '../theme/fonts';
 
 const AMENITY_OPTIONS: { key: Amenity; label: string }[] = [
   { key: 'parking',      label: '🚗 חניה' },
@@ -399,9 +400,9 @@ function Field({ label, children, style }: { label: string; children: React.Reac
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: dirApp.background },
   scroll: { padding: 20, paddingBottom: 40 },
-  header: { fontSize: 22, fontWeight: '800', color: dirApp.primary, textAlign: 'right', marginBottom: 20 },
+  header: { fontSize: 22, fontWeight: '800', color: dirApp.primary, textAlign: 'right', marginBottom: 20, fontFamily: fontFamily.bold },
   row: { flexDirection: 'row', marginBottom: 0, alignItems: 'flex-start' },
-  fieldLabel: { color: dirApp.outline, fontSize: 12, fontWeight: '600', textAlign: 'right', marginBottom: 6 },
+  fieldLabel: { color: dirApp.outline, fontSize: 12, fontWeight: '600', textAlign: 'right', marginBottom: 6, fontFamily: fontFamily.bold },
   input: {
     backgroundColor: dirApp.surfaceContainerLowest,
     borderRadius: 12,
@@ -411,9 +412,10 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: `${dirApp.outlineVariant}AA`,
     marginBottom: 0,
+    fontFamily: fontFamily.regular,
   },
   textarea: { height: 100, textAlignVertical: 'top' },
-  helperText: { marginTop: 4, textAlign: 'right', color: dirApp.outline, fontSize: 11 },
+  helperText: { marginTop: 4, textAlign: 'right', color: dirApp.outline, fontSize: 11, fontFamily: fontFamily.regular },
   loader: { marginTop: 6 },
   suggestionsBox: {
     marginTop: 4,
@@ -432,7 +434,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: `${dirApp.outlineVariant}44`,
   },
-  suggestionText: { textAlign: 'right', color: dirApp.onSurface, fontSize: 14 },
+  suggestionText: { textAlign: 'right', color: dirApp.onSurface, fontSize: 14, fontFamily: fontFamily.regular },
   amenitiesGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 },
   amenityChip: {
     paddingHorizontal: 12,
@@ -443,8 +445,8 @@ const styles = StyleSheet.create({
     borderColor: `${dirApp.outlineVariant}AA`,
   },
   amenityChipActive: { backgroundColor: dirApp.secondary, borderColor: dirApp.secondary },
-  amenityText: { color: dirApp.outline, fontSize: 13 },
-  amenityTextActive: { color: dirApp.onSecondary, fontWeight: '600' },
+  amenityText: { color: dirApp.outline, fontSize: 13, fontFamily: fontFamily.regular },
+  amenityTextActive: { color: dirApp.onSecondary, fontWeight: '600', fontFamily: fontFamily.bold },
   petsRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -457,7 +459,7 @@ const styles = StyleSheet.create({
     borderColor: `${dirApp.outlineVariant}AA`,
   },
   petsRowActive: { borderColor: dirApp.secondary },
-  petsLabel: { color: dirApp.outline, fontSize: 14 },
+  petsLabel: { color: dirApp.outline, fontSize: 14, fontFamily: fontFamily.regular },
   saveBtn: {
     backgroundColor: dirApp.primaryContainer,
     borderRadius: 14,
@@ -471,5 +473,5 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   saveBtnDisabled: { opacity: 0.6 },
-  saveBtnText: { color: C.onInverse.primary, fontSize: 16, fontWeight: '800' },
+  saveBtnText: { color: C.onInverse.primary, fontSize: 16, fontWeight: '800', fontFamily: fontFamily.bold },
 });

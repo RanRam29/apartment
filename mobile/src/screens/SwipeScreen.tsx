@@ -14,6 +14,7 @@ import { C } from '../theme';
 import { dirApp } from '../theme/dirAppTokens';
 import { dirType } from '../theme/textStyles';
 import type { Apartment, SwipeDirection } from '../types';
+import { fontFamily } from '../theme/fonts';
 
 const FREE_DAILY_LIMIT = 20;
 
@@ -350,14 +351,14 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: dirApp.background },
   centered: { flex: 1, backgroundColor: dirApp.background, justifyContent: 'center', alignItems: 'center', gap: 12 },
 
-  loadingText: { color: C.textSub, fontSize: 15, marginTop: 8 },
-  emptyTitle:  { fontSize: 20, fontWeight: '700', color: C.text, marginTop: 8 },
-  emptySubtitle: { fontSize: 14, color: C.textSub },
+  loadingText: { color: C.textSub, fontSize: 15, marginTop: 8, fontFamily: fontFamily.regular },
+  emptyTitle:  { fontSize: 20, fontWeight: '700', color: C.text, marginTop: 8, fontFamily: fontFamily.bold },
+  emptySubtitle: { fontSize: 14, color: C.textSub, fontFamily: fontFamily.regular },
   reloadBtn: {
     marginTop: 16, backgroundColor: dirApp.primaryContainer,
     paddingHorizontal: 28, paddingVertical: 12, borderRadius: 14,
   },
-  reloadText: { color: C.onInverse.primary, fontWeight: '700' },
+  reloadText: { color: C.onInverse.primary, fontWeight: '700', fontFamily: fontFamily.bold },
   feedErrorDetail: { textAlign: 'center', paddingHorizontal: 24, lineHeight: 20 },
   feedErrorOutlineBtn: {
     marginTop: 10,
@@ -367,7 +368,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: dirApp.primary,
   },
-  feedErrorOutlineBtnText: { color: dirApp.primary, fontWeight: '700' },
+  feedErrorOutlineBtnText: { color: dirApp.primary, fontWeight: '700', fontFamily: fontFamily.bold },
   header: {
     flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: 16, paddingTop: 6, paddingBottom: 8,
@@ -408,12 +409,12 @@ const styles = StyleSheet.create({
     backgroundColor: C.coralAlpha(0.12),
     borderColor: C.coralAlpha(0.3),
   },
-  quotaText: { color: C.textSub, fontSize: 11, fontWeight: '600' },
+  quotaText: { color: C.textSub, fontSize: 11, fontWeight: '600', fontFamily: fontFamily.semibold },
   deckCountBadge: {
     width: 26, height: 26, borderRadius: 13,
     backgroundColor: C.border, justifyContent: 'center', alignItems: 'center',
   },
-  deckCountText: { fontSize: 11, fontWeight: '700', color: C.textSub },
+  deckCountText: { fontSize: 11, fontWeight: '700', color: C.textSub, fontFamily: fontFamily.bold },
 
   // Cards
   deckContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
@@ -453,7 +454,7 @@ const styles = StyleSheet.create({
     shadowColor: dirApp.primary, shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08, shadowRadius: 6, elevation: 3,
   },
-  undoBtnText: { color: dirApp.primary, fontSize: 13, fontWeight: '600' },
+  undoBtnText: { color: dirApp.primary, fontSize: 13, fontWeight: '600', fontFamily: fontFamily.semibold },
 
   // Modals
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
@@ -470,20 +471,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12, paddingVertical: 6,
     borderWidth: 1, borderColor: C.border,
   },
-  matchAptName: { color: C.textSub, fontSize: 13, maxWidth: 200 },
+  matchAptName: { color: C.textSub, fontSize: 13, maxWidth: 200, fontFamily: fontFamily.regular },
   matchIconRow: {
     width: 72, height: 72, borderRadius: 36,
     backgroundColor: C.coralAlpha(0.1),
     justifyContent: 'center', alignItems: 'center',
   },
-  matchTitle: { fontSize: 24, fontWeight: '800', color: C.text },
-  matchSub:   { fontSize: 14, color: C.textSub, textAlign: 'center', lineHeight: 20 },
+  matchTitle: { fontSize: 24, fontWeight: '800', color: C.text, fontFamily: fontFamily.bold },
+  matchSub:   { fontSize: 14, color: C.textSub, textAlign: 'center', lineHeight: 20, fontFamily: fontFamily.regular },
   primaryBtn: {
     backgroundColor: dirApp.primaryContainer, borderRadius: 14,
     paddingHorizontal: 32, paddingVertical: 14,
     width: '100%', alignItems: 'center',
   },
-  primaryBtnText: { color: C.onInverse.primary, fontWeight: '700', fontSize: 15 },
+  primaryBtnText: { color: C.onInverse.primary, fontWeight: '700', fontSize: 15, fontFamily: fontFamily.bold },
   premiumBtn: {
     flexDirection: 'row', gap: 8,
     backgroundColor: dirApp.primaryContainer, borderRadius: 14,
@@ -491,5 +492,5 @@ const styles = StyleSheet.create({
     width: '100%', alignItems: 'center', justifyContent: 'center',
   },
   secondaryBtn: { paddingVertical: 8 },
-  secondaryBtnText: { color: C.textSub, fontSize: 14 },
+  secondaryBtnText: { color: C.textSub, fontSize: 14, fontFamily: fontFamily.regular },
 });

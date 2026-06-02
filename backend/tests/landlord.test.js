@@ -13,6 +13,18 @@ const { initRedis, getRedisClient } = require('../src/config/redis');
 const app = require('../src/app');
 const { generateStrongTestPassword } = require('./helpers/testCredentials');
 
+// Mock UserPreferences to prevent Mongoose timeouts during registration & leads fetch
+jest.mock('../src/models/mongo/UserPreferences', () => {
+  return {
+    create: jest.fn(async () => ({})),
+    findOne: jest.fn(async () => ({})),
+    updateOne: jest.fn(async () => ({})),
+    find: jest.fn(() => ({
+      lean: jest.fn(async () => []),
+    })),
+  };
+});
+
 const ts = Date.now();
 const TEST_PASSWORD = generateStrongTestPassword();
 const LANDLORD = {

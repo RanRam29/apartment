@@ -98,6 +98,7 @@ function AdminTabs() {
             AdminUsers:  focused ? 'people' : 'people-outline',
             AdminStats:  focused ? 'stats-chart' : 'stats-chart-outline',
             LogsConsole: focused ? 'document-text' : 'document-text-outline',
+            Profile:     focused ? 'person' : 'person-outline',
           };
           return <Ionicons name={icons[route.name]} size={size} color={color} />;
         },
@@ -107,6 +108,7 @@ function AdminTabs() {
       <AdminTab.Screen name="AdminUsers"  component={AdminUsersScreen}  options={{ title: 'משתמשים' }} />
       <AdminTab.Screen name="AdminStats"  component={AdminStatsScreen}  options={{ title: 'סטטיסטיקות' }} />
       <AdminTab.Screen name="LogsConsole" component={LogsConsoleScreen} options={{ title: 'לוגים' }} />
+      <AdminTab.Screen name="Profile" component={ProfileScreen} options={{ title: 'פרופיל' }} />
     </AdminTab.Navigator>
   );
 }

@@ -23,6 +23,7 @@ import { useDirection } from '../hooks/useDirection';
 import { dirApp } from '../theme/dirAppTokens';
 import SwipeHouseLogo from '../components/SwipeHouseLogo';
 import { useColors } from '../context/ThemeContext';
+import { fontFamily } from '../theme/fonts';
 
 const { width: W } = Dimensions.get('window');
 const PAD = 16;
@@ -650,8 +651,8 @@ const landlordStyles = StyleSheet.create({
     gap: 12,
   },
   headerTextBlock: { flex: 1, alignItems: 'flex-end' },
-  greeting: { fontSize: 14, color: C.textMut, fontWeight: '400', marginBottom: 2 },
-  username: { fontSize: 26, color: dirApp.primary, fontWeight: '700', letterSpacing: -0.5 },
+  greeting: { fontSize: 14, color: C.textMut, fontWeight: '400', marginBottom: 2, fontFamily: fontFamily.regular },
+  username: { fontSize: 26, color: dirApp.primary, fontWeight: '700', letterSpacing: -0.5, fontFamily: fontFamily.bold },
   headerBadge: {
     width: 44,
     height: 44,
@@ -681,8 +682,8 @@ const landlordStyles = StyleSheet.create({
     shadowRadius: C.glass.shadowLight.shadowRadius,
     elevation: C.glass.shadowLight.elevation,
   },
-  heroTitle: { fontSize: 20, fontWeight: '700', color: dirApp.primary, marginBottom: 8, letterSpacing: -0.3 },
-  heroSub: { fontSize: 14, color: C.textSub, lineHeight: 20, marginBottom: 16 },
+  heroTitle: { fontSize: 20, fontWeight: '700', color: dirApp.primary, marginBottom: 8, letterSpacing: -0.3, fontFamily: fontFamily.bold },
+  heroSub: { fontSize: 14, color: C.textSub, lineHeight: 20, marginBottom: 16, fontFamily: fontFamily.regular },
   heroPill: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -694,7 +695,7 @@ const landlordStyles = StyleSheet.create({
     borderRadius: 999,
   },
   heroDot: { width: 6, height: 6, borderRadius: 3 },
-  heroPillText: { fontSize: 12, fontWeight: '600', color: dirApp.primary },
+  heroPillText: { fontSize: 12, fontWeight: '600', color: dirApp.primary, fontFamily: fontFamily.semibold },
 
   sectionLabel: {
     fontSize: 11,
@@ -703,6 +704,7 @@ const landlordStyles = StyleSheet.create({
     textTransform: 'uppercase',
     color: C.textMut,
     marginBottom: 14,
+    fontFamily: fontFamily.bold,
   },
 
   grid: {
@@ -744,8 +746,8 @@ const landlordStyles = StyleSheet.create({
     right: -20,
     opacity: 0.6,
   },
-  tileLabel: { fontSize: 15, fontWeight: '700', color: C.text, marginBottom: 4 },
-  tileSubLabel: { fontSize: 12, color: C.textMut, lineHeight: 16 },
+  tileLabel: { fontSize: 15, fontWeight: '700', color: C.text, marginBottom: 4, fontFamily: fontFamily.bold },
+  tileSubLabel: { fontSize: 12, color: C.textMut, lineHeight: 16, fontFamily: fontFamily.regular },
 
   tipCard: {
     flexDirection: 'row',
@@ -757,5 +759,5 @@ const landlordStyles = StyleSheet.create({
     borderColor: C.cyanAlpha(0.15),
     padding: 14,
   },
-  tipText: { flex: 1, fontSize: 13, color: C.textSub, lineHeight: 18 },
+  tipText: { flex: 1, fontSize: 13, color: C.textSub, lineHeight: 18, fontFamily: fontFamily.regular },
 });

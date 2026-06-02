@@ -56,8 +56,12 @@ function q(result) {
 // ─── Postgres User / Match / Apartment mock ───────────────────────────────────
 jest.mock('../src/models', () => ({
   User: {
-    findByPk: jest.fn(async () => ({
-      id: 'user-landlord', firstName: 'ישראל', lastName: 'ישראלי', phone: '050-1234567',
+    findByPk: jest.fn(async (id) => ({
+      id: id || 'user-landlord',
+      firstName: id === 'user-tenant' ? 'שוכר' : 'ישראל',
+      lastName: 'ישראלי',
+      phone: '050-1234567',
+      trustScore: id === 'user-tenant' ? 0 : 50,
     })),
     findOne:  jest.fn(async () => null),
     findAll:  jest.fn(async () => [
@@ -177,7 +181,18 @@ jest.mock('../src/models/mongo/UserPoints', () => {
     find:             jest.fn(),
     findOneAndUpdate: jest.fn(),
   };
-  const ctor = jest.fn(() => ({ ...mockPoints, save: jest.fn(async () => mockPoints) }));
+  const ctor = jest.fn((args) => {
+    const instance = {
+      userId: 'user-tenant',
+      points: 120,
+      level: 2,
+      badges: [{ id: 'explorer', name: 'חוקר', earnedAt: new Date() }],
+      lastActivityAt: new Date(),
+      ...args,
+    };
+    instance.save = jest.fn(async () => instance);
+    return instance;
+  });
   return Object.assign(ctor, m);
 });
 
