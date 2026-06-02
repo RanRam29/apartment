@@ -4,14 +4,15 @@
 > The orchestrator (Claude Code) reads this file to update the main DASHBOARD.md.
 
 ## Current Task
-**Task:** Admin-only Configuration Panel (wind/admin-config-panel)
+**Task:** WhatsApp Integration & Mobile UI Features (Phases 1-6)
 **Status:** 🟢 DONE
-**Progress:** Rebuilt admin console screens, updated api routing, and verified typescript and test status. Fully completed!
+**Progress:** Implemented WhatsApp notifications opt-in preference settings, debounced advanced NLP search with cache, GDPR compliance settings, redesigned Landlord Dashboard V2, circular Trust Score widget on profile, verified landlord listing shields, custom error boundaries, pull-to-refresh list controls, haptics, and glowing card skeleton placeholders. Fully completed and verified via tests!
 
 ## Completed Tasks
 
 | Task | Completed At | Commits | Notes |
 |------|-------------|---------|-------|
+| WhatsApp Integration & Mobile UI Features (Phases 1-6) | 2026-06-02 | `7477eac` | Implemented WhatsApp preference updates, NLP search, GDPR settings, refreshed Landlord Dashboard V2, circular trust score widget, verified badges, and haptic feedback. Passed Jest integrations and TS check. |
 | Fix W-1 — Missing Property Images in Swipe | 2026-05-31 | `[Local]` | Resolved property card blank background by introducing a beautiful local fallback illustration using Figma/Stitch design tokens. |
 | Admin-only Configuration Panel | 2026-05-31 | `f8dac32`, `bfee9e8`, `410a405` | Integrated AdminConfigScreen, AdminUsersScreen, AdminStatsScreen, updated types & AppNavigator.tsx bottom tabs. Fixed bottom-tab overlap clipping and resolved empty-phone user update 422 validation failure. |
 | T3.0 New Feature Suite | 2026-05-30 | `d026b12` | Implemented trust score synced to Postgres, renter journal RTL vertical timeline, and contract amendments with comprehensive Jest verification. |
@@ -44,6 +45,7 @@ mobile/src/screens/EditListingScreen.tsx (modified)
 mobile/src/screens/LandlordDashboard.tsx (modified)
 mobile/src/screens/ListingsScreen.tsx (modified)
 mobile/src/screens/ProfileScreen.tsx (modified)
+mobile/src/screens/GamificationScreen.tsx (modified)
 backend/src/config/resend.js (created)
 backend/src/services/resendService.js (created)
 backend/src/services/notificationService.js (created)
@@ -67,6 +69,8 @@ mobile/src/navigation/AppNavigator.tsx (modified)
 mobile/src/screens/AdminConfigScreen.tsx (created)
 mobile/src/screens/AdminUsersScreen.tsx (created)
 mobile/src/screens/AdminStatsScreen.tsx (created)
+mobile/src/screens/PrivacySettingsScreen.tsx (created)
+mobile/src/components/SkeletonLoader.tsx (created)
 backend/tests/resendService.test.js (created)
 backend/tests/kycV3.test.js (created)
 backend/tests/tosAndRole.test.js (created)
@@ -75,4 +79,4 @@ backend/tests/guarantor.test.js (created)
 ```
 
 ## Last Updated
-2026-05-31 (Admin-only Configuration Panel merged to main)
+2026-06-02 (WhatsApp Integration & Mobile UI Features completed)
