@@ -9,6 +9,8 @@ import { formatLoginError } from '../utils/authErrors';
 import { isTimeoutError } from '../utils/networkUtils';
 import { C } from '../theme';
 import { dirApp } from '../theme/dirAppTokens';
+import { dirType } from '../theme/textStyles';
+import { fontFamily } from '../theme/fonts';
 import SwipeHouseLogo from '../components/SwipeHouseLogo';
 import { useColors } from '../context/ThemeContext';
 
@@ -120,9 +122,10 @@ export default function LoginScreen({ onSwitch }: Props) {
 const styles = StyleSheet.create({
   container: { flexGrow: 1, justifyContent: 'center', padding: 28 },
   brandRow: { alignItems: 'center', marginBottom: 20 },
-  title: { fontSize: 26, fontWeight: '700', color: dirApp.primary, textAlign: 'right', marginBottom: 4 },
-  subtitle: { fontSize: 14, color: dirApp.outline, textAlign: 'right', marginBottom: 28 },
+  title: { ...dirType.hero, color: dirApp.primary, textAlign: 'right', marginBottom: 4 },
+  subtitle: { ...dirType.caption, color: dirApp.outline, textAlign: 'right', marginBottom: 28 },
   input: {
+    fontFamily: fontFamily.regular,
     backgroundColor: dirApp.surfaceContainerLowest,
     borderRadius: 14,
     padding: 16,
@@ -146,9 +149,9 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   buttonDisabled: { opacity: 0.6 },
-  buttonText: { color: C.onInverse.primary, fontSize: 16, fontWeight: '700' },
-  errorText: { color: C.danger, fontSize: 13, textAlign: 'right', marginBottom: 10, lineHeight: 20 },
-  infoText: { color: C.success, fontSize: 13, textAlign: 'right', marginBottom: 10, lineHeight: 20 },
+  buttonText: { ...dirType.subhead, color: C.onInverse.primary },
+  errorText: { ...dirType.caption, color: C.danger, fontSize: 13, textAlign: 'right', marginBottom: 10, lineHeight: 20 },
+  infoText: { ...dirType.caption, color: C.success, fontSize: 13, textAlign: 'right', marginBottom: 10, lineHeight: 20 },
   switchRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 24 },
   switchText: { color: dirApp.outline, fontSize: 14 },
   switchLink: { color: dirApp.secondary, fontWeight: '700' },
