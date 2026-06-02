@@ -5,9 +5,8 @@ import { C } from '../theme';
 
 const LOGO = require('../../assets/logo.png');
 
-/** Pixel size of `assets/logo.png` (width × height). Used for `aspectRatio` = W/H. */
-const LOGO_W = 134;
-const LOGO_H = 117;
+const LOGO_W = 2816;
+const LOGO_H = 1536;
 const LOGO_ASPECT = LOGO_W / LOGO_H;
 
 const WIDTH = { xs: 72, sm: 96, md: 128, lg: 176 };
@@ -23,7 +22,7 @@ interface Props {
   plate?: boolean;
 }
 
-export default function SwipeHouseLogo({ size = 'md', plate = true }: Props) {
+export default function SwipeHouseLogo({ size = 'md', plate = false }: Props) {
   const width = WIDTH[size];
 
   const inner = (
@@ -62,17 +61,8 @@ const styles = StyleSheet.create({
   wrapperPlate: {
     alignItems: 'center',
     alignSelf: 'center',
-    backgroundColor: '#D8DADF',
     borderRadius: 16,
     paddingVertical: 10,
     paddingHorizontal: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: C.border,
-    // Light “tile” feel without literal checker PNG
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 2,
-    elevation: 2,
   },
 });
