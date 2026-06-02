@@ -2,7 +2,9 @@ import React, { useEffect, useCallback, useRef, useState } from 'react';
 import {
   View, Text, StyleSheet, SafeAreaView,
   TouchableOpacity, Modal, ActivityIndicator, Animated,
+  ScrollView, RefreshControl,
 } from 'react-native';
+import SkeletonLoader from '../components/SkeletonLoader';
 import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -31,6 +33,15 @@ export default function SwipeScreen() {
   const undoOpacity = useRef(new Animated.Value(0)).current;
   const undoTimer   = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [undoVisible, setUndoVisible] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([loadFeed(), loadQuota()]);
+    } catch (_) {}
+    setRefreshing(false);
+  }, [loadFeed, loadQuota]);
 
   useEffect(() => {
     if (personaLandlord) return;
@@ -99,9 +110,44 @@ export default function SwipeScreen() {
 
   if (awaitingFeed && !feedError) {
     return (
-      <SafeAreaView style={styles.centered}>
-        <ActivityIndicator size="large" color={C.cyan} />
-        <Text style={styles.loadingText}>טוען דירות...</Text>
+      <SafeAreaView style={styles.container}>
+        {/* Header skeleton */}
+        <View style={styles.header}>
+          <View style={styles.headerLeft}>
+            <SkeletonLoader width={36} height={36} borderRadius={18} />
+          </View>
+          <View style={styles.headerCenter}>
+            <SkeletonLoader width={100} height={24} borderRadius={6} />
+          </View>
+          <View style={styles.headerRight}>
+            <SkeletonLoader width={36} height={36} borderRadius={18} />
+          </View>
+        </View>
+
+        {/* Card skeleton */}
+        <View style={[styles.deckContainer, { paddingHorizontal: 16 }]}>
+          <View style={{ backgroundColor: '#1e293b', borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1, borderRadius: 24, padding: 16, width: '100%', height: '90%' }}>
+            <SkeletonLoader width="100%" height="60%" borderRadius={16} style={{ marginBottom: 16 }} />
+            <SkeletonLoader width="80%" height={24} borderRadius={6} style={{ marginBottom: 12 }} />
+            <SkeletonLoader width="40%" height={20} borderRadius={6} style={{ marginBottom: 16 }} />
+            <View style={{ flexDirection: 'row-reverse', gap: 8, marginBottom: 16 }}>
+              <SkeletonLoader width={60} height={24} borderRadius={12} />
+              <SkeletonLoader width={60} height={24} borderRadius={12} />
+              <SkeletonLoader width={60} height={24} borderRadius={12} />
+            </View>
+            <View style={{ flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center' }}>
+              <SkeletonLoader width={120} height={32} borderRadius={16} />
+              <SkeletonLoader width={36} height={36} borderRadius={18} />
+            </View>
+          </View>
+        </View>
+
+        {/* Action buttons skeleton */}
+        <View style={styles.actions}>
+          <SkeletonLoader width={58} height={58} borderRadius={29} />
+          <SkeletonLoader width={48} height={48} borderRadius={24} />
+          <SkeletonLoader width={62} height={62} borderRadius={31} />
+        </View>
       </SafeAreaView>
     );
   }
@@ -143,13 +189,18 @@ export default function SwipeScreen() {
 
   if (!feedError && feedLoadState === 'success' && visibleCards.length === 0) {
     return (
-      <SafeAreaView style={styles.centered}>
-        <Ionicons name="home-outline" size={56} color={C.border} />
-        <Text style={styles.emptyTitle}>ראית את כל הדירות!</Text>
-        <Text style={styles.emptySubtitle}>נסה לשנות את פילטרי החיפוש</Text>
-        <TouchableOpacity style={styles.reloadBtn} onPress={() => loadFeed()}>
-          <Text style={styles.reloadText}>טען מחדש</Text>
-        </TouchableOpacity>
+      <SafeAreaView style={{ flex: 1 }}>
+        <ScrollView
+          contentContainerStyle={[styles.centered, { flexGrow: 1 }]}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[C.cyan]} tintColor={C.cyan} />}
+        >
+          <Ionicons name="home-outline" size={56} color={C.border} />
+          <Text style={styles.emptyTitle}>ראית את כל הדירות!</Text>
+          <Text style={styles.emptySubtitle}>נסה לשנות את פילטרי החיפוש</Text>
+          <TouchableOpacity style={styles.reloadBtn} onPress={() => loadFeed()}>
+            <Text style={styles.reloadText}>טען מחדש</Text>
+          </TouchableOpacity>
+        </ScrollView>
       </SafeAreaView>
     );
   }

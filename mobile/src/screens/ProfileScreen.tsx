@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  SafeAreaView, ScrollView, ActivityIndicator, TextInput, Modal, Linking, Platform, Switch,
+  SafeAreaView, ScrollView, ActivityIndicator, TextInput, Modal, Linking, Platform, Switch, Alert,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import * as Haptics from 'expo-haptics';
 import * as ImagePicker from 'expo-image-picker';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuthStore } from '../store/useAuthStore';
@@ -33,6 +34,67 @@ export default function ProfileScreen() {
   const [lastName,    setLastName]            = useState(user?.lastName ?? '');
   const [savingProfile, setSavingProfile]     = useState(false);
   const [switchingRole, setSwitchingRole]     = useState(false);
+
+  const [whatsappOptIn, setWhatsappOptIn] = useState(user?.whatsappOptIn ?? false);
+  const [phoneInput, setPhoneInput] = useState(user?.phone ?? '');
+  const [savingWhatsapp, setSavingWhatsapp] = useState(false);
+
+  const getScoreColor = (score: number) => {
+    if (score <= 30) return '#EF4444'; // Red
+    if (score <= 60) return '#F59E0B'; // Orange
+    if (score <= 80) return '#10B981'; // Light Green
+    return '#047857'; // Dark Green
+  };
+
+  const getScoreLabel = (score: number) => {
+    if (score <= 30) return 'טעון שיפור ⚠️';
+    if (score <= 60) return 'בינוני 📊';
+    if (score <= 80) return 'טוב מאוד 👍';
+    return 'מעולה! 🏆';
+  };
+
+  const trustScore = user?.trustScore ?? 50;
+  const scoreColor = getScoreColor(trustScore);
+
+  async function handleWhatsappToggle(value: boolean) {
+    setWhatsappOptIn(value);
+    if (!value) {
+      setSavingWhatsapp(true);
+      try {
+        await authApi.updateUsersMe({ whatsappOptIn: false });
+        updateUser({ whatsappOptIn: false });
+        showAlert('הצלחה', 'הסרת את הרישום לקבלת הודעות ב-WhatsApp.');
+      } catch {
+        setWhatsappOptIn(true);
+        showAlert('שגיאה', 'עדכון ההגדרות נכשל.');
+      } finally {
+        setSavingWhatsapp(false);
+      }
+    }
+  }
+
+  async function saveWhatsappSettings() {
+    const trimmed = phoneInput.trim();
+    if (!trimmed) {
+      showAlert('שגיאה', 'יש להזין מספר טלפון לקבלת הודעות.');
+      return;
+    }
+    if (!/^(\+972|0)[0-9]{8,9}$/.test(trimmed)) {
+      showAlert('שגיאה', 'מספר הטלפון אינו תקין (לדוגמה: 0501234567).');
+      return;
+    }
+
+    setSavingWhatsapp(true);
+    try {
+      await authApi.updateUsersMe({ whatsappOptIn: true, phone: trimmed });
+      updateUser({ whatsappOptIn: true, phone: trimmed });
+      showAlert('הצלחה', 'ההרשמה לקבלת הודעות ב-WhatsApp עודכנה בהצלחה!');
+    } catch {
+      showAlert('שגיאה', 'עדכון מספר הטלפון וההרשמה נכשל.');
+    } finally {
+      setSavingWhatsapp(false);
+    }
+  }
 
   async function handleSwitchRole() {
     const currentRole = user?.activeRole || user?.role;
@@ -188,6 +250,35 @@ export default function ProfileScreen() {
           </Text>
         </View>
 
+        {/* Trust Score circular progress ring card */}
+        <TouchableOpacity
+          style={[styles.trustScoreCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
+          onPress={() => {
+            Haptics.selectionAsync();
+            navigation.navigate('Gamification');
+          }}
+          activeOpacity={0.8}
+        >
+          <View style={styles.trustScoreContainer}>
+            <View style={[styles.progressRingOuter, { borderColor: `${scoreColor}22` }]}>
+              <View style={[styles.progressRingInner, { borderColor: scoreColor }]}>
+                <Text style={[styles.trustScoreNum, { color: colors.text }]}>{trustScore}</Text>
+                <Text style={[styles.trustScoreUnit, { color: colors.textMut }]}>/ 100</Text>
+              </View>
+            </View>
+
+            <View style={styles.trustScoreDetails}>
+              <Text style={[styles.trustScoreTitle, { color: colors.text }]}>מדד האמינות שלך</Text>
+              <Text style={[styles.trustScoreBadgeText, { color: scoreColor }]}>
+                {getScoreLabel(trustScore)}
+              </Text>
+              <Text style={[styles.trustScoreSub, { color: colors.textMut }]}>
+                ציון גבוה מעניק תג "משכיר מאומת" בפיד וקדימות בפניות! לחץ כאן לשיפור הציון 🏆
+              </Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+
         {/* Premium */}
         {user?.isPremium ? (
           <View style={styles.premiumBanner}>
@@ -230,9 +321,52 @@ export default function ProfileScreen() {
           <MenuItem icon="notifications-outline" label="התראות"
             onPress={() => Platform.OS === 'web' ? window.alert('בקרוב\nהגדרות התראות יתווספו בקרוב') : Alert.alert('בקרוב', 'הגדרות התראות יתווספו בקרוב')} />
           <MenuItem icon="shield-checkmark-outline" label="פרטיות ואבטחה"
-            onPress={() => Platform.OS === 'web' ? window.alert('בקרוב\nהגדרות פרטיות יתווספו בקרוב') : Alert.alert('בקרוב', 'הגדרות פרטיות יתווספו בקרוב')} />
+            onPress={() => navigation.navigate('PrivacySettings')} />
           <MenuItem icon="help-circle-outline" label="עזרה ותמיכה"
             onPress={() => Platform.OS === 'web' ? window.alert('תמיכה\nsupport@dirapp.co.il') : Alert.alert('תמיכה', 'support@dirapp.co.il')} />
+        </View>
+
+        {/* WhatsApp Opt-in toggle */}
+        <View style={[styles.darkModeRow, { backgroundColor: colors.bgCard, borderColor: colors.border, flexDirection: 'column', alignItems: 'stretch', gap: 10 }]}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+            <Ionicons name="logo-whatsapp" size={20} color="#25D366" />
+            <Text style={[styles.darkModeLabel, { color: colors.text, flex: 1, marginRight: 10 }]}>
+              קבל הודעות ב-WhatsApp
+            </Text>
+            <Switch
+              value={whatsappOptIn}
+              onValueChange={handleWhatsappToggle}
+              trackColor={{ false: colors.border, true: '#25D366' }}
+              thumbColor={whatsappOptIn ? '#128C7E' : colors.bgCard}
+            />
+          </View>
+          {whatsappOptIn && (
+            <View style={{ width: '100%', marginTop: 4 }}>
+              <Text style={[styles.fieldLabel, { color: colors.textSub, marginBottom: 6, textAlign: 'right' }]}>מספר טלפון לקבלת הודעות</Text>
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <TextInput
+                  style={[styles.fieldInput, { flex: 1, backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
+                  value={phoneInput}
+                  onChangeText={setPhoneInput}
+                  textAlign="right"
+                  keyboardType="phone-pad"
+                  placeholder="לדוגמא: 0501234567"
+                  placeholderTextColor={colors.textMut}
+                />
+                <TouchableOpacity
+                  style={{ backgroundColor: dirApp.secondary, borderRadius: 12, paddingHorizontal: 16, justifyContent: 'center' }}
+                  onPress={saveWhatsappSettings}
+                  disabled={savingWhatsapp}
+                >
+                  {savingWhatsapp ? (
+                    <ActivityIndicator size="small" color="#ffffff" />
+                  ) : (
+                    <Text style={{ color: '#ffffff', fontWeight: 'bold', fontSize: 13 }}>שמור</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
         </View>
 
         {/* Dark mode toggle */}
@@ -466,4 +600,69 @@ const styles = StyleSheet.create({
     backgroundColor: dirApp.primaryContainer,
   },
   saveBtnText: { color: C.onInverse.primary, fontWeight: '700', fontSize: 15 },
+
+  // Trust Score Widget Styles
+  trustScoreCard: {
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 16,
+    marginBottom: 20,
+    width: '100%',
+    shadowColor: dirApp.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  trustScoreContainer: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: 16,
+  },
+  progressRingOuter: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+    borderWidth: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  progressRingInner: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    borderWidth: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+  },
+  trustScoreNum: {
+    fontSize: 18,
+    fontWeight: '800',
+    lineHeight: 18,
+  },
+  trustScoreUnit: {
+    fontSize: 9,
+    fontWeight: '600',
+    marginTop: 1,
+  },
+  trustScoreDetails: {
+    flex: 1,
+    alignItems: 'flex-end',
+    gap: 2,
+  },
+  trustScoreTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  trustScoreBadgeText: {
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  trustScoreSub: {
+    fontSize: 10,
+    textAlign: 'right',
+    lineHeight: 14,
+    marginTop: 2,
+  },
 });

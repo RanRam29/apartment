@@ -17,7 +17,27 @@ router.get('/agreement/:agreementId', async (req, res, next) => {
       where: { agreementId: req.params.agreementId },
       order: [['dueDate', 'ASC']],
     });
-    res.json(rows);
+
+    const { WhatsAppMessage } = require('../models');
+    const waMessages = await WhatsAppMessage.findAll({
+      where: {
+        contractId: req.params.agreementId,
+        direction: 'outbound',
+      },
+      order: [['createdAt', 'DESC']],
+    });
+
+    const rowsWithWa = rows.map(row => {
+      const rowJson = row.toJSON();
+      const matched = waMessages.find(msg => {
+        const payloadStr = JSON.stringify(msg.payload || {});
+        return payloadStr.includes(row.dueDate) || payloadStr.includes(String(row.amount));
+      });
+      rowJson.whatsappReminderSentAt = matched ? matched.createdAt : null;
+      return rowJson;
+    });
+
+    res.json(rowsWithWa);
   } catch (err) {
     next(err);
   }

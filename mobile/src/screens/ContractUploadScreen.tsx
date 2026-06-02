@@ -58,7 +58,7 @@ export default function ContractUploadScreen({ navigation, route }: any) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <View className="header" style={styles.header}>
+      <View style={styles.header}>
         <Text style={styles.emoji}>📄</Text>
         <Text style={styles.title}>העלאת חוזה וניתוח AI</Text>
         <Text style={styles.subtitle}>העלה את טיוטת החוזה שלך, ומנוע ה-AI של Gemini יחלץ את הנתונים העיקריים באופן אוטומטי.</Text>

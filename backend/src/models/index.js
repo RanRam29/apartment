@@ -68,8 +68,27 @@ const ContractAmendment = require('./pg/ContractAmendment');
 RentalAgreement.hasMany(ContractAmendment, { foreignKey: 'contractId', as: 'amendments' });
 ContractAmendment.belongsTo(RentalAgreement, { foreignKey: 'contractId', as: 'contract' });
 
+// WhatsApp
+const WhatsAppMessage = require('./pg/WhatsAppMessage');
+const WhatsAppConversationState = require('./pg/WhatsAppConversationState');
+WhatsAppMessage.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+User.hasMany(WhatsAppMessage, { foreignKey: 'userId', as: 'whatsappMessages' });
+
 MaintenanceTicket.belongsTo(RentalAgreement, { foreignKey: 'agreementId', as: 'agreement' });
 RentalAgreement.hasMany(MaintenanceTicket, { foreignKey: 'agreementId', as: 'maintenanceTickets' });
+
+// Financial + Protocol Evidence (previously unregistered)
+const PaymentLedger = require('./pg/PaymentLedger');
+const ProtocolEvidence = require('./pg/ProtocolEvidence');
+
+RentalAgreement.hasMany(PaymentLedger, { foreignKey: 'agreementId', as: 'paymentLedgerRows' });
+PaymentLedger.belongsTo(RentalAgreement, { foreignKey: 'agreementId', as: 'agreement' });
+
+RentalAgreement.hasMany(ProtocolEvidence, { foreignKey: 'agreementId', as: 'protocolEvidence' });
+ProtocolEvidence.belongsTo(RentalAgreement, { foreignKey: 'agreementId', as: 'agreement' });
+
+RentalAgreement.belongsTo(Apartment, { foreignKey: 'propertyId', as: 'apartment' });
+Apartment.hasMany(RentalAgreement, { foreignKey: 'propertyId', as: 'agreements' });
 
 module.exports = {
   User,
@@ -91,5 +110,9 @@ module.exports = {
   AgreementRoom,
   OwnershipVerification,
   ContractAmendment,
+  WhatsAppMessage,
+  WhatsAppConversationState,
+  PaymentLedger,
+  ProtocolEvidence,
 };
 

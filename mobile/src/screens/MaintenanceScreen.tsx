@@ -18,6 +18,7 @@ export default function MaintenanceScreen({ route }: any) {
   const { tickets, fetchTicketsForAgreement, createTicket, respondToTicket, closeTicket, isLoading } = useMaintenanceStore();
   const { user } = useAuthStore();
   const [description, setDescription] = useState('');
+  const [sendWhatsapp, setSendWhatsapp] = useState(false);
 
   useEffect(() => {
     fetchTicketsForAgreement(agreementId).catch(() => {});
@@ -33,9 +34,11 @@ export default function MaintenanceScreen({ route }: any) {
       const formData = new FormData();
       formData.append('agreementId', agreementId);
       formData.append('description', description);
+      formData.append('sendWhatsapp', String(sendWhatsapp));
       
       await createTicket(formData);
       setDescription('');
+      setSendWhatsapp(false);
       showAlert('הצלחה', 'קריאת השירות נפתחה בהצלחה! המשכיר קיבל התראה.');
       fetchTicketsForAgreement(agreementId).catch(() => {});
     } catch (err: any) {
@@ -96,6 +99,16 @@ export default function MaintenanceScreen({ route }: any) {
             onChangeText={setDescription}
             style={styles.textInput}
           />
+          <TouchableOpacity 
+            onPress={() => setSendWhatsapp(!sendWhatsapp)} 
+            style={styles.checkboxContainer}
+            activeOpacity={0.8}
+          >
+            <View style={[styles.checkbox, sendWhatsapp && styles.checkboxChecked]}>
+              {sendWhatsapp && <Text style={styles.checkboxCheckmark}>✓</Text>}
+            </View>
+            <Text style={styles.checkboxLabel}>שלח התראה למשכיר גם ב-WhatsApp</Text>
+          </TouchableOpacity>
           <TouchableOpacity onPress={handleOpenTicket} style={styles.submitBtn}>
             <Text style={styles.submitBtnText}>פתח קריאת שירות</Text>
           </TouchableOpacity>
@@ -351,5 +364,36 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 14,
     fontWeight: '600',
+  },
+  checkboxContainer: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderRadius: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 10,
+    backgroundColor: 'transparent',
+  },
+  checkboxChecked: {
+    backgroundColor: '#10b981',
+    borderColor: '#10b981',
+  },
+  checkboxCheckmark: {
+    color: '#ffffff',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  checkboxLabel: {
+    color: '#ffffff',
+    fontSize: 13,
+    fontWeight: '500',
+    textAlign: 'right',
   },
 });

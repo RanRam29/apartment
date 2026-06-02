@@ -194,7 +194,7 @@ router.get(
         include: [{
           model: User,
           as: 'landlord',
-          attributes: ['id', 'firstName', 'lastName', 'avatarUrl', 'isVerified', 'isPremium'],
+          attributes: ['id', 'firstName', 'lastName', 'avatarUrl', 'isVerified', 'isPremium', 'trustScore'],
         }],
         // פרימיום (משלם) קודם — מודגש במפה ובפיד
         order: [
@@ -232,7 +232,7 @@ router.get('/:id', authenticate, async (req, res, next) => {
     if (cached) return res.json({ apartment: cached, fromCache: true });
 
     const apartment = await Apartment.findByPk(req.params.id, {
-      include: [{ model: User, as: 'landlord', attributes: ['id', 'firstName', 'lastName', 'avatarUrl', 'isVerified'] }],
+      include: [{ model: User, as: 'landlord', attributes: ['id', 'firstName', 'lastName', 'avatarUrl', 'isVerified', 'trustScore'] }],
     });
 
     if (!apartment) return res.status(404).json({ error: 'Apartment not found' });
@@ -370,6 +370,74 @@ router.post(
 
       await cacheSet(cacheKey, copy, 600);
       res.json({ copy, style });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// POST /api/apartments/search/nlp — NLP free-text search via Gemini
+router.post(
+  '/search/nlp',
+  authenticate,
+  requireRole('tenant'),
+  [body('query').trim().isLength({ min: 2, max: 500 }).withMessage('Query must be 2-500 chars')],
+  async (req, res, next) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
+
+      const { query } = req.body;
+
+      const { parseSearchQuery } = require('../services/geminiService');
+      const filters = await parseSearchQuery(query);
+
+      // Build Sequelize where clause
+      const where = { isActive: true };
+      
+      if (filters.city) {
+        where.city = { [Op.iLike]: `%${filters.city}%` };
+      }
+      const streetFilter = filters.street || filters.neighborhood;
+      if (streetFilter) {
+        where.street = { [Op.iLike]: `%${streetFilter}%` };
+      }
+      if (filters.minPrice || filters.maxPrice) {
+        where.price = {};
+        if (filters.minPrice) where.price[Op.gte] = filters.minPrice;
+        if (filters.maxPrice) where.price[Op.lte] = filters.maxPrice;
+      }
+      if (filters.minRooms || filters.maxRooms) {
+        where.rooms = {};
+        if (filters.minRooms) where.rooms[Op.gte] = filters.minRooms;
+        if (filters.maxRooms) where.rooms[Op.lte] = filters.maxRooms;
+      }
+      if (filters.amenities?.length) {
+        where.amenities = { [Op.contains]: filters.amenities };
+      }
+      if (filters.petsAllowed === true) {
+        where.petsAllowed = true;
+      }
+
+      // Exclude already-swiped apartments
+      const swipedIds = await Swipe.findAll({
+        where: { tenantId: req.user.id },
+        attributes: ['apartmentId'],
+        raw: true,
+      }).then((rows) => rows.map((r) => r.apartmentId));
+
+      if (swipedIds.length) {
+        where.id = { [Op.notIn]: swipedIds };
+      }
+
+      const apartments = await Apartment.findAll({
+        where,
+        include: [{ model: User, as: 'landlord', attributes: ['id', 'firstName', 'lastName', 'avatarUrl', 'isVerified', 'trustScore'] }],
+        order: [['likeCount', 'DESC'], ['createdAt', 'DESC']],
+        limit: 30,
+      });
+
+      res.json({ apartments, parsed: filters, total: apartments.length });
     } catch (err) {
       next(err);
     }

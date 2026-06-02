@@ -1,8 +1,9 @@
 import React from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
-  SafeAreaView, ActivityIndicator, Dimensions, Modal,
+  SafeAreaView, ActivityIndicator, Dimensions, Modal, Alert,
 } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
@@ -44,6 +45,13 @@ function getImageUrl(img: unknown): string | null {
 
 export default function ApartmentDetailScreen({ route, navigation }: Props) {
   const { apartmentId } = route.params;
+
+  const getScoreColor = (score: number) => {
+    if (score <= 30) return '#EF4444';
+    if (score <= 60) return '#F59E0B';
+    if (score <= 80) return '#10B981';
+    return '#047857';
+  };
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
@@ -308,11 +316,31 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
                   </View>
                 )}
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.landlordName}>
-                    {apt.landlord.firstName} {apt.landlord.lastName}
-                  </Text>
+                  <View style={{ flexDirection: 'row-reverse', alignItems: 'center', gap: 8, justifyContent: 'flex-end' }}>
+                    <Text style={styles.landlordName}>
+                      {apt.landlord.firstName} {apt.landlord.lastName}
+                    </Text>
+                    {apt.landlord.trustScore != null && (
+                      <TouchableOpacity
+                        onLongPress={() => {
+                          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+                          Alert.alert(
+                            'מדד אמינות משכיר',
+                            `ציון אמינות: ${apt.landlord.trustScore}/100\n\nהציון מחושב אוטומטית לפי פרמטרים של אימות זהות (KYC), היסטוריית חוזים מוצלחת, אישור בעלות על הנכס ומהירות הטיפול בתקלות.`
+                          );
+                        }}
+                        activeOpacity={0.7}
+                        style={[
+                          styles.trustBadgeMini,
+                          { backgroundColor: getScoreColor(apt.landlord.trustScore) }
+                        ]}
+                      >
+                        <Text style={styles.trustBadgeMiniText}>{apt.landlord.trustScore}</Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
                   {apt.landlord.isVerified && (
-                    <Text style={styles.verifiedText}>✓ משתמש מאומת</Text>
+                    <Text style={[styles.verifiedText, { textAlign: 'right', marginTop: 2 }]}>✓ משתמש מאומת</Text>
                   )}
                 </View>
               </View>
@@ -506,4 +534,16 @@ const styles = StyleSheet.create({
   costAmountBold: { color: C.cyan, fontWeight: '800', fontSize: 16, fontFamily: fontFamily.bold },
   costDivider: { height: 1, backgroundColor: Dark.border, marginVertical: 8 },
   costNote: { color: C.textMut, fontSize: 11, textAlign: 'right', marginTop: 8, fontFamily: fontFamily.regular },
+  trustBadgeMini: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  trustBadgeMiniText: {
+    color: '#ffffff',
+    fontSize: 10,
+    fontWeight: '800',
+  },
 });

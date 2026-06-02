@@ -59,6 +59,7 @@ import MaintenanceScreen from '../screens/MaintenanceScreen';
 import TermsScreen from '../screens/TermsScreen';
 import RenterJournalScreen from '../screens/RenterJournalScreen';
 import VerificationPendingScreen from '../screens/VerificationPendingScreen';
+import PrivacySettingsScreen from '../screens/PrivacySettingsScreen';
 
 
 const RootStack  = createNativeStackNavigator<RootStackParamList>();
@@ -349,6 +350,7 @@ function MainNavigator() {
       <MainStack.Screen name="Maintenance" component={MaintenanceScreen} options={{ headerShown: false }} />
       <MainStack.Screen name="Terms" component={TermsScreen} options={{ headerShown: false }} />
       <MainStack.Screen name="RenterJournal" component={RenterJournalScreen} options={{ headerShown: false }} />
+      <MainStack.Screen name="PrivacySettings" component={PrivacySettingsScreen} options={{ headerShown: false }} />
     </MainStack.Navigator>
 
   );

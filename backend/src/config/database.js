@@ -41,6 +41,7 @@ const USER_V3_COLUMNS = {
   is_locked: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
   active_role: { type: DataTypes.STRING(20), allowNull: true, defaultValue: 'tenant' },
   trust_score: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 50 },
+  whatsapp_opt_in: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
 };
 const APARTMENT_STREET_COLUMN = {
   street: { type: DataTypes.STRING(100), allowNull: true },

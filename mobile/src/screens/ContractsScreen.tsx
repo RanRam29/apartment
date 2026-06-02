@@ -3,6 +3,8 @@ import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
   SafeAreaView, ActivityIndicator, Alert, Modal, ScrollView, TextInput, Platform,
 } from 'react-native';
+import * as Haptics from 'expo-haptics';
+import SkeletonLoader from '../components/SkeletonLoader';
 import { WebView } from 'react-native-webview';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -67,8 +69,14 @@ const DEPOSIT_META: Record<DepositStatus, { label: string; color: string }> = {
 function ContractCard({ contract, onPress }: { contract: Contract; onPress: () => void }) {
   const sm = STATUS_META[contract.status];
   const dm = DEPOSIT_META[contract.depositStatus];
+  
+  const handlePress = () => {
+    Haptics.selectionAsync();
+    onPress();
+  };
+
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.85}>
+    <TouchableOpacity style={styles.card} onPress={handlePress} activeOpacity={0.85}>
       <View style={styles.cardTop}>
         <Text style={styles.cardTitle} numberOfLines={1}>{contract.apartmentTitle}</Text>
         <View style={styles.cardBadges}>
@@ -590,7 +598,22 @@ export default function ContractsScreen() {
 
       <ResponsiveContainer style={{ flex: 1 }}>
         {isLoading ? (
-          <ActivityIndicator color={dirApp.secondary} style={{ marginTop: 40 }} />
+          <ScrollView contentContainerStyle={styles.list}>
+            {Array.from({ length: 4 }).map((_, i) => (
+              <View key={i} style={[styles.card, { opacity: 0.8 }]}>
+                <View style={[styles.cardTop, { marginBottom: 12 }]}>
+                  <SkeletonLoader width={160} height={20} borderRadius={6} />
+                  <SkeletonLoader width={80} height={20} borderRadius={6} />
+                </View>
+                <SkeletonLoader width={200} height={14} borderRadius={6} style={{ alignSelf: 'flex-end', marginBottom: 8 }} />
+                <SkeletonLoader width={100} height={20} borderRadius={6} style={{ alignSelf: 'flex-end', marginBottom: 12 }} />
+                <View style={styles.cardBottom}>
+                  <SkeletonLoader width={120} height={16} borderRadius={6} />
+                  <SkeletonLoader width={140} height={16} borderRadius={6} />
+                </View>
+              </View>
+            ))}
+          </ScrollView>
         ) : contracts.length === 0 ? (
           <View style={styles.empty}>
             <Ionicons name="document-text-outline" size={56} color={dirApp.outline} />

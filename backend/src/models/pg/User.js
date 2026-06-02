@@ -87,6 +87,10 @@ const User = sequelize.define('User', {
     type: DataTypes.INTEGER,
     defaultValue: 50,
   },
+  whatsappOptIn: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
 }, {
   tableName: 'users',
   indexes: [

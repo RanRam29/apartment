@@ -75,7 +75,7 @@ router.post(
 
       const apartments = await Apartment.findAll({
         where,
-        include: [{ model: User, as: 'landlord', attributes: ['id', 'firstName', 'lastName', 'avatarUrl', 'isVerified'] }],
+        include: [{ model: User, as: 'landlord', attributes: ['id', 'firstName', 'lastName', 'avatarUrl', 'isVerified', 'trustScore'] }],
         order: [['likeCount', 'DESC'], ['createdAt', 'DESC']],
         limit: 30,
       });
@@ -123,7 +123,7 @@ router.get('/personalized', authenticate, requireRole('tenant'), async (req, res
 
     const apartmentsRaw = await Apartment.findAll({
       where,
-      include: [{ model: User, as: 'landlord', attributes: ['id', 'firstName', 'lastName', 'avatarUrl', 'isVerified'] }],
+      include: [{ model: User, as: 'landlord', attributes: ['id', 'firstName', 'lastName', 'avatarUrl', 'isVerified', 'trustScore'] }],
       order: [['likeCount', 'DESC'], ['createdAt', 'DESC']],
       limit: 40,
     });

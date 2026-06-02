@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, FlatList,
   StyleSheet, SafeAreaView, ActivityIndicator, KeyboardAvoidingView,
   Platform, ScrollView,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import SkeletonLoader from '../components/SkeletonLoader';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useMutation } from '@tanstack/react-query';
@@ -57,6 +59,8 @@ function visibleParsedFilters(filters: Record<string, unknown> | null): [string,
   });
 }
 
+const HISTORY_KEY = 'dirapp_search_history';
+
 export default function SearchScreen() {
   const colors = useColors();
   const navigation = useNavigation<any>();
@@ -68,10 +72,44 @@ export default function SearchScreen() {
   const [filterPets, setFilterPets] = useState(false);
   const [results, setResults] = useState<Apartment[]>([]);
   const [parsedFilters, setParsedFilters] = useState<Record<string, any> | null>(null);
+  const [history, setHistory] = useState<string[]>([]);
+  const [isInputFocused, setIsInputFocused] = useState(false);
 
   const parsedEntries = visibleParsedFilters(parsedFilters);
-
   const hasManualFilters = !!(filterCity || filterMaxPrice || filterRooms || filterPets);
+
+  const loadHistory = useCallback(async () => {
+    try {
+      const data = await AsyncStorage.getItem(HISTORY_KEY);
+      if (data) {
+        setHistory(JSON.parse(data));
+      }
+    } catch (_) {}
+  }, []);
+
+  useEffect(() => {
+    loadHistory();
+  }, [loadHistory]);
+
+  const saveHistory = async (newHistory: string[]) => {
+    try {
+      setHistory(newHistory);
+      await AsyncStorage.setItem(HISTORY_KEY, JSON.stringify(newHistory));
+    } catch (_) {}
+  };
+
+  const addToHistory = (queryText: string) => {
+    if (!queryText.trim()) return;
+    const clean = queryText.trim();
+    const filtered = history.filter((h) => h !== clean);
+    const updated = [clean, ...filtered].slice(0, 10);
+    saveHistory(updated);
+  };
+
+  const deleteHistoryItem = (itemToDelete: string) => {
+    const updated = history.filter((h) => h !== itemToDelete);
+    saveHistory(updated);
+  };
 
   const searchMutation = useMutation({
     mutationFn: async (q: string) => {
@@ -101,6 +139,7 @@ export default function SearchScreen() {
     const text = overrideQuery ?? query;
     if (!text.trim() && !hasManualFilters) return;
     if (overrideQuery) setQuery(overrideQuery);
+    addToHistory(text);
     searchMutation.mutate(text.trim());
   }
 
@@ -165,6 +204,8 @@ export default function SearchScreen() {
               value={query}
               onChangeText={setQuery}
               onSubmitEditing={() => handleSearch()}
+              onFocus={() => setIsInputFocused(true)}
+              onBlur={() => setTimeout(() => setIsInputFocused(false), 250)}
               returnKeyType="search"
               textAlign="right"
             />
@@ -185,6 +226,31 @@ export default function SearchScreen() {
             />
           </TouchableOpacity>
         </View>
+
+        {/* Search history list */}
+        {isInputFocused && query.trim() === '' && history.length > 0 && (
+          <View style={[styles.historyPanel, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            <Text style={[styles.historyTitle, { color: colors.textSub }]}>חיפושים אחרונים</Text>
+            {history.map((h) => (
+              <View key={h} style={[styles.historyRow, { borderBottomColor: colors.border }]}>
+                <TouchableOpacity
+                  onPress={() => deleteHistoryItem(h)}
+                  style={styles.historyDeleteBtn}
+                  accessibilityLabel="מחק חיפוש אחרון"
+                >
+                  <Ionicons name="trash-outline" size={14} color={C.danger} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => handleSearch(h)}
+                  style={styles.historyTextBtn}
+                >
+                  <Ionicons name="time-outline" size={14} color={colors.textMut} />
+                  <Text style={[styles.historyText, { color: colors.text }]}>{h}</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+          </View>
+        )}
 
         {/* Filter panel */}
         {showFilters && (
@@ -304,10 +370,18 @@ export default function SearchScreen() {
 
         {/* Loading */}
         {searchMutation.isPending && (
-          <View style={styles.loadingBox}>
-            <ActivityIndicator size="large" color={C.cyan} />
-            <Text style={styles.loadingText}>מחפש עם AI...</Text>
-          </View>
+          <ScrollView contentContainerStyle={styles.resultsList}>
+            {Array.from({ length: 4 }).map((_, i) => (
+              <View key={i} style={[styles.resultCard, { opacity: 0.8, backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                <SkeletonLoader width={68} height={68} borderRadius={10} />
+                <View style={[styles.resultInfo, { flex: 1 }]}>
+                  <SkeletonLoader width="80%" height={16} borderRadius={4} style={{ alignSelf: 'flex-end', marginBottom: 6 }} />
+                  <SkeletonLoader width="60%" height={12} borderRadius={4} style={{ alignSelf: 'flex-end', marginBottom: 6 }} />
+                  <SkeletonLoader width="30%" height={14} borderRadius={4} style={{ alignSelf: 'flex-end' }} />
+                </View>
+              </View>
+            ))}
+          </ScrollView>
         )}
 
         {/* Results */}
@@ -595,4 +669,35 @@ const styles = StyleSheet.create({
   noResultsEmoji: { fontSize: 48 },
   noResultsText: { fontSize: 16, fontWeight: '700', color: dirApp.primary },
   noResultsSub: { fontSize: 13, color: dirApp.outline },
+
+  historyPanel: {
+    padding: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: 8,
+    gap: 10,
+  },
+  historyTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    textAlign: 'right',
+  },
+  historyRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingBottom: 8,
+    borderBottomWidth: 0.5,
+  },
+  historyDeleteBtn: {
+    padding: 4,
+  },
+  historyTextBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  historyText: {
+    fontSize: 13,
+  },
 });

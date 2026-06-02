@@ -7,6 +7,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { C, Dark } from '../theme';
 import { dirApp } from '../theme/dirAppTokens';
 
+import { clientLogsApi } from '../services/api';
+
 interface State { hasError: boolean }
 
 export class ErrorBoundary extends React.Component<React.PropsWithChildren, State> {
@@ -18,6 +20,17 @@ export class ErrorBoundary extends React.Component<React.PropsWithChildren, Stat
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
     console.error('[ErrorBoundary]', error.message, info.componentStack);
+    clientLogsApi.event({
+      level: 'error',
+      category: 'application',
+      event: 'client.error_boundary',
+      message: error.message,
+      metadata: {
+        stack: error.stack,
+        componentStack: info.componentStack,
+      },
+      tags: ['client', 'crash'],
+    }).catch(() => {});
   }
 
   render() {
