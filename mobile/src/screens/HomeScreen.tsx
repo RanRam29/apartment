@@ -23,7 +23,6 @@ import { useDirection } from '../hooks/useDirection';
 import { dirApp } from '../theme/dirAppTokens';
 import SwipeHouseLogo from '../components/SwipeHouseLogo';
 import { useColors } from '../context/ThemeContext';
-import { fontFamily } from '../theme/fonts';
 
 const { width: W } = Dimensions.get('window');
 const PAD = 16;
