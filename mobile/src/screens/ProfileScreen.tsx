@@ -13,6 +13,7 @@ import { usePersonaIsLandlord } from '../navigation/AdminAppModeContext';
 import { paymentApi, authApi } from '../services/api';
 import { C } from '../theme';
 import { dirApp } from '../theme/dirAppTokens';
+import { fontFamily } from '../theme/fonts';
 import type { MainStackParamList } from '../types';
 import SwipeHouseLogo from '../components/SwipeHouseLogo';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
@@ -377,8 +378,8 @@ const styles = StyleSheet.create({
   verifiedText: { color: dirApp.primary, fontSize: 11, fontWeight: '600' },
 
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
-  name:    { fontSize: 22, fontWeight: '800', color: dirApp.primary },
-  email:   { fontSize: 13, color: C.textSub, marginBottom: 10 },
+  name:    { fontFamily: fontFamily.bold, fontSize: 22, fontWeight: '800', color: dirApp.primary },
+  email:   { fontFamily: fontFamily.regular, fontSize: 13, color: C.textSub, marginBottom: 10 },
 
   roleBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
@@ -424,7 +425,7 @@ const styles = StyleSheet.create({
     backgroundColor: `${dirApp.secondaryContainer}44`, justifyContent: 'center', alignItems: 'center',
     marginLeft: 12,
   },
-  menuLabel: { flex: 1, color: C.text, fontSize: 14, textAlign: 'right', marginRight: 10 },
+  menuLabel: { fontFamily: fontFamily.medium, flex: 1, color: C.text, fontSize: 14, textAlign: 'right', marginRight: 10 },
 
   darkModeRow: {
     flexDirection: 'row', alignItems: 'center', gap: 12,

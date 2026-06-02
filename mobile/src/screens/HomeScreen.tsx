@@ -18,6 +18,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import { usePersonaIsLandlord } from '../navigation/AdminAppModeContext';
 import { C } from '../theme';
 import { dirType } from '../theme/textStyles';
+import { fontFamily } from '../theme/fonts';
 import { useDirection } from '../hooks/useDirection';
 import { dirApp } from '../theme/dirAppTokens';
 import SwipeHouseLogo from '../components/SwipeHouseLogo';
@@ -438,8 +439,8 @@ const tenantStyles = StyleSheet.create({
   },
   avatarLetter: { color: dirApp.primary },
   welcomeBlock: { marginBottom: 24 },
-  welcomeTitle: { marginBottom: 6 },
-  welcomeSub: {},
+  welcomeTitle: { fontFamily: fontFamily.bold, marginBottom: 6 },
+  welcomeSub: { fontFamily: fontFamily.regular },
   journalHero: {
     alignSelf: 'center',
     backgroundColor: dirApp.primaryContainer,
@@ -455,8 +456,8 @@ const tenantStyles = StyleSheet.create({
     elevation: 4,
   },
   journalHeroContent: { zIndex: 2, flex: 1, justifyContent: 'center' },
-  journalHeroTitle: { fontWeight: 'bold' },
-  journalHeroSub: { marginBottom: 12, maxWidth: 280, lineHeight: 18 },
+  journalHeroTitle: { fontFamily: fontFamily.bold, fontWeight: 'bold' },
+  journalHeroSub: { fontFamily: fontFamily.regular, marginBottom: 12, maxWidth: 280, lineHeight: 18 },
   ctaSecondary: {
     alignSelf: 'flex-start',
     backgroundColor: '#ffffff',
