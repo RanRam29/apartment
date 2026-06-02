@@ -58,6 +58,7 @@ import LedgerScreen from '../screens/LedgerScreen';
 import MaintenanceScreen from '../screens/MaintenanceScreen';
 import TermsScreen from '../screens/TermsScreen';
 import RenterJournalScreen from '../screens/RenterJournalScreen';
+import VerificationPendingScreen from '../screens/VerificationPendingScreen';
 
 
 const RootStack  = createNativeStackNavigator<RootStackParamList>();
@@ -352,7 +353,7 @@ function MainNavigator() {
 }
 
 export default function AppNavigator() {
-  const { isAuthenticated, isLoading, restoreSession } = useAuthStore();
+  const { isAuthenticated, isLoading, restoreSession, user } = useAuthStore();
   const bootTheme = useAppTheme();
 
   useEffect(() => {
@@ -422,10 +423,12 @@ export default function AppNavigator() {
   return (
     <NavigationContainer>
       <RootStack.Navigator screenOptions={{ headerShown: false }}>
-        {isAuthenticated ? (
-          <RootStack.Screen name="Main" component={MainNavigator} />
-        ) : (
+        {!isAuthenticated ? (
           <RootStack.Screen name="Auth" component={AuthScreen} />
+        ) : user?.isVerified === false ? (
+          <RootStack.Screen name="VerifyEmail" component={VerificationPendingScreen} />
+        ) : (
+          <RootStack.Screen name="Main" component={MainNavigator} />
         )}
       </RootStack.Navigator>
     </NavigationContainer>

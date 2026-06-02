@@ -149,6 +149,7 @@ export interface LandlordDashboard {
 export type RootStackParamList = {
   Auth: undefined;
   Main: undefined;
+  VerifyEmail: undefined;
 };
 
 export type TenantTabParamList = {
