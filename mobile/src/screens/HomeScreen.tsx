@@ -639,7 +639,7 @@ const tenantStyles = StyleSheet.create({
 
 const landlordStyles = StyleSheet.create({
   container: { flex: 1, backgroundColor: dirApp.background },
-  scrollContent: { paddingHorizontal: 24, paddingBottom: 32 },
+  scrollContent: { paddingHorizontal: 24, paddingBottom: 100 },
 
   header: {
     flexDirection: 'row',

@@ -350,7 +350,7 @@ function MenuItem({ icon, label, onPress, last = false }: {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: dirApp.background },
-  scroll:    { alignItems: 'center', paddingVertical: 24, paddingBottom: 40 },
+  scroll:    { alignItems: 'center', paddingVertical: 24, paddingBottom: 100 },
   profileInner: { alignItems: 'center', width: '100%' },
   brandRow:  { marginBottom: 8 },
 
