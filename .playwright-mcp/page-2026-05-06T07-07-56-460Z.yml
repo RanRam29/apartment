@@ -1,0 +1,64 @@
+- generic [ref=e109]:
+  - generic [ref=e254]:
+    - generic [ref=e255] [cursor=pointer]:
+      - generic [ref=e257]: TL
+      - generic [ref=e259]: 
+    - generic [ref=e260] [cursor=pointer]:
+      - generic [ref=e261]: Test Landlord
+      - generic [ref=e262]: 
+    - generic [ref=e263]: landlord_web_test_171497@example.com
+    - generic [ref=e264]:
+      - generic [ref=e265]: 
+      - generic [ref=e266]: שוכר
+    - generic [ref=e267] [cursor=pointer]:
+      - generic [ref=e268]: 
+      - generic [ref=e269]:
+        - generic [ref=e270]: שדרג לפרמיום ⚡
+        - generic [ref=e271]: ₪29/חודש · ללא הגבלת זמות ועוד
+      - generic [ref=e272]: 
+    - generic [ref=e273]:
+      - generic [ref=e274] [cursor=pointer]:
+        - generic [ref=e275]: 
+        - generic [ref=e276]: העדפות חיפוש
+        - generic [ref=e278]: 
+      - generic [ref=e279] [cursor=pointer]:
+        - generic [ref=e280]: 
+        - generic [ref=e281]: התראות
+        - generic [ref=e283]: 
+      - generic [ref=e284] [cursor=pointer]:
+        - generic [ref=e285]: 
+        - generic [ref=e286]: פרטיות ואבטחה
+        - generic [ref=e288]: 
+      - generic [ref=e289] [cursor=pointer]:
+        - generic [ref=e290]: 
+        - generic [ref=e291]: עזרה ותמיכה
+        - generic [ref=e293]: 
+    - generic [ref=e294] [cursor=pointer]:
+      - generic [ref=e295]: 
+      - generic [ref=e296]: התנתקות
+    - generic [ref=e297]: DirApp v1.0.0
+  - tablist [ref=e224]:
+    - link "  דירות" [ref=e225] [cursor=pointer]:
+      - /url: /Main/Tabs/Swipe
+      - generic:
+        - generic [ref=e227]: 
+        - generic [ref=e229]: 
+      - generic [ref=e230]: דירות
+    - link "  התאמות" [ref=e231] [cursor=pointer]:
+      - /url: /Main/Tabs/Matches
+      - generic:
+        - generic [ref=e233]: 
+        - generic [ref=e235]: 
+      - generic [ref=e236]: התאמות
+    - link "  חיפוש" [ref=e237] [cursor=pointer]:
+      - /url: /Main/Tabs/Search
+      - generic:
+        - generic [ref=e239]: 
+        - generic [ref=e241]: 
+      - generic [ref=e242]: חיפוש
+    - link "  פרופיל" [active] [ref=e243] [cursor=pointer]:
+      - /url: /Main/Tabs/Profile
+      - generic:
+        - generic [ref=e245]: 
+        - generic [ref=e247]: 
+      - generic [ref=e248]: פרופיל

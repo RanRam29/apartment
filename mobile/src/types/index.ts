@@ -193,7 +193,7 @@ export type MainStackParamList = {
   Services: undefined;
   IoT: undefined;
   LogsConsole: undefined;
-  RenterJournal: undefined;
+  RenterJournal: { userId?: string };
   Terms: undefined;
   ContractUpload: undefined;
   CheckIn: { contractId: string };

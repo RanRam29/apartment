@@ -1,0 +1,381 @@
+// DirApp Database Schema — paste into https://dbdiagram.io
+// Generated 2026-05-30
+
+Project DirApp {
+  database_type: 'PostgreSQL'
+  Note: 'Rental matching platform — core PG models'
+}
+
+// ========== IDENTITY ==========
+
+Table users {
+  id uuid [pk, default: `uuid_generate_v4()`]
+  email varchar(255) [not null, unique]
+  phone varchar(20) [unique, note: 'Israeli format +972/0']
+  passwordHash varchar(255) [not null]
+  role user_role [not null, default: 'tenant']
+  firstName varchar(100) [not null]
+  lastName varchar(100) [not null]
+  avatarUrl text
+  isVerified boolean [default: false]
+  verificationToken varchar(128)
+  verifiedAt timestamp
+  isPremium boolean [default: false]
+  lastActiveAt timestamp
+  tosAcceptedAt timestamp
+  tosVersion varchar(20)
+  blockedCount integer [default: 0]
+  isLocked boolean [default: false]
+  activeRole varchar(20) [note: 'tenant/landlord context switch']
+  trustScore integer [default: 50]
+  createdAt timestamp
+  updatedAt timestamp
+}
+
+Enum user_role {
+  tenant
+  landlord
+  admin
+}
+
+Table user_kyc_profiles {
+  id uuid [pk]
+  userId uuid [not null, unique, ref: - users.id]
+  status kyc_status [default: 'PENDING']
+  personaInquiryId varchar(255) [unique]
+  createdAt timestamp
+  updatedAt timestamp
+}
+
+Enum kyc_status {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// ========== LISTINGS & MATCHING ==========
+
+Table apartments {
+  id uuid [pk]
+  landlordId uuid [not null, ref: > users.id]
+  title varchar(200) [not null]
+  description text
+  price integer [not null, note: 'ILS monthly']
+  rooms float [not null]
+  floor integer
+  totalFloors integer
+  sizeSqm integer
+  city varchar(100) [not null]
+  street varchar(100)
+  address varchar(255)
+  latitude float
+  longitude float
+  images jsonb [default: '[]']
+  amenities jsonb [default: '[]']
+  availableFrom date
+  minLeasePeriod integer [note: 'months']
+  petsAllowed boolean [default: false]
+  isActive boolean [default: true]
+  viewCount integer [default: 0]
+  likeCount integer [default: 0]
+  createdAt timestamp
+  updatedAt timestamp
+}
+
+Table swipes {
+  id uuid [pk]
+  tenantId uuid [not null, ref: > users.id]
+  apartmentId uuid [not null, ref: > apartments.id]
+  direction swipe_direction [not null]
+  seenDurationMs integer
+  createdAt timestamp
+  updatedAt timestamp
+
+  indexes {
+    (tenantId, apartmentId) [unique]
+  }
+}
+
+Enum swipe_direction {
+  like
+  dislike
+  superlike
+}
+
+Table matches {
+  id uuid [pk]
+  tenantId uuid [not null, ref: > users.id]
+  landlordId uuid [not null, ref: > users.id]
+  apartmentId uuid [not null, ref: > apartments.id]
+  status match_status [default: 'pending']
+  tenantLikedAt timestamp
+  landlordLikedAt timestamp
+  lastMessageAt timestamp
+  expiresAt timestamp
+  createdAt timestamp
+  updatedAt timestamp
+
+  indexes {
+    (tenantId, apartmentId) [unique]
+  }
+}
+
+Enum match_status {
+  pending
+  accepted
+  rejected
+  expired
+}
+
+// ========== AGREEMENTS ==========
+
+Table rental_agreements {
+  id uuid [pk]
+  landlordId uuid [not null]
+  propertyId uuid [not null]
+  status agreement_status [default: 'UPLOAD']
+  startDate date
+  endDate date
+  monthlyRentIls decimal(10,2)
+  paymentDueDay integer [default: 1]
+  cpiLinked boolean [default: false]
+  r2DocKey varchar(512)
+  extractedFields jsonb
+  landlordSignedAt timestamp
+  checkinCompletedAt timestamp
+  checkoutCompletedAt timestamp
+  renewedFromId uuid
+  createdAt timestamp
+  updatedAt timestamp
+}
+
+Enum agreement_status {
+  UPLOAD
+  PENDING_SIGN
+  PENDING_ACTIVATION
+  ACTIVE
+  EXPIRING
+  ENDED
+}
+
+Table agreement_parties {
+  id uuid [pk]
+  agreementId uuid [not null, ref: > rental_agreements.id]
+  userId uuid [not null, ref: > users.id]
+  role party_role [not null]
+  signedAt timestamp
+  kycStatus kyc_status [default: 'PENDING']
+  isHouseManager boolean [default: false]
+  createdAt timestamp
+  updatedAt timestamp
+
+  indexes {
+    (agreementId, userId) [unique]
+  }
+}
+
+Enum party_role {
+  tenant
+  guarantor
+}
+
+Table agreement_rooms {
+  id uuid [pk]
+  agreementId uuid [not null, ref: > rental_agreements.id]
+  name varchar(100) [not null]
+  type room_type [default: 'builtin']
+  checkinPhotos jsonb [default: '[]']
+  checkoutPhotos jsonb [default: '[]']
+  checkoutNotes text
+  createdAt timestamp
+  updatedAt timestamp
+}
+
+Enum room_type {
+  builtin
+  custom
+}
+
+Table agreement_guarantors {
+  id uuid [pk]
+  agreementId uuid [not null]
+  email varchar(255) [not null]
+  name varchar(100) [not null]
+  invitationToken uuid [not null]
+  invitationExpiresAt timestamp [not null]
+  invitationStatus invitation_status [default: 'PENDING']
+  signedAt timestamp
+  createdAt timestamp
+  updatedAt timestamp
+}
+
+Enum invitation_status {
+  PENDING
+  APPROVED
+  DECLINED
+  EXPIRED
+}
+
+Table ownership_verifications {
+  id uuid [pk]
+  agreementId uuid [not null, ref: > rental_agreements.id]
+  tenantId uuid [not null, ref: > users.id]
+  choice verification_choice [not null]
+  verifiedAt timestamp [not null]
+  createdAt timestamp
+  updatedAt timestamp
+
+  indexes {
+    (agreementId, tenantId) [unique]
+  }
+}
+
+Enum verification_choice {
+  verified
+  skipped
+}
+
+// ========== PAYMENTS ==========
+
+Table ledger_rows {
+  id uuid [pk]
+  agreementId uuid [not null, ref: > rental_agreements.id]
+  period varchar(20) [not null]
+  dueDate date [not null]
+  amount decimal(10,2) [not null]
+  status ledger_status [default: 'PENDING']
+  reportedByTenant timestamp
+  confirmedByLandlord timestamp
+  cpiAdjustment decimal(10,2) [default: 0]
+  notes text
+  receiptR2Key varchar(512)
+  createdAt timestamp
+  updatedAt timestamp
+}
+
+Enum ledger_status {
+  PENDING
+  REPORTED
+  PAID
+  OVERDUE
+}
+
+Table payment_ledger {
+  id uuid [pk]
+  agreementId uuid [not null, ref: > rental_agreements.id]
+  billingPeriod date [not null]
+  baseAmountIls decimal(10,2) [not null]
+  cpiAdjustmentIls decimal(10,2) [default: 0]
+  totalDueIls decimal(10,2) [not null]
+  status payment_status [default: 'PENDING']
+  paymentProofUrl varchar(512)
+  paidAt timestamp
+  createdAt timestamp
+  updatedAt timestamp
+}
+
+Enum payment_status {
+  PENDING
+  PAID
+  OVERDUE
+}
+
+// ========== MAINTENANCE ==========
+
+Table maintenance_tickets {
+  id uuid [pk]
+  agreementId uuid [not null]
+  reporterId uuid [not null, ref: > users.id]
+  description text [not null]
+  photoR2Key varchar(512)
+  status ticket_status [default: 'OPEN']
+  landlordResponse landlord_response
+  landlordNote text
+  createdAt timestamp
+  updatedAt timestamp
+}
+
+Enum ticket_status {
+  OPEN
+  IN_PROGRESS
+  WAITING_INVOICE
+  CLOSED
+}
+
+Enum landlord_response {
+  handling
+  technician
+  alternative
+}
+
+Table ticket_invoices {
+  id uuid [pk]
+  ticketId uuid [not null, ref: > maintenance_tickets.id]
+  r2Key varchar(512) [not null]
+  amount decimal(10,2) [not null]
+  payer invoice_payer [not null]
+  createdAt timestamp
+  updatedAt timestamp
+}
+
+Enum invoice_payer {
+  landlord
+  tenant
+}
+
+// ========== PROTOCOL ==========
+
+Table protocol_evidence {
+  id uuid [pk]
+  agreementId uuid [not null, ref: > rental_agreements.id]
+  protocolType protocol_type [not null]
+  roomZone varchar(64) [not null]
+  conditionTag condition_tag [not null]
+  s3ImageKey varchar(512) [not null]
+  imageHash varchar(64) [not null]
+  gpsLatitude float [not null]
+  gpsLongitude float [not null]
+  capturedAt timestamp [not null]
+  createdAt timestamp
+  updatedAt timestamp
+}
+
+Enum protocol_type {
+  CHECK_IN
+  CHECK_OUT
+}
+
+Enum condition_tag {
+  CLEAN
+  MINOR_WEAR
+  DAMAGED
+}
+
+// ========== SYSTEM ==========
+
+Table audit_logs {
+  id uuid [pk]
+  requestId varchar(64)
+  actorId uuid
+  actorRole varchar(32)
+  action varchar(120) [not null]
+  resourceType varchar(80)
+  resourceId varchar(120)
+  outcome varchar(16) [default: 'success']
+  statusCode integer
+  ipAddress varchar(64)
+  userAgent varchar(512)
+  route varchar(255)
+  method varchar(12)
+  metadata jsonb
+  createdAt timestamp
+  updatedAt timestamp
+}
+
+Table app_config {
+  key varchar(100) [pk]
+  value varchar(500) [not null]
+  description text
+  createdAt timestamp
+  updatedAt timestamp
+}

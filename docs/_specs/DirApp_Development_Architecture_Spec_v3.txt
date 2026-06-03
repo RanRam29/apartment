@@ -1,0 +1,252 @@
+DirApp
+Development Architecture Spec
+גרסה 3.0 — מאי 2026
+# 1. ארכיטקטורה כללית
+## 1.1 דיאגרמה
+Mobile (React Native / Expo)
+         ↓ REST + WebSocket
+Backend (Node.js / Express)  ←→  Gemini 1.5 Flash (OCR + NLP + AI)
+    ↓              ↓              ↓
+Supabase       MongoDB         Redis
+(PostgreSQL)   (Chat)          (Feed Cache)
+    ↓
+Cloudflare R2 (Images + Docs + Archive)
+    ↓
+Resend (Email) + Expo Push (Notifications)
+    ↓
+Persona (KYC) — Web SDK for Guarantors
+## 1.2 שכבות
+# 2. Backend Architecture
+## 2.1 מבנה תיקיות
+backend/src/
+├── config/         DB connections (PG, Mongo, Redis, Kafka, Socket.io)
+├── models/
+│   ├── pg/         Sequelize models (PostgreSQL)
+│   └── mongo/      Mongoose models (MongoDB)
+├── routes/         auth, apartments, swipe, matches, chat,
+│                   contracts, ledger, checkin, maintenance,
+│                   guarantor, admin
+├── services/       matchingService, geminiService, uploadService,
+│                   kycService, notificationService, contractService
+└── middleware/     auth (JWT), errorHandler, rateLimiter
+## 2.2 API Endpoints — עדכון v3.0
+# 3. Database Architecture
+## 3.1 PostgreSQL Schemas (Supabase)
+schema: auth
+schema: properties
+schema: contracts
+schema: maintenance
+## 3.2 MongoDB Collections
+## 3.3 Redis Keys
+# 4. Services Architecture
+## 4.1 kycService
+initiateVerification(userId) — שולח ל-Persona, מחזיר verification URL
+handleWebhook(payload, hmacSignature) — HMAC-SHA256 validation + עדכון DB
+checkAndUnlockContracts(userId) — לאחר APPROVED — מאפשר חתימה
+abstraction layer — IKYCProvider interface להחלפת Persona בעתיד
+## 4.2 contractService
+uploadAndExtract(file, landlordId) — Gemini OCR + שמירה ב-R2
+validateGate(agreementId) — בודק כל תנאי Validation Gate
+transitionState(agreementId, newState) — StateLockGuard
+generateLedger(agreementId) — יצירת כל שורות הלדגר
+scheduleExpiringAlerts(agreementId) — יצירת כל ההתראות
+## 4.3 notificationService
+sendPush(userId, title, body, data) — Expo Push
+sendEmail(to, template, data) — Resend
+scheduleReminder(userId, timestamp, payload) — תזמון עתידי
+## 4.4 geminiService (קיים — מורחב)
+extractContractFields(fileBuffer) — חדש: OCR + structured extraction
+generateMarketingCopy(apartmentData) — קיים
+parseNLPSearch(query) — קיים
+scoreCompatibility(tenant, apartment) — קיים
+# 5. Security Architecture
+## 5.1 Authentication
+JWT tokens — חתימה + expiry
+Role-based middleware — landlord / tenant / admin
+KYC guard — routes מסוימות דורשות KYC APPROVED
+## 5.2 KYC Security
+HMAC-SHA256 על כל Persona webhook
+ספרת ביקורת ת"ז — pre-filter לפני שליחה ל-Persona
+S3 presigned URLs — 5 דקות בלבד לעלות מסמכים
+תמונות KYC נמחקות אוטומטית אחרי 7 ימים
+## 5.3 Data Privacy
+תיקון 13 לחוק הגנת הפרטיות — data minimization
+R2 lifecycle rules — מחיקה אוטומטית לפי סוג bucket
+לא שומרים מסמכי זהות גולמיים — רק Persona inquiry ID
+# 6. Cloudflare R2 — Storage Strategy
+דחיסה: אוטומטית בצד הלקוח לפני העלאה — מקסימום 2MB לתמונה.
+# 7. Web App — ערבים (חדש)
+## 7.1 Stack
+React Web — SPA פשוט
+Persona Web SDK — KYC בדפדפן
+Deploy: Vercel (כבר מוגדר ב-vercel.json)
+## 7.2 Flow
+שוכר מקבל קישור מוזמן ב-email
+נפתח דף: שם משכיר + כתובת + תקופה + שכירות + הסבר מחויבות
+KYC דרך Persona Web SDK
+חתימה דיגיטלית על הסכם ערבות
+דחייה: כפתור "לא מסכים" + הודעה למשכיר
+# 8. Admin Panel (חדש)
+## 8.1 Stack
+React Web — נפרד מאפליקציית הערבים
+Auth: JWT עם role ADMIN — גישה מוגבלת לראן בלבד
+Deploy: Vercel (sub-domain)
+## 8.2 Configuration Store
+כל הפרמטרים הקינפוגביליים נשמרים בטבלת app_config ב-Supabase:
+# 9. Cron Jobs
+# 10. שינויים נדרשים מהקוד הקיים
+DirApp Development Architecture Spec v3.0 — מאי 2026
+
+[TABLE]
+פרט | ערך
+גרסה | 3.0
+תאריך | מאי 2026
+Branch | claude/rental-matching-platform-mKuSW
+Repo | github.com/RanRam29/apartment
+[/TABLE]
+
+
+[TABLE]
+שכבה | טכנולוגיה | סטטוס | הערה
+Mobile | React Native / Expo 51 | קיים | Zustand, React Query, Reanimated 3
+Backend | Node.js / Express | קיים | Sequelize + Mongoose + Socket.io
+PostgreSQL | Supabase | שונה | הועבר מ-raw PG
+MongoDB | MongoDB | קיים | לצ'אט בלבד
+Redis | Redis | קיים | Feed cache + sessions
+AI | Gemini 1.5 Flash | קיים | OCR + NLP + חילוץ שדות
+Storage | Cloudflare R2 | שונה | הוחלף Cloudinary
+Email | Resend | חדש | במקום Twilio SMS
+Push | Expo Push | קיים | חינם
+KYC | Persona | קיים | + abstraction layer
+Web (ערב) | React Web | חדש | Persona Web SDK
+Infra | Docker + Kubernetes | קיים | dev + prod
+[/TABLE]
+
+
+[TABLE]
+Method | Endpoint | תיאור | סטטוס
+POST | /api/auth/register | הרשמה (משכיר/שוכר) | קיים
+POST | /api/auth/login | Login → JWT | קיים
+GET | /api/apartments/feed | Swipe feed (Redis cached) | קיים
+POST | /api/swipe | Record swipe → match | קיים
+GET | /api/matches | רשימת matches | קיים
+POST | /api/matches/:id/accept | משכיר מקבל match | קיים
+GET | /api/chat/:matchId | Paginated messages | קיים
+POST | /api/contracts/upload | העלאת חוזה + AI extraction | חדש
+GET | /api/contracts/:id | פרטי חוזה מלאים | חדש
+POST | /api/contracts/:id/sign | חתימה על חוזה | חדש
+POST | /api/contracts/:id/checkin | ביצוע Check-In | חדש
+POST | /api/contracts/:id/checkout | ביצוע Check-Out | חדש
+GET | /api/contracts/:id/ledger | לדגר תשלומים | חדש
+POST | /api/ledger/:id/report | שוכר מדווח תשלום | חדש
+POST | /api/ledger/:id/confirm | משכיר מאשר תשלום | חדש
+POST | /api/maintenance | פתיחת תקלה | חדש
+GET | /api/maintenance/:contractId | רשימת תקלות | חדש
+POST | /api/kyc/initiate | התחלת תהליך KYC | חדש
+POST | /api/kyc/webhook | Persona webhook | קיים
+GET | /api/landlord/dashboard | Dashboard מאוחד | קיים - מורחב
+GET | /api/admin/* | כל endpoints של Admin | חדש
+[/TABLE]
+
+
+[TABLE]
+טבלה | עמודות עיקריות | הערה
+users | id, phone, email, role, kyc_status, kyc_expires_at, blocked_count, is_locked | תפקיד גמיש לפי חוזה
+kyc_records | id, user_id, persona_inquiry_id, status, id_expiry, created_at | שמירה 7 ימים
+ownership_declarations | id, user_id, contract_id, declared_at, ip | הצהרות חתומות
+[/TABLE]
+
+
+[TABLE]
+טבלה | עמודות עיקריות | הערה
+properties | id, owner_id, address, lat, lng, status, created_at | 
+property_rooms | id, property_id, name, type (builtin/custom) | חדרים לCheck-In/Out
+property_images | id, property_id, r2_key, order, created_at | R2 references
+[/TABLE]
+
+
+[TABLE]
+טבלה | עמודות עיקריות | הערה
+agreements | id, property_id, landlord_id, status, start_date, end_date, monthly_rent, payment_day, cpi_enabled, r2_doc_key | State Machine
+agreement_parties | id, agreement_id, user_id, role, signed_at, kyc_status | שוכרים + ערבים
+agreement_rooms | id, agreement_id, room_id, checkin_photos[], checkout_photos[] | תמונות לפי חדר
+ledger_rows | id, agreement_id, period, due_date, amount, status, reported_at, confirmed_at, cpi_adj, notes, receipt_r2_key | לדגר
+ownership_verifications | id, agreement_id, tenant_id, choice, verified_at | אמת בעלות
+[/TABLE]
+
+
+[TABLE]
+טבלה | עמודות עיקריות | הערה
+tickets | id, agreement_id, reporter_id, description, status, photo_r2_key, created_at | 
+ticket_invoices | id, ticket_id, r2_key, amount, payer (landlord/tenant), uploaded_at | חשבוניות
+[/TABLE]
+
+
+[TABLE]
+Collection | שימוש | הערה
+messages | הודעות צ'אט real-time | Socket.io
+chat_sessions | session metadata | match_id reference
+user_preferences | העדפות swipe, lifestyle score | לmatchingService
+[/TABLE]
+
+
+[TABLE]
+Key Pattern | תוכן | TTL
+feed:{userId} | Swipe feed cache | 1 שעה
+session:{token} | JWT session | 24 שעות
+nlp:{queryHash} | NLP query cache | 6 שעות
+kyc:lock:{userId} | מניעת KYC כפול | 10 דקות
+[/TABLE]
+
+
+[TABLE]
+Bucket | תוכן | Policy | TTL
+property-images | תמונות נכסים שיווקיות | public-read | לנצח
+contract-docs | קבצי חוזה מקוריים | private | תקופת חוזה
+checkin-photos | תמונות Check-In/Out | private | תקופת חוזה + 3 שנים
+payment-receipts | אסמכתאות תשלום | private | תקופת חוזה + 3 שנים
+archive | חוזים שפגו | private | 3 שנים → auto-delete
+[/TABLE]
+
+
+[TABLE]
+key | value | description
+check_in_window_days | 5 | ימים לביצוע Check-In
+checkout_revision_rounds | 3 | סבבי תיקון Check-Out
+blocking_threshold | 5 | חסימות לנעילה
+payment_autoconfirm_hours | 48 | שעות לAuto-Confirm
+guarantor_link_ttl_days | 5 | תוקף קישור ערב
+expiring_warning_days | 120 | ימים לפני EXPIRING
+kyc_renewal_years | 5 | שנים לחידוש KYC
+[/TABLE]
+
+
+[TABLE]
+Job | תזמון | תיאור
+ledger-due-alerts | כל יום 08:00 | שליחת התראות תשלום -5 ימים
+ledger-overdue | כל יום 23:59 | סימון שורות OVERDUE
+payment-autoconfirm | כל שעה | Auto-Confirm לאחר 48 שעות
+expiring-alerts | כל יום 09:00 | התראות EXPIRING לפי לוח
+cpi-adjustment | 1 לינואר כל שנה | עדכון שכירות לפי CPI
+kyc-renewal | כל יום | בדיקת תאריך תפוגת ת"ז
+maintenance-alerts | כל שעה | התראות עיכוב תקלות
+r2-cleanup | כל חודש | מחיקת קבצים שפג תוקפם
+[/TABLE]
+
+
+[TABLE]
+קובץ/מודול | שינוי נדרש | עדיפות
+uploadService.js | החלפת Cloudinary ב-R2 SDK | קריטי
+models/pg/Contract.js | עדכון Schema + State Machine חדש | קריטי
+models/pg/Ledger.js | יצירת מודל חדש | קריטי
+routes/contracts.js | endpoint upload + sign + checkin + checkout | קריטי
+services/kycService.js | abstraction layer + HMAC webhook | קריטי
+services/geminiService.js | הוספת extractContractFields() | קריטי
+services/notificationService.js | החלפת Twilio ב-Resend + Expo Push | קריטי
+routes/payments.js | הסרת Meshulam מ-MVP — תיעוד ידני בלבד | גבוה
+mobile/screens | הוספת CheckInScreen, CheckOutScreen, LedgerScreen | גבוה
+config/database.js | מעבר ל-Supabase connection string | גבוה
+web/guarantor | יצירת Web app חדש לערבים | בינוני
+web/admin | יצירת Admin Panel חדש | בינוני
+[/TABLE]
+

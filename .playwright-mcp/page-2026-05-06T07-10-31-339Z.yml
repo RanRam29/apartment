@@ -1,0 +1,50 @@
+- generic [ref=e432]:
+  - generic [ref=e438]:
+    - generic [ref=e439]: פרסם מודעה חדשה
+    - generic [ref=e440]:
+      - generic [ref=e441]: כותרת *
+      - 'textbox "לדוג׳: דירת 3 חדרות מרוהטת בלב תל אביב" [ref=e442]'
+    - generic [ref=e443]:
+      - generic [ref=e444]:
+        - generic [ref=e445]: מחיר ₪ *
+        - textbox "6500" [ref=e446]
+      - generic [ref=e447]:
+        - generic [ref=e448]: חדרות *
+        - textbox "3" [ref=e449]
+    - generic [ref=e450]:
+      - generic [ref=e451]:
+        - generic [ref=e452]: עיר *
+        - textbox "תל אביב" [ref=e453]
+      - generic [ref=e454]:
+        - generic [ref=e455]: שכונה
+        - textbox "פלורנטין" [ref=e456]
+    - generic [ref=e457]:
+      - generic [ref=e458]:
+        - generic [ref=e459]: קומה
+        - textbox "3" [ref=e460]
+      - generic [ref=e461]:
+        - generic [ref=e462]: גודל מ"ר
+        - textbox "75" [ref=e463]
+    - generic [ref=e464]:
+      - generic [ref=e465]: תיאור
+      - textbox "תאר את הדירה..." [ref=e466]
+    - generic [ref=e467]: שירותים
+    - generic [ref=e468]:
+      - generic [ref=e470] [cursor=pointer]: 🚗 חניה
+      - generic [ref=e472] [cursor=pointer]: 🌿 מרפסת
+      - generic [ref=e474] [cursor=pointer]: 🛗 מעלית
+      - generic [ref=e476] [cursor=pointer]: ❄️ מזגן
+      - generic [ref=e478] [cursor=pointer]: 📦 מחסן
+      - generic [ref=e480] [cursor=pointer]: 🛋️ מרוהטת
+      - generic [ref=e482] [cursor=pointer]: ☀️ דוד שמש
+      - generic [ref=e484] [cursor=pointer]: 🐾 חיות מותרות
+    - generic [ref=e485]: תמונות (0/10)
+    - generic [ref=e488] [cursor=pointer]:
+      - generic [ref=e489]: 
+      - generic [ref=e490]: הוסף
+    - generic [ref=e492] [cursor=pointer]: פרסם מודעה 🏠
+  - generic [ref=e493]:
+    - generic:
+      - generic:
+        - button "Go back" [ref=e495] [cursor=pointer]
+        - heading "פרסם מודעה" [level=1] [ref=e498]

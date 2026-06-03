@@ -95,6 +95,10 @@ const User = sequelize.define('User', {
     type: DataTypes.JSONB,
     defaultValue: { push: true, email: true, paymentReminders: true, maintenance: true, whatsapp: false },
   },
+  bio: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
 }, {
   tableName: 'users',
   indexes: [

@@ -1,0 +1,99 @@
+DirApp
+Product Roadmap
+גרסה 3.0 — מאי 2026
+# 1. סיכום מצב נוכחי
+# 2. MVP Milestone — גרסה 3.0
+כל הפיצ'רים הבאים נדרשים לפני launch ראשון לפיילוט.
+## 2.1 Core — חובה ל-Launch
+# 3. גרסה 2.0 — Post-MVP
+# 4. גרסה 3.0 — Enterprise
+# 5. Architecture Decisions Log
+DirApp Product Roadmap v3.0 — מאי 2026
+
+[TABLE]
+פרט | ערך
+גרסה | 3.0 — עדכון לאחר סקירת אפיון מקיפה
+תאריך | מאי 2026
+מצב | MVP פעיל
+[/TABLE]
+
+
+[TABLE]
+Feature | Phase | סטטוס | הערה
+F1 — Discovery Engine (Swipe) | Phase 1 | approved | פועל — daily quota, superlike, dwell-time
+F2 — Landlord Dashboard | Phase 1 | approved | פועל — analytics, listings
+F3 — Property Upload Engine | Phase 1 | approved | עודכן — R2 במקום Cloudinary
+F4 — Cost Calculator | Phase 1 | approved | פועל — arnona + building fee
+F5 — AI Lead Qualification | Phase 2 | approved | פועל — lead_scoring.py
+F6 — Smart Map | Phase 2 | approved | פועל — MapScreen + TAMA 38
+F7 — Marketing Copy Generator | Phase 2 | approved | פועל — Gemini styles
+F8 — Roommate Compatibility | Phase 2 | approved | פועל — lifestyle questionnaire
+F9 — Identity Verification (KYC) | Phase 3 | approved | עודכן — Persona + abstraction layer
+F10 — Digital Contracts | Phase 3 | approved | עודכן — Upload Flow + State Machine חדש
+F11 — Payments | Phase 3 | approved | עודכן — ידני ב-MVP, Stripe בגרסה הבאה
+F12 — Commercial Real Estate | Phase 3 | approved | קיים — לא במיקוד MVP
+F13 — Gamification | Phase 4 | approved | קיים — לא במיקוד MVP
+F14 — Services Marketplace | Phase 4 | approved | קיים — superseded ע"י midrag.co.il
+F15 — IoT | Phase 4 | approved | קיים — לא ב-MVP
+[/TABLE]
+
+
+[TABLE]
+ID | Feature | תיאור | עדיפות
+M1 | Contract Upload + AI Extraction | Upload PDF/DOCX + Gemini OCR + מסך אישור | קריטי
+M2 | State Machine v3 | UPLOAD→PENDING_SIGN→ACTIVE→EXPIRING→ENDED | קריטי
+M3 | Check-In Flow | תמונות לפי חדרים + אישור משכיר | קריטי
+M4 | Check-Out Flow | תמונות + הערות + סבבי תיקון + Auto-Confirm | קריטי
+M5 | Ledger + Payment Tracking | לדגר ידני + דיווח + אישור + Auto-Confirm | קריטי
+M6 | KYC v2 | Persona + abstraction layer + Webhook HMAC | קריטי
+M7 | Guarantor Web Flow | Web app ייעודי + Persona Web SDK | קריטי
+M8 | Notification System v2 | Resend Email + Expo Push (ללא Twilio) | קריטי
+M9 | Storage Migration | Cloudinary → Cloudflare R2 | קריטי
+M10 | Admin Panel v1 | GODMODE — config + user management | קריטי
+M11 | Terms of Service | אישור חובה + ניטרליות DirApp | קריטי
+M12 | Multi-tenant Support | מנהל בית + Switch תפקידים | גבוה
+M13 | EXPIRING Alerts | לוח התראות 120/90/60/45/30 ימים | גבוה
+M14 | Contract Renewal Flow | חידוש + PENDING_ACTIVATION | גבוה
+M15 | Maintenance Flow | פתיחת תקלה + midrag.co.il + חשבונית | גבוה
+[/TABLE]
+
+
+[TABLE]
+ID | Feature | תיאור | תלות
+V2-1 | Stripe Connect | עמלה קטנה לDirApp — מצריך רישיון | מחקר רגולטורי
+V2-2 | SLA מלא | Deadlines + Breach + ניכוי | M15
+V2-3 | Contract Amendment | תיקון חוזה פעיל בהסכמה | M2
+V2-4 | Warning Letter | מכתב התראה לפני פינוי — חובה משפטית | M2
+V2-5 | Waitlist לנכסים | תור למתעניינים | M1
+V2-6 | Anti-discrimination Flow | הודעת דחייה מסודרת | KYC
+V2-7 | D&B Integration | אימות בעלות מול נסח טאבו | לא דחוף
+V2-8 | Open Banking | אינטגרציה Masav | רגולציה
+[/TABLE]
+
+
+[TABLE]
+Feature | תיאור
+חברות ניהול | ח.פ. כמשכיר — ניהול עשרות נכסים — לקוח עיקרי צפוי
+Insurance / Risk | ביטוח שכ"ד + Risk scoring — Phase 5
+Litigation Prep | Evidence File + Filing Assistant — Phase 6
+Tax Reporting | ייצוא לדיווח מס + סיווג הכנסות
+Invoice & Receipt | יצירת חשבוניות ספות אוטומטית
+PPM Scheduler | תחזוקה מונעת — lתזמון אוטומטי
+[/TABLE]
+
+
+[TABLE]
+החלטה | סיבה | תאריך
+Upload במקום אשף | חיכוך פחות — משכירים כבר יש להם חוזה | מאי 2026
+ביטול DRAFT | לא נדרש עם Upload flow | מאי 2026
+ביטול DISPUTED | DirApp לא מעורבת בסכסוכים | מאי 2026
+R2 במקום Cloudinary | עלות נמוכה + egress חינם + archiving | מאי 2026
+Resend במקום Twilio | חינמי ל-MVP + אין צורך ב-SMS | מאי 2026
+תשלום ידני ב-MVP | מורכבות רגולטורית גבוהה | מאי 2026
+MongoDB לצ'אט בלבד | real-time performance + schema flexibility | מאי 2026
+Redis נשמר | Feed cache קריטי לביצועי Swipe | מאי 2026
+Supabase לPostgreSQL | managed + free tier + auth built-in | מאי 2026
+midrag.co.il לטכנאים | 11,000 בעלי מקצוע — אפס תחזוקה | מאי 2026
+Gemini לOCR | כבר מחובר + איכות גבוהה לעברית | מאי 2026
+[/TABLE]
+

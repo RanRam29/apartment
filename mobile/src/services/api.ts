@@ -396,6 +396,11 @@ export const tenantApi = {
   getJournal: () => api.get('/tenant/journal'),
 };
 
+export const renterJournalApi = {
+  getJournal: (userId: string) => api.get(`/v3/renter-journal/${userId}`),
+  updateProfile: (userId: string, data: { firstName?: string; lastName?: string; bio?: string; avatarUrl?: string }) => api.put(`/v3/renter-journal/${userId}`, data),
+};
+
 // ─── Token helpers ────────────────────────────────────────────────────────────
 export const tokenStorage = {
   save: (token: string) => storage.setItemAsync(TOKEN_KEY, token),
