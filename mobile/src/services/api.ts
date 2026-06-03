@@ -126,15 +126,16 @@ export const authApi = {
     api.patch('/auth/avatar', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
   switchRole: (role: 'tenant' | 'landlord') => api.patch('/auth/switch-role', { role }),
   updateUsersMe: (data: { whatsappOptIn?: boolean; phone?: string }) =>
-    api.put('/users/me', data),
+    api.patch('/auth/profile', data),
+  // Stub — WhatsApp unread count endpoint not yet implemented in backend
   getUnreadWhatsappCount: () =>
-    api.get('/v3/whatsapp/unread-count'),
+    Promise.resolve({ data: { count: 0 } }),
   updateNotificationPreferences: (prefs: any) =>
-    api.put('/users/me/notification-preferences', prefs),
+    api.put('/auth/notification-preferences', prefs),
   exportData: () =>
-    api.post('/users/me/export-data'),
+    api.post('/auth/export-data'),
   requestDeletion: () =>
-    api.post('/users/me/request-deletion'),
+    api.post('/auth/request-deletion'),
 };
 
 // ─── Apartments ───────────────────────────────────────────────────────────────
@@ -149,7 +150,7 @@ export const apartmentsApi = {
     floor: number | null; totalFloors: number | null; sizeSqm: number | null;
     city: string; street: string | null; neighborhood: string | null; address: string | null;
     amenities: string[]; petsAllowed: boolean; availableFrom: string | null;
-    minLeasePeriod: number | null; isActive: boolean;
+    minLeasePeriod: number | null; isActive: boolean; buildingFee: number | null;
   }>) => api.patch(`/apartments/${id}`, data),
   toggleFreeze: (id: string) => api.post(`/apartments/${id}/freeze`),
   deletePermanently: (id: string) => api.delete(`/apartments/${id}`),

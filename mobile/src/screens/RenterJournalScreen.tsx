@@ -463,6 +463,7 @@ const styles = StyleSheet.create({
     borderBottomColor: 'rgba(255, 255, 255, 0.05)',
   },
   backBtn: { padding: 8 },
+  nameRow: { alignItems: 'center', gap: 8 },
   refreshBtn: { padding: 8 },
   title: { fontSize: 18, fontWeight: 'bold' },
   scrollContent: { padding: 16, paddingBottom: 40 },

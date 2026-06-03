@@ -54,7 +54,7 @@ export default function PrivacySettingsScreen() {
       const res = await authApi.exportData();
       setExporting(false);
       
-      const formattedJson = JSON.stringify(res.data.data, null, 2);
+      const formattedJson = JSON.stringify(res.data, null, 2);
       if (Platform.OS === 'web') {
         window.alert(`פרטי המידע השמורים שלך:\n\n${formattedJson}`);
       } else {
