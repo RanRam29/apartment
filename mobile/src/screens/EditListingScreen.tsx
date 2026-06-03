@@ -70,6 +70,7 @@ export default function EditListingScreen({ route, navigation }: Props) {
   const [street, setStreet]             = useState('');
   const [floor, setFloor]               = useState('');
   const [sizeSqm, setSizeSqm]           = useState('');
+  const [buildingFee, setBuildingFee]   = useState('');
   const [amenities, setAmenities]       = useState<Amenity[]>([]);
   const [petsAllowed, setPetsAllowed]   = useState(false);
   const [saving, setSaving]             = useState(false);
@@ -89,6 +90,7 @@ export default function EditListingScreen({ route, navigation }: Props) {
     setStreet(apt.street ?? apt.neighborhood ?? '');
     setFloor(apt.floor != null ? String(apt.floor) : '');
     setSizeSqm(apt.sizeSqm != null ? String(apt.sizeSqm) : '');
+    setBuildingFee(apt.buildingFee != null ? String(apt.buildingFee) : '');
     setAmenities(apt.amenities ?? []);
     setPetsAllowed(apt.petsAllowed ?? false);
     setHydrated(true);
@@ -115,7 +117,7 @@ export default function EditListingScreen({ route, navigation }: Props) {
 
   function getCityMatches(query: string) {
     const q = normalizeText(query);
-    if (q.length < 2) return [];
+    if (q.length < 1) return [];
     const startsWith = ISRAELI_CITIES.filter((name) => normalizeText(name).startsWith(q));
     const contains = ISRAELI_CITIES.filter((name) => {
       const norm = normalizeText(name);
@@ -152,7 +154,7 @@ export default function EditListingScreen({ route, navigation }: Props) {
   useEffect(() => {
     const q = street.trim();
     const selectedCity = city.trim();
-    if (!selectedCity || q.length < 2) {
+    if (!selectedCity || q.length < 1) {
       setStreetSuggestions([]);
       setIsLoadingStreets(false);
       return;
@@ -162,7 +164,7 @@ export default function EditListingScreen({ route, navigation }: Props) {
       setIsLoadingStreets(true);
       try {
         const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=il&addressdetails=1&accept-language=he&limit=25&q=${encodeURIComponent(`${q}, ${selectedCity}, ישראל`)}`,
+          `https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=il&addressdetails=1&accept-language=he&limit=100&q=${encodeURIComponent(`${q}, ${selectedCity}, ישראל`)}`,
           {
             signal: controller.signal,
             headers: { 'User-Agent': 'ApartmentApp/1.0 (EditListing)' },
@@ -171,7 +173,7 @@ export default function EditListingScreen({ route, navigation }: Props) {
         const data = await res.json();
         const parsed = Array.isArray(data)
           ? data
-              .map((item: any) => item?.address?.road)
+              .map((item: any) => item?.address?.road || item?.address?.pedestrian || item?.address?.living_street || item?.address?.footway || item?.name)
               .filter(Boolean)
               .filter((road: string) => {
                 const qNorm = normalizeText(q);
@@ -210,8 +212,8 @@ export default function EditListingScreen({ route, navigation }: Props) {
       Alert.alert('שגיאה', 'כותרת לא יכולה להכיל קוד או תווים לא תקינים');
       return;
     }
-    if (!/^\d+$/.test(price) || !/^\d+$/.test(rooms) || (sizeSqm && !/^\d+$/.test(sizeSqm)) || (floor && !/^\d+$/.test(floor))) {
-      Alert.alert('שגיאה', 'שדות מחיר, חדרים, קומה וגודל חייבים להכיל מספרים בלבד');
+    if (!/^\d+$/.test(price) || !/^\d+$/.test(rooms) || (sizeSqm && !/^\d+$/.test(sizeSqm)) || (floor && !/^\d+$/.test(floor)) || (buildingFee && !/^\d+$/.test(buildingFee))) {
+      Alert.alert('שגיאה', 'שדות מחיר, חדרים, קומה, גודל וועד בית חייבים להכיל מספרים בלבד');
       return;
     }
     const isCityValid = await validateIsraeliCity(cityValue);
@@ -235,6 +237,7 @@ export default function EditListingScreen({ route, navigation }: Props) {
         street: streetValue,
         floor: floor ? parseInt(floor, 10) : null,
         sizeSqm: sizeSqm ? parseInt(sizeSqm, 10) : null,
+        buildingFee: buildingFee ? parseInt(buildingFee, 10) : null,
         amenities,
         petsAllowed,
       });
@@ -271,16 +274,15 @@ export default function EditListingScreen({ route, navigation }: Props) {
             <Text style={styles.helperText}>{title.length}/100</Text>
           </Field>
 
-          <View style={styles.row}>
-            <Field label="מחיר ₪ *" style={{ flex: 1, marginLeft: 8 }}>
-              <TextInput style={[styles.input, { backgroundColor: colors.bgCard, color: colors.text, borderColor: colors.border }]} value={price} onChangeText={(value) => setPrice(keepDigitsOnly(value))}
-                keyboardType="numeric" placeholder="6500" placeholderTextColor={colors.textMut} textAlign="right" />
-            </Field>
-            <Field label="חדרים *" style={{ flex: 1 }}>
-              <TextInput style={[styles.input, { backgroundColor: colors.bgCard, color: colors.text, borderColor: colors.border }]} value={rooms} onChangeText={(value) => setRooms(keepDigitsOnly(value))}
-                keyboardType="numeric" placeholder="3" placeholderTextColor={colors.textMut} textAlign="right" />
-            </Field>
-          </View>
+          <Field label="מחיר ₪ *">
+            <TextInput style={[styles.input, { backgroundColor: colors.bgCard, color: colors.text, borderColor: colors.border }]} value={price} onChangeText={(value) => setPrice(keepDigitsOnly(value))}
+              keyboardType="numeric" placeholder="6500" placeholderTextColor={colors.textMut} textAlign="right" />
+          </Field>
+
+          <Field label="ועד בית ₪">
+            <TextInput style={[styles.input, { backgroundColor: colors.bgCard, color: colors.text, borderColor: colors.border }]} value={buildingFee} onChangeText={(value) => setBuildingFee(keepDigitsOnly(value))}
+              keyboardType="numeric" placeholder="250 (השאר ריק לחישוב מוערך)" placeholderTextColor={colors.textMut} textAlign="right" />
+          </Field>
 
           <View style={styles.row}>
             <Field label="עיר *" style={{ flex: 1, marginLeft: 8 }}>
@@ -332,6 +334,10 @@ export default function EditListingScreen({ route, navigation }: Props) {
           </View>
 
           <View style={styles.row}>
+            <Field label="חדרים *" style={{ flex: 1, marginLeft: 8 }}>
+              <TextInput style={[styles.input, { backgroundColor: colors.bgCard, color: colors.text, borderColor: colors.border }]} value={rooms} onChangeText={(value) => setRooms(keepDigitsOnly(value))}
+                keyboardType="numeric" placeholder="3" placeholderTextColor={colors.textMut} textAlign="right" />
+            </Field>
             <Field label="קומה" style={{ flex: 1, marginLeft: 8 }}>
               <TextInput style={[styles.input, { backgroundColor: colors.bgCard, color: colors.text, borderColor: colors.border }]} value={floor} onChangeText={(value) => setFloor(keepDigitsOnly(value))}
                 keyboardType="numeric" placeholder="3" placeholderTextColor={colors.textMut} textAlign="right" />
@@ -435,17 +441,17 @@ const styles = StyleSheet.create({
     borderBottomColor: `${dirApp.outlineVariant}44`,
   },
   suggestionText: { textAlign: 'right', color: dirApp.onSurface, fontSize: 14, fontFamily: fontFamily.regular },
-  amenitiesGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 },
+  amenitiesGrid: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: 4, marginBottom: 20 },
   amenityChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: 6,
+    paddingVertical: 4,
     borderRadius: 10,
     backgroundColor: dirApp.surfaceContainerLow,
     borderWidth: 1.5,
     borderColor: `${dirApp.outlineVariant}AA`,
   },
   amenityChipActive: { backgroundColor: dirApp.secondary, borderColor: dirApp.secondary },
-  amenityText: { color: dirApp.outline, fontSize: 13, fontFamily: fontFamily.regular },
+  amenityText: { color: dirApp.outline, fontSize: 10, fontFamily: fontFamily.regular },
   amenityTextActive: { color: dirApp.onSecondary, fontWeight: '600', fontFamily: fontFamily.bold },
   petsRow: {
     flexDirection: 'row',

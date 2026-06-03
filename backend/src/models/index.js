@@ -87,6 +87,9 @@ PaymentLedger.belongsTo(RentalAgreement, { foreignKey: 'agreementId', as: 'agree
 RentalAgreement.hasMany(ProtocolEvidence, { foreignKey: 'agreementId', as: 'protocolEvidence' });
 ProtocolEvidence.belongsTo(RentalAgreement, { foreignKey: 'agreementId', as: 'agreement' });
 
+RentalAgreement.belongsTo(Apartment, { foreignKey: 'propertyId', as: 'apartment' });
+Apartment.hasMany(RentalAgreement, { foreignKey: 'propertyId', as: 'agreements' });
+
 module.exports = {
   User,
   Apartment,

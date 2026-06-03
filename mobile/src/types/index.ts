@@ -9,6 +9,11 @@ export interface User {
   avatarUrl: string | null;
   isVerified: boolean;
   isPremium: boolean;
+  activeRole?: UserRole;
+  phone?: string;
+  whatsappOptIn?: boolean;
+  trustScore?: number;
+  tosAcceptedAt?: string;
 }
 
 export interface AuditLogItem {
@@ -60,7 +65,7 @@ export type Amenity =
 export interface Apartment {
   id: string;
   landlordId: string;
-  landlord?: Pick<User, 'id' | 'firstName' | 'lastName' | 'avatarUrl' | 'isVerified' | 'isPremium'>;
+  landlord?: Pick<User, 'id' | 'firstName' | 'lastName' | 'avatarUrl' | 'isVerified' | 'isPremium' | 'trustScore'>;
   title: string;
   description: string | null;
   price: number;
@@ -190,6 +195,24 @@ export type MainStackParamList = {
   LogsConsole: undefined;
   RenterJournal: undefined;
   Terms: undefined;
+  ContractUpload: undefined;
+  CheckIn: { contractId: string };
+  CheckOut: { contractId: string };
+  Ledger: { agreementId?: string };
+  Maintenance: { agreementId?: string };
+  PrivacySettings: undefined;
+  LandlordProfile: {
+    landlord: {
+      id: string;
+      firstName: string;
+      lastName: string;
+      avatarUrl: string | null;
+      isVerified: boolean;
+      trustScore: number | null;
+      isPremium?: boolean;
+    };
+    apartmentId?: string;
+  };
 };
 
 export type AdminTabParamList = {

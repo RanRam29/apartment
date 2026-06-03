@@ -39,16 +39,18 @@ function computeCostBreakdown(apartment) {
   const sqm = apartment.sizeSqm ? Number(apartment.sizeSqm) : Math.round((Number(apartment.rooms) || 3) * 30);
   const arnonaEstimate = Math.round(arnonaRate * sqm);
 
-  // Building (va'ad bayit) fee by size
-  const rooms = Number(apartment.rooms) || 3;
-  const buildingFeeEstimate = rooms <= 2 ? 150 : rooms <= 3.5 ? 250 : 400;
+  // Building (va'ad bayit) fee: use landlord specified value if exists, otherwise fallback to size estimate
+  const hasCustomFee = apartment.buildingFee !== null && apartment.buildingFee !== undefined;
+  const buildingFeeEstimate = hasCustomFee
+    ? Number(apartment.buildingFee)
+    : (Number(apartment.rooms) <= 2 ? 150 : Number(apartment.rooms) <= 3.5 ? 250 : 400);
 
   return {
     rent,
     arnonaEstimate,
     buildingFeeEstimate,
     total: rent + arnonaEstimate + buildingFeeEstimate,
-    note: 'ארנונה ודמי ועד בית הינם הערכה בלבד',
+    note: hasCustomFee ? 'ארנונה הינה הערכה בלבד' : 'ארנונה ודמי ועד בית הינם הערכה בלבד',
   };
 }
 
@@ -84,7 +86,7 @@ router.post(
         title, description, price, rooms, floor, totalFloors,
         sizeSqm, city, neighborhood, street, address,
         latitude, longitude, amenities, availableFrom,
-        minLeasePeriod, petsAllowed,
+        minLeasePeriod, petsAllowed, buildingFee,
       } = req.body;
       if (typeof city !== 'string') {
         return res.status(422).json({ error: 'city must be a string' });
@@ -104,6 +106,7 @@ router.post(
         floor: floor ? parseInt(floor) : null,
         totalFloors: totalFloors ? parseInt(totalFloors) : null,
         sizeSqm: sizeSqm ? parseInt(sizeSqm) : null,
+        buildingFee: buildingFee ? parseInt(buildingFee) : null,
         city,
         street: street || neighborhood || null,
         address,
@@ -194,7 +197,7 @@ router.get(
         include: [{
           model: User,
           as: 'landlord',
-          attributes: ['id', 'firstName', 'lastName', 'avatarUrl', 'isVerified', 'isPremium'],
+          attributes: ['id', 'firstName', 'lastName', 'avatarUrl', 'isVerified', 'isPremium', 'trustScore'],
         }],
         // פרימיום (משלם) קודם — מודגש במפה ובפיד
         order: [
@@ -232,7 +235,7 @@ router.get('/:id', authenticate, async (req, res, next) => {
     if (cached) return res.json({ apartment: cached, fromCache: true });
 
     const apartment = await Apartment.findByPk(req.params.id, {
-      include: [{ model: User, as: 'landlord', attributes: ['id', 'firstName', 'lastName', 'avatarUrl', 'isVerified'] }],
+      include: [{ model: User, as: 'landlord', attributes: ['id', 'firstName', 'lastName', 'avatarUrl', 'isVerified', 'trustScore'] }],
     });
 
     if (!apartment) return res.status(404).json({ error: 'Apartment not found' });
@@ -259,7 +262,7 @@ router.patch('/:id', authenticate, requireRole('landlord'), async (req, res, nex
     const allowed = [
       'title', 'description', 'price', 'rooms', 'floor', 'totalFloors',
       'sizeSqm', 'city', 'street', 'neighborhood', 'address', 'amenities',
-      'petsAllowed', 'availableFrom', 'minLeasePeriod', 'isActive',
+      'petsAllowed', 'availableFrom', 'minLeasePeriod', 'isActive', 'buildingFee',
     ];
     const raw = Object.fromEntries(
       Object.entries(req.body).filter(([k]) => allowed.includes(k))
@@ -267,7 +270,7 @@ router.patch('/:id', authenticate, requireRole('landlord'), async (req, res, nex
 
     const updates = {};
     for (const [k, v] of Object.entries(raw)) {
-      if (['price', 'floor', 'totalFloors', 'sizeSqm', 'minLeasePeriod'].includes(k)) {
+      if (['price', 'floor', 'totalFloors', 'sizeSqm', 'minLeasePeriod', 'buildingFee'].includes(k)) {
         updates[k] = v !== '' && v !== null ? parseInt(v, 10) : null;
       } else if (k === 'rooms') {
         updates[k] = parseFloat(v);
@@ -376,7 +379,7 @@ router.post(
   }
 );
 
-// ─── POST /api/apartments/search/nlp — natural language search ──────────────
+// ─── POST /api/apartments/search/nlp — NLP free-text search via Gemini ──────
 router.post(
   '/search/nlp',
   authenticate,
@@ -387,36 +390,48 @@ router.post(
       if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
 
       const { query: nlpQuery } = req.body;
+
+      // Redis cache (6h)
       const cacheKey = `nlp:${Buffer.from(nlpQuery).toString('base64').slice(0, 64)}`;
       const cached = await cacheGet(cacheKey);
       if (cached) return res.json({ ...cached, fromCache: true });
 
-      const parsed = await parseSearchQuery(nlpQuery);
+      const filters = await parseSearchQuery(nlpQuery);
 
+      // Build Sequelize where clause
       const where = { isActive: true };
-      if (parsed.city) where.city = { [Op.iLike]: `%${parsed.city}%` };
-      if (parsed.minPrice && parsed.maxPrice) {
-        where.price = { [Op.between]: [parsed.minPrice, parsed.maxPrice] };
-      } else if (parsed.minPrice) {
-        where.price = { [Op.gte]: parsed.minPrice };
-      } else if (parsed.maxPrice) {
-        where.price = { [Op.lte]: parsed.maxPrice };
+      if (filters.city) where.city = { [Op.iLike]: `%${filters.city}%` };
+      const streetFilter = filters.street || filters.neighborhood;
+      if (streetFilter) where.street = { [Op.iLike]: `%${streetFilter}%` };
+      if (filters.minPrice || filters.maxPrice) {
+        where.price = {};
+        if (filters.minPrice) where.price[Op.gte] = filters.minPrice;
+        if (filters.maxPrice) where.price[Op.lte] = filters.maxPrice;
       }
-      if (parsed.rooms) where.rooms = { [Op.gte]: parsed.rooms };
-      if (parsed.petsAllowed) where.petsAllowed = true;
+      if (filters.minRooms || filters.maxRooms) {
+        where.rooms = {};
+        if (filters.minRooms) where.rooms[Op.gte] = filters.minRooms;
+        if (filters.maxRooms) where.rooms[Op.lte] = filters.maxRooms;
+      }
+      if (filters.amenities?.length) where.amenities = { [Op.contains]: filters.amenities };
+      if (filters.petsAllowed === true) where.petsAllowed = true;
 
-      const { rows: apartments, count } = await Apartment.findAndCountAll({
+      // Exclude already-swiped apartments
+      const swipedIds = await Swipe.findAll({
+        where: { tenantId: req.user.id },
+        attributes: ['apartmentId'],
+        raw: true,
+      }).then((rows) => rows.map((r) => r.apartmentId));
+      if (swipedIds.length) where.id = { [Op.notIn]: swipedIds };
+
+      const apartments = await Apartment.findAll({
         where,
-        include: [{
-          model: User,
-          as: 'landlord',
-          attributes: ['id', 'firstName', 'lastName', 'avatarUrl', 'isVerified', 'isPremium'],
-        }],
+        include: [{ model: User, as: 'landlord', attributes: ['id', 'firstName', 'lastName', 'avatarUrl', 'isVerified', 'trustScore'] }],
         order: [['createdAt', 'DESC']],
         limit: 30,
       });
 
-      const payload = { apartments, total: count, parsed };
+      const payload = { apartments, parsed: filters, total: apartments.length };
       await cacheSet(cacheKey, payload, 21600); // 6h
       res.json(payload);
     } catch (err) {

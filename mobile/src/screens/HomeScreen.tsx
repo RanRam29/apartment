@@ -1,4 +1,4 @@
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -23,6 +23,7 @@ import { useDirection } from '../hooks/useDirection';
 import { dirApp } from '../theme/dirAppTokens';
 import SwipeHouseLogo from '../components/SwipeHouseLogo';
 import { useColors } from '../context/ThemeContext';
+import { authApi } from '../services/api';
 
 const { width: W } = Dimensions.get('window');
 const PAD = 16;
@@ -128,6 +129,23 @@ function TenantHome() {
   const navigation = useNavigation<any>();
   const { flexRow, textAlign } = useDirection();
   const firstName = user?.firstName ?? 'שם';
+  const [unreadWA, setUnreadWA] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    async function fetchUnread() {
+      try {
+        const res = await authApi.getUnreadWhatsappCount();
+        if (active) setUnreadWA(res.data.count || 0);
+      } catch {}
+    }
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 15000);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, []);
 
   const go = (route: string) => {
     Haptics.selectionAsync();
@@ -148,6 +166,22 @@ function TenantHome() {
           accessibilityLabel="תפריט פרופיל"
         >
           <Ionicons name="menu-outline" size={24} color={dirApp.primary} />
+          {unreadWA > 0 && (
+            <View style={{
+              position: 'absolute',
+              top: 2,
+              right: 2,
+              backgroundColor: '#25D366',
+              borderRadius: 8,
+              minWidth: 14,
+              height: 14,
+              justifyContent: 'center',
+              alignItems: 'center',
+              paddingHorizontal: 2,
+            }}>
+              <Text style={{ color: '#ffffff', fontSize: 8, fontWeight: 'bold' }}>{unreadWA}</Text>
+            </View>
+          )}
         </TouchableOpacity>
         <Text style={[tenantStyles.brandWordmark, dirType.heading, { color: dirApp.primary }]}>DirApp</Text>
         <TouchableOpacity
@@ -347,6 +381,23 @@ export default function HomeScreen() {
   const navigation = useNavigation<any>();
   const isLandlord = usePersonaIsLandlord();
   const greeting = getGreeting();
+  const [unreadWA, setUnreadWA] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    async function fetchUnread() {
+      try {
+        const res = await authApi.getUnreadWhatsappCount();
+        if (active) setUnreadWA(res.data.count || 0);
+      } catch {}
+    }
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 15000);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, []);
 
   function handleServicePress(id: string) {
     Haptics.selectionAsync();
@@ -372,6 +423,24 @@ export default function HomeScreen() {
           </View>
           <View style={landlordStyles.headerBadge}>
             <Ionicons name="notifications-outline" size={22} color={dirApp.primary} />
+            {unreadWA > 0 && (
+              <View style={{
+                position: 'absolute',
+                top: -4,
+                right: -4,
+                backgroundColor: '#25D366',
+                borderRadius: 10,
+                minWidth: 18,
+                height: 18,
+                justifyContent: 'center',
+                alignItems: 'center',
+                paddingHorizontal: 4,
+                borderWidth: 1.5,
+                borderColor: colors.bg,
+              }}>
+                <Text style={{ color: '#ffffff', fontSize: 9, fontWeight: 'bold' }}>{unreadWA}</Text>
+              </View>
+            )}
           </View>
         </View>
 

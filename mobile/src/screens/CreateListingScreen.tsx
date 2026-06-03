@@ -57,6 +57,7 @@ export default function CreateListingScreen({ navigation }: any) {
   const [title, setTitle]             = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice]             = useState('');
+  const [buildingFee, setBuildingFee] = useState('');
   const [rooms, setRooms]             = useState('');
   const [city, setCity]               = useState('');
   const [street, setStreet]             = useState('');
@@ -100,7 +101,7 @@ export default function CreateListingScreen({ navigation }: any) {
 
   function getCityMatches(query: string) {
     const q = normalizeText(query);
-    if (q.length < 2) return [];
+    if (q.length < 1) return [];
     const startsWith = ISRAELI_CITIES.filter((name) => normalizeText(name).startsWith(q));
     const contains = ISRAELI_CITIES.filter((name) => {
       const norm = normalizeText(name);
@@ -137,7 +138,7 @@ export default function CreateListingScreen({ navigation }: any) {
   useEffect(() => {
     const q = street.trim();
     const selectedCity = city.trim();
-    if (!selectedCity || q.length < 2) {
+    if (!selectedCity || q.length < 1) {
       setStreetSuggestions([]);
       setIsLoadingStreets(false);
       return;
@@ -147,7 +148,7 @@ export default function CreateListingScreen({ navigation }: any) {
       setIsLoadingStreets(true);
       try {
         const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=il&addressdetails=1&accept-language=he&limit=25&q=${encodeURIComponent(`${q}, ${selectedCity}, ישראל`)}`,
+          `https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=il&addressdetails=1&accept-language=he&limit=100&q=${encodeURIComponent(`${q}, ${selectedCity}, ישראל`)}`,
           {
             signal: controller.signal,
             headers: { 'User-Agent': 'ApartmentApp/1.0 (CreateListing)' },
@@ -156,7 +157,7 @@ export default function CreateListingScreen({ navigation }: any) {
         const data = await res.json();
         const parsed = Array.isArray(data)
           ? data
-              .map((item: any) => item?.address?.road)
+              .map((item: any) => item?.address?.road || item?.address?.pedestrian || item?.address?.living_street || item?.address?.footway || item?.name)
               .filter(Boolean)
               .filter((road: string) => {
                 const qNorm = normalizeText(q);
@@ -207,8 +208,8 @@ export default function CreateListingScreen({ navigation }: any) {
       showMessage('שגיאה', 'כותרת לא יכולה להכיל קוד או תווים לא תקינים');
       return;
     }
-    if (!/^\d+$/.test(price) || !/^\d+$/.test(rooms) || (sizeSqm && !/^\d+$/.test(sizeSqm)) || (floor && !/^\d+$/.test(floor))) {
-      showMessage('שגיאה', 'שדות מחיר, חדרים, קומה וגודל חייבים להכיל מספרים בלבד');
+    if (!/^\d+$/.test(price) || !/^\d+$/.test(rooms) || (sizeSqm && !/^\d+$/.test(sizeSqm)) || (floor && !/^\d+$/.test(floor)) || (buildingFee && !/^\d+$/.test(buildingFee))) {
+      showMessage('שגיאה', 'שדות מחיר, חדרים, קומה, גודל וועד בית חייבים להכיל מספרים בלבד');
       return;
     }
     const isCityValid = await validateIsraeliCity(cityValue);
@@ -236,6 +237,9 @@ export default function CreateListingScreen({ navigation }: any) {
       }
       form.append('floor', floor);
       form.append('sizeSqm', sizeSqm);
+      if (buildingFee) {
+        form.append('buildingFee', buildingFee);
+      }
       form.append('amenities', JSON.stringify(amenities));
 
       for (let i = 0; i < images.length; i++) {
@@ -288,33 +292,32 @@ export default function CreateListingScreen({ navigation }: any) {
               <Text style={styles.helperText}>{title.length}/100</Text>
             </Field>
 
-            <View style={styles.row}>
-              <Field label="מחיר ₪ *" style={{ flex: 1 }}>
-                <TextInput
-                  style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
-                  value={price}
-                  onChangeText={(value) => setPrice(keepDigitsOnly(value))}
-                  keyboardType="numeric"
-                  placeholder="6500"
-                  placeholderTextColor={colors.textMut}
-                  textAlign="right"
-                />
-              </Field>
-              <Field label="חדרים *" style={{ flex: 1 }}>
-                <TextInput
-                  style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
-                  value={rooms}
-                  onChangeText={(value) => setRooms(keepDigitsOnly(value))}
-                  keyboardType="numeric"
-                  placeholder="3"
-                  placeholderTextColor={colors.textMut}
-                  textAlign="right"
-                />
-              </Field>
-            </View>
+            <Field label="מחיר ₪ *">
+              <TextInput
+                style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
+                value={price}
+                onChangeText={(value) => setPrice(keepDigitsOnly(value))}
+                keyboardType="numeric"
+                placeholder="6500"
+                placeholderTextColor={colors.textMut}
+                textAlign="right"
+              />
+            </Field>
+
+            <Field label="ועד בית ₪">
+              <TextInput
+                style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
+                value={buildingFee}
+                onChangeText={(value) => setBuildingFee(keepDigitsOnly(value))}
+                keyboardType="numeric"
+                placeholder="250 (השאר ריק לחישוב מוערך)"
+                placeholderTextColor={colors.textMut}
+                textAlign="right"
+              />
+            </Field>
 
             <View style={styles.row}>
-              <Field label="עיר *" style={{ flex: 1 }}>
+              <Field label="עיר *" style={{ flex: 2 }}>
                 <TextInput
                   style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
                   value={city}
@@ -345,7 +348,7 @@ export default function CreateListingScreen({ navigation }: any) {
                   </View>
                 )}
               </Field>
-              <Field label="רחוב *" style={{ flex: 1 }}>
+              <Field label="רחוב *" style={{ flex: 2 }}>
                 <TextInput
                   style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
                   value={street}
@@ -373,21 +376,31 @@ export default function CreateListingScreen({ navigation }: any) {
                   </View>
                 )}
               </Field>
+              <Field label="מספר בית" style={{ flex: 1 }}>
+                <TextInput
+                  style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
+                  value={houseNumber}
+                  onChangeText={(value) => setHouseNumber(keepDigitsOnly(value))}
+                  keyboardType="numeric"
+                  placeholder="12"
+                  placeholderTextColor={colors.textMut}
+                  textAlign="right"
+                />
+              </Field>
             </View>
 
-            <Field label="מספר בית">
-              <TextInput
-                style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border, maxWidth: 120 }]}
-                value={houseNumber}
-                onChangeText={(value) => setHouseNumber(keepDigitsOnly(value))}
-                keyboardType="numeric"
-                placeholder="12"
-                placeholderTextColor={colors.textMut}
-                textAlign="right"
-              />
-            </Field>
-
             <View style={styles.row}>
+              <Field label="חדרים *" style={{ flex: 1 }}>
+                <TextInput
+                  style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
+                  value={rooms}
+                  onChangeText={(value) => setRooms(keepDigitsOnly(value))}
+                  keyboardType="numeric"
+                  placeholder="3"
+                  placeholderTextColor={colors.textMut}
+                  textAlign="right"
+                />
+              </Field>
               <Field label="קומה" style={{ flex: 1 }}>
                 <TextInput
                   style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
@@ -441,23 +454,30 @@ export default function CreateListingScreen({ navigation }: any) {
             </View>
 
             <Text style={styles.fieldLabel}>תמונות ({images.length}/10)</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imagesRow} contentContainerStyle={styles.imagesRowContent}>
-              <TouchableOpacity style={styles.addImageBtn} onPress={pickImages}>
-                <Ionicons name="camera-outline" size={28} color={dirApp.secondary} />
-                <Text style={styles.addImageText}>הוסף</Text>
+            {images.length === 0 ? (
+              <TouchableOpacity style={styles.uploadPlaceholder} onPress={pickImages}>
+                <Ionicons name="add" size={20} color={dirApp.secondary} style={{ marginLeft: 6 }} />
+                <Text style={styles.uploadPlaceholderText}>להוספת תמונה לחצ/י פה</Text>
               </TouchableOpacity>
-              {images.map((img, i) => (
-                <View key={i} style={styles.imageThumb}>
-                  <Image source={img} style={styles.imageThumbImg} contentFit="cover" />
-                  <TouchableOpacity
-                    style={styles.removeImageBtn}
-                    onPress={() => setImages((prev) => prev.filter((_, idx) => idx !== i))}
-                  >
-                    <Ionicons name="close-circle" size={18} color={C.danger} />
-                  </TouchableOpacity>
-                </View>
-              ))}
-            </ScrollView>
+            ) : (
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imagesRow} contentContainerStyle={styles.imagesRowContent}>
+                <TouchableOpacity style={styles.addImageBtn} onPress={pickImages}>
+                  <Ionicons name="camera-outline" size={28} color={dirApp.secondary} />
+                  <Text style={styles.addImageText}>הוסף</Text>
+                </TouchableOpacity>
+                {images.map((img, i) => (
+                  <View key={i} style={styles.imageThumb}>
+                    <Image source={img} style={styles.imageThumbImg} contentFit="cover" />
+                    <TouchableOpacity
+                      style={styles.removeImageBtn}
+                      onPress={() => setImages((prev) => prev.filter((_, idx) => idx !== i))}
+                    >
+                      <Ionicons name="close-circle" size={18} color={C.danger} />
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </ScrollView>
+            )}
 
             <TouchableOpacity
               style={[styles.submitBtn, loading && styles.submitBtnDisabled]}
@@ -538,20 +558,38 @@ const styles = StyleSheet.create({
     borderBottomColor: `${dirApp.outlineVariant}44`,
   },
   suggestionText: { textAlign: 'right', color: dirApp.onSurface, fontSize: 14, fontFamily: fontFamily.regular },
-  amenitiesGrid: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: 8, marginBottom: 20, justifyContent: 'flex-start' },
+  amenitiesGrid: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: 4, marginBottom: 20, justifyContent: 'flex-start' },
   amenityChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: 6,
+    paddingVertical: 4,
     borderRadius: 10,
     backgroundColor: dirApp.surfaceContainerLow,
     borderWidth: 1.5,
     borderColor: `${dirApp.outlineVariant}AA`,
   },
   amenityChipActive: { backgroundColor: dirApp.secondary, borderColor: dirApp.secondary },
-  amenityText: { color: dirApp.outline, fontSize: 13, textAlign: 'right', fontFamily: fontFamily.regular },
+  amenityText: { color: dirApp.outline, fontSize: 10, textAlign: 'right', fontFamily: fontFamily.regular },
   amenityTextActive: { color: dirApp.onSecondary, fontWeight: '600', fontFamily: fontFamily.bold },
   imagesRow: { marginBottom: 24 },
   imagesRowContent: { flexDirection: 'row-reverse', alignItems: 'center' },
+  uploadPlaceholder: {
+    width: '100%',
+    height: 54,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: dirApp.secondary,
+    borderStyle: 'dashed',
+    flexDirection: 'row-reverse',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: `${dirApp.secondaryContainer}11`,
+    marginBottom: 24,
+  },
+  uploadPlaceholderText: {
+    color: dirApp.secondary,
+    fontSize: 14,
+    fontFamily: fontFamily.semibold,
+  },
   addImageBtn: {
     width: 80,
     height: 80,

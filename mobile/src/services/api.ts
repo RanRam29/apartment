@@ -125,6 +125,16 @@ export const authApi = {
   uploadAvatar: (formData: FormData) =>
     api.patch('/auth/avatar', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
   switchRole: (role: 'tenant' | 'landlord') => api.patch('/auth/switch-role', { role }),
+  updateUsersMe: (data: { whatsappOptIn?: boolean; phone?: string }) =>
+    api.put('/users/me', data),
+  getUnreadWhatsappCount: () =>
+    api.get('/v3/whatsapp/unread-count'),
+  updateNotificationPreferences: (prefs: any) =>
+    api.put('/users/me/notification-preferences', prefs),
+  exportData: () =>
+    api.post('/users/me/export-data'),
+  requestDeletion: () =>
+    api.post('/users/me/request-deletion'),
 };
 
 // ─── Apartments ───────────────────────────────────────────────────────────────
@@ -145,6 +155,8 @@ export const apartmentsApi = {
   deletePermanently: (id: string) => api.delete(`/apartments/${id}`),
   generateMarketingCopy: (id: string, style: 'professional' | 'friendly' | 'luxury') =>
     api.post(`/apartments/${id}/marketing-copy`, { style }),
+  searchNlp: (query: string) =>
+    api.post('/apartments/search/nlp', { query }),
 };
 
 // ─── Swipe ────────────────────────────────────────────────────────────────────
@@ -185,6 +197,7 @@ export const recommendationsApi = {
 // ─── Landlord ─────────────────────────────────────────────────────────────────
 export const landlordApi = {
   dashboard: () => api.get('/landlord/dashboard'),
+  dashboardV2: () => api.get('/v3/maintenance/landlord/dashboard-v2'),
   leads: (params?: { status?: string; page?: number }) =>
     api.get('/landlord/leads', { params }),
 };

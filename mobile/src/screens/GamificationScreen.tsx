@@ -1,11 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
-  View, Text, TouchableOpacity, StyleSheet,
-  SafeAreaView, ScrollView, ActivityIndicator,
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
+import * as Haptics from 'expo-haptics';
 import { gamificationApi } from '../services/api';
+import { useAuthStore } from '../store/useAuthStore';
 import { C, Dark } from '../theme';
 import { dirApp } from '../theme/dirAppTokens';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
@@ -45,7 +52,6 @@ interface LeaderboardEntry {
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-
 const LEVEL_LABELS: Record<number, string> = {
   1: 'Rookie',
   2: 'Explorer',
@@ -79,7 +85,6 @@ function fmtDate(d: string) {
 }
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
-
 function LevelChip({ level }: { level: number }) {
   const color = LEVEL_COLORS[level] ?? C.textMut;
   const label = LEVEL_LABELS[level] ?? String(level);
@@ -103,14 +108,16 @@ function BadgeCard({ badge }: { badge: Badge }) {
   );
 }
 
-function LeaderRow({ entry }: { entry: LeaderboardEntry }) {
+function LeaderRow({ entry, isCurrentUser }: { entry: LeaderboardEntry; isCurrentUser: boolean }) {
   const isTop3 = entry.rank <= 3;
   const rankColors = [C.gold, C.textMut, C.accent.bronze];
   const rankColor = isTop3 ? rankColors[entry.rank - 1] : TEXT_SUB;
   return (
-    <View style={styles.leaderRow}>
+    <View style={[styles.leaderRow, isCurrentUser && styles.leaderRowCurrent]}>
       <Text style={[styles.leaderRank, { color: rankColor }]}>#{entry.rank}</Text>
-      <Text style={styles.leaderName} numberOfLines={1}>{entry.firstName}</Text>
+      <Text style={[styles.leaderName, isCurrentUser && styles.leaderNameCurrent]} numberOfLines={1}>
+        {entry.firstName} {isCurrentUser && '(אתה)'}
+      </Text>
       <LevelChip level={entry.level} />
       <Text style={styles.leaderPoints}>{entry.points.toLocaleString()} נק'</Text>
     </View>
@@ -118,8 +125,10 @@ function LeaderRow({ entry }: { entry: LeaderboardEntry }) {
 }
 
 // ─── Main Screen ─────────────────────────────────────────────────────────────
-
 export default function GamificationScreen({ navigation }: any) {
+  const { user } = useAuthStore();
+  const [activeTab, setActiveTab] = useState<'myAchievements' | 'leaderboard'>('myAchievements');
+
   const { data: meData, isLoading: meLoading } = useQuery<GamificationMe>({
     queryKey: ['gamification-me'],
     queryFn:  () => gamificationApi.getMe().then((r) => r.data),
@@ -135,6 +144,11 @@ export default function GamificationScreen({ navigation }: any) {
   const levelLabel                        = LEVEL_LABELS[me.level] ?? String(me.level);
   const levelColor                        = LEVEL_COLORS[me.level] ?? TEXT_SUB;
 
+  const handleTabChange = (tab: 'myAchievements' | 'leaderboard') => {
+    Haptics.selectionAsync();
+    setActiveTab(tab);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
@@ -146,58 +160,83 @@ export default function GamificationScreen({ navigation }: any) {
         <View style={styles.backBtn} />
       </View>
 
+      {/* Tabs */}
+      <View style={styles.tabContainer}>
+        <TouchableOpacity
+          style={[styles.tabButton, activeTab === 'myAchievements' && styles.tabButtonActive]}
+          onPress={() => handleTabChange('myAchievements')}
+        >
+          <Text style={[styles.tabText, activeTab === 'myAchievements' && styles.tabTextActive]}>ההישגים שלי</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tabButton, activeTab === 'leaderboard' && styles.tabButtonActive]}
+          onPress={() => handleTabChange('leaderboard')}
+        >
+          <Text style={[styles.tabText, activeTab === 'leaderboard' && styles.tabTextActive]}>טבלת מובילים</Text>
+        </TouchableOpacity>
+      </View>
+
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <ResponsiveContainer>
-        {/* Points & Level */}
-        {meLoading ? (
-          <View style={styles.center}>
-            <ActivityIndicator size="large" color={ACCENT} />
-          </View>
-        ) : (
-          <View style={styles.pointsCard}>
-            <Text style={styles.pointsNumber}>{me.points.toLocaleString()}</Text>
-            <Text style={styles.pointsLabel}>נקודות</Text>
-            <View style={[styles.levelBadge, { borderColor: levelColor }]}>
-              <Ionicons name="trophy-outline" size={14} color={levelColor} />
-              <Text style={[styles.levelBadgeText, { color: levelColor }]}>{levelLabel}</Text>
-            </View>
+          {activeTab === 'myAchievements' ? (
+            <>
+              {/* Points & Level */}
+              {meLoading ? (
+                <View style={styles.center}>
+                  <ActivityIndicator size="large" color={ACCENT} />
+                </View>
+              ) : (
+                <View style={styles.pointsCard}>
+                  <Text style={styles.pointsNumber}>{me.points.toLocaleString()}</Text>
+                  <Text style={styles.pointsLabel}>נקודות</Text>
+                  <View style={[styles.levelBadge, { borderColor: levelColor }]}>
+                    <Ionicons name="trophy-outline" size={14} color={levelColor} />
+                    <Text style={[styles.levelBadgeText, { color: levelColor }]}>{levelLabel}</Text>
+                  </View>
 
-            {/* Progress bar to next level */}
-            <ProgressBar points={me.points} level={me.level} />
-          </View>
-        )}
+                  {/* Progress bar to next level */}
+                  <ProgressBar points={me.points} level={me.level} />
+                </View>
+              )}
 
-        {/* Badges */}
-        <Text style={[styles.sectionTitle, dirType.label]}>התגים שלי</Text>
-        {meLoading ? null : me.badges.length === 0 ? (
-          <View style={styles.emptyBadges}>
-            <Ionicons name="ribbon-outline" size={36} color={C.textMut} />
-            <Text style={[styles.emptyText, dirType.body]}>צבור נקודות כדי לקבל תגים</Text>
-          </View>
-        ) : (
-          <View style={styles.badgesGrid}>
-            {me.badges.map((b) => <BadgeCard key={b.id} badge={b} />)}
-          </View>
-        )}
-
-        {/* Leaderboard */}
-        <Text style={[styles.sectionTitle, dirType.label]}>לוח מובילים</Text>
-        {lbLoading ? (
-          <ActivityIndicator color={ACCENT} style={{ marginVertical: 20 }} />
-        ) : leaderboard.length === 0 ? (
-          <View style={styles.emptyBadges}>
-            <Text style={[styles.emptyText, dirType.body]}>אין נתונים עדיין</Text>
-          </View>
-        ) : (
-          <View style={styles.leaderCard}>
-            {leaderboard.map((entry) => (
-              <React.Fragment key={entry.userId}>
-                <LeaderRow entry={entry} />
-                {entry.rank < leaderboard.length && <View style={styles.divider} />}
-              </React.Fragment>
-            ))}
-          </View>
-        )}
+              {/* Badges */}
+              <Text style={[styles.sectionTitle, dirType.label]}>התגים שלי</Text>
+              {meLoading ? null : me.badges.length === 0 ? (
+                <View style={styles.emptyBadges}>
+                  <Ionicons name="ribbon-outline" size={36} color={C.textMut} />
+                  <Text style={[styles.emptyText, dirType.body]}>צבור נקודות כדי לקבל תגים</Text>
+                </View>
+              ) : (
+                <View style={styles.badgesGrid}>
+                  {me.badges.map((b) => <BadgeCard key={b.id} badge={b} />)}
+                </View>
+              )}
+            </>
+          ) : (
+            <>
+              {/* Leaderboard */}
+              <Text style={[styles.sectionTitle, dirType.label]}>לוח מובילים</Text>
+              {lbLoading ? (
+                <ActivityIndicator color={ACCENT} style={{ marginVertical: 20 }} />
+              ) : leaderboard.length === 0 ? (
+                <View style={styles.emptyBadges}>
+                  <Text style={[styles.emptyText, dirType.body]}>אין נתונים עדיין</Text>
+                </View>
+              ) : (
+                <View style={styles.leaderCard}>
+                  {leaderboard.map((entry, idx) => {
+                    const isCurrentUser = entry.userId === user?.id || entry.userId === me.userId;
+                    return (
+                      <React.Fragment key={entry.userId}>
+                        <LeaderRow entry={entry} isCurrentUser={isCurrentUser} />
+                        {idx < leaderboard.length - 1 && <View style={styles.divider} />}
+                      </React.Fragment>
+                    );
+                  })}
+                </View>
+              )}
+            </>
+          )}
         </ResponsiveContainer>
       </ScrollView>
     </SafeAreaView>
@@ -205,7 +244,6 @@ export default function GamificationScreen({ navigation }: any) {
 }
 
 // ─── Progress bar ─────────────────────────────────────────────────────────────
-
 const TIERS = [0, 100, 500, 1500];
 
 function ProgressBar({ points, level }: { points: number; level: number }) {
@@ -233,7 +271,6 @@ function ProgressBar({ points, level }: { points: number; level: number }) {
 }
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
-
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: BG },
 
@@ -249,6 +286,36 @@ const styles = StyleSheet.create({
   },
   backBtn:     { padding: 4, width: 32 },
   headerTitle: { color: TEXT, fontSize: 17, fontWeight: '700', fontFamily: fontFamily.bold },
+
+  tabContainer: {
+    flexDirection: 'row-reverse',
+    backgroundColor: CARD,
+    padding: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: BORDER,
+  },
+  tabButton: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderRadius: 8,
+  },
+  tabButtonActive: {
+    backgroundColor: C.cyanAlpha(0.12),
+    borderWidth: 1,
+    borderColor: C.cyan,
+  },
+  tabText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: TEXT_SUB,
+    fontFamily: fontFamily.semibold,
+  },
+  tabTextActive: {
+    color: ACCENT,
+    fontWeight: '700',
+    fontFamily: fontFamily.bold,
+  },
 
   scroll: { padding: 16, gap: 8, paddingBottom: 40 },
   center: { paddingVertical: 40, alignItems: 'center' },
@@ -376,8 +443,15 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     gap: 10,
   },
+  leaderRowCurrent: {
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+  },
   leaderRank:   { color: TEXT_SUB, fontSize: 13, fontWeight: '800', width: 28, fontFamily: fontFamily.extrabold },
   leaderName:   { color: TEXT, fontSize: 14, fontWeight: '600', flex: 1, fontFamily: fontFamily.semibold },
+  leaderNameCurrent: {
+    color: '#10B981',
+    fontWeight: '800',
+  },
   leaderPoints: { color: ACCENT, fontSize: 13, fontWeight: '700', fontFamily: fontFamily.bold },
   divider:      { height: 1, backgroundColor: BORDER, marginHorizontal: 16 },
 

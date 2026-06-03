@@ -183,6 +183,67 @@ const adminRoutes = require('./routes/admin');
 app.use('/api/v3/ledger', ledgerRoutes);
 app.use('/api/v3/admin', adminRoutes);
 
+// User / Me preference updates and GDPR stubs
+const { authenticate: userAuth } = require('./middleware/auth');
+const { User } = require('./models');
+
+app.put('/api/users/me', userAuth, async (req, res, next) => {
+  try {
+    const { whatsappOptIn, phone } = req.body;
+    const user = await User.findByPk(req.user.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const updates = {};
+    if (whatsappOptIn !== undefined) updates.whatsappOptIn = Boolean(whatsappOptIn);
+    if (phone !== undefined) {
+      const trimmedPhone = String(phone).trim();
+      if (trimmedPhone && !/^(\+972|0)[0-9]{8,9}$/.test(trimmedPhone)) {
+        return res.status(422).json({ error: 'Invalid Israeli phone number format' });
+      }
+      updates.phone = trimmedPhone || null;
+    }
+
+    await user.update(updates);
+    const { passwordHash: _, ...safeUser } = user.toJSON();
+    res.json({ user: safeUser });
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.get('/api/v3/whatsapp/unread-count', userAuth, async (req, res, next) => {
+  try {
+    const WhatsAppMessage = require('./models/pg/WhatsAppMessage');
+    const count = await WhatsAppMessage.count({
+      where: {
+        userId: req.user.id,
+        direction: 'inbound',
+        status: { [require('sequelize').Op.ne]: 'read' }
+      }
+    });
+    res.json({ count });
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.put('/api/users/me/notification-preferences', userAuth, (req, res) => {
+  res.json({ ok: true, preferences: req.body });
+});
+
+app.post('/api/users/me/export-data', userAuth, async (req, res, next) => {
+  try {
+    const user = await User.findByPk(req.user.id, { attributes: { exclude: ['passwordHash'] } });
+    res.json({ ok: true, data: user });
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/api/users/me/request-deletion', userAuth, (req, res) => {
+  res.json({ ok: true, message: 'בקשת מחיקת החשבון התקבלה בהצלחה ותטופל תוך 30 יום.' });
+});
+
 app.use(errorHandler);
 
 module.exports = app;

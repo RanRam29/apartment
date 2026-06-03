@@ -390,7 +390,7 @@ export default function AdminUsersScreen() {
               style={[styles.toggleBadge, editForm.isVerified && styles.toggleBadgeActive]}
               onPress={() => setEditForm(prev => ({ ...prev, isVerified: !prev.isVerified }))}
             >
-              <Ionicons name="checkmark-seal" size={12} color={editForm.isVerified ? '#ffffff' : colors.textMut} />
+              <Ionicons name="checkmark-circle-outline" size={12} color={editForm.isVerified ? '#ffffff' : colors.textMut} />
               <Text style={[styles.toggleBadgeText, editForm.isVerified && styles.toggleBadgeTextActive]}>מאומת</Text>
             </TouchableOpacity>
 
@@ -444,7 +444,7 @@ export default function AdminUsersScreen() {
               <Ionicons name="star" size={16} color="#F59E0B" style={{ marginLeft: 2 }} />
             )}
             {item.isVerified && (
-              <Ionicons name="checkmark-seal" size={16} color="#3B82F6" style={{ marginLeft: 2 }} />
+              <Ionicons name="checkmark-circle-outline" size={16} color="#3B82F6" style={{ marginLeft: 2 }} />
             )}
             <View style={styles.roleBadge}>
               <Text style={styles.roleBadgeText}>{translateRole(item.role)}</Text>

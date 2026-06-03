@@ -8,16 +8,19 @@ import {
   TextInput,
   ActivityIndicator,
   Linking,
+  SafeAreaView,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useMaintenanceStore } from '../store/useMaintenanceStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { showAlert } from '../utils/alert';
 
-export default function MaintenanceScreen({ route }: any) {
+export default function MaintenanceScreen({ route, navigation }: any) {
   const { agreementId = '00000000-0000-4000-9000-000000000001' } = route.params || {};
   const { tickets, fetchTicketsForAgreement, createTicket, respondToTicket, closeTicket, isLoading } = useMaintenanceStore();
   const { user } = useAuthStore();
   const [description, setDescription] = useState('');
+  const [sendWhatsapp, setSendWhatsapp] = useState(false);
 
   useEffect(() => {
     fetchTicketsForAgreement(agreementId).catch(() => {});
@@ -33,9 +36,11 @@ export default function MaintenanceScreen({ route }: any) {
       const formData = new FormData();
       formData.append('agreementId', agreementId);
       formData.append('description', description);
+      formData.append('sendWhatsapp', String(sendWhatsapp));
       
       await createTicket(formData);
       setDescription('');
+      setSendWhatsapp(false);
       showAlert('הצלחה', 'קריאת השירות נפתחה בהצלחה! המשכיר קיבל התראה.');
       fetchTicketsForAgreement(agreementId).catch(() => {});
     } catch (err: any) {
@@ -72,17 +77,34 @@ export default function MaintenanceScreen({ route }: any) {
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#5f5ce5" />
-        <Text style={styles.loadingText}>טוען קריאות שירות (Maintenance)...</Text>
-      </View>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Ionicons name="chevron-back" size={24} color="#ffffff" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>קריאות שירות</Text>
+          <View style={{ width: 38 }} />
+        </View>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#5f5ce5" />
+          <Text style={styles.loadingText}>טוען קריאות שירות (Maintenance)...</Text>
+        </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      <Text style={styles.title}>קריאות שירות ותחזוקת דירה</Text>
-      <Text style={styles.subtitle}>פתח ותעד תקלות בדירה ישירות מול המשכיר, בקלות ובשקיפות.</Text>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <Ionicons name="chevron-back" size={24} color="#ffffff" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>קריאות שירות</Text>
+        <View style={{ width: 38 }} />
+      </View>
+      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+        <Text style={styles.title}>קריאות שירות ותחזוקת דירה</Text>
+        <Text style={styles.subtitle}>פתח ותעד תקלות בדירה ישירות מול המשכיר, בקלות ובשקיפות.</Text>
 
       {user?.role === 'tenant' && (
         <View style={styles.formCard}>
@@ -96,6 +118,16 @@ export default function MaintenanceScreen({ route }: any) {
             onChangeText={setDescription}
             style={styles.textInput}
           />
+          <TouchableOpacity 
+            onPress={() => setSendWhatsapp(!sendWhatsapp)} 
+            style={styles.checkboxContainer}
+            activeOpacity={0.8}
+          >
+            <View style={[styles.checkbox, sendWhatsapp && styles.checkboxChecked]}>
+              {sendWhatsapp && <Text style={styles.checkboxCheckmark}>✓</Text>}
+            </View>
+            <Text style={styles.checkboxLabel}>שלח התראה למשכיר גם ב-WhatsApp</Text>
+          </TouchableOpacity>
           <TouchableOpacity onPress={handleOpenTicket} style={styles.submitBtn}>
             <Text style={styles.submitBtnText}>פתח קריאת שירות</Text>
           </TouchableOpacity>
@@ -151,7 +183,8 @@ export default function MaintenanceScreen({ route }: any) {
         <Text style={styles.midragBtnText}>🔍 מצא בעל מקצוע מומלץ במידרג</Text>
       </TouchableOpacity>
     </ScrollView>
-  );
+  </SafeAreaView>
+);
 }
 
 const styles = StyleSheet.create({
@@ -351,5 +384,55 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 14,
     fontWeight: '600',
+  },
+  checkboxContainer: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderRadius: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 10,
+    backgroundColor: 'transparent',
+  },
+  checkboxChecked: {
+    backgroundColor: '#10b981',
+    borderColor: '#10b981',
+  },
+  checkboxCheckmark: {
+    color: '#ffffff',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  checkboxLabel: {
+    color: '#ffffff',
+    fontSize: 13,
+    fontWeight: '500',
+    textAlign: 'right',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: '#0f111e',
+  },
+  backBtn: {
+    padding: 8,
+    borderRadius: 20,
+  },
+  headerTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#ffffff',
   },
 });

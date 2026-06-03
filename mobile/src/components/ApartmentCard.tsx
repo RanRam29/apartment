@@ -96,9 +96,17 @@ export default function ApartmentCard({ apartment, isTop: _isTop = false }: Prop
               ? `פנוי מ-${new Date(apartment.availableFrom).toLocaleDateString('he-IL', { month: 'short', day: 'numeric' })}`
               : 'פנוי עכשיו'}
           </Text>
-          <Text style={styles.landlordName}>
-            {apartment.landlord?.firstName} {apartment.landlord?.lastName}
-          </Text>
+          <View style={{ flexDirection: 'row-reverse', alignItems: 'center', gap: 4 }}>
+            <Text style={styles.landlordName}>
+              {apartment.landlord?.firstName} {apartment.landlord?.lastName}
+            </Text>
+            {apartment.landlord?.trustScore != null && apartment.landlord.trustScore > 70 && (
+              <View style={styles.verifiedLandlordBadge}>
+                <Ionicons name="shield-checkmark" size={11} color="#10B981" />
+                <Text style={styles.verifiedLandlordText}>משכיר מאומת</Text>
+              </View>
+            )}
+          </View>
         </View>
       </View>
     </View>
@@ -216,4 +224,19 @@ const styles = StyleSheet.create({
   landlordRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   landlordName: { color: C.onInverse.subtle, fontSize: 12 },
   availableFrom: { color: C.cyan, fontSize: 12, fontWeight: '600' },
+  verifiedLandlordBadge: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: 2,
+    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    marginRight: 6,
+  },
+  verifiedLandlordText: {
+    color: '#10B981',
+    fontSize: 9,
+    fontWeight: '700',
+  },
 });

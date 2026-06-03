@@ -31,6 +31,7 @@ export const C = {
 
   // ── Status / feedback (canonical) ────────────────────
   gold: '#F59E0B',
+  warning: '#F59E0B',
   success: '#10B981',
   danger: '#BA1A1A',
 
