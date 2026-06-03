@@ -205,7 +205,7 @@ function App() {
         
         {/* Header */}
         <div className="header">
-          <span className="logo">🏠</span>
+          <img src="/logo.png" alt="DirApp" className="logo" />
           <h1>אישור וחתימת ערב לחוזה</h1>
           <p>שלום {details.guarantorName}, הוזמנת להיות ערב לחוזה שכירות דרך DirApp</p>
         </div>

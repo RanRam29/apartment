@@ -1,5 +1,7 @@
 const { Op } = require('sequelize');
-const { RentalAgreement, AgreementParty } = require('../models');
+const { RentalAgreement, AgreementParty, User } = require('../models');
+const logger = require('../utils/logger');
+const waNotify = require('../services/whatsappNotificationService');
 
 const ALERT_DAYS = [120, 90, 60, 45, 30];
 
@@ -23,12 +25,28 @@ async function runExpiringAlerts() {
         await agreement.update({ status: 'EXPIRING' });
       }
 
-      // Notify landlord + tenants (notification service is CASCADE's domain, use console for now)
       const tenants = await AgreementParty.findAll({
         where: { agreementId: agreement.id, role: 'tenant' },
       });
       const userIds = [agreement.landlordId, ...tenants.map(t => t.userId)];
-      console.log(`EXPIRING ALERT: ${days} days — agreement ${agreement.id} — notifying ${userIds.length} users`);
+
+      if (days === 60) {
+        for (const uid of userIds) {
+          const user = await User.findByPk(uid, { attributes: ['id', 'firstName', 'phone'] });
+          if (user?.phone) {
+            await waNotify.sendContractRenewal60Days({
+              phoneNumber: user.phone,
+              recipientName: user.firstName,
+              expiryDate: agreement.endDate,
+              address: agreement.address || '',
+              contractId: agreement.id,
+              userId: user.id,
+            }).catch((e) => logger.warn(`WA renewal 60d failed: ${e.message}`));
+          }
+        }
+      }
+
+      logger.info(`EXPIRING ALERT: ${days} days — agreement ${agreement.id} — notifying ${userIds.length} users`);
     }
   }
 }

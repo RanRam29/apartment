@@ -87,6 +87,14 @@ const User = sequelize.define('User', {
     type: DataTypes.INTEGER,
     defaultValue: 50,
   },
+  whatsappOptIn: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+  notificationPreferences: {
+    type: DataTypes.JSONB,
+    defaultValue: { push: true, email: true, paymentReminders: true, maintenance: true, whatsapp: false },
+  },
 }, {
   tableName: 'users',
   indexes: [

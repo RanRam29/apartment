@@ -51,7 +51,14 @@ app.use(
 if (process.env.NODE_ENV !== 'test') {
   app.use(morgan('combined'));
 }
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({
+  limit: '10mb',
+  verify: (req, _res, buf) => {
+    if (req.originalUrl.startsWith('/webhooks/whatsapp')) {
+      req.rawBody = buf;
+    }
+  },
+}));
 app.use(express.urlencoded({ extended: true }));
 app.use(requestContext);
 app.use(auditCapture);
@@ -166,6 +173,9 @@ app.use('/api/v3/guarantor', require('./routes/guarantor'));
 app.use('/api/v3/ledger', require('./routes/ledger'));
 app.use('/api/v3/admin', require('./routes/admin'));
 app.use('/api/v3/admin/stats', require('./routes/adminStats'));
+
+// WhatsApp webhook (no auth — Meta signs requests with HMAC)
+app.use('/webhooks/whatsapp', require('./routes/whatsapp'));
 
 // v3 routes (Cursor Agent: Financial + Admin)
 const ledgerRoutes = require('./routes/ledger');

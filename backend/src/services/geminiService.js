@@ -487,10 +487,104 @@ Return ONLY valid JSON, no markdown.`;
   }
 }
 
+/**
+ * Scores compatibility between a tenant's preferences and an apartment listing.
+ * Used by the matching/feed service to rank apartments for a specific tenant.
+ *
+ * @param {object} tenant  - { lifestyle: { sleep, cleanliness, noise, guests, smoking, pets, wfh }, preferences: { maxPrice, minRooms, ... } }
+ * @param {object} apartment - { price, rooms, amenities, petsAllowed, city, ... }
+ * @returns {number} Score 0-100 (higher = better match)
+ */
+async function scoreCompatibility(tenant, apartment) {
+  const apiKey = process.env.GEMINI_API_KEY;
+
+  // Heuristic score when Gemini unavailable
+  function heuristicScore() {
+    let score = 50;
+    const prefs = tenant?.preferences || {};
+    const lifestyle = tenant?.lifestyle || {};
+
+    // Price fit (+/- 20 pts)
+    if (prefs.maxPrice && apartment.price) {
+      const ratio = apartment.price / prefs.maxPrice;
+      if (ratio <= 0.8)  score += 20;
+      else if (ratio <= 1.0) score += 10;
+      else if (ratio <= 1.1) score -= 5;
+      else score -= 20;
+    }
+
+    // Room count fit (+/- 15 pts)
+    if (prefs.minRooms && apartment.rooms) {
+      if (apartment.rooms >= prefs.minRooms) score += 15;
+      else score -= 10;
+    }
+
+    // Pet policy (+/- 10 pts)
+    if (lifestyle.pets && !apartment.petsAllowed) score -= 10;
+    if (lifestyle.pets && apartment.petsAllowed) score += 10;
+
+    return Math.max(0, Math.min(100, Math.round(score)));
+  }
+
+  if (!apiKey) {
+    logger.warn('GEMINI_API_KEY not set — using heuristic compatibility score');
+    return heuristicScore();
+  }
+
+  const prompt = `You are a rental compatibility scoring assistant.
+Score the compatibility between this tenant and apartment from 0 to 100.
+Higher score = better match.
+
+Tenant preferences:
+${JSON.stringify(tenant?.preferences || {}, null, 2)}
+
+Tenant lifestyle:
+${JSON.stringify(tenant?.lifestyle || {}, null, 2)}
+
+Apartment:
+${JSON.stringify({
+  price: apartment.price,
+  rooms: apartment.rooms,
+  city: apartment.city,
+  amenities: apartment.amenities,
+  petsAllowed: apartment.petsAllowed,
+}, null, 2)}
+
+Return ONLY a JSON object: { "score": <number 0-100>, "reason": "<one sentence>" }`;
+
+  const t0 = Date.now();
+  try {
+    const response = await axios.post(
+      geminiGenerateUrl(),
+      {
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.2, maxOutputTokens: 64 },
+      },
+      geminiRequestConfig(apiKey)
+    );
+
+    const rawText = response.data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+    const parsed = extractJsonObject(rawText);
+    const score = parsed?.score;
+
+    if (typeof score !== 'number' || score < 0 || score > 100) {
+      logger.warn(`Gemini scoreCompatibility invalid score ms=${Date.now() - t0} — using heuristic`);
+      return heuristicScore();
+    }
+
+    logger.info(`Gemini scoreCompatibility ok ms=${Date.now() - t0} score=${score}`);
+    return Math.round(score);
+  } catch (err) {
+    logger.error(`Gemini scoreCompatibility error ms=${Date.now() - t0}: ${err.message}`);
+    return heuristicScore();
+  }
+}
+
 module.exports = {
   parseSearchQuery,
   generateListingSummary,
   generateMarketingCopy,
+  scoreCompatibility,
   COPY_STYLE_INSTRUCTIONS,
   sanitizeParsedFilters,
   extractJsonObject,

@@ -7,7 +7,7 @@ const { authenticate, requireRole } = require('../middleware/auth');
 const { geminiMarketingLimiter } = require('../middleware/geminiRateLimit');
 const { upload, uploadMany } = require('../services/uploadService');
 const { cacheGet, cacheSet, cacheDel } = require('../config/redis');
-const { generateMarketingCopy, COPY_STYLE_INSTRUCTIONS } = require('../services/geminiService');
+const { generateMarketingCopy, COPY_STYLE_INSTRUCTIONS, parseSearchQuery } = require('../services/geminiService');
 const logger = require('../utils/logger');
 const { logAudit } = require('../services/auditLogService');
 const { AUDIT_ACTIONS, AUDIT_OUTCOMES } = require('../constants/logging');
@@ -370,6 +370,55 @@ router.post(
 
       await cacheSet(cacheKey, copy, 600);
       res.json({ copy, style });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// ─── POST /api/apartments/search/nlp — natural language search ──────────────
+router.post(
+  '/search/nlp',
+  authenticate,
+  [body('query').trim().isLength({ min: 2, max: 500 }).withMessage('Query must be 2-500 chars')],
+  async (req, res, next) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
+
+      const { query: nlpQuery } = req.body;
+      const cacheKey = `nlp:${Buffer.from(nlpQuery).toString('base64').slice(0, 64)}`;
+      const cached = await cacheGet(cacheKey);
+      if (cached) return res.json({ ...cached, fromCache: true });
+
+      const parsed = await parseSearchQuery(nlpQuery);
+
+      const where = { isActive: true };
+      if (parsed.city) where.city = { [Op.iLike]: `%${parsed.city}%` };
+      if (parsed.minPrice && parsed.maxPrice) {
+        where.price = { [Op.between]: [parsed.minPrice, parsed.maxPrice] };
+      } else if (parsed.minPrice) {
+        where.price = { [Op.gte]: parsed.minPrice };
+      } else if (parsed.maxPrice) {
+        where.price = { [Op.lte]: parsed.maxPrice };
+      }
+      if (parsed.rooms) where.rooms = { [Op.gte]: parsed.rooms };
+      if (parsed.petsAllowed) where.petsAllowed = true;
+
+      const { rows: apartments, count } = await Apartment.findAndCountAll({
+        where,
+        include: [{
+          model: User,
+          as: 'landlord',
+          attributes: ['id', 'firstName', 'lastName', 'avatarUrl', 'isVerified', 'isPremium'],
+        }],
+        order: [['createdAt', 'DESC']],
+        limit: 30,
+      });
+
+      const payload = { apartments, total: count, parsed };
+      await cacheSet(cacheKey, payload, 21600); // 6h
+      res.json(payload);
     } catch (err) {
       next(err);
     }

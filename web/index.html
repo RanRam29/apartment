@@ -35,10 +35,9 @@
       display: flex; align-items: center; justify-content: space-between; gap: 16px;
     }
     .navbar-logo {
-      font-size: 1.1rem; font-weight: 800; color: #f0f4f8;
-      letter-spacing: -0.01em; display: flex; align-items: center; gap: 6px;
+      display: flex; align-items: center;
     }
-    .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: #00cba9; }
+    .navbar-logo img { height: 36px; width: auto; }
     .navbar-links { display: flex; align-items: center; gap: 28px; list-style: none; }
     .navbar-links a { font-size: 0.88rem; color: rgba(240,244,248,0.65); transition: color 200ms; }
     .navbar-links a:hover { color: #f0f4f8; }
@@ -299,7 +298,7 @@
       display: flex; align-items: center; justify-content: space-between;
       flex-wrap: wrap; gap: 12px; max-width: 1040px; margin: 0 auto;
     }
-    .footer-logo { font-size: 1rem; font-weight: 800; color: #f0f4f8; display: flex; align-items: center; gap: 6px; }
+    .footer-logo { display: flex; align-items: center; }
     .footer-copy { font-size: 0.82rem; color: rgba(240,244,248,0.35); }
     .footer-love { font-size: 0.82rem; color: rgba(240,244,248,0.35); }
     .footer-love .heart { color: #ef4444; }
@@ -314,8 +313,7 @@
   <!-- NAVBAR -->
   <nav class="navbar" role="navigation" aria-label="ניווט ראשי">
     <div class="navbar-logo">
-      <div class="logo-dot"></div>
-      DirApp
+      <img src="logo.png" alt="DirApp" />
     </div>
     <ul class="navbar-links">
       <li><a href="#features">יתרונות</a></li>
@@ -499,7 +497,7 @@
   <!-- FOOTER -->
   <footer>
     <div style="max-width:1040px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-      <div class="footer-logo"><div class="logo-dot"></div> DirApp</div>
+      <div class="footer-logo"><img src="logo.png" alt="DirApp" style="height:28px;width:auto;" /></div>
       <div class="footer-copy">© 2026 DirApp · כל הזכויות שמורות</div>
       <div class="footer-love">Made with <span class="heart">♥</span> in Tel Aviv</div>
     </div>
