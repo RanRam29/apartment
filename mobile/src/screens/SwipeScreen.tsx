@@ -475,7 +475,7 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: 'row', justifyContent: 'center',
     alignItems: 'center', gap: 18,
-    paddingVertical: 18, paddingBottom: 24,
+    paddingVertical: 18, paddingBottom: 90,
   },
   actionBtn: {
     width: 58, height: 58, borderRadius: 29,
@@ -497,7 +497,7 @@ const styles = StyleSheet.create({
   },
 
   // Undo
-  undoFab: { position: 'absolute', bottom: 108, left: 20 },
+  undoFab: { position: 'absolute', bottom: 170, left: 20 },
   undoBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     backgroundColor: C.bgCard, borderRadius: 20,
