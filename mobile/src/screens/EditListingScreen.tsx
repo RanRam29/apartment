@@ -70,6 +70,7 @@ export default function EditListingScreen({ route, navigation }: Props) {
   const [street, setStreet]             = useState('');
   const [floor, setFloor]               = useState('');
   const [sizeSqm, setSizeSqm]           = useState('');
+  const [buildingFee, setBuildingFee]   = useState('');
   const [amenities, setAmenities]       = useState<Amenity[]>([]);
   const [petsAllowed, setPetsAllowed]   = useState(false);
   const [saving, setSaving]             = useState(false);
@@ -89,6 +90,7 @@ export default function EditListingScreen({ route, navigation }: Props) {
     setStreet(apt.street ?? apt.neighborhood ?? '');
     setFloor(apt.floor != null ? String(apt.floor) : '');
     setSizeSqm(apt.sizeSqm != null ? String(apt.sizeSqm) : '');
+    setBuildingFee(apt.buildingFee != null ? String(apt.buildingFee) : '');
     setAmenities(apt.amenities ?? []);
     setPetsAllowed(apt.petsAllowed ?? false);
     setHydrated(true);
@@ -210,8 +212,8 @@ export default function EditListingScreen({ route, navigation }: Props) {
       Alert.alert('שגיאה', 'כותרת לא יכולה להכיל קוד או תווים לא תקינים');
       return;
     }
-    if (!/^\d+$/.test(price) || !/^\d+$/.test(rooms) || (sizeSqm && !/^\d+$/.test(sizeSqm)) || (floor && !/^\d+$/.test(floor))) {
-      Alert.alert('שגיאה', 'שדות מחיר, חדרים, קומה וגודל חייבים להכיל מספרים בלבד');
+    if (!/^\d+$/.test(price) || !/^\d+$/.test(rooms) || (sizeSqm && !/^\d+$/.test(sizeSqm)) || (floor && !/^\d+$/.test(floor)) || (buildingFee && !/^\d+$/.test(buildingFee))) {
+      Alert.alert('שגיאה', 'שדות מחיר, חדרים, קומה, גודל וועד בית חייבים להכיל מספרים בלבד');
       return;
     }
     const isCityValid = await validateIsraeliCity(cityValue);
@@ -235,6 +237,7 @@ export default function EditListingScreen({ route, navigation }: Props) {
         street: streetValue,
         floor: floor ? parseInt(floor, 10) : null,
         sizeSqm: sizeSqm ? parseInt(sizeSqm, 10) : null,
+        buildingFee: buildingFee ? parseInt(buildingFee, 10) : null,
         amenities,
         petsAllowed,
       });
@@ -274,6 +277,11 @@ export default function EditListingScreen({ route, navigation }: Props) {
           <Field label="מחיר ₪ *">
             <TextInput style={[styles.input, { backgroundColor: colors.bgCard, color: colors.text, borderColor: colors.border }]} value={price} onChangeText={(value) => setPrice(keepDigitsOnly(value))}
               keyboardType="numeric" placeholder="6500" placeholderTextColor={colors.textMut} textAlign="right" />
+          </Field>
+
+          <Field label="ועד בית ₪">
+            <TextInput style={[styles.input, { backgroundColor: colors.bgCard, color: colors.text, borderColor: colors.border }]} value={buildingFee} onChangeText={(value) => setBuildingFee(keepDigitsOnly(value))}
+              keyboardType="numeric" placeholder="250 (השאר ריק לחישוב מוערך)" placeholderTextColor={colors.textMut} textAlign="right" />
           </Field>
 
           <View style={styles.row}>

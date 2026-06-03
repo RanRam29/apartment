@@ -45,6 +45,7 @@ const USER_V3_COLUMNS = {
 };
 const APARTMENT_STREET_COLUMN = {
   street: { type: DataTypes.STRING(100), allowNull: true },
+  building_fee: { type: DataTypes.INTEGER, allowNull: true, defaultValue: null },
 };
 
 function isMissingUsersTableError(err) {

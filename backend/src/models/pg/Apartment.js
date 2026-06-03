@@ -92,6 +92,12 @@ const Apartment = sequelize.define('Apartment', {
     allowNull: true,
     comment: 'months',
   },
+  buildingFee: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    validate: { min: 0 },
+    comment: 'shekels per month',
+  },
   petsAllowed: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,

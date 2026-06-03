@@ -201,6 +201,18 @@ export type MainStackParamList = {
   Ledger: { agreementId?: string };
   Maintenance: { agreementId?: string };
   PrivacySettings: undefined;
+  LandlordProfile: {
+    landlord: {
+      id: string;
+      firstName: string;
+      lastName: string;
+      avatarUrl: string | null;
+      isVerified: boolean;
+      trustScore: number | null;
+      isPremium?: boolean;
+    };
+    apartmentId?: string;
+  };
 };
 
 export type AdminTabParamList = {

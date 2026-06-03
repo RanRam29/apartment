@@ -8,7 +8,8 @@ import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { apartmentsApi } from '../services/api';
+import { apartmentsApi, swipeApi, matchesApi } from '../services/api';
+import { useAuthStore } from '../store/useAuthStore';
 import type { MainStackParamList, Amenity } from '../types';
 import { LinearGradient } from 'expo-linear-gradient';
 import { C, Dark } from '../theme';
@@ -45,6 +46,7 @@ function getImageUrl(img: unknown): string | null {
 
 export default function ApartmentDetailScreen({ route, navigation }: Props) {
   const { apartmentId } = route.params;
+  const { user } = useAuthStore();
 
   const getScoreColor = (score: number) => {
     if (score <= 30) return '#EF4444';
@@ -134,6 +136,50 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
   function prevImage() {
     scrollToImage(activeImage - 1);
   }
+
+  const isOwner = apt.landlordId === user?.id;
+
+  const handleScheduleVisit = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    try {
+      const matchesRes = await matchesApi.list();
+      const existingMatch = matchesRes.data.matches?.find(
+        (m: any) => m.apartmentId === apt.id
+      );
+
+      if (existingMatch) {
+        navigation.navigate('Chat', {
+          matchId: existingMatch.id,
+          title: apt.landlord?.firstName + ' ' + apt.landlord?.lastName
+        });
+        return;
+      }
+
+      const swipeRes = await swipeApi.record(apt.id, 'like');
+      const { match } = swipeRes.data;
+
+      if (match) {
+        Alert.alert('יש התאמה! 🎉', 'נמצאה התאמה הדדית! מועבר לצ׳אט לקביעת ביקור.', [
+          {
+            text: 'המשך',
+            onPress: () => {
+              navigation.navigate('Chat', {
+                matchId: match.id,
+                title: apt.landlord?.firstName + ' ' + apt.landlord?.lastName
+              });
+            }
+          }
+        ]);
+      } else {
+        Alert.alert(
+          'בקשתך נשלחה ✉️',
+          'הבעת עניין בדירה נרשמה בהצלחה! המשכיר קיבל התראה. ברגע שתהיה התאמה, ייפתח ביניכם צ׳אט לתיאום ביקור.'
+        );
+      }
+    } catch (err: any) {
+      Alert.alert('שגיאה', 'לא ניתן לשלוח בקשה כרגע. אנא נסה שנית מאוחר יותר.');
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -307,7 +353,16 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
           {apt.landlord && (
             <>
               <Text style={styles.sectionTitle}>בעל הדירה</Text>
-              <View style={styles.landlordRow}>
+              <TouchableOpacity
+                style={styles.landlordRow}
+                onPress={() => {
+                  navigation.navigate('LandlordProfile', {
+                    landlord: apt.landlord,
+                    apartmentId: apt.id,
+                  });
+                }}
+                activeOpacity={0.8}
+              >
                 {apt.landlord.avatarUrl ? (
                   <Image source={{ uri: apt.landlord.avatarUrl }} style={styles.avatar} contentFit="cover" />
                 ) : (
@@ -343,7 +398,7 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
                     <Text style={[styles.verifiedText, { textAlign: 'right', marginTop: 2 }]}>✓ משתמש מאומת</Text>
                   )}
                 </View>
-              </View>
+              </TouchableOpacity>
             </>
           )}
         </View>
@@ -356,10 +411,22 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
           <Text style={styles.ctaPriceAmount}>₪{price.toLocaleString()}</Text>
           <Text style={styles.ctaPriceLabel}>/חודש</Text>
         </View>
-        <TouchableOpacity style={styles.ctaMainBtn}>
-          <Ionicons name="calendar-outline" size={16} color={Dark.bg} />
-          <Text style={styles.ctaMainBtnText}>קבע ביקור</Text>
-        </TouchableOpacity>
+        {isOwner ? (
+          <TouchableOpacity
+            style={[styles.ctaMainBtn, { backgroundColor: dirApp.secondary }]}
+            onPress={() => {
+              navigation.navigate('EditListing', { apartmentId: apt.id });
+            }}
+          >
+            <Ionicons name="pencil-outline" size={16} color={Dark.bg} />
+            <Text style={styles.ctaMainBtnText}>ערוך מודעה</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity style={styles.ctaMainBtn} onPress={handleScheduleVisit}>
+            <Ionicons name="calendar-outline" size={16} color={Dark.bg} />
+            <Text style={styles.ctaMainBtnText}>קבע ביקור</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       <Modal

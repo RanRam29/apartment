@@ -39,16 +39,18 @@ function computeCostBreakdown(apartment) {
   const sqm = apartment.sizeSqm ? Number(apartment.sizeSqm) : Math.round((Number(apartment.rooms) || 3) * 30);
   const arnonaEstimate = Math.round(arnonaRate * sqm);
 
-  // Building (va'ad bayit) fee by size
-  const rooms = Number(apartment.rooms) || 3;
-  const buildingFeeEstimate = rooms <= 2 ? 150 : rooms <= 3.5 ? 250 : 400;
+  // Building (va'ad bayit) fee: use landlord specified value if exists, otherwise fallback to size estimate
+  const hasCustomFee = apartment.buildingFee !== null && apartment.buildingFee !== undefined;
+  const buildingFeeEstimate = hasCustomFee
+    ? Number(apartment.buildingFee)
+    : (Number(apartment.rooms) <= 2 ? 150 : Number(apartment.rooms) <= 3.5 ? 250 : 400);
 
   return {
     rent,
     arnonaEstimate,
     buildingFeeEstimate,
     total: rent + arnonaEstimate + buildingFeeEstimate,
-    note: 'ארנונה ודמי ועד בית הינם הערכה בלבד',
+    note: hasCustomFee ? 'ארנונה הינה הערכה בלבד' : 'ארנונה ודמי ועד בית הינם הערכה בלבד',
   };
 }
 
@@ -84,7 +86,7 @@ router.post(
         title, description, price, rooms, floor, totalFloors,
         sizeSqm, city, neighborhood, street, address,
         latitude, longitude, amenities, availableFrom,
-        minLeasePeriod, petsAllowed,
+        minLeasePeriod, petsAllowed, buildingFee,
       } = req.body;
       if (typeof city !== 'string') {
         return res.status(422).json({ error: 'city must be a string' });
@@ -104,6 +106,7 @@ router.post(
         floor: floor ? parseInt(floor) : null,
         totalFloors: totalFloors ? parseInt(totalFloors) : null,
         sizeSqm: sizeSqm ? parseInt(sizeSqm) : null,
+        buildingFee: buildingFee ? parseInt(buildingFee) : null,
         city,
         street: street || neighborhood || null,
         address,
@@ -259,7 +262,7 @@ router.patch('/:id', authenticate, requireRole('landlord'), async (req, res, nex
     const allowed = [
       'title', 'description', 'price', 'rooms', 'floor', 'totalFloors',
       'sizeSqm', 'city', 'street', 'neighborhood', 'address', 'amenities',
-      'petsAllowed', 'availableFrom', 'minLeasePeriod', 'isActive',
+      'petsAllowed', 'availableFrom', 'minLeasePeriod', 'isActive', 'buildingFee',
     ];
     const raw = Object.fromEntries(
       Object.entries(req.body).filter(([k]) => allowed.includes(k))
@@ -267,7 +270,7 @@ router.patch('/:id', authenticate, requireRole('landlord'), async (req, res, nex
 
     const updates = {};
     for (const [k, v] of Object.entries(raw)) {
-      if (['price', 'floor', 'totalFloors', 'sizeSqm', 'minLeasePeriod'].includes(k)) {
+      if (['price', 'floor', 'totalFloors', 'sizeSqm', 'minLeasePeriod', 'buildingFee'].includes(k)) {
         updates[k] = v !== '' && v !== null ? parseInt(v, 10) : null;
       } else if (k === 'rooms') {
         updates[k] = parseFloat(v);

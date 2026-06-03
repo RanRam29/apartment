@@ -57,6 +57,7 @@ export default function CreateListingScreen({ navigation }: any) {
   const [title, setTitle]             = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice]             = useState('');
+  const [buildingFee, setBuildingFee] = useState('');
   const [rooms, setRooms]             = useState('');
   const [city, setCity]               = useState('');
   const [street, setStreet]             = useState('');
@@ -207,8 +208,8 @@ export default function CreateListingScreen({ navigation }: any) {
       showMessage('שגיאה', 'כותרת לא יכולה להכיל קוד או תווים לא תקינים');
       return;
     }
-    if (!/^\d+$/.test(price) || !/^\d+$/.test(rooms) || (sizeSqm && !/^\d+$/.test(sizeSqm)) || (floor && !/^\d+$/.test(floor))) {
-      showMessage('שגיאה', 'שדות מחיר, חדרים, קומה וגודל חייבים להכיל מספרים בלבד');
+    if (!/^\d+$/.test(price) || !/^\d+$/.test(rooms) || (sizeSqm && !/^\d+$/.test(sizeSqm)) || (floor && !/^\d+$/.test(floor)) || (buildingFee && !/^\d+$/.test(buildingFee))) {
+      showMessage('שגיאה', 'שדות מחיר, חדרים, קומה, גודל וועד בית חייבים להכיל מספרים בלבד');
       return;
     }
     const isCityValid = await validateIsraeliCity(cityValue);
@@ -236,6 +237,9 @@ export default function CreateListingScreen({ navigation }: any) {
       }
       form.append('floor', floor);
       form.append('sizeSqm', sizeSqm);
+      if (buildingFee) {
+        form.append('buildingFee', buildingFee);
+      }
       form.append('amenities', JSON.stringify(amenities));
 
       for (let i = 0; i < images.length; i++) {
@@ -295,6 +299,18 @@ export default function CreateListingScreen({ navigation }: any) {
                 onChangeText={(value) => setPrice(keepDigitsOnly(value))}
                 keyboardType="numeric"
                 placeholder="6500"
+                placeholderTextColor={colors.textMut}
+                textAlign="right"
+              />
+            </Field>
+
+            <Field label="ועד בית ₪">
+              <TextInput
+                style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
+                value={buildingFee}
+                onChangeText={(value) => setBuildingFee(keepDigitsOnly(value))}
+                keyboardType="numeric"
+                placeholder="250 (השאר ריק לחישוב מוערך)"
                 placeholderTextColor={colors.textMut}
                 textAlign="right"
               />
