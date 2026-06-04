@@ -4,14 +4,15 @@
 > The orchestrator (Claude Code) reads this file to update the main DASHBOARD.md.
 
 ## Current Task
-**Task:** Push, commit, and prepare pull request for main branch.
+**Task:** Push layout and logout fixes to remote branch.
 **Status:** 🟢 DONE
-**Progress:** Finished Phase 1 (Guarantor Web App), Phase 2 (Lease Wizard Mobile), Phase 3 (Maintenance & SLA), Phase 4 (Search & Discovery list grid/map carousel), and Phase 5 (Admin Stats approvals queue & Rent Ledger light-theme dashboard). Overhauled MatchesScreen, MatchCard, LedgerScreen syntax/types, and MapScreen compilation to complete the light white/slate design overhaul. All merged and pushed to main branch.
+**Progress:** Resolved the blank viewport rendering bug on desktop web browsers by absolutely positioning the sidebar and adding sceneContainerStyle. Added a dedicated "Logout" shortcut in the sidebar footer for easy user switching, and resolved all compilation/type issues across the mobile screens.
 
 ## Completed Tasks
 
 | Task | Completed At | Commits | Notes |
 |------|-------------|---------|-------|
+| Responsive Desktop Layout & Sidebar Logout Shortcut | 2026-06-04 | `b0d07ae` | Fixed blank main screen on desktop web browsers by absolutely positioning the sidebar and setting sceneContainerStyle for the navigators. Added a dedicated "Logout" (התנתקות) button directly in the desktop sidebar footer. Resolved TypeScript compilation errors in types/index.ts, api.ts, MaintenanceScreen.tsx, and mapScreenHtml.test.ts. |
 | Clean White/Slate Design Overhaul Cleanup | 2026-06-04 | `02c2cfe` | Overhauled MatchesScreen.tsx, MatchCard.tsx, ProfileScreen.tsx, LandlordDashboard.tsx, and LeadsScreen.tsx to clean white-slate aesthetic. Fixed syntax, missing imports, and compilation errors in LedgerScreen.tsx, MapScreen.tsx, and AppNavigator.tsx. Verified ESLint checks compile 100% cleanly. |
 | Stitch Design Integration (Phases 4-5) | 2026-06-04 | `3355a43`, `43ba2a2` | Integrated high-fidelity Stitch layouts for Search & Discovery lists and maps (SearchScreen.tsx, MapScreen.tsx) with Leaflet price overlays, center FAB crosshair, bottom snap carousel, and bidirection sync. Redesigned LedgerScreen.tsx to a premium light theme with payment details and CPI adjustment breakdown/index modals. Integrated the Maintenance Approvals Queue with completed work ticket cards inside AdminStatsScreen.tsx. All eslint checks passed cleanly. |
 | Stitch Design Integration (Phases 1-3) | 2026-06-04 | `f7e8e09`, `31b7d3a`, `20dbfcc` | Integrated high-fidelity Stitch layouts for Guarantor Web flow (App.jsx, App.css, index.html), Lease Onboarding Mobile screens (ContractsScreen.tsx, ContractDetailScreen.tsx), and Maintenance & SLA Tracking Flow (MaintenanceScreen.tsx, api.ts, useMaintenanceStore.ts). Implemented wizard step tracking, ID checksums, OTP grid, SLA countdown timers, geofenced audit logs, and invoice uploads. Passed Vite build and Sequenced Postgres Jest suite. |
