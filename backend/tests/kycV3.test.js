@@ -26,7 +26,7 @@ jest.mock('../src/models/mongo/UserPreferences', () => {
 const { sequelize, initPostgres } = require('../src/config/database');
 const { initRedis, getRedisClient } = require('../src/config/redis');
 const app = require('../src/app');
-const { User, UserKycProfile, AgreementParty, RentalAgreement } = require('../src/models');
+const { User, UserKycProfile, AgreementParty, RentalAgreement, Apartment } = require('../src/models');
 const UserPoints = require('../src/models/mongo/UserPoints');
 
 const { validateIsraeliId, verifyWebhookSignature } = require('../src/services/kycServiceV3');
@@ -76,6 +76,16 @@ describe('KYC Service & Webhooks Integration Suite (M6)', () => {
     landlordToken = llRes.body.token;
     landlord = await User.findOne({ where: { email: `landlord-kyc-${unique}@test.com` } });
     await landlord.update({ isVerified: true });
+
+    // Seed mock apartment
+    await Apartment.create({
+      id: '00000000-0000-4000-8000-000000000777',
+      landlordId: landlord.id,
+      title: 'דירת בדיקה לקבוצת KYC',
+      price: 5000,
+      rooms: 3,
+      city: 'תל אביב',
+    });
 
     // Seed mock rental agreement and party
     const agreement = await RentalAgreement.create({
