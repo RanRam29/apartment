@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   View, Text, StyleSheet, SafeAreaView, ScrollView,
-  TouchableOpacity, Dimensions, Alert
+  TouchableOpacity, Dimensions,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,6 +14,7 @@ import { ResponsiveContainer } from '../components/ResponsiveContainer';
 import * as Haptics from 'expo-haptics';
 import { useColors } from '../context/ThemeContext';
 import { swipeApi, matchesApi } from '../services/api';
+import { showAlert } from '../utils/alert';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'LandlordProfile'>;
 
@@ -42,7 +43,7 @@ export default function LandlordProfileScreen({ route, navigation }: Props) {
   const handleActionPress = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (!apartmentId) {
-      Alert.alert('צ׳אט עם בעל הדירה', 'לשיחה עם בעל הדירה, אנא כנס דרך פרסום המודעה המבוקשת.');
+      showAlert('צ׳אט עם בעל הדירה', 'לשיחה עם בעל הדירה, אנא כנס דרך פרסום המודעה המבוקשת.');
       return;
     }
 
@@ -66,7 +67,7 @@ export default function LandlordProfileScreen({ route, navigation }: Props) {
       const { match } = swipeRes.data;
 
       if (match) {
-        Alert.alert('יש התאמה! 🎉', 'נמצאה התאמה הדדית! מועבר לצ׳אט לקביעת ביקור.', [
+        showAlert('יש התאמה! 🎉', 'נמצאה התאמה הדדית! מועבר לצ׳אט לקביעת ביקור.', [
           {
             text: 'המשך',
             onPress: () => {
@@ -78,16 +79,16 @@ export default function LandlordProfileScreen({ route, navigation }: Props) {
           }
         ]);
       } else {
-        Alert.alert(
+        showAlert(
           'בקשתך נשלחה ✉️',
           'הבעת עניין בדירה נרשמה בהצלחה! המשכיר קיבל התראה. ברגע שתהיה התאמה, ייפתח ביניכם צ׳אט לתיאום ביקור.'
         );
       }
     } catch (err: any) {
       if (err?.response?.status === 400 && err?.response?.data?.error?.includes('own listing')) {
-        Alert.alert('שגיאה', 'לא ניתן לקבוע ביקור בדירה של עצמך.');
+        showAlert('שגיאה', 'לא ניתן לקבוע ביקור בדירה של עצמך.');
       } else {
-        Alert.alert('שגיאה', 'לא ניתן לשלוח בקשה כרגע. אנא נסה שנית מאוחר יותר.');
+        showAlert('שגיאה', 'לא ניתן לשלוח בקשה כרגע. אנא נסה שנית מאוחר יותר.');
       }
     }
   };
