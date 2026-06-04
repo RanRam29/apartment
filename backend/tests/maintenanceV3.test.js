@@ -66,10 +66,12 @@ describe('Maintenance Ticket Flow (M15)', () => {
     
     // Clean up any old agreement with this ID
     await RentalAgreement.destroy({ where: { id: agreementId } }).catch(() => {});
+    // Clean up polluted old apartment ID so apartments.test.js can pass
+    await Apartment.destroy({ where: { id: '00000000-0000-4000-8000-000000000001' } }).catch(() => {});
     
     // Seed mock apartment
     await Apartment.findOrCreate({
-      where: { id: '00000000-0000-4000-8000-000000000001' },
+      where: { id: '00000000-0000-4000-8000-000000000099' },
       defaults: {
         landlordId: landlord.id,
         title: 'Test Apartment for Maintenance',
@@ -84,7 +86,7 @@ describe('Maintenance Ticket Flow (M15)', () => {
     await RentalAgreement.create({
       id: agreementId,
       landlordId: landlord.id,
-      propertyId: '00000000-0000-4000-8000-000000000001',
+      propertyId: '00000000-0000-4000-8000-000000000099',
       monthlyRentIls: 5000,
       startDate: '2026-07-01',
       endDate: '2027-06-30',
