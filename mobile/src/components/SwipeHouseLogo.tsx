@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Image } from 'expo-image';
+import { useNavigation } from '@react-navigation/native';
 import { C } from '../theme';
 
 const LOGO = require('../../assets/logo.png');
@@ -24,6 +25,7 @@ interface Props {
 
 export default function SwipeHouseLogo({ size = 'md', plate = false }: Props) {
   const width = WIDTH[size];
+  const navigation = useNavigation<any>();
 
   const inner = (
     <Image
@@ -33,26 +35,17 @@ export default function SwipeHouseLogo({ size = 'md', plate = false }: Props) {
     />
   );
 
-  if (!plate) {
-    return (
-      <View
-        style={styles.wrapperBare}
-        accessibilityRole="image"
-        accessibilityLabel="DirApp"
-      >
-        {inner}
-      </View>
-    );
-  }
+  const wrapStyle = plate ? styles.wrapperPlate : styles.wrapperBare;
 
   return (
-    <View
-      style={styles.wrapperPlate}
-      accessibilityRole="image"
-      accessibilityLabel="DirApp"
+    <TouchableOpacity
+      style={wrapStyle}
+      onPress={() => navigation.navigate('Tabs')}
+      accessibilityRole="button"
+      accessibilityLabel="חזרה למסך הראשי"
     >
       {inner}
-    </View>
+    </TouchableOpacity>
   );
 }
 
