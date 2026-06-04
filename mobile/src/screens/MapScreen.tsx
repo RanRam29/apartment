@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -452,7 +452,7 @@ export default function MapScreen() {
             style={styles.tuneBtn}
             onPress={() => navigation.navigate('Search')}
           >
-            <Ionicons name="tune" size={18} color="#002045" />
+            <Ionicons name="options-outline" size={18} color="#002045" />
           </TouchableOpacity>
         </View>
 

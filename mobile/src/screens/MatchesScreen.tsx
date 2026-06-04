@@ -54,9 +54,9 @@ export default function MatchesScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
       <ResponsiveContainer style={{ flex: 1 }}>
-        <View style={styles.shellHeader}>
-          <Text style={[styles.headerBrand, dirType.heading, { color: dirApp.primary }]}>DirApp</Text>
-          <Text style={[styles.header, dirType.subhead, { color: dirApp.primary }]}>
+        <View style={[styles.shellHeader, { borderBottomColor: colors.border }]}>
+          <Text style={[styles.headerBrand, dirType.heading, { color: colors.text }]}>DirApp</Text>
+          <Text style={[styles.header, dirType.subhead, { color: colors.text }]}>
             {isLandlord ? 'צ׳אטים' : 'התאמות'}
           </Text>
         </View>
@@ -72,9 +72,22 @@ export default function MatchesScreen() {
               <Pressable
                 key={key}
                 onPress={() => setTab(key)}
-                style={[styles.tabBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }, active && styles.tabBtnActive]}
+                style={[
+                  styles.tabBtn, 
+                  { backgroundColor: colors.bgCard, borderColor: colors.border }, 
+                  active && styles.tabBtnActive,
+                  active && { 
+                    backgroundColor: colors.isDark ? colors.surface : dirApp.secondaryContainer,
+                    borderColor: colors.isDark ? colors.borderStrong : dirApp.secondary 
+                  }
+                ]}
               >
-                <Text style={[styles.tabBtnText, active && styles.tabBtnTextActive]}>{label}</Text>
+                <Text style={[
+                  styles.tabBtnText, 
+                  { color: colors.textSub },
+                  active && styles.tabBtnTextActive,
+                  active && { color: colors.isDark ? colors.text : dirApp.onSecondaryContainer }
+                ]}>{label}</Text>
               </Pressable>
             );
           })}
@@ -89,7 +102,7 @@ export default function MatchesScreen() {
             <RefreshControl
               refreshing={isRefetching}
               onRefresh={refetch}
-              tintColor={dirApp.secondary}
+              tintColor={colors.isDark ? colors.text : dirApp.secondary}
             />
           }
           renderItem={({ item, index }) => {
@@ -98,10 +111,10 @@ export default function MatchesScreen() {
             return (
               <>
                 {tab === 'all' && index === 0 && accepted.length > 0 && (
-                  <Text style={styles.sectionLabel}>פעיל ({accepted.length})</Text>
+                  <Text style={[styles.sectionLabel, { color: colors.textMut }]}>פעיל ({accepted.length})</Text>
                 )}
                 {showPendingHeader && (
-                  <Text style={[styles.sectionLabel, accepted.length > 0 ? { marginTop: 8 } : null]}>
+                  <Text style={[styles.sectionLabel, { color: colors.textMut }, accepted.length > 0 ? { marginTop: 8 } : null]}>
                     ממתין לאישור ({pending.length})
                   </Text>
                 )}
@@ -117,14 +130,14 @@ export default function MatchesScreen() {
           ListEmptyComponent={
             <View style={styles.empty}>
               <Text style={styles.emptyEmoji}>💬</Text>
-              <Text style={styles.emptyTitle}>
+              <Text style={[styles.emptyTitle, { color: colors.text }]}>
                 {tab === 'pending'
                   ? 'אין בקשות ממתינות'
                   : tab === 'active'
                     ? (isLandlord ? 'אין שיחות פעילות' : 'אין התאמות פעילות')
                     : (isLandlord ? 'אין שיחות עדיין' : 'אין התאמות עדיין')}
               </Text>
-              <Text style={styles.emptySub}>
+              <Text style={[styles.emptySub, { color: colors.textSub }]}>
                 {isLandlord
                   ? 'כשתאשר ליד מדף הלידים — השיחה עם השוכר תופיע כאן.'
                   : 'המשך להחליק כדי למצוא דירות'}

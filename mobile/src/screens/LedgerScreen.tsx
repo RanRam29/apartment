@@ -121,11 +121,11 @@ export default function LedgerScreen({ route, navigation }: any) {
   if (isLoading && !refreshing) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
-        <View style={[styles.header, { borderBottomColor: colors.border }]}>
+        <View style={[styles.header, { backgroundColor: colors.bgCard, borderBottomColor: colors.border }]}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Ionicons name="chevron-back" size={24} color={dirApp.primary} />
+            <Ionicons name="chevron-back" size={24} color={colors.text} />
           </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: dirApp.primary }]}>ספר תשלומים</Text>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>ספר תשלומים</Text>
           <View style={{ width: 38 }} />
         </View>
         <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
@@ -138,7 +138,7 @@ export default function LedgerScreen({ route, navigation }: any) {
           
           {Array.from({ length: 3 }).map((_, i) => (
             <View key={i} style={[styles.skeletonRowCard, { borderColor: colors.border }]}>
-              <View style={styles.rowHeader}>
+              <View style={styles.rowTopBar}>
                 <SkeletonLoader width={70} height={18} borderRadius={4} />
                 <SkeletonLoader width={90} height={18} borderRadius={4} />
               </View>
@@ -153,11 +153,11 @@ export default function LedgerScreen({ route, navigation }: any) {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
-      <View style={[styles.header, { borderBottomColor: colors.border }]}>
+      <View style={[styles.header, { backgroundColor: colors.bgCard, borderBottomColor: colors.border }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="chevron-back" size={24} color={dirApp.primary} />
+          <Ionicons name="chevron-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: dirApp.primary }]}>ספר תשלומים</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>ספר תשלומים</Text>
         <View style={{ width: 38 }} />
       </View>
 
@@ -168,14 +168,14 @@ export default function LedgerScreen({ route, navigation }: any) {
       >
         {/* TITLE SECTION */}
         <View style={styles.titleSection}>
-          <Text style={[styles.title, { color: dirApp.primary }]}>ספר תשלומים ומעקב שכירות</Text>
+          <Text style={[styles.title, { color: colors.text }]}>ספר תשלומים ומעקב שכירות</Text>
           <Text style={[styles.subtitle, { color: colors.textSub }]}>מעקב שקוף אחר שכר דירה, חיובים ואישורי תשלומים הדדיים.</Text>
         </View>
 
         {/* BENTO HERO SECTION */}
         <View style={styles.bentoSection}>
           {nextPaymentDue ? (
-            <View style={[styles.nextPaymentCard, { borderColor: colors.border }]}>
+            <View style={[styles.nextPaymentCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
               <View style={styles.nextPaymentHeader}>
                 <View style={styles.statusBadgePending}>
                   <View style={styles.statusDotPending} />
@@ -183,34 +183,34 @@ export default function LedgerScreen({ route, navigation }: any) {
                     {nextPaymentDue.status === 'REPORTED' ? 'ממתין לאישור' : 'טרם שולם'}
                   </Text>
                 </View>
-                <Text style={styles.periodLabel}>תשלום קרוב שטרם שולם</Text>
+                <Text style={[styles.periodLabel, { color: colors.textMut }]}>תשלום קרוב שטרם שולם</Text>
               </View>
               
-              <Text style={styles.nextPaymentAmount}>
+              <Text style={[styles.nextPaymentAmount, { color: colors.text }]}>
                 ₪{(parseFloat(nextPaymentDue.amount) + parseFloat(nextPaymentDue.cpiAdjustment || 0)).toLocaleString('he-IL', { minimumFractionDigits: 2 })}
               </Text>
 
-              <View style={styles.nextPaymentMetaRow}>
+              <View style={[styles.nextPaymentMetaRow, { borderTopColor: colors.border }]}>
                 <View style={styles.metaCol}>
-                  <Text style={styles.metaLabel}>שיטת תשלום</Text>
-                  <Text style={styles.metaValue}>העברה בנקאית / Bit</Text>
+                  <Text style={[styles.metaLabel, { color: colors.textMut }]}>שיטת תשלום</Text>
+                  <Text style={[styles.metaValue, { color: colors.text }]}>העברה בנקאית / Bit</Text>
                 </View>
                 <View style={styles.metaCol}>
-                  <Text style={styles.metaLabel}>תאריך יעד</Text>
-                  <Text style={styles.metaValue}>{formatDate(nextPaymentDue.dueDate)}</Text>
+                  <Text style={[styles.metaLabel, { color: colors.textMut }]}>תאריך יעד</Text>
+                  <Text style={[styles.metaValue, { color: colors.text }]}>{formatDate(nextPaymentDue.dueDate)}</Text>
                 </View>
               </View>
             </View>
           ) : (
-            <View style={[styles.allPaidCard, { borderColor: colors.border }]}>
+            <View style={[styles.allPaidCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
               <Ionicons name="checkmark-circle" size={40} color={C.success} />
-              <Text style={styles.allPaidTitle}>כל התשלומים שולמו במלואם! 🎉</Text>
-              <Text style={styles.allPaidSub}>אין תשלומים פתוחים או בפיגור בספר זה.</Text>
+              <Text style={[styles.allPaidTitle, { color: colors.text }]}>כל התשלומים שולמו במלואם! 🎉</Text>
+              <Text style={[styles.allPaidSub, { color: colors.textSub }]}>אין תשלומים פתוחים או בפיגור בספר זה.</Text>
             </View>
           )}
 
           {/* CPI LINKAGE INFO CARD */}
-          <View style={styles.cpiCard}>
+          <View style={[styles.cpiCard, { backgroundColor: colors.isDark ? colors.surface : '#1e293b' }]}>
             <View style={styles.cpiHeader}>
               <Ionicons name="information-circle-outline" size={20} color="#ffffff" />
               <Text style={styles.cpiTitle}>הצמדה למדד (מדד המחירים לצרכן)</Text>
@@ -231,7 +231,7 @@ export default function LedgerScreen({ route, navigation }: any) {
 
         {/* LEDGER SECTION */}
         <View style={styles.ledgerHeaderRow}>
-          <Text style={[styles.ledgerTitle, { color: dirApp.primary }]}>פירוט תשלומים תקופתיים</Text>
+          <Text style={[styles.ledgerTitle, { color: colors.text }]}>פירוט תשלומים תקופתיים</Text>
         </View>
 
         {rows.length > 0 ? (
@@ -256,13 +256,13 @@ export default function LedgerScreen({ route, navigation }: any) {
                         {isPaid ? 'שולם' : (isReported ? 'בבדיקה' : (isOverdue ? 'בפיגור' : 'ממתין'))}
                       </Text>
                     </View>
-                    <Text style={[styles.rowPeriodText, { color: dirApp.primary }]}>{formatPeriod(row.period)}</Text>
+                    <Text style={[styles.rowPeriodText, { color: colors.text }]}>{formatPeriod(row.period)}</Text>
                   </View>
 
                   <View style={styles.rowDetails}>
                     <View style={styles.detailCol}>
                       <Text style={[styles.detailLabel, { color: colors.textSub }]}>סך הכל לתשלום</Text>
-                      <Text style={[styles.detailValueBold, { color: isPaid ? C.success : dirApp.primary }]}>
+                      <Text style={[styles.detailValueBold, { color: isPaid ? C.success : colors.text }]}>
                         ₪{totalAmount.toLocaleString('he-IL')}
                       </Text>
                     </View>
@@ -327,7 +327,7 @@ export default function LedgerScreen({ route, navigation }: any) {
             <View style={styles.helpIconContainer}>
               <Ionicons name="help-buoy-outline" size={20} color={dirApp.secondary} />
             </View>
-            <Text style={[styles.helpTitle, { color: dirApp.primary }]}>צריך עזרה בנוגע לתשלום?</Text>
+            <Text style={[styles.helpTitle, { color: colors.text }]}>צריך עזרה בנוגע לתשלום?</Text>
           </View>
           <Text style={[styles.helpBody, { color: colors.textSub }]}>
             צוות הכספים שלנו בודק את אישורי ההעברות תוך 24 שעות עבודה. אם מצאת אי התאמה כלשהי בחישוב המדד, אנא פתח פנייה.
@@ -357,9 +357,9 @@ export default function LedgerScreen({ route, navigation }: any) {
           <View style={[styles.modalContent, { backgroundColor: colors.bgCard }]}>
             <View style={styles.modalHeader}>
               <TouchableOpacity onPress={() => setShowCpiModal(false)} style={styles.modalCloseBtn}>
-                <Ionicons name="close" size={24} color={dirApp.primary} />
+                <Ionicons name="close" size={24} color={colors.text} />
               </TouchableOpacity>
-              <Text style={[styles.modalTitle, { color: dirApp.primary }]}>כללי הצמדה למדד (מדד הבסיס)</Text>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>כללי הצמדה למדד (מדד הבסיס)</Text>
             </View>
 
             <View style={styles.modalBody}>
@@ -370,11 +370,11 @@ export default function LedgerScreen({ route, navigation }: any) {
               {/* CALCULATION GRID */}
               <View style={[styles.calcGrid, { backgroundColor: colors.bg, borderColor: colors.border }]}>
                 <View style={styles.calcRow}>
-                  <Text style={[styles.calcVal, { color: dirApp.primary }]}>104.2 (ינואר 2026)</Text>
+                  <Text style={[styles.calcVal, { color: colors.text }]}>104.2 (ינואר 2026)</Text>
                   <Text style={[styles.calcLabel, { color: colors.textSub }]}>מדד בסיס בחוזה:</Text>
                 </View>
                 <View style={styles.calcRow}>
-                  <Text style={[styles.calcVal, { color: dirApp.primary }]}>106.3 (ספטמבר 2026)</Text>
+                  <Text style={[styles.calcVal, { color: colors.text }]}>106.3 (ספטמבר 2026)</Text>
                   <Text style={[styles.calcLabel, { color: colors.textSub }]}>מדד נוכחי ידוע:</Text>
                 </View>
                 <View style={[styles.calcRowTotal, { borderTopColor: colors.border }]}>

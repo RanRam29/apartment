@@ -26,8 +26,8 @@ export const C = {
   textMut: dirApp.outline,
 
   // ── Borders / dividers ───────────────────────────────
-  border: '#C4C6CD',
-  borderLight: '#E9E8E9',
+  border: '#e2e8f0',
+  borderLight: '#f1f5f9',
 
   // ── Status / feedback (canonical) ────────────────────
   gold: '#F59E0B',
@@ -70,7 +70,7 @@ export const C = {
 
   accent: {
     violet: '#7C3AED',
-    blue: '#0984E3',
+    blue: '#0047ba',
     bronze: '#CD7F32',
   },
 
@@ -93,27 +93,27 @@ export const C = {
     navyBorder: 'rgba(22, 40, 57, 0.15)',
     surfaceBg: 'rgba(22, 40, 57, 0.05)',
     surfaceBorder: 'rgba(22, 40, 57, 0.10)',
-    shadowColor: dirApp.primary,
+    shadowColor: '#0f172a',
     shadowLight: {
-      shadowColor: dirApp.primary,
+      shadowColor: '#0f172a',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.04,
+      shadowRadius: 8,
+      elevation: 2,
+    },
+    shadowMedium: {
+      shadowColor: '#0f172a',
       shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.08,
+      shadowOpacity: 0.06,
       shadowRadius: 16,
       elevation: 4,
     },
-    shadowMedium: {
-      shadowColor: dirApp.primary,
+    shadowStrong: {
+      shadowColor: '#0f172a',
       shadowOffset: { width: 0, height: 8 },
-      shadowOpacity: 0.12,
+      shadowOpacity: 0.10,
       shadowRadius: 24,
       elevation: 8,
-    },
-    shadowStrong: {
-      shadowColor: dirApp.primary,
-      shadowOffset: { width: 0, height: 12 },
-      shadowOpacity: 0.18,
-      shadowRadius: 32,
-      elevation: 12,
     },
   },
 

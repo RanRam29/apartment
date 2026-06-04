@@ -19,15 +19,15 @@ export type AppColors = {
 };
 
 const LIGHT: AppColors = {
-  bg: C.bg,
-  bgCard: C.bgCard,
-  surface: dirApp.surfaceContainerLow,
-  text: C.text,
-  textSub: C.textSub,
-  textMut: C.textMut,
-  border: C.border,
-  borderStrong: '#A0A4AB',
-  inputBg: dirApp.surfaceContainerLow,
+  bg: '#f8fafc',
+  bgCard: '#ffffff',
+  surface: '#f1f5f9',
+  text: '#0f172a',
+  textSub: '#475569',
+  textMut: '#94a3b8',
+  border: '#e2e8f0',
+  borderStrong: '#cbd5e1',
+  inputBg: '#ffffff',
   isDark: false,
 };
 

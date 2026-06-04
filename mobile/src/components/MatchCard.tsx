@@ -7,6 +7,7 @@ import { he } from 'date-fns/locale';
 import { C } from '../theme';
 import { dirApp } from '../theme/dirAppTokens';
 import type { Match } from '../types';
+import { useColors } from '../context/ThemeContext';
 
 interface Props {
   match: Match;
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export default function MatchCard({ match, currentUserId, unreadCount, onPress }: Props) {
+  const colors = useColors();
   const isLandlord  = match.landlordId === currentUserId;
   const otherParty  = isLandlord ? match.tenant : match.landlord;
   const apartment   = match.apartment;
@@ -28,7 +30,11 @@ export default function MatchCard({ match, currentUserId, unreadCount, onPress }
   );
 
   return (
-    <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.8}>
+    <TouchableOpacity 
+      style={[styles.container, { backgroundColor: colors.bgCard, borderColor: colors.border }]} 
+      onPress={onPress} 
+      activeOpacity={0.8}
+    >
       {coverImage ? (
         <Image
           source={{ uri: coverImage }}
@@ -36,32 +42,32 @@ export default function MatchCard({ match, currentUserId, unreadCount, onPress }
           contentFit="cover"
         />
       ) : (
-        <View style={[styles.thumb, styles.thumbFallback]}>
-          <Ionicons name="home-outline" size={24} color={C.textMut} />
+        <View style={[styles.thumb, styles.thumbFallback, { backgroundColor: colors.surface }]}>
+          <Ionicons name="home-outline" size={24} color={colors.textMut} />
         </View>
       )}
 
       <View style={styles.info}>
-        <Text style={styles.title} numberOfLines={1}>{apartment?.title || 'דירה'}</Text>
-        <Text style={styles.location} numberOfLines={1}>
+        <Text style={[styles.title, { color: colors.text }]} numberOfLines={1}>{apartment?.title || 'דירה'}</Text>
+        <Text style={[styles.location, { color: colors.textSub }]} numberOfLines={1}>
           {apartment?.city} · ₪{apartment?.price?.toLocaleString()}/חודש
         </Text>
         <View style={styles.partyRow}>
           {otherParty?.avatarUrl && !otherParty.avatarUrl.includes('via.placeholder.com') ? (
             <Image source={{ uri: otherParty.avatarUrl }} style={styles.avatar} contentFit="cover" />
           ) : (
-            <View style={{width:40,height:40,borderRadius:20,backgroundColor:'#334',justifyContent:'center',alignItems:'center'}}>
-              <Ionicons name="person" size={20} color={C.textMut} />
+            <View style={{width:40,height:40,borderRadius:20,backgroundColor: colors.surface,justifyContent:'center',alignItems:'center'}}>
+              <Ionicons name="person" size={20} color={colors.textMut} />
             </View>
           )}
-          <Text style={styles.partyName} numberOfLines={1}>
+          <Text style={[styles.partyName, { color: colors.textSub }]} numberOfLines={1}>
             {otherParty?.firstName} {otherParty?.lastName}
           </Text>
         </View>
       </View>
 
       <View style={styles.right}>
-        <Text style={styles.time}>{timeAgo}</Text>
+        <Text style={[styles.time, { color: colors.textMut }]}>{timeAgo}</Text>
         {isPending ? (
           <View style={styles.pendingBadge}>
             <Text style={styles.pendingText}>ממתין</Text>
@@ -71,7 +77,7 @@ export default function MatchCard({ match, currentUserId, unreadCount, onPress }
             <Text style={styles.unreadText}>{unreadCount > 99 ? '99+' : unreadCount}</Text>
           </View>
         ) : (
-          <Ionicons name="chevron-forward" size={16} color={C.textMut} />
+          <Ionicons name="chevron-forward" size={16} color={colors.textMut} />
         )}
       </View>
     </TouchableOpacity>

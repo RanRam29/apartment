@@ -13,6 +13,7 @@ import {
   ScrollView,
   Dimensions,
   Alert,
+  Modal,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SkeletonLoader from '../components/SkeletonLoader';
@@ -82,11 +83,17 @@ export default function SearchScreen() {
   
   // Active manual filters
   const [filterCity, setFilterCity] = useState('');
+  const [filterMinPrice, setFilterMinPrice] = useState('');
   const [filterMaxPrice, setFilterMaxPrice] = useState('');
+  const [filterPropertyType, setFilterPropertyType] = useState<string | null>(null);
   const [filterRooms, setFilterRooms] = useState<number | null>(null);
   const [filterPets, setFilterPets] = useState(false);
   const [filterParking, setFilterParking] = useState(false);
   const [filterElevator, setFilterElevator] = useState(false);
+  const [filterAirConditioning, setFilterAirConditioning] = useState(false);
+  const [filterFurnished, setFilterFurnished] = useState(false);
+  const [filterImmediate, setFilterImmediate] = useState(false);
+  const [filterMoveInDate, setFilterMoveInDate] = useState('');
   
   const [results, setResults] = useState<Apartment[]>([]);
   const [parsedFilters, setParsedFilters] = useState<Record<string, any> | null>(null);
@@ -95,7 +102,20 @@ export default function SearchScreen() {
   const [favorites, setFavorites] = useState<Record<string, boolean>>({});
 
   const parsedEntries = visibleParsedFilters(parsedFilters);
-  const hasManualFilters = !!(filterCity || filterMaxPrice || filterRooms || filterPets || filterParking || filterElevator);
+  const hasManualFilters = !!(
+    filterCity || 
+    filterMinPrice || 
+    filterMaxPrice || 
+    filterPropertyType || 
+    filterRooms || 
+    filterPets || 
+    filterParking || 
+    filterElevator || 
+    filterAirConditioning || 
+    filterFurnished || 
+    filterImmediate || 
+    filterMoveInDate
+  );
 
   const loadHistory = useCallback(async () => {
     try {
@@ -108,7 +128,6 @@ export default function SearchScreen() {
 
   useEffect(() => {
     loadHistory();
-    // Fetch initial search results (feed) on load
     handleSearch('');
   }, [loadHistory]);
 
@@ -136,6 +155,7 @@ export default function SearchScreen() {
     mutationFn: async (q: string) => {
       const overrides = {
         city: filterCity || undefined,
+        minPrice: filterMinPrice ? parseInt(filterMinPrice) : undefined,
         maxPrice: filterMaxPrice ? parseInt(filterMaxPrice) : undefined,
         minRooms: filterRooms ?? undefined,
         petsAllowed: filterPets || undefined,
@@ -145,15 +165,63 @@ export default function SearchScreen() {
       if (q) {
         return recommendationsApi.nlpSearch(q, overrides);
       }
-      // Manual filters only — use feed endpoint
       return apartmentsApi.getFeed({
         city: filterCity || undefined,
+        minPrice: filterMinPrice ? parseInt(filterMinPrice) : undefined,
         maxPrice: filterMaxPrice ? parseInt(filterMaxPrice) : undefined,
         rooms: filterRooms ?? undefined,
       });
     },
     onSuccess: (res) => {
-      setResults(res.data.apartments || []);
+      let rawResults = res.data.apartments || [];
+      
+      // Client-side filter fallbacks for maximum compliance with manual filter options
+      if (filterPropertyType) {
+        rawResults = rawResults.filter((a: Apartment) => 
+          a.title?.toLowerCase().includes(filterPropertyType.toLowerCase()) || 
+          a.description?.toLowerCase().includes(filterPropertyType.toLowerCase())
+        );
+      }
+      if (filterAirConditioning) {
+        rawResults = rawResults.filter((a: Apartment) => 
+          a.amenities?.some(am => 
+            am.includes('מיזוג') || 
+            am.includes('מזגן') || 
+            am.toLowerCase().includes('ac') || 
+            am.toLowerCase().includes('air conditioning')
+          )
+        );
+      }
+      if (filterFurnished) {
+        rawResults = rawResults.filter((a: Apartment) => 
+          a.amenities?.some(am => 
+            am.includes('ריהוט') || 
+            am.includes('מרוהט') || 
+            am.toLowerCase().includes('furnished')
+          )
+        );
+      }
+      if (filterParking) {
+        rawResults = rawResults.filter((a: Apartment) => 
+          a.amenities?.some(am => 
+            am.includes('חניה') || 
+            am.toLowerCase().includes('parking')
+          )
+        );
+      }
+      if (filterElevator) {
+        rawResults = rawResults.filter((a: Apartment) => 
+          a.amenities?.some(am => 
+            am.includes('מעלית') || 
+            am.toLowerCase().includes('elevator')
+          )
+        );
+      }
+      if (filterPets) {
+        rawResults = rawResults.filter((a: Apartment) => a.petsAllowed === true);
+      }
+
+      setResults(rawResults);
       setParsedFilters(res.data.filters ?? null);
     },
   });
@@ -186,12 +254,17 @@ export default function SearchScreen() {
 
   function clearFilters() {
     setFilterCity('');
+    setFilterMinPrice('');
     setFilterMaxPrice('');
+    setFilterPropertyType(null);
     setFilterRooms(null);
     setFilterPets(false);
     setFilterParking(false);
     setFilterElevator(false);
-    // Reload search after clear
+    setFilterAirConditioning(false);
+    setFilterFurnished(false);
+    setFilterImmediate(false);
+    setFilterMoveInDate('');
     setTimeout(() => handleSearch(''), 50);
   }
 
@@ -207,8 +280,19 @@ export default function SearchScreen() {
     let parts: string[] = [];
     if (filterCity) parts.push(filterCity);
     else parts.push('כל הארץ');
-    if (filterMaxPrice) parts.push(`עד ₪${Number(filterMaxPrice).toLocaleString()}`);
-    else parts.push('כל המחירים');
+    
+    if (filterMinPrice || filterMaxPrice) {
+      if (filterMinPrice && filterMaxPrice) {
+        parts.push(`₪${Number(filterMinPrice).toLocaleString()}-${Number(filterMaxPrice).toLocaleString()}`);
+      } else if (filterMinPrice) {
+        parts.push(`מ- ₪${Number(filterMinPrice).toLocaleString()}`);
+      } else {
+        parts.push(`עד ₪${Number(filterMaxPrice).toLocaleString()}`);
+      }
+    } else {
+      parts.push('כל המחירים');
+    }
+    
     if (filterRooms) parts.push(`${filterRooms} חדרים`);
     return parts.join(' • ');
   };
@@ -267,7 +351,7 @@ export default function SearchScreen() {
                 onPress={() => setShowFilters(v => !v)}
               >
                 <Ionicons 
-                  name="tune" 
+                  name="options-outline" 
                   size={20} 
                   color={showFilters || hasManualFilters ? '#002045' : '#74777f'} 
                 />
@@ -355,70 +439,259 @@ export default function SearchScreen() {
             </View>
           )}
 
-          {/* Filter Panel (expandable manual selectors) */}
-          {showFilters && (
-            <View style={styles.expandedFilterPanel}>
-              {/* City Selector */}
-              <Text style={styles.filterSectionTitle}>בחר עיר</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.cityScroll}>
-                {CITIES.map((city) => (
-                  <TouchableOpacity
-                    key={city}
-                    style={[styles.cityChip, filterCity === city && styles.cityChipActive]}
-                    onPress={() => setFilterCity(prev => prev === city ? '' : city)}
-                  >
-                    <Text style={[styles.cityChipText, filterCity === city && styles.cityChipTextActive]}>{city}</Text>
+          {/* Advanced Filters Modal Overlay (Stitch Mockup) */}
+          <Modal
+            visible={showFilters}
+            animationType="slide"
+            transparent={true}
+            onRequestClose={() => setShowFilters(false)}
+          >
+            <View style={styles.modalBackdrop}>
+              <TouchableOpacity
+                style={styles.modalBackdropClose}
+                activeOpacity={1}
+                onPress={() => setShowFilters(false)}
+              />
+              <View style={[styles.modalContent, { backgroundColor: colors.bgCard }]}>
+                {/* Header */}
+                <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
+                  <TouchableOpacity onPress={() => setShowFilters(false)} style={styles.modalCloseBtn}>
+                    <Ionicons name="close" size={22} color={colors.text} />
                   </TouchableOpacity>
-                ))}
-              </ScrollView>
+                  <Text style={[styles.modalTitle, { color: colors.text }]}>סינון מתקדם</Text>
+                  <TouchableOpacity onPress={clearFilters} style={styles.modalClearAllBtn}>
+                    <Text style={styles.modalClearAllText}>נקה הכל</Text>
+                  </TouchableOpacity>
+                </View>
 
-              {/* Rooms Selector */}
-              <Text style={styles.filterSectionTitle}>חדרי שינה (מינימום)</Text>
-              <View style={styles.roomsRow}>
-                {ROOMS_OPTIONS.map((opt) => (
+                {/* Content Area */}
+                <ScrollView 
+                  showsVerticalScrollIndicator={false}
+                  contentContainerStyle={styles.modalScrollContent}
+                >
+                  {/* City Selector */}
+                  <View style={styles.modalSection}>
+                    <Text style={[styles.modalSectionTitle, { color: colors.text }]}>בחר עיר</Text>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.cityScroll}>
+                      {CITIES.map((city) => (
+                        <TouchableOpacity
+                          key={city}
+                          style={[
+                            styles.cityChip,
+                            { borderColor: colors.border },
+                            filterCity === city && { backgroundColor: '#0047ba', borderColor: '#0047ba' }
+                          ]}
+                          onPress={() => setFilterCity(prev => prev === city ? '' : city)}
+                        >
+                          <Text style={[
+                            styles.cityChipText,
+                            { color: colors.textSub },
+                            filterCity === city && { color: '#ffffff', fontWeight: '600' }
+                          ]}>{city}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                  </View>
+
+                  <View style={[styles.modalDivider, { backgroundColor: colors.border }]} />
+
+                  {/* Monthly Rent Price Range */}
+                  <View style={styles.modalSection}>
+                    <Text style={[styles.modalSectionTitle, { color: colors.text }]}>טווח מחירים (שכירות חודשית)</Text>
+                    <View style={styles.priceFieldsContainer}>
+                      <View style={[styles.priceFieldWrapper, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                        <Text style={styles.priceFieldLabel}>מינימום</Text>
+                        <TextInput
+                          style={[styles.priceFieldInput, { color: colors.text }]}
+                          value={filterMinPrice}
+                          onChangeText={setFilterMinPrice}
+                          keyboardType="numeric"
+                          placeholder="₪ ללא הגבלה"
+                          placeholderTextColor="#94a3b8"
+                          textAlign="right"
+                        />
+                      </View>
+                      <View style={[styles.priceFieldWrapper, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                        <Text style={styles.priceFieldLabel}>מקסימום</Text>
+                        <TextInput
+                          style={[styles.priceFieldInput, { color: colors.text }]}
+                          value={filterMaxPrice}
+                          onChangeText={setFilterMaxPrice}
+                          keyboardType="numeric"
+                          placeholder="₪ ללא הגבלה"
+                          placeholderTextColor="#94a3b8"
+                          textAlign="right"
+                        />
+                      </View>
+                    </View>
+                  </View>
+
+                  <View style={[styles.modalDivider, { backgroundColor: colors.border }]} />
+
+                  {/* Property Type */}
+                  <View style={styles.modalSection}>
+                    <Text style={[styles.modalSectionTitle, { color: colors.text }]}>סוג הנכס</Text>
+                    <View style={styles.propertyTypesGrid}>
+                      {[
+                        { label: 'דירה', value: 'apartment' },
+                        { label: 'סטודיו', value: 'studio' },
+                        { label: 'פנטהאוז', value: 'penthouse' },
+                        { label: 'בית פרטי', value: 'house' },
+                      ].map((t) => {
+                        const active = filterPropertyType === t.value;
+                        return (
+                          <TouchableOpacity
+                            key={t.value}
+                            style={[
+                              styles.propertyTypeBtn,
+                              { borderColor: colors.border },
+                              active && { backgroundColor: 'rgba(0, 71, 186, 0.08)', borderColor: '#0047ba' }
+                            ]}
+                            onPress={() => setFilterPropertyType(prev => prev === t.value ? null : t.value)}
+                          >
+                            <Text style={[
+                              styles.propertyTypeBtnText,
+                              { color: active ? '#0047ba' : colors.textSub, fontWeight: active ? '700' : '500' }
+                            ]}>
+                              {t.label}
+                            </Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+                  </View>
+
+                  <View style={[styles.modalDivider, { backgroundColor: colors.border }]} />
+
+                  {/* Rooms/Bedrooms */}
+                  <View style={styles.modalSection}>
+                    <Text style={[styles.modalSectionTitle, { color: colors.text }]}>מספר חדרים (מינימום)</Text>
+                    <View style={styles.roomsGrid}>
+                      {[
+                        { label: '1', value: 1 },
+                        { label: '2', value: 2 },
+                        { label: '3', value: 3 },
+                        { label: '4', value: 4 },
+                        { label: '5+', value: 5 },
+                      ].map((opt) => {
+                        const active = filterRooms === opt.value;
+                        return (
+                          <TouchableOpacity
+                            key={opt.value}
+                            style={[
+                              styles.roomGridBtn,
+                              { borderColor: colors.border },
+                              active && { backgroundColor: 'rgba(0, 71, 186, 0.08)', borderColor: '#0047ba' }
+                            ]}
+                            onPress={() => setFilterRooms(prev => prev === opt.value ? null : opt.value)}
+                          >
+                            <Text style={[
+                              styles.roomGridBtnText,
+                              { color: active ? '#0047ba' : colors.textSub, fontWeight: active ? '700' : '500' }
+                            ]}>
+                              {opt.label}
+                            </Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+                  </View>
+
+                  <View style={[styles.modalDivider, { backgroundColor: colors.border }]} />
+
+                  {/* Essential Amenities Checklist */}
+                  <View style={styles.modalSection}>
+                    <Text style={[styles.modalSectionTitle, { color: colors.text }]}>מאפיינים חיוניים</Text>
+                    <View style={styles.amenitiesChecklist}>
+                      {[
+                        { label: 'חניה', icon: 'car-outline', val: filterParking, set: setFilterParking },
+                        { label: 'מעלית', icon: 'business-outline', val: filterElevator, set: setFilterElevator },
+                        { label: 'מיזוג אוויר', icon: 'snow-outline', val: filterAirConditioning, set: setFilterAirConditioning },
+                        { label: 'חיות מותרות', icon: 'paw-outline', val: filterPets, set: setFilterPets },
+                        { label: 'מרוהטת', icon: 'easel-outline', val: filterFurnished, set: setFilterFurnished },
+                      ].map((item) => (
+                        <TouchableOpacity
+                          key={item.label}
+                          style={[
+                            styles.amenityRow,
+                            { borderColor: colors.border },
+                            item.val && { backgroundColor: 'rgba(0, 71, 186, 0.04)', borderColor: '#0047ba' }
+                          ]}
+                          onPress={() => item.set(!item.val)}
+                          activeOpacity={0.7}
+                        >
+                          <View style={styles.amenityLabelGroup}>
+                            <Ionicons name={item.icon as any} size={18} color={item.val ? '#0047ba' : colors.textSub} style={{ marginLeft: 10 }} />
+                            <Text style={[styles.amenityText, { color: item.val ? '#0047ba' : colors.text, fontWeight: item.val ? '700' : '500' }]}>
+                              {item.label}
+                            </Text>
+                          </View>
+                          <Ionicons
+                            name={item.val ? 'checkbox' : 'square-outline'}
+                            size={20}
+                            color={item.val ? '#0047ba' : colors.textMut}
+                          />
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+
+                  <View style={[styles.modalDivider, { backgroundColor: colors.border }]} />
+
+                  {/* Availability */}
+                  <View style={styles.modalSection}>
+                    <Text style={[styles.modalSectionTitle, { color: colors.text }]}>זמינות</Text>
+                    <View style={styles.availabilityGroup}>
+                      <View style={styles.toggleRow}>
+                        <Text style={[styles.toggleText, { color: colors.text }]}>כניסה מיידית</Text>
+                        <TouchableOpacity
+                          style={[
+                            styles.toggleSwitch,
+                            { backgroundColor: filterImmediate ? '#0047ba' : '#cbd5e1' }
+                          ]}
+                          onPress={() => setFilterImmediate(!filterImmediate)}
+                          activeOpacity={0.8}
+                        >
+                          <View style={[
+                            styles.toggleThumb,
+                            { transform: [{ translateX: filterImmediate ? -18 : 0 }] }
+                          ]} />
+                        </TouchableOpacity>
+                      </View>
+
+                      <View style={styles.datePickerInputContainer}>
+                        <TextInput
+                          style={[styles.datePickerInput, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
+                          value={filterMoveInDate}
+                          onChangeText={setFilterMoveInDate}
+                          placeholder="בחר תאריך כניסה (למשל: 01.07.2026)"
+                          placeholderTextColor="#94a3b8"
+                          textAlign="right"
+                        />
+                        <Ionicons name="calendar-outline" size={18} color={colors.textMut} style={styles.calendarIcon} />
+                      </View>
+                    </View>
+                  </View>
+                </ScrollView>
+
+                {/* Sticky Footer */}
+                <View style={[styles.modalFooter, { borderTopColor: colors.border }]}>
                   <TouchableOpacity
-                    key={opt.value}
-                    style={[styles.roomBtn, filterRooms === opt.value && styles.roomBtnActive]}
-                    onPress={() => setFilterRooms(prev => prev === opt.value ? null : opt.value)}
+                    style={styles.applyFilterBtn}
+                    onPress={() => {
+                      setShowFilters(false);
+                      handleSearch();
+                    }}
+                    activeOpacity={0.85}
                   >
-                    <Text style={[styles.roomBtnText, filterRooms === opt.value && styles.roomBtnTextActive]}>
-                      {opt.label}
+                    <Text style={styles.applyFilterBtnText}>
+                      הצג {results.length} תוצאות
                     </Text>
                   </TouchableOpacity>
-                ))}
-              </View>
-
-              {/* Max Price input */}
-              <View style={{ marginTop: 12 }}>
-                <Text style={styles.filterSectionTitle}>מחיר חודשי מקסימלי (ש״ח)</Text>
-                <TextInput
-                  style={styles.priceInput}
-                  placeholder="ללא הגבלת מחיר"
-                  placeholderTextColor="#74777f"
-                  value={filterMaxPrice}
-                  onChangeText={setFilterMaxPrice}
-                  keyboardType="numeric"
-                  textAlign="right"
-                />
-              </View>
-
-              {/* Action Buttons */}
-              <View style={styles.filterActions}>
-                <TouchableOpacity onPress={clearFilters} style={styles.clearFiltersBtn}>
-                  <Text style={styles.clearFiltersText}>נקה הכל</Text>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  onPress={() => {
-                    setShowFilters(false);
-                    handleSearch();
-                  }} 
-                  style={styles.applyFiltersBtn}
-                >
-                  <Text style={styles.applyFiltersText}>החל סינון</Text>
-                </TouchableOpacity>
+                </View>
               </View>
             </View>
-          )}
+          </Modal>
 
           {/* Active parsed-filter chips (UX-030) */}
           {searchMutation.isSuccess && query.trim().length > 0 && (
@@ -1272,5 +1545,214 @@ const styles = StyleSheet.create({
   noResultsSub: {
     fontSize: 12,
     color: '#74777f',
+  },
+
+  // Advanced Filters Modal Styling (Stitch clean card style)
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.45)', // Slate-900 with 45% opacity
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalBackdropClose: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  modalContent: {
+    width: '100%',
+    height: '100%',
+    maxHeight: Platform.OS === 'web' ? 795 : '90%',
+    maxWidth: Platform.OS === 'web' ? 640 : '100%',
+    borderRadius: Platform.OS === 'web' ? 16 : 24,
+    borderTopRightRadius: 24,
+    borderTopLeftRadius: 24,
+    overflow: 'hidden',
+    shadowColor: '#0f172a',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.15,
+    shadowRadius: 24,
+    elevation: 8,
+  },
+  modalHeader: {
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+  },
+  modalCloseBtn: {
+    padding: 4,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  modalClearAllBtn: {
+    padding: 4,
+  },
+  modalClearAllText: {
+    fontSize: 13,
+    color: '#0047ba',
+    fontWeight: '700',
+  },
+  modalScrollContent: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+  modalSection: {
+    width: '100%',
+  },
+  modalSectionTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    textAlign: 'right',
+    marginBottom: 12,
+  },
+  modalDivider: {
+    height: 1,
+    width: '100%',
+    marginVertical: 18,
+  },
+  priceFieldsContainer: {
+    flexDirection: 'row-reverse',
+    gap: 16,
+  },
+  priceFieldWrapper: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    alignItems: 'flex-end',
+  },
+  priceFieldLabel: {
+    fontSize: 10,
+    color: '#64748b',
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  priceFieldInput: {
+    fontSize: 15,
+    fontWeight: '700',
+    width: '100%',
+    padding: 0,
+    height: 24,
+  },
+  propertyTypesGrid: {
+    flexDirection: 'row-reverse',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  propertyTypeBtn: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  propertyTypeBtnText: {
+    fontSize: 12,
+  },
+  roomsGrid: {
+    flexDirection: 'row-reverse',
+    gap: 8,
+  },
+  roomGridBtn: {
+    flex: 1,
+    aspectRatio: 1,
+    borderRadius: 10,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  roomGridBtnText: {
+    fontSize: 13,
+  },
+  amenitiesChecklist: {
+    gap: 8,
+  },
+  amenityRow: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 12,
+    borderWidth: 1,
+    borderRadius: 12,
+  },
+  amenityLabelGroup: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+  },
+  amenityText: {
+    fontSize: 13,
+  },
+  availabilityGroup: {
+    gap: 12,
+  },
+  toggleRow: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  toggleText: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  toggleSwitch: {
+    width: 44,
+    height: 26,
+    borderRadius: 13,
+    padding: 3,
+    justifyContent: 'center',
+  },
+  toggleThumb: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#ffffff',
+    alignSelf: 'flex-end',
+  },
+  datePickerInputContainer: {
+    position: 'relative',
+    justifyContent: 'center',
+  },
+  datePickerInput: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderRadius: 12,
+    fontSize: 13,
+    fontWeight: '700',
+    paddingLeft: 40,
+  },
+  calendarIcon: {
+    position: 'absolute',
+    left: 12,
+  },
+  modalFooter: {
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderTopWidth: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+  },
+  applyFilterBtn: {
+    backgroundColor: '#0047ba',
+    borderRadius: 12,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#0047ba',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  applyFilterBtnText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '800',
   },
 });
