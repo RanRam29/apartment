@@ -11,6 +11,63 @@ const { isAllowedCorsOrigin } = require('./corsOrigins');
 
 let io;
 
+async function findAcceptedMatchForUser(matchId, userId) {
+  if (typeof matchId !== 'string' || !matchId.trim()) return null;
+
+  // Lazy-require to avoid circular dependency at module load time
+  const { Match } = require('../models');
+  return Match.findOne({
+    where: {
+      id: matchId,
+      status: 'accepted',
+      [Op.or]: [{ tenantId: userId }, { landlordId: userId }],
+    },
+    attributes: ['id', 'tenantId', 'landlordId'],
+  });
+}
+
+function ensureSocketChatState(socket) {
+  socket.data = socket.data || {};
+  if (!socket.data.authorizedChatRooms) {
+    socket.data.authorizedChatRooms = new Set();
+  }
+  return socket.data.authorizedChatRooms;
+}
+
+async function joinAcceptedChatRooms(socket, userId) {
+  const { Match } = require('../models');
+  const authorizedChatRooms = ensureSocketChatState(socket);
+  const rows = await Match.findAll({
+    where: {
+      status: 'accepted',
+      [Op.or]: [{ tenantId: userId }, { landlordId: userId }],
+    },
+    attributes: ['id'],
+  });
+
+  for (const match of rows) {
+    const matchId = String(match.id);
+    socket.join(`chat:${matchId}`);
+    authorizedChatRooms.add(matchId);
+  }
+
+  return rows.length;
+}
+
+async function isAuthorizedForChat(socket, matchId, userId) {
+  const authorizedChatRooms = ensureSocketChatState(socket);
+  if (typeof matchId !== 'string' || !matchId.trim()) return false;
+  if (authorizedChatRooms.has(matchId)) return true;
+
+  const match = await findAcceptedMatchForUser(matchId, userId);
+  if (!match) return false;
+
+  const authorizedMatchId = String(match.id);
+  socket.join(`chat:${authorizedMatchId}`);
+  authorizedChatRooms.add(authorizedMatchId);
+  return authorizedMatchId === matchId;
+}
+
 function initSocket(server) {
   io = new Server(server, {
     cors: {
@@ -62,6 +119,7 @@ function initSocket(server) {
 
   io.on('connection', (socket) => {
     const userId = socket.user.id;
+    ensureSocketChatState(socket);
     socket.join(`user:${userId}`);
     logger.debug(`User ${userId} connected via WebSocket`);
     logAudit({
@@ -78,31 +136,37 @@ function initSocket(server) {
     // Join all accepted-match chat rooms so messages arrive without opening Chat first
     void (async () => {
       try {
-        const { Match } = require('../models');
-        const rows = await Match.findAll({
-          where: {
-            status: 'accepted',
-            [Op.or]: [{ tenantId: userId }, { landlordId: userId }],
-          },
-          attributes: ['id'],
-        });
-        for (const m of rows) {
-          socket.join(`chat:${m.id}`);
-        }
-        if (rows.length) logger.debug(`User ${userId} auto-joined ${rows.length} chat rooms`);
+        const joinedCount = await joinAcceptedChatRooms(socket, userId);
+        if (joinedCount) logger.debug(`User ${userId} auto-joined ${joinedCount} chat rooms`);
       } catch (err) {
         logger.warn(`Socket chat auto-join failed: ${err.message}`);
       }
     })();
 
     // Join a specific match chat room
-    socket.on('join_chat', (matchId) => {
-      socket.join(`chat:${matchId}`);
-      logger.debug(`User ${userId} joined chat:${matchId}`);
+    socket.on('join_chat', async (matchId, ack) => {
+      try {
+        const match = await findAcceptedMatchForUser(matchId, userId);
+        if (!match) {
+          return ack?.({ error: 'Unauthorized' });
+        }
+
+        const authorizedMatchId = String(match.id);
+        ensureSocketChatState(socket).add(authorizedMatchId);
+        socket.join(`chat:${authorizedMatchId}`);
+        logger.debug(`User ${userId} joined chat:${authorizedMatchId}`);
+        return ack?.({ success: true });
+      } catch (err) {
+        logger.warn(`Socket join_chat authorization failed: ${err.message}`);
+        return ack?.({ error: 'Failed to join chat' });
+      }
     });
 
     socket.on('leave_chat', (matchId) => {
       socket.leave(`chat:${matchId}`);
+      if (typeof matchId === 'string') {
+        ensureSocketChatState(socket).delete(matchId);
+      }
     });
 
     // Primary message path — persist to MongoDB then broadcast
@@ -175,11 +239,13 @@ function initSocket(server) {
     });
 
     // Typing indicator — broadcast to other participants only
-    socket.on('typing', ({ matchId }) => {
+    socket.on('typing', async ({ matchId } = {}) => {
+      if (!(await isAuthorizedForChat(socket, matchId, userId))) return;
       socket.to(`chat:${matchId}`).emit('user_typing', { userId, matchId });
     });
 
-    socket.on('stop_typing', ({ matchId }) => {
+    socket.on('stop_typing', async ({ matchId } = {}) => {
+      if (!(await isAuthorizedForChat(socket, matchId, userId))) return;
       socket.to(`chat:${matchId}`).emit('user_stop_typing', { userId, matchId });
     });
 
