@@ -6,13 +6,17 @@ const { Apartment, User, Swipe, Match } = require('../models');
 const { authenticate, requireRole } = require('../middleware/auth');
 const { geminiMarketingLimiter } = require('../middleware/geminiRateLimit');
 const { upload, uploadMany } = require('../services/uploadService');
-const { cacheGet, cacheSet, cacheDel } = require('../config/redis');
+const { cacheGet, cacheSet, cacheDel, cacheDelPattern } = require('../config/redis');
 const { generateMarketingCopy, COPY_STYLE_INSTRUCTIONS } = require('../services/geminiService');
 const logger = require('../utils/logger');
 const { logAudit } = require('../services/auditLogService');
 const { AUDIT_ACTIONS, AUDIT_OUTCOMES } = require('../constants/logging');
 
 const router = express.Router();
+
+async function invalidateTenantFeedCache() {
+  await cacheDelPattern('feed:v2:*');
+}
 
 // ─── F4: True Monthly Cost Calculator ────────────────────────────────────────
 // Monthly arnona rate in ₪/m² by city (approximate municipal tax).
@@ -116,11 +120,7 @@ router.post(
         petsAllowed: petsAllowed === 'true',
       });
 
-      // Invalidate feed cache for this city
-      const normalizedCity = typeof city === 'string' ? city.toLowerCase() : null;
-      if (normalizedCity) {
-        await cacheDel(`feed:${normalizedCity}`);
-      }
+      await invalidateTenantFeedCache();
       // Invalidate landlord dashboard cache so listings appear immediately
       await cacheDel(`landlord:dashboard:${req.user.id}`);
 
@@ -280,10 +280,7 @@ router.patch('/:id', authenticate, requireRole('landlord'), async (req, res, nex
 
     await apartment.update(updates);
     await cacheDel(`apartment:${apartment.id}`);
-    const normalizedCity = typeof apartment.city === 'string' ? apartment.city.toLowerCase() : null;
-    if (normalizedCity) {
-      await cacheDel(`feed:${normalizedCity}`);
-    }
+    await invalidateTenantFeedCache();
     await cacheDel(`landlord:dashboard:${req.user.id}`);
     await logAudit({
       ...req.getAuditContext?.(),
@@ -310,7 +307,6 @@ router.delete('/:id', authenticate, requireRole('landlord'), async (req, res, ne
     });
     if (!apartment) return res.status(404).json({ error: 'Apartment not found' });
 
-    const normalizedCity = typeof apartment.city === 'string' ? apartment.city.toLowerCase() : null;
     const aid = apartment.id;
 
     await sequelize.transaction(async (t) => {
@@ -321,9 +317,7 @@ router.delete('/:id', authenticate, requireRole('landlord'), async (req, res, ne
 
     await cacheDel(`apartment:${aid}`);
     await cacheDel(`landlord:dashboard:${req.user.id}`);
-    if (normalizedCity) {
-      await cacheDel(`feed:${normalizedCity}`);
-    }
+    await invalidateTenantFeedCache();
     await logAudit({
       ...req.getAuditContext?.(),
       actorId: req.user.id,

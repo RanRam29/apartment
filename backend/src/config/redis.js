@@ -15,9 +15,20 @@ function createInMemoryRedis() {
       store.set(key, value);
       return 'OK';
     },
-    del: async (key) => {
-      store.delete(key);
-      return 1;
+    del: async (...keys) => {
+      let deleted = 0;
+      for (const key of keys) {
+        if (store.delete(key)) deleted += 1;
+      }
+      return deleted;
+    },
+    scan: async (cursor, _matchKeyword, pattern, _countKeyword, count = 100) => {
+      const keys = Array.from(store.keys());
+      const start = Number(cursor) || 0;
+      const regex = new RegExp(`^${String(pattern).replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*')}$`);
+      const matches = keys.slice(start, start + Number(count)).filter((key) => regex.test(key));
+      const nextCursor = start + Number(count) >= keys.length ? '0' : String(start + Number(count));
+      return [nextCursor, matches];
     },
     incr: async (key) => {
       const current = Number(store.get(key) || 0) + 1;
@@ -59,7 +70,7 @@ function createResilientRedis(redisConnection) {
     }
   };
 
-  for (const method of ['get', 'setex', 'del', 'incr', 'decr', 'expireat']) {
+  for (const method of ['get', 'setex', 'del', 'scan', 'incr', 'decr', 'expireat']) {
     resilientClient[method] = (...args) => runCommand(method, args);
   }
   resilientClient.disconnect = () => redisConnection.disconnect();
@@ -158,4 +169,16 @@ async function cacheDel(key) {
   await getRedisClient().del(key);
 }
 
-module.exports = { initRedis, getRedisClient, cacheGet, cacheSet, cacheDel };
+async function cacheDelPattern(pattern) {
+  const client = getRedisClient();
+  let cursor = '0';
+  do {
+    const [nextCursor, keys] = await client.scan(cursor, 'MATCH', pattern, 'COUNT', 100);
+    cursor = nextCursor;
+    if (keys.length) {
+      await client.del(...keys);
+    }
+  } while (cursor !== '0');
+}
+
+module.exports = { initRedis, getRedisClient, cacheGet, cacheSet, cacheDel, cacheDelPattern };

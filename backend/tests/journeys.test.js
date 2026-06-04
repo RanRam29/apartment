@@ -52,6 +52,7 @@ jest.mock('../src/config/redis', () => {
     cacheGet: jest.fn(async () => null),
     cacheSet: jest.fn(async () => undefined),
     cacheDel: jest.fn(async () => undefined),
+    cacheDelPattern: jest.fn(async () => undefined),
   };
 });
 
@@ -121,6 +122,7 @@ jest.mock('../src/models', () => ({
 
 const app = require('../src/app');
 const { Swipe, Apartment, Match, Message } = require('../src/models');
+const { cacheDelPattern } = require('../src/config/redis');
 
 describe('Critical journey routes', () => {
   beforeEach(() => {
@@ -171,6 +173,10 @@ describe('Critical journey routes', () => {
 
     expect(deleted.status).toBe(200);
     expect(deleted.body.message).toBe('Apartment deleted');
+    expect(cacheDelPattern).toHaveBeenCalledTimes(3);
+    expect(cacheDelPattern).toHaveBeenNthCalledWith(1, 'feed:v2:*');
+    expect(cacheDelPattern).toHaveBeenNthCalledWith(2, 'feed:v2:*');
+    expect(cacheDelPattern).toHaveBeenNthCalledWith(3, 'feed:v2:*');
   });
 
   it('swipe creates/returns pending match and exposes it in matches list', async () => {

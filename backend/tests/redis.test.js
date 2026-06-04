@@ -65,6 +65,23 @@ describe('Redis fallback', () => {
     await expect(cacheGet('swipes:daily:user-1:2026-05-09')).resolves.toEqual({ count: 1 });
   });
 
+  it('deletes all in-memory keys matching a cache pattern', async () => {
+    process.env.NODE_ENV = 'test';
+
+    const { initRedis, cacheGet, cacheSet, cacheDelPattern } = require('../src/config/redis');
+    await initRedis();
+
+    await cacheSet('feed:v2:tenant-1:all:0:99999:all:1', { stale: true });
+    await cacheSet('feed:v2:tenant-2:Tel Aviv:0:99999:all:1', { stale: true });
+    await cacheSet('landlord:dashboard:landlord-1', { keep: true });
+
+    await cacheDelPattern('feed:v2:*');
+
+    await expect(cacheGet('feed:v2:tenant-1:all:0:99999:all:1')).resolves.toBeNull();
+    await expect(cacheGet('feed:v2:tenant-2:Tel Aviv:0:99999:all:1')).resolves.toBeNull();
+    await expect(cacheGet('landlord:dashboard:landlord-1')).resolves.toEqual({ keep: true });
+  });
+
   it('keeps the connected Redis client after a transient runtime error', async () => {
     const EventEmitter = require('events');
     const clients = [];
