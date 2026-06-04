@@ -85,6 +85,7 @@ export interface Apartment {
   minLeasePeriod: number | null;
   petsAllowed: boolean;
   isActive: boolean;
+  buildingFee?: number | null;
   viewCount: number;
   likeCount: number;
   createdAt: string;

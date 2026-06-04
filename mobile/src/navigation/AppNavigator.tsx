@@ -73,8 +73,18 @@ const MainStack  = createNativeStackNavigator<MainStackParamList>();
 function CustomTabBar({ state, navigation, role }: any) {
   const { isDesktop } = useResponsive();
   const colors = useColors();
-  const { user } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const insets = useSafeAreaInsets();
+
+  const handleLogout = () => {
+    if (typeof window !== 'undefined') {
+      if (window.confirm('האם אתה בטוח שברצונך להתנתק?')) {
+        logout();
+      }
+    } else {
+      logout();
+    }
+  };
 
   const tabIcons: Record<string, { active: keyof typeof Ionicons.glyphMap; inactive: keyof typeof Ionicons.glyphMap }> = {
     Swipe: { active: 'home', inactive: 'home-outline' },
@@ -195,6 +205,10 @@ function CustomTabBar({ state, navigation, role }: any) {
         <View style={{ flex: 1 }} />
 
         <View style={navStyles.sidebarFooter}>
+          <TouchableOpacity style={navStyles.footerItem} onPress={handleLogout} activeOpacity={0.7}>
+            <Ionicons name="log-out-outline" size={16} color={C.danger} style={{ marginLeft: 8 }} />
+            <Text style={[navStyles.footerItemText, { color: C.danger }]}>התנתקות</Text>
+          </TouchableOpacity>
           <TouchableOpacity style={navStyles.footerItem}>
             <Ionicons name="settings-outline" size={16} color={colors.textMut} style={{ marginLeft: 8 }} />
             <Text style={[navStyles.footerItemText, { color: colors.textMut }]}>הגדרות</Text>
@@ -261,10 +275,11 @@ function CustomTabBar({ state, navigation, role }: any) {
 function AdminTabs() {
   const { isDesktop } = useResponsive();
   return (
-    <View style={{ flex: 1, flexDirection: isDesktop ? 'row-reverse' : 'column' }}>
+    <View style={{ flex: 1 }}>
       <AdminTab.Navigator
         tabBar={(props) => <CustomTabBar {...props} role="admin" />}
         screenOptions={{ headerShown: false }}
+        sceneContainerStyle={{ marginRight: isDesktop ? 260 : 0 }}
       >
         <AdminTab.Screen name="AdminConfig" component={AdminConfigScreen} options={{ title: 'הגדרות' }} />
         <AdminTab.Screen name="AdminUsers"  component={AdminUsersScreen}  options={{ title: 'משתמשים' }} />
@@ -279,10 +294,11 @@ function AdminTabs() {
 function TenantTabs() {
   const { isDesktop } = useResponsive();
   return (
-    <View style={{ flex: 1, flexDirection: isDesktop ? 'row-reverse' : 'column' }}>
+    <View style={{ flex: 1 }}>
       <TenantTab.Navigator
         tabBar={(props) => <CustomTabBar {...props} role="tenant" />}
         screenOptions={{ headerShown: false }}
+        sceneContainerStyle={{ marginRight: isDesktop ? 260 : 0 }}
       >
         <TenantTab.Screen name="Swipe"   component={SwipeScreen}   options={{ title: 'דירות' }} />
         <TenantTab.Screen name="Matches" component={MatchesScreen} options={{ title: 'התאמות' }} />
@@ -298,10 +314,11 @@ function TenantTabs() {
 function LandlordTabs() {
   const { isDesktop } = useResponsive();
   return (
-    <View style={{ flex: 1, flexDirection: isDesktop ? 'row-reverse' : 'column' }}>
+    <View style={{ flex: 1 }}>
       <LandlordTab.Navigator
         tabBar={(props) => <CustomTabBar {...props} role="landlord" />}
         screenOptions={{ headerShown: false }}
+        sceneContainerStyle={{ marginRight: isDesktop ? 260 : 0 }}
       >
         <LandlordTab.Screen name="Dashboard" component={LandlordDashboard} options={{ title: 'דשבורד' }} />
         <LandlordTab.Screen name="Leads"     component={LeadsScreen}       options={{ title: 'לידים' }} />
@@ -542,12 +559,16 @@ export default function AppNavigator() {
 
 const navStyles = StyleSheet.create({
   sidebarContainer: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    bottom: 0,
     width: 260,
-    height: '100%',
     borderLeftWidth: 1,
     paddingVertical: 24,
     paddingHorizontal: 16,
     flexDirection: 'column',
+    zIndex: 100,
   },
   sidebarHeader: {
     marginBottom: 24,

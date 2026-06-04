@@ -373,7 +373,7 @@ export default function MaintenanceScreen({ route, navigation }: any) {
                 {/* Breach Warning Banner */}
                 {sla.isOverdue && ticket.status !== 'CLOSED' && (
                   <View style={styles.breachContainer}>
-                    <Ionicons name="gavel" size={16} color={C.danger} style={{ marginLeft: 6 }} />
+                    <Ionicons name="warning-outline" size={16} color={C.danger} style={{ marginLeft: 6 }} />
                     <View style={{ flex: 1 }}>
                       <Text style={styles.breachTitle}>הפרה של תנאי החוזה וחוק השכירות</Text>
                       <Text style={styles.breachText}>לשוכר עומדת הזכות לתקן באופן עצמאי ולקזז משכר הדירה בכפוף להצגת קבלה.</Text>

@@ -149,7 +149,7 @@ export const apartmentsApi = {
     floor: number | null; totalFloors: number | null; sizeSqm: number | null;
     city: string; street: string | null; neighborhood: string | null; address: string | null;
     amenities: string[]; petsAllowed: boolean; availableFrom: string | null;
-    minLeasePeriod: number | null; isActive: boolean;
+    minLeasePeriod: number | null; isActive: boolean; buildingFee: number | null;
   }>) => api.patch(`/apartments/${id}`, data),
   toggleFreeze: (id: string) => api.post(`/apartments/${id}/freeze`),
   deletePermanently: (id: string) => api.delete(`/apartments/${id}`),
