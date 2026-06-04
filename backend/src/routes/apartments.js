@@ -8,9 +8,35 @@ const { geminiMarketingLimiter } = require('../middleware/geminiRateLimit');
 const { upload, uploadMany } = require('../services/uploadService');
 const { cacheGet, cacheSet, cacheDel } = require('../config/redis');
 const { generateMarketingCopy, COPY_STYLE_INSTRUCTIONS, parseSearchQuery } = require('../services/geminiService');
+const axios = require('axios');
 const logger = require('../utils/logger');
 const { logAudit } = require('../services/auditLogService');
 const { AUDIT_ACTIONS, AUDIT_OUTCOMES } = require('../constants/logging');
+
+async function geocodeAddress(city, street) {
+  if (!city) return null;
+  try {
+    const params = { format: 'jsonv2', countrycodes: 'il', limit: 1 };
+    if (street) {
+      params.street = street;
+      params.city = city;
+    } else {
+      params.q = city + ', ישראל';
+    }
+    const { data } = await axios.get('https://nominatim.openstreetmap.org/search', {
+      params,
+      headers: { 'User-Agent': 'DirApp-Backend/1.0' },
+      timeout: 5000,
+    });
+    if (data?.[0]?.lat && data?.[0]?.lon) {
+      return { latitude: parseFloat(data[0].lat), longitude: parseFloat(data[0].lon) };
+    }
+    return null;
+  } catch (err) {
+    logger.warn(`Geocode failed for "${street}, ${city}": ${err.message}`);
+    return null;
+  }
+}
 const RentalContract = require('../models/mongo/RentalContract');
 
 const router = express.Router();
@@ -98,6 +124,13 @@ router.post(
         images = await uploadMany(req.files, 'apartments');
       }
 
+      let lat = latitude ? parseFloat(latitude) : null;
+      let lng = longitude ? parseFloat(longitude) : null;
+      if (!lat || !lng) {
+        const geo = await geocodeAddress(city, street || neighborhood);
+        if (geo) { lat = geo.latitude; lng = geo.longitude; }
+      }
+
       const apartment = await Apartment.create({
         landlordId: req.user.id,
         title,
@@ -111,8 +144,8 @@ router.post(
         city,
         street: street || neighborhood || null,
         address,
-        latitude: latitude ? parseFloat(latitude) : null,
-        longitude: longitude ? parseFloat(longitude) : null,
+        latitude: lat,
+        longitude: lng,
         images,
         amenities: amenities ? JSON.parse(amenities) : [],
         availableFrom: availableFrom || null,
@@ -279,6 +312,18 @@ router.patch('/:id', authenticate, requireRole('landlord'), async (req, res, nex
         updates[k] = v === true || v === 'true';
       } else {
         updates[k] = v;
+      }
+    }
+
+    // Re-geocode if city or street changed, or if coordinates are missing
+    const newCity = updates.city || apartment.city;
+    const newStreet = updates.street || updates.neighborhood || apartment.street;
+    const needsGeocode = (updates.city || updates.street || updates.neighborhood) || (!apartment.latitude || !apartment.longitude);
+    if (needsGeocode) {
+      const geo = await geocodeAddress(newCity, newStreet);
+      if (geo) {
+        updates.latitude = geo.latitude;
+        updates.longitude = geo.longitude;
       }
     }
 
@@ -457,5 +502,28 @@ router.post(
     }
   }
 );
+
+// ─── POST /api/apartments/geocode-backfill — one-time backfill for existing listings ──
+router.post('/geocode-backfill', authenticate, requireRole('admin'), async (req, res, next) => {
+  try {
+    const missing = await Apartment.findAll({
+      where: { [Op.or]: [{ latitude: null }, { longitude: null }] },
+      attributes: ['id', 'city', 'street'],
+    });
+    let updated = 0;
+    for (const apt of missing) {
+      const geo = await geocodeAddress(apt.city, apt.street);
+      if (geo) {
+        await apt.update({ latitude: geo.latitude, longitude: geo.longitude });
+        updated++;
+      }
+      // Nominatim rate limit: 1 req/sec
+      await new Promise((r) => setTimeout(r, 1100));
+    }
+    res.json({ total: missing.length, updated });
+  } catch (err) {
+    next(err);
+  }
+});
 
 module.exports = router;
