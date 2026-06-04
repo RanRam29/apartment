@@ -10,6 +10,7 @@ interface MaintenanceState {
   createTicket: (formData: FormData) => Promise<void>;
   respondToTicket: (id: string, data: any) => Promise<void>;
   closeTicket: (id: string) => Promise<void>;
+  uploadInvoice: (id: string, formData: FormData) => Promise<void>;
 }
 
 export const useMaintenanceStore = create<MaintenanceState>((set, get) => ({
@@ -63,6 +64,18 @@ export const useMaintenanceStore = create<MaintenanceState>((set, get) => ({
       set({ tickets: updatedTickets, isLoading: false });
     } catch (err: any) {
       set({ error: err?.message || 'Failed to close ticket', isLoading: false });
+      throw err;
+    }
+  },
+
+  uploadInvoice: async (id, formData) => {
+    set({ isLoading: true, error: null });
+    try {
+      const res = await maintenanceApi.uploadInvoice(id, formData);
+      // Wait, uploadInvoice returns the invoice or updated ticket. Let's refresh tickets for the agreement
+      set({ isLoading: false });
+    } catch (err: any) {
+      set({ error: err?.message || 'Failed to upload invoice', isLoading: false });
       throw err;
     }
   },

@@ -388,6 +388,7 @@ export const maintenanceApi = {
   getForAgreement: (agreementId: string) => api.get(`/v3/maintenance/agreement/${agreementId}`),
   respond: (id: string, data: any) => api.post(`/v3/maintenance/${id}/respond`, data),
   close: (id: string) => api.post(`/v3/maintenance/${id}/close`),
+  uploadInvoice: (id: string, formData: FormData) => api.post(`/v3/maintenance/${id}/invoice`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
 };
 
 export const kycApi = {
