@@ -509,16 +509,19 @@ router.post(
   }
 );
 
-// ─── POST /api/apartments/geocode-backfill — backfill coordinates for listings missing them ──
+// ─── POST /api/apartments/geocode-backfill — backfill coordinates ──
+// Body: { "force": true } to re-geocode ALL listings (not just missing)
 router.post('/geocode-backfill', authenticate, requireRole('admin'), async (req, res, next) => {
   try {
-    const missing = await Apartment.findAll({
-      where: { [Op.or]: [{ latitude: null }, { longitude: null }] },
+    const force = req.body?.force === true;
+    const where = force ? {} : { [Op.or]: [{ latitude: null }, { longitude: null }] };
+    const listings = await Apartment.findAll({
+      where,
       attributes: ['id', 'city', 'street'],
     });
     let updated = 0;
     const failed = [];
-    for (const apt of missing) {
+    for (const apt of listings) {
       const geo = await geocodeAddress(apt.city, apt.street);
       if (geo) {
         await apt.update({ latitude: geo.latitude, longitude: geo.longitude });
@@ -526,10 +529,9 @@ router.post('/geocode-backfill', authenticate, requireRole('admin'), async (req,
       } else {
         failed.push({ id: apt.id, city: apt.city, street: apt.street });
       }
-      // Nominatim rate limit: 1 req/sec (geocodeAddress may make up to 3 calls)
       await new Promise((r) => setTimeout(r, 3500));
     }
-    res.json({ total: missing.length, updated, failed });
+    res.json({ total: listings.length, updated, failed });
   } catch (err) {
     next(err);
   }
