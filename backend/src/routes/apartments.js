@@ -13,25 +13,31 @@ const logger = require('../utils/logger');
 const { logAudit } = require('../services/auditLogService');
 const { AUDIT_ACTIONS, AUDIT_OUTCOMES } = require('../constants/logging');
 
+async function geocodeNominatim(params) {
+  const { data } = await axios.get('https://nominatim.openstreetmap.org/search', {
+    params: { format: 'jsonv2', countrycodes: 'il', limit: 1, ...params },
+    headers: { 'User-Agent': 'DirApp-Backend/1.0' },
+    timeout: 5000,
+  });
+  if (data?.[0]?.lat && data?.[0]?.lon) {
+    return { latitude: parseFloat(data[0].lat), longitude: parseFloat(data[0].lon) };
+  }
+  return null;
+}
+
 async function geocodeAddress(city, street) {
   if (!city) return null;
   try {
-    const params = { format: 'jsonv2', countrycodes: 'il', limit: 1 };
+    // 1) Structured: street + city (most accurate)
     if (street) {
-      params.street = street;
-      params.city = city;
-    } else {
-      params.q = city + ', ישראל';
+      const r1 = await geocodeNominatim({ street, city });
+      if (r1) return r1;
+      // 2) Free-text fallback: "street, city, ישראל"
+      const r2 = await geocodeNominatim({ q: `${street}, ${city}, ישראל` });
+      if (r2) return r2;
     }
-    const { data } = await axios.get('https://nominatim.openstreetmap.org/search', {
-      params,
-      headers: { 'User-Agent': 'DirApp-Backend/1.0' },
-      timeout: 5000,
-    });
-    if (data?.[0]?.lat && data?.[0]?.lon) {
-      return { latitude: parseFloat(data[0].lat), longitude: parseFloat(data[0].lon) };
-    }
-    return null;
+    // 3) City-only fallback (always returns at least city center)
+    return await geocodeNominatim({ q: `${city}, ישראל` });
   } catch (err) {
     logger.warn(`Geocode failed for "${street}, ${city}": ${err.message}`);
     return null;
@@ -503,7 +509,7 @@ router.post(
   }
 );
 
-// ─── POST /api/apartments/geocode-backfill — one-time backfill for existing listings ──
+// ─── POST /api/apartments/geocode-backfill — backfill coordinates for listings missing them ──
 router.post('/geocode-backfill', authenticate, requireRole('admin'), async (req, res, next) => {
   try {
     const missing = await Apartment.findAll({
@@ -511,16 +517,19 @@ router.post('/geocode-backfill', authenticate, requireRole('admin'), async (req,
       attributes: ['id', 'city', 'street'],
     });
     let updated = 0;
+    const failed = [];
     for (const apt of missing) {
       const geo = await geocodeAddress(apt.city, apt.street);
       if (geo) {
         await apt.update({ latitude: geo.latitude, longitude: geo.longitude });
         updated++;
+      } else {
+        failed.push({ id: apt.id, city: apt.city, street: apt.street });
       }
-      // Nominatim rate limit: 1 req/sec
-      await new Promise((r) => setTimeout(r, 1100));
+      // Nominatim rate limit: 1 req/sec (geocodeAddress may make up to 3 calls)
+      await new Promise((r) => setTimeout(r, 3500));
     }
-    res.json({ total: missing.length, updated });
+    res.json({ total: missing.length, updated, failed });
   } catch (err) {
     next(err);
   }
