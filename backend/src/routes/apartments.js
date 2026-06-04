@@ -11,6 +11,7 @@ const { generateMarketingCopy, COPY_STYLE_INSTRUCTIONS, parseSearchQuery } = req
 const logger = require('../utils/logger');
 const { logAudit } = require('../services/auditLogService');
 const { AUDIT_ACTIONS, AUDIT_OUTCOMES } = require('../constants/logging');
+const RentalContract = require('../models/mongo/RentalContract');
 
 const router = express.Router();
 
@@ -315,6 +316,23 @@ router.delete('/:id', authenticate, requireRole('landlord'), async (req, res, ne
 
     const normalizedCity = typeof apartment.city === 'string' ? apartment.city.toLowerCase() : null;
     const aid = apartment.id;
+
+    if (RentalContract.db.readyState === 1) {
+      const activeContract = await RentalContract.findOne({
+        apartmentId: String(aid),
+        landlordId: req.user.id,
+        status: { $nin: ['terminated'] },
+      });
+      if (activeContract) {
+        return res.status(409).json({
+          error: 'Cannot delete apartment with an active rental contract',
+        });
+      }
+    } else if (process.env.NODE_ENV === 'production') {
+      return res.status(503).json({
+        error: 'Cannot delete apartment while contract data is unavailable',
+      });
+    }
 
     await sequelize.transaction(async (t) => {
       await Swipe.destroy({ where: { apartmentId: aid }, transaction: t });
