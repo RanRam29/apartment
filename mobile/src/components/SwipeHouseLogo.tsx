@@ -32,22 +32,22 @@ export default function SwipeHouseLogo({ size = 'md', plate = false }: Props) {
     <Image
       source={LOGO}
       style={{ width, aspectRatio: LOGO_ASPECT }}
-      contentFit=”contain”
+      contentFit="contain"
     />
   );
 
   const wrapStyle = plate ? styles.wrapperPlate : styles.wrapperBare;
 
   if (!navigation) {
-    return <View style={wrapStyle} accessibilityRole=”image” accessibilityLabel=”DirApp”>{inner}</View>;
+    return <View style={wrapStyle} accessibilityRole="image" accessibilityLabel="DirApp">{inner}</View>;
   }
 
   return (
     <TouchableOpacity
       style={wrapStyle}
       onPress={() => navigation.navigate('Tabs')}
-      accessibilityRole=”button”
-      accessibilityLabel=”חזרה למסך הראשי”
+      accessibilityRole="button"
+      accessibilityLabel="חזרה למסך הראשי"
     >
       {inner}
     </TouchableOpacity>
