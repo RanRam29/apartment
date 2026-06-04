@@ -102,6 +102,7 @@ jest.mock('../src/models', () => ({
     upsert: jest.fn(),
     findOne: jest.fn(),
     findAll: jest.fn(),
+    destroy: jest.fn(async () => 1),
   },
   Apartment: {
     findOne: jest.fn(),
@@ -113,6 +114,7 @@ jest.mock('../src/models', () => ({
     findOne: jest.fn(),
     findAll: jest.fn(),
     update: jest.fn(async () => [1]),
+    destroy: jest.fn(async () => 1),
   },
   Message: {
     find: jest.fn(),
@@ -123,6 +125,9 @@ jest.mock('../src/models', () => ({
   User: {},
   UserPreferences: {
     updateOne: jest.fn(async () => undefined),
+  },
+  AuditLog: {
+    create: jest.fn(async () => ({})),
   },
 }));
 
