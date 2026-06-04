@@ -60,6 +60,12 @@ jest.mock('../src/config/socket', () => ({
   getIO: () => ({ to: () => ({ emit: () => {} }) }),
 }));
 
+jest.mock('../src/config/database', () => ({
+  sequelize: {
+    transaction: jest.fn(async (callback) => callback({})),
+  },
+}));
+
 jest.mock('../src/services/pushService', () => ({
   sendPushNotification: jest.fn(async () => true),
 }));
