@@ -62,7 +62,23 @@ describe('Maintenance Ticket Flow (M15)', () => {
       });
     tenantToken = tRes.body.token;
     tenant = await User.findOne({ where: { email: tenantEmail } });
-    await tenant.update({ isVerified: true });
+    const { Apartment } = require('../src/models');
+    
+    // Clean up any old agreement with this ID
+    await RentalAgreement.destroy({ where: { id: agreementId } }).catch(() => {});
+    
+    // Seed mock apartment
+    await Apartment.findOrCreate({
+      where: { id: '00000000-0000-4000-8000-000000000001' },
+      defaults: {
+        landlordId: landlord.id,
+        title: 'Test Apartment for Maintenance',
+        price: 5000,
+        rooms: 3,
+        city: 'Tel Aviv',
+        isActive: true,
+      }
+    }).catch(() => {});
 
     // Seed mock active agreement to satisfy postgres foreign key check
     await RentalAgreement.create({
