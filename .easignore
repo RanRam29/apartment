@@ -21,8 +21,8 @@ A_professional_minimalist_logo.mp4
 assets/dirapp-logo-animated.mp4
 
 # Root-level files not needed
-package-lock.json
-package.json
+/package-lock.json
+/package.json
 ARCHITECTURE.md
 ROADMAP.md
 MASTER.md
@@ -35,6 +35,7 @@ STATUS.md
 .easignore
 
 # Mobile build artifacts
+mobile/android.bak/
 mobile/android/.gradle/
 mobile/android/build/
 mobile/android/app/build/
