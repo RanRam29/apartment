@@ -214,9 +214,9 @@ export default function ProfileScreen() {
         </TouchableOpacity>
 
         {user?.isVerified && (
-          <View style={styles.verifiedBadge}>
+          <View style={[styles.verifiedBadge, { borderColor: `${C.cyan}44`, backgroundColor: `${C.cyan}11` }]}>
             <Ionicons name="checkmark-circle" size={14} color={C.cyan} />
-            <Text style={styles.verifiedText}>מאומת</Text>
+            <Text style={[styles.verifiedText, { color: colors.text }]}>מאומת</Text>
           </View>
         )}
 
@@ -228,18 +228,18 @@ export default function ProfileScreen() {
           }}
           style={styles.nameRow}
         >
-          <Text style={styles.name}>{user?.firstName} {user?.lastName}</Text>
-          <Ionicons name="pencil-outline" size={14} color={C.textMut} />
+          <Text style={[styles.name, { color: colors.text }]}>{user?.firstName} {user?.lastName}</Text>
+          <Ionicons name="pencil-outline" size={14} color={colors.textMut} />
         </TouchableOpacity>
         <Text style={[styles.email, { color: colors.textSub }]}>{user?.email}</Text>
 
-        <View style={styles.roleBadge}>
+        <View style={[styles.roleBadge, { backgroundColor: colors.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(15,23,42,0.05)', borderColor: colors.border }]}>
           <Ionicons
             name={personaLandlord ? 'home-outline' : 'person-outline'}
             size={13}
-            color={dirApp.primary}
+            color={colors.text}
           />
-          <Text style={styles.roleText}>
+          <Text style={[styles.roleText, { color: colors.text }]}>
             {user?.role === 'admin'
               ? personaLandlord
                 ? 'מנהל · ממשק משכיר'
@@ -281,13 +281,17 @@ export default function ProfileScreen() {
 
         {/* Premium */}
         {user?.isPremium ? (
-          <View style={styles.premiumBanner}>
+          <View style={[styles.premiumBanner, { borderColor: 'rgba(245,158,11,0.25)', backgroundColor: 'rgba(245,158,11,0.1)' }]}>
             <Ionicons name="star" size={16} color={C.gold} />
             <Text style={styles.premiumText}>חשבון פרמיום פעיל</Text>
             <Ionicons name="star" size={16} color={C.gold} />
           </View>
         ) : (
-          <TouchableOpacity style={[styles.upgradeBtn, { backgroundColor: colors.bgCard }]} onPress={handleUpgrade} activeOpacity={0.85}>
+          <TouchableOpacity 
+            style={[styles.upgradeBtn, { backgroundColor: colors.bgCard, borderColor: 'rgba(245,158,11,0.25)' }]} 
+            onPress={handleUpgrade} 
+            activeOpacity={0.85}
+          >
             <Ionicons name="star-outline" size={18} color={C.gold} />
             <View style={styles.upgradeBtnTextBox}>
               <Text style={styles.upgradeBtnTitle}>שדרג לפרמיום ⚡</Text>
@@ -469,14 +473,14 @@ function MenuItem({ icon, label, onPress, last = false }: {
   const colors = useColors();
   return (
     <TouchableOpacity
-      style={[styles.menuItem, !last && styles.menuItemBorder]}
+      style={[styles.menuItem, !last && styles.menuItemBorder, !last && { borderBottomColor: colors.border }]}
       onPress={onPress}
       activeOpacity={0.7}
     >
       <Ionicons name="chevron-back" size={15} color={colors.textMut} />
       <Text style={[styles.menuLabel, { color: colors.text }]}>{label}</Text>
       <View style={styles.menuIconWrap}>
-        <Ionicons name={icon} size={18} color={dirApp.primary} />
+        <Ionicons name={icon} size={18} color={colors.text} />
       </View>
     </TouchableOpacity>
   );

@@ -89,7 +89,7 @@ export default function LandlordDashboard() {
               style={[styles.profileButton, { borderColor: colors.border }]}
               onPress={() => handleActionPress('Profile')}
             >
-              <Ionicons name="person-outline" size={20} color={dirApp.primary} />
+              <Ionicons name="person-outline" size={20} color={colors.text} />
             </TouchableOpacity>
             <Text style={[styles.header, { color: colors.text }]}>דשבורד משכיר</Text>
           </View>
@@ -127,7 +127,7 @@ export default function LandlordDashboard() {
               </View>
               <Text style={[styles.trustScoreValue, { color: colors.text }]}>{trustScore}/100</Text>
             </View>
-            <View style={styles.progressBarBg}>
+            <View style={[styles.progressBarBg, { backgroundColor: colors.isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(15, 23, 42, 0.08)' }]}>
               <View style={[styles.progressBarFill, { width: `${trustScore}%`, backgroundColor: scoreColor }]} />
             </View>
             <Text style={[styles.trustFooterText, { color: colors.textMut }]}>

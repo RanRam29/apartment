@@ -14,6 +14,7 @@ import type { Match } from '../types';
 import { C, Dark } from '../theme';
 import { dirApp } from '../theme/dirAppTokens';
 import { fontFamily } from '../theme/fonts';
+import { useColors } from '../context/ThemeContext';
 
 const STATUS_TABS = ['pending', 'accepted', 'rejected'] as const;
 type StatusTab = typeof STATUS_TABS[number];
@@ -57,6 +58,8 @@ export default function LeadsScreen() {
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
 
+
+  const colors = useColors();
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['leads', activeTab],
@@ -112,9 +115,9 @@ export default function LeadsScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
       <View style={styles.headerRow}>
-        <Text style={styles.header}>לידים</Text>
+        <Text style={[styles.header, { color: colors.text }]}>לידים</Text>
         <View style={styles.aiBadge}>
           <Ionicons name="sparkles" size={14} color={dirApp.secondary} />
           <Text style={styles.aiBadgeText}>AI Score</Text>
@@ -122,21 +125,36 @@ export default function LeadsScreen() {
       </View>
 
       <View style={styles.tabs}>
-        {STATUS_TABS.map((tab) => (
-          <TouchableOpacity
-            key={tab}
-            style={[styles.tab, activeTab === tab && styles.tabActive]}
-            onPress={() => setActiveTab(tab)}
-          >
-            <Text style={[styles.tabText, activeTab === tab && styles.tabTextActive]}>
-              {STATUS_LABEL[tab]}
-            </Text>
-          </TouchableOpacity>
-        ))}
+        {STATUS_TABS.map((tab) => {
+          const active = activeTab === tab;
+          return (
+            <TouchableOpacity
+              key={tab}
+              style={[
+                styles.tab, 
+                { backgroundColor: colors.bgCard }, 
+                active && styles.tabActive,
+                active && { 
+                  backgroundColor: colors.isDark ? colors.surface : dirApp.secondaryContainer,
+                }
+              ]}
+              onPress={() => setActiveTab(tab)}
+            >
+              <Text style={[
+                styles.tabText, 
+                { color: colors.textSub },
+                active && styles.tabTextActive,
+                active && { color: colors.isDark ? colors.text : dirApp.onSecondaryContainer }
+              ]}>
+                {STATUS_LABEL[tab]}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
 
       {isLoading ? (
-        <ActivityIndicator style={{ marginTop: 40 }} color={C.cyan} />
+        <ActivityIndicator style={{ marginTop: 40 }} color={colors.isDark ? C.cyan : dirApp.secondary} />
       ) : (
         <FlatList
           data={data ?? []}
@@ -155,7 +173,7 @@ export default function LeadsScreen() {
           )}
           ListEmptyComponent={
             <View style={styles.empty}>
-              <Text style={styles.emptyText}>אין לידים ב{STATUS_LABEL[activeTab]}</Text>
+              <Text style={[styles.emptyText, { color: colors.textMut }]}>אין לידים ב{STATUS_LABEL[activeTab]}</Text>
             </View>
           }
         />
@@ -166,6 +184,9 @@ export default function LeadsScreen() {
 
 function TenantContactBar({ phone, email }: { phone?: string | null; email?: string | null }) {
   if (!phone && !email) return null;
+  const colors = useColors();
+  const brandColor = colors.isDark ? C.cyan : dirApp.secondary;
+  const btnBg = colors.isDark ? `${C.cyan}18` : 'rgba(0, 71, 186, 0.08)';
 
   function call() {
     if (!phone) return;
@@ -186,23 +207,23 @@ function TenantContactBar({ phone, email }: { phone?: string | null; email?: str
   }
 
   return (
-    <View style={styles.contactBar}>
+    <View style={[styles.contactBar, { borderTopColor: colors.border }]}>
       {phone && (
         <>
-          <TouchableOpacity style={styles.contactBtn} onPress={call}>
-            <Ionicons name="call-outline" size={15} color={C.cyan} />
-            <Text style={styles.contactBtnText}>{phone}</Text>
+          <TouchableOpacity style={[styles.contactBtn, { backgroundColor: btnBg }]} onPress={call}>
+            <Ionicons name="call-outline" size={15} color={brandColor} />
+            <Text style={[styles.contactBtnText, { color: brandColor }]}>{phone}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.contactBtn, styles.waBtn]} onPress={whatsapp}>
+          <TouchableOpacity style={[styles.contactBtn, styles.waBtn, { backgroundColor: '#25D36618' }]} onPress={whatsapp}>
             <Ionicons name="logo-whatsapp" size={15} color="#25D366" />
             <Text style={[styles.contactBtnText, { color: '#25D366' }]}>WhatsApp</Text>
           </TouchableOpacity>
         </>
       )}
       {email && !phone && (
-        <TouchableOpacity style={styles.contactBtn} onPress={sendEmail}>
-          <Ionicons name="mail-outline" size={15} color={C.cyan} />
-          <Text style={styles.contactBtnText}>{email}</Text>
+        <TouchableOpacity style={[styles.contactBtn, { backgroundColor: btnBg }]} onPress={sendEmail}>
+          <Ionicons name="mail-outline" size={15} color={brandColor} />
+          <Text style={[styles.contactBtnText, { color: brandColor }]}>{email}</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -216,13 +237,14 @@ function LeadRow({ match, onAccept, onReject, showActions, onOpenChat }: {
   showActions: boolean;
   onOpenChat: () => void;
 }) {
+  const colors = useColors();
   const isAcceptedChatRow = !showActions && match.status === 'accepted';
   const score = leadScoreStyle(match.leadScore);
   const tenant = match.tenant;
 
   return (
     <TouchableOpacity
-      style={styles.leadCard}
+      style={[styles.leadCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
       onPress={isAcceptedChatRow ? onOpenChat : undefined}
       disabled={!isAcceptedChatRow}
       activeOpacity={isAcceptedChatRow ? 0.85 : 1}
@@ -233,12 +255,12 @@ function LeadRow({ match, onAccept, onReject, showActions, onOpenChat }: {
           {tenant?.avatarUrl ? (
             <Image source={{ uri: tenant.avatarUrl }} style={styles.avatar} contentFit="cover" />
           ) : (
-            <View style={[styles.avatar, styles.avatarPlaceholder]}>
-              <Ionicons name="person" size={20} color={C.textMut} />
+            <View style={[styles.avatar, styles.avatarPlaceholder, { backgroundColor: colors.surface }]}>
+              <Ionicons name="person" size={20} color={colors.textMut} />
             </View>
           )}
           {tenant?.isVerified && (
-            <View style={styles.verifiedBadge}>
+            <View style={[styles.verifiedBadge, { backgroundColor: colors.bgCard }]}>
               <Ionicons name="checkmark-circle" size={16} color={C.cyan} />
             </View>
           )}
@@ -249,14 +271,14 @@ function LeadRow({ match, onAccept, onReject, showActions, onOpenChat }: {
             <View style={[styles.scoreBadge, { backgroundColor: score.bg }]}>
               <Text style={[styles.scoreText, { color: score.color }]}>{score.label}</Text>
             </View>
-            <Text style={styles.tenantName}>
+            <Text style={[styles.tenantName, { color: colors.text }]}>
               {tenant?.firstName} {tenant?.lastName}
             </Text>
           </View>
-          <Text style={styles.aptName} numberOfLines={1}>
+          <Text style={[styles.aptName, { color: colors.textSub }]} numberOfLines={1}>
             {match.apartment?.title}
           </Text>
-          <Text style={styles.aptMeta}>
+          <Text style={[styles.aptMeta, { color: colors.isDark ? C.cyan : dirApp.secondary }]}>
             {match.apartment?.city} · ₪{match.apartment?.price?.toLocaleString()}/חודש
           </Text>
         </View>
@@ -268,20 +290,20 @@ function LeadRow({ match, onAccept, onReject, showActions, onOpenChat }: {
       {/* ── כפתורי פעולה ── */}
       {showActions && (
         <View style={styles.actions}>
-          <TouchableOpacity style={styles.rejectBtn} onPress={onReject}>
+          <TouchableOpacity style={[styles.rejectBtn, { borderColor: colors.isDark ? C.danger : 'rgba(239, 68, 68, 0.4)' }]} onPress={onReject}>
             <Ionicons name="close" size={18} color={C.statusTone.negative} />
             <Text style={styles.rejectText}>דחה</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.acceptBtn} onPress={onAccept}>
-            <Ionicons name="checkmark" size={18} color={dirApp.primary} />
-            <Text style={styles.acceptText}>אשר</Text>
+          <TouchableOpacity style={[styles.acceptBtn, { backgroundColor: colors.isDark ? C.cyan : dirApp.secondary }]} onPress={onAccept}>
+            <Ionicons name="checkmark" size={18} color={colors.isDark ? dirApp.primary : '#ffffff'} />
+            <Text style={[styles.acceptText, { color: colors.isDark ? dirApp.primary : '#ffffff' }]}>אשר</Text>
           </TouchableOpacity>
         </View>
       )}
       {isAcceptedChatRow && (
-        <TouchableOpacity style={styles.chatBtn} onPress={onOpenChat}>
-          <Ionicons name="chatbubble-ellipses-outline" size={18} color={dirApp.primary} />
-          <Text style={styles.chatText}>פתח צ׳אט</Text>
+        <TouchableOpacity style={[styles.chatBtn, { backgroundColor: colors.isDark ? C.cyan : dirApp.secondary }]} onPress={onOpenChat}>
+          <Ionicons name="chatbubble-ellipses-outline" size={18} color={colors.isDark ? dirApp.primary : '#ffffff'} />
+          <Text style={[styles.chatText, { color: colors.isDark ? dirApp.primary : '#ffffff' }]}>פתח צ׳אט</Text>
         </TouchableOpacity>
       )}
     </TouchableOpacity>
