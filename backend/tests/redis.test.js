@@ -71,14 +71,16 @@ describe('Redis fallback', () => {
     const { initRedis, cacheGet, cacheSet, cacheDelPattern } = require('../src/config/redis');
     await initRedis();
 
-    await cacheSet('feed:v2:tenant-1:all:0:99999:all:1', { stale: true });
-    await cacheSet('feed:v2:tenant-2:Tel Aviv:0:99999:all:1', { stale: true });
+    const feedKeys = Array.from(
+      { length: 125 },
+      (_, index) => `feed:v2:tenant-${index}:all:0:99999:all:1`
+    );
+    await Promise.all(feedKeys.map((key) => cacheSet(key, { stale: true })));
     await cacheSet('landlord:dashboard:landlord-1', { keep: true });
 
     await cacheDelPattern('feed:v2:*');
 
-    await expect(cacheGet('feed:v2:tenant-1:all:0:99999:all:1')).resolves.toBeNull();
-    await expect(cacheGet('feed:v2:tenant-2:Tel Aviv:0:99999:all:1')).resolves.toBeNull();
+    await Promise.all(feedKeys.map((key) => expect(cacheGet(key)).resolves.toBeNull()));
     await expect(cacheGet('landlord:dashboard:landlord-1')).resolves.toEqual({ keep: true });
   });
 

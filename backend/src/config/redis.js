@@ -22,13 +22,11 @@ function createInMemoryRedis() {
       }
       return deleted;
     },
-    scan: async (cursor, _matchKeyword, pattern, _countKeyword, count = 100) => {
+    scan: async (cursor, _matchKeyword, pattern) => {
+      if (cursor !== '0') return ['0', []];
       const keys = Array.from(store.keys());
-      const start = Number(cursor) || 0;
       const regex = new RegExp(`^${String(pattern).replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*')}$`);
-      const matches = keys.slice(start, start + Number(count)).filter((key) => regex.test(key));
-      const nextCursor = start + Number(count) >= keys.length ? '0' : String(start + Number(count));
-      return [nextCursor, matches];
+      return ['0', keys.filter((key) => regex.test(key))];
     },
     incr: async (key) => {
       const current = Number(store.get(key) || 0) + 1;
