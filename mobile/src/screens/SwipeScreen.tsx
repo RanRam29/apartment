@@ -325,14 +325,22 @@ export default function SwipeScreen() {
       <Modal visible={!!lastMatch} transparent animationType="fade">
         <View style={styles.overlay}>
           <View style={styles.modalCard}>
-            <View style={styles.matchHeartsRow}>
-              <Ionicons name="heart" size={28} color={C.coral} style={{ opacity: 0.45, marginRight: -6 }} />
-              <View style={styles.matchIconRow}>
-                <Ionicons name="heart" size={40} color={C.coral} />
+            {lastMatch?.status === 'accepted' ? (
+              <View style={styles.matchHeartsRow}>
+                <Ionicons name="heart" size={28} color={C.coral} style={{ opacity: 0.45, marginRight: -6 }} />
+                <View style={styles.matchIconRow}>
+                  <Ionicons name="heart" size={40} color={C.coral} />
+                </View>
+                <Ionicons name="heart" size={28} color={C.coral} style={{ opacity: 0.45, marginLeft: -6 }} />
               </View>
-              <Ionicons name="heart" size={28} color={C.coral} style={{ opacity: 0.45, marginLeft: -6 }} />
-            </View>
-            <Text style={styles.matchTitle}>יש התאמה! 🎉</Text>
+            ) : (
+              <View style={styles.matchIconRow}>
+                <Ionicons name="mail-outline" size={40} color={dirApp.secondary} />
+              </View>
+            )}
+            <Text style={styles.matchTitle}>
+              {lastMatch?.status === 'accepted' ? 'יש התאמה! 🎉' : 'הבקשה נשלחה! ✉️'}
+            </Text>
             {(lastMatch as any)?.apartment?.title ? (
               <View style={styles.matchAptRow}>
                 <Ionicons name="home-outline" size={13} color={C.textSub} />
@@ -342,7 +350,7 @@ export default function SwipeScreen() {
             <Text style={styles.matchSub}>
               {lastMatch?.status === 'accepted'
                 ? 'המשכיר אישר — תוכלו לדבר עכשיו!'
-                : 'ממתין לאישור המשכיר'}
+                : 'המשכיר קיבל התראה על ההתעניינות שלך. ברגע שיאשר, ייפתח ביניכם צ׳אט.'}
             </Text>
             <TouchableOpacity style={styles.primaryBtn} onPress={resetMatch}>
               <Text style={styles.primaryBtnText}>המשך לחפש</Text>

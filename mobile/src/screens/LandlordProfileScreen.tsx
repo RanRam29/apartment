@@ -66,10 +66,10 @@ export default function LandlordProfileScreen({ route, navigation }: Props) {
       const swipeRes = await swipeApi.record(apartmentId, 'like');
       const { match } = swipeRes.data;
 
-      if (match) {
-        showAlert('יש התאמה! 🎉', 'נמצאה התאמה הדדית! מועבר לצ׳אט לקביעת ביקור.', [
+      if (match?.status === 'accepted') {
+        showAlert('יש התאמה! 🎉', 'המשכיר אישר — תוכלו לדבר עכשיו!', [
           {
-            text: 'המשך',
+            text: 'פתח צ׳אט',
             onPress: () => {
               navigation.navigate('Chat', {
                 matchId: match.id,
@@ -80,8 +80,8 @@ export default function LandlordProfileScreen({ route, navigation }: Props) {
         ]);
       } else {
         showAlert(
-          'בקשתך נשלחה ✉️',
-          'הבעת עניין בדירה נרשמה בהצלחה! המשכיר קיבל התראה. ברגע שתהיה התאמה, ייפתח ביניכם צ׳אט לתיאום ביקור.'
+          'הבקשה נשלחה ✉️',
+          'המשכיר קיבל התראה על ההתעניינות שלך. ברגע שיאשר, ייפתח ביניכם צ׳אט.'
         );
       }
     } catch (err: any) {
