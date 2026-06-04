@@ -6,6 +6,7 @@ import {
 import { WebView } from 'react-native-webview';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigation } from '@react-navigation/native';
 import { apartmentsApi } from '../services/api';
 import { C, Dark } from '../theme';
 import { dirApp } from '../theme/dirAppTokens';
@@ -67,6 +68,7 @@ export function buildHtml(markers: AptMarker[], tama38Url: string): string {
     .apt-popup .title { font-weight: 600; font-size: 13px; margin-bottom: 4px; }
     .apt-popup .badge { display: inline-block; background: ${C.gold}; color: ${dirApp.primary}; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 6px; margin-bottom: 4px; }
     .apt-popup .approx { color: ${C.gold}; font-size: 11px; margin-top: 4px; }
+    .apt-popup .view-btn { display: block; margin-top: 8px; padding: 6px 0; background: ${dirApp.secondary}; color: ${dirApp.onSecondary}; border: none; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; text-align: center; }
     .tama-layer { fill: ${C.statusTone.caution}; fill-opacity: 0.18; stroke: ${C.statusTone.caution}; stroke-width: 1.5; }
   </style>
 </head>
@@ -134,15 +136,16 @@ export function buildHtml(markers: AptMarker[], tama38Url: string): string {
     var badge = pr ? '<div class="badge">מודעה בולטת</div>' : '';
     var approx = apt.approxLocation
       ? '<div class="approx">מיקום משוער לפי עיר</div>' : '';
-    m.bindPopup(
+    var popupHtml =
       '<div class="apt-popup">'
       + badge
       + '<div class="title">' + escapeHtml(apt.title) + '</div>'
       + '<div class="price">₪' + Number(apt.price).toLocaleString() + '/חודש</div>'
       + '<div class="meta">' + escapeHtml(apt.rooms) + ' חדרים · ' + escapeHtml(apt.city) + '</div>'
       + approx
-      + '</div>'
-    );
+      + '<button class="view-btn" onclick="postToHost({type:\\'navigate\\',apartmentId:\\'' + escapeHtml(apt.id) + '\\'})">צפה במודעה</button>'
+      + '</div>';
+    m.bindPopup(popupHtml);
     markerGroup.addLayer(m);
   });
 
@@ -202,6 +205,7 @@ export function buildHtml(markers: AptMarker[], tama38Url: string): string {
 
 export default function MapScreen() {
   const colors = useColors();
+  const navigation = useNavigation<any>();
   const webRef = React.useRef<WebView>(null);
   const iframeRef = React.useRef<HTMLIFrameElement | null>(null);
   const [tamaOn, setTamaOn] = React.useState(false);
@@ -263,7 +267,8 @@ export default function MapScreen() {
       if (typeof event.data !== 'string') return;
       try {
         const msg = JSON.parse(event.data);
-        if (!msg || typeof msg.type !== 'string' || !msg.type.startsWith('tama_')) return;
+        if (!msg || typeof msg.type !== 'string') return;
+        if (!msg.type.startsWith('tama_') && msg.type !== 'navigate') return;
       } catch {
         return;
       }
@@ -276,7 +281,9 @@ export default function MapScreen() {
   function handleMessage(event: any) {
     try {
       const msg = JSON.parse(event.nativeEvent.data);
-      if (msg.type === 'tama_loaded') setTamaStatus('loaded');
+      if (msg.type === 'navigate' && msg.apartmentId) {
+        navigation.navigate('ApartmentDetail', { apartmentId: msg.apartmentId });
+      } else if (msg.type === 'tama_loaded') setTamaStatus('loaded');
       else if (msg.type === 'tama_empty') setTamaStatus('empty');
       else if (msg.type === 'tama_error') setTamaStatus('error');
     } catch {
