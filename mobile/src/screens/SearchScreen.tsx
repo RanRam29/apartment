@@ -72,6 +72,7 @@ export default function SearchScreen() {
   const [filterPets, setFilterPets] = useState(false);
   const [results, setResults] = useState<Apartment[]>([]);
   const [parsedFilters, setParsedFilters] = useState<Record<string, any> | null>(null);
+  const [wasRelaxed, setWasRelaxed] = useState(false);
   const [history, setHistory] = useState<string[]>([]);
   const [isInputFocused, setIsInputFocused] = useState(false);
 
@@ -132,6 +133,7 @@ export default function SearchScreen() {
     onSuccess: (res) => {
       setResults(res.data.apartments);
       setParsedFilters(res.data.filters ?? null);
+      setWasRelaxed(res.data.relaxed === true);
     },
   });
 
@@ -154,6 +156,7 @@ export default function SearchScreen() {
     setQuery('');
     setResults([]);
     setParsedFilters(null);
+    setWasRelaxed(false);
     searchMutation.reset();
   }
 
@@ -382,6 +385,14 @@ export default function SearchScreen() {
               </View>
             ))}
           </ScrollView>
+        )}
+
+        {/* Relaxed-search hint */}
+        {wasRelaxed && results.length > 0 && (
+          <View style={styles.relaxedHint}>
+            <Ionicons name="information-circle-outline" size={16} color={dirApp.outline} />
+            <Text style={styles.relaxedHintText}>לא נמצאו דירות עם כל המתקנים — מוצגות תוצאות קרובות</Text>
+          </View>
         )}
 
         {/* Results */}
@@ -665,6 +676,18 @@ const styles = StyleSheet.create({
   resultAmenities: { color: dirApp.outline, fontSize: 10, textAlign: 'right', opacity: 0.9 },
   verifiedIcon: { marginLeft: 2 },
 
+  relaxedHint: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: `${dirApp.secondaryContainer}33`,
+    borderRadius: 8,
+    marginBottom: 4,
+    justifyContent: 'flex-end',
+  },
+  relaxedHintText: { color: dirApp.outline, fontSize: 12, textAlign: 'right', flex: 1 },
   noResults: { alignItems: 'center', paddingTop: 60, gap: 8 },
   noResultsEmoji: { fontSize: 48 },
   noResultsText: { fontSize: 16, fontWeight: '700', color: dirApp.primary },

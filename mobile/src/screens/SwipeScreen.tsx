@@ -23,6 +23,7 @@ const FREE_DAILY_LIMIT = 20;
 export default function SwipeScreen() {
   const navigation = useNavigation<any>();
   const user = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
   const personaLandlord = usePersonaIsLandlord();
   const {
     deck, currentIndex, isLoading, lastMatch, feedError, feedLoadState,
@@ -170,19 +171,30 @@ export default function SwipeScreen() {
         <Ionicons name="alert-circle-outline" size={56} color={C.coral} />
         <Text style={styles.emptyTitle}>{title}</Text>
         <Text style={[styles.emptySubtitle, styles.feedErrorDetail]}>{detail}</Text>
-        <TouchableOpacity
-          style={styles.reloadBtn}
-          onPress={() => {
-            clearFeedError();
-            loadFeed();
-            loadQuota();
-          }}
-        >
-          <Text style={styles.reloadText}>נסה שוב</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.feedErrorOutlineBtn} onPress={() => navigation.navigate('Profile')}>
-          <Text style={styles.feedErrorOutlineBtnText}>פתח פרופיל</Text>
-        </TouchableOpacity>
+        {status === 401 ? (
+          <TouchableOpacity
+            style={styles.reloadBtn}
+            onPress={() => { logout(); }}
+          >
+            <Text style={styles.reloadText}>התחבר מחדש</Text>
+          </TouchableOpacity>
+        ) : (
+          <>
+            <TouchableOpacity
+              style={styles.reloadBtn}
+              onPress={() => {
+                clearFeedError();
+                loadFeed();
+                loadQuota();
+              }}
+            >
+              <Text style={styles.reloadText}>נסה שוב</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.feedErrorOutlineBtn} onPress={() => navigation.navigate('Profile')}>
+              <Text style={styles.feedErrorOutlineBtnText}>פתח פרופיל</Text>
+            </TouchableOpacity>
+          </>
+        )}
       </SafeAreaView>
     );
   }

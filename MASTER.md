@@ -208,7 +208,7 @@
 | **NF1 — Trust Score** | M5 ✅ + M6 ✅ | Antigravity | ✅ אומת E2E 2026-06-01 |
 | **NF2 — Renter Journal** | M1+M3+M4+M8+M9 | Antigravity | ✅ אומת E2E 2026-06-01 |
 | **V2-3 — Contract Amendment** | M2 | Antigravity | ✅ אומת E2E 2026-06-01 |
-| **V2-4 — NLP Search** | — | Claude Code + Antigravity | 🟡 Backend route ready, UI needed |
+| **V2-4 — NLP Search** | — | Claude Code + Antigravity | 🟡 Backend + UI ready, BUG-012 fixed (amenities fallback + role gate) |
 | **V2-7 — GDPR Privacy** | — | Claude Code + Antigravity | 🟡 Backend routes ready, UI needed |
 | **WhatsApp opt-in** | Phase 2 | Claude Code + Antigravity | 🟡 Backend field ready, UI needed |
 | V2-1 — Stripe Connect | M5 | TBD | ❌ לא התחיל |
@@ -226,6 +226,7 @@
 | BUG-007 | דשבורד פיקטיבי | Antigravity | 🏁 CLOSED |
 | BUG-008 | לא ניתן להיכנס לצ'אטים | Antigravity | 🏁 CLOSED |
 | BUG-003 | אישור ליד לא עובד מה-UI | Antigravity | 🏁 CLOSED |
+| BUG-012 | NLP search: amenities filter too strict + role gate | Claude Code | ✅ FIXED |
 | BUG-002 | admin@dirapp.com 401 | Claude Code | 🏁 CLOSED |
 | BUG-009 | Trust Score מתחיל ב-0 | Antigravity | 🏁 CLOSED |
 | BUG-004 | Admin panel לא נבדק E2E | Antigravity | 🏁 CLOSED |

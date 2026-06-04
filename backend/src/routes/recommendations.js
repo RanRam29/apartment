@@ -16,7 +16,6 @@ const router = express.Router();
 router.post(
   '/search',
   authenticate,
-  requireRole('tenant'),
   geminiSearchLimiter,
   [body('query').trim().isLength({ min: 2, max: 500 }).withMessage('Query must be 2-500 chars')],
   async (req, res, next) => {
@@ -57,9 +56,6 @@ router.post(
         { upsert: true }
       ).catch(() => {});
 
-      // Build Sequelize where clause from merged filters
-      const where = buildWhereFromFilters(mergedFilters, req.user.id);
-
       // Exclude already-swiped apartments
       const swipedIds = await Swipe.findAll({
         where: { tenantId: req.user.id },
@@ -67,20 +63,36 @@ router.post(
         raw: true,
       }).then((rows) => rows.map((r) => r.apartmentId));
 
-      if (swipedIds.length) {
-        where.id = { [Op.notIn]: swipedIds };
-      }
+      const baseExclusions = {};
+      if (swipedIds.length) baseExclusions.id = { [Op.notIn]: swipedIds };
+      baseExclusions.isActive = true;
 
-      where.isActive = true;
-
-      const apartments = await Apartment.findAll({
-        where,
+      // Strict search with all filters (including amenities)
+      const strictWhere = { ...buildWhereFromFilters(mergedFilters, req.user.id), ...baseExclusions };
+      let apartments = await Apartment.findAll({
+        where: strictWhere,
         include: [{ model: User, as: 'landlord', attributes: ['id', 'firstName', 'lastName', 'avatarUrl', 'isVerified', 'trustScore'] }],
         order: [['likeCount', 'DESC'], ['createdAt', 'DESC']],
         limit: 30,
       });
 
-      res.json({ apartments, filters: mergedFilters, total: apartments.length });
+      // Relaxed fallback: drop amenities + petsAllowed filters when strict search returns nothing
+      let relaxed = false;
+      if (apartments.length === 0 && (mergedFilters.amenities?.length || mergedFilters.petsAllowed)) {
+        const relaxedFilters = { ...mergedFilters };
+        delete relaxedFilters.amenities;
+        delete relaxedFilters.petsAllowed;
+        const relaxedWhere = { ...buildWhereFromFilters(relaxedFilters, req.user.id), ...baseExclusions };
+        apartments = await Apartment.findAll({
+          where: relaxedWhere,
+          include: [{ model: User, as: 'landlord', attributes: ['id', 'firstName', 'lastName', 'avatarUrl', 'isVerified', 'trustScore'] }],
+          order: [['likeCount', 'DESC'], ['createdAt', 'DESC']],
+          limit: 30,
+        });
+        relaxed = apartments.length > 0;
+      }
+
+      res.json({ apartments, filters: mergedFilters, total: apartments.length, relaxed });
     } catch (err) {
       next(err);
     }

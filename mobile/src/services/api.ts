@@ -104,6 +104,12 @@ api.interceptors.response.use(
     }
     if (error.response?.status === 401) {
       await storage.deleteItemAsync(TOKEN_KEY);
+      // Reset auth store so navigation redirects to login
+      const { useAuthStore } = require('../store/useAuthStore');
+      const state = useAuthStore.getState();
+      if (state.isAuthenticated) {
+        useAuthStore.setState({ user: null, token: null, isAuthenticated: false, needsOnboarding: false });
+      }
     }
     return Promise.reject(error);
   }
