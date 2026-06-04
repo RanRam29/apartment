@@ -20,6 +20,7 @@ import { C } from '../theme';
 import { dirType } from '../theme/textStyles';
 import { dirApp } from '../theme/dirAppTokens';
 import { useColors } from '../context/ThemeContext';
+import { fontFamily } from '../theme/fonts';
 
 const { width: W } = Dimensions.get('window');
 
@@ -29,6 +30,59 @@ const AMENDMENT_FIELDS = [
   { key: 'startDate', label: 'תאריך התחלה' },
   { key: 'endDate', label: 'תאריך סיום' },
 ];
+
+function LeaseWizardStepTrack({ contract, colors }: { contract: any; colors: any }) {
+  // Check conditions for each of the 5 Lease Onboarding steps
+  const isStep1Done = true; // Property details is always done if the contract exists
+  const isStep2Done = !!(contract.monthlyRentIls || contract.monthlyRent) && !!contract.startDate;
+  const isStep3Done = !!contract.depositMonths || contract.depositStatus !== 'pending';
+  const isStep4Done = true; // Legal Declarations are accepted by default on generation
+  const isStep5Done = contract.status === 'ACTIVE' || (!!contract.tenantSignedAt && !!contract.landlordSignedAt);
+
+  const steps = [
+    { label: 'פרטי נכס', done: isStep1Done, icon: 'home-outline' },
+    { label: 'תנאי שכירות', done: isStep2Done, icon: 'calendar-outline' },
+    { label: 'ערבונות', done: isStep3Done, icon: 'shield-checkmark-outline' },
+    { label: 'הצהרות', done: isStep4Done, icon: 'document-text-outline' },
+    { label: 'חתימה', done: isStep5Done, icon: 'pencil-outline' },
+  ];
+
+  return (
+    <View style={[styles.stepTrackContainer, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+      <Text style={[styles.stepTrackTitle, { color: colors.text }]}>בדיקת שלבי החוזה (Lease Wizard)</Text>
+      <View style={styles.stepTrackRow}>
+        {steps.map((s, idx) => (
+          <React.Fragment key={idx}>
+            <View style={styles.stepTrackNode}>
+              <View style={[
+                styles.stepTrackBubble,
+                s.done ? styles.stepTrackBubbleDone : styles.stepTrackBubblePending
+              ]}>
+                <Ionicons 
+                  name={s.done ? 'checkmark' : (s.icon as any)} 
+                  size={14} 
+                  color={s.done ? '#ffffff' : dirApp.outline} 
+                />
+              </View>
+              <Text style={[
+                styles.stepTrackLabel,
+                s.done ? [styles.stepTrackLabelDone, { color: '#10b981' }] : [styles.stepTrackLabelPending, { color: colors.textMut }]
+              ]}>
+                {s.label}
+              </Text>
+            </View>
+            {idx < steps.length - 1 && (
+              <View style={[
+                styles.stepTrackConnector,
+                s.done && steps[idx + 1].done ? styles.stepTrackConnectorDone : [styles.stepTrackConnectorPending, { backgroundColor: colors.border }]
+              ]} />
+            )}
+          </React.Fragment>
+        ))}
+      </View>
+    </View>
+  );
+}
 
 export default function ContractDetailScreen({ route, navigation }: any) {
   const colors = useColors();
@@ -154,6 +208,8 @@ export default function ContractDetailScreen({ route, navigation }: any) {
       </View>
 
       <Text style={[styles.title, { color: colors.text }]}>פרטי חוזה שכירות דיגיטלי</Text>
+
+      <LeaseWizardStepTrack contract={activeContract} colors={colors} />
 
       <View style={[styles.card, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
         <View style={styles.detailRow}>
@@ -669,5 +725,64 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 14,
     fontWeight: 'bold',
+  },
+  stepTrackContainer: {
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+  },
+  stepTrackTitle: {
+    fontSize: 14,
+    fontFamily: fontFamily.bold,
+    marginBottom: 16,
+    textAlign: 'right',
+  },
+  stepTrackRow: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  stepTrackNode: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  stepTrackBubble: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 6,
+    borderWidth: 1.5,
+  },
+  stepTrackBubbleDone: {
+    backgroundColor: '#10b981',
+    borderColor: '#10b981',
+  },
+  stepTrackBubblePending: {
+    backgroundColor: 'transparent',
+    borderColor: dirApp.outline,
+  },
+  stepTrackLabel: {
+    fontSize: 10,
+    textAlign: 'center',
+  },
+  stepTrackLabelDone: {
+    fontFamily: fontFamily.medium,
+  },
+  stepTrackLabelPending: {
+    fontFamily: fontFamily.regular,
+  },
+  stepTrackConnector: {
+    height: 2,
+    flex: 0.8,
+    marginTop: -16,
+  },
+  stepTrackConnectorDone: {
+    backgroundColor: '#10b981',
+  },
+  stepTrackConnectorPending: {
+    backgroundColor: dirApp.outlineVariant,
   },
 });
