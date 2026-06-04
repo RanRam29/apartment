@@ -35,6 +35,7 @@ export interface AuditLogItem {
 export interface SystemEventItem {
   _id: string;
   createdAt: string;
+  requestId: string | null;
   source: string;
   category: 'application' | 'security' | 'integration' | 'performance';
   severity: 'debug' | 'info' | 'warn' | 'error' | 'critical';
