@@ -1,5 +1,5 @@
 import { useChatStore } from '../src/store/useChatStore';
-import { chatApi, tokenStorage } from '../src/services/api';
+import { chatApi, clientLogsApi, tokenStorage } from '../src/services/api';
 
 const mockEmit = jest.fn();
 const mockOn = jest.fn();
@@ -18,6 +18,9 @@ jest.mock('../src/services/api', () => ({
   chatApi: {
     getMessages: jest.fn(),
     sendMessage: jest.fn(),
+  },
+  clientLogsApi: {
+    event: jest.fn(async () => undefined),
   },
   tokenStorage: {
     get: jest.fn(),
@@ -53,6 +56,9 @@ describe('useChatStore', () => {
     useChatStore.getState().disconnect();
     expect(useChatStore.getState().socket).toBeNull();
     expect(useChatStore.getState().messages).toEqual({});
+    expect(clientLogsApi.event).toHaveBeenCalledWith(
+      expect.objectContaining({ event: 'client.socket.disconnect' })
+    );
   });
 
   it('joinChat emits join_chat event on connected socket', async () => {
