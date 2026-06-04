@@ -4,14 +4,16 @@
 > The orchestrator (Claude Code) reads this file to update the main DASHBOARD.md.
 
 ## Current Task
-**Task:** Refine Create/Edit Listing Layout, Card Click Navigation, and Clean Up Navigation Tabs
-**Status:** 🟢 DONE
-**Progress:** Reordered fields in Create/Edit Listing screens (Price full width, City/Street in one row, Rooms/Floor/Size in one row). Shrank amenities chips to fit in a single row. Replaced empty image picker square with a dashed full-width button containing "+" and "להוספת תמונה לחצ/י פה". Added tap gesture handler on SwipeableCard to navigate directly to the ApartmentDetail screen when tapped. Removed the static mock "Home" (בית) tab screen entirely, so the app now defaults directly to the Swipe/Explore interface (for tenants) and Dashboard (for landlords). Verified everything with eslint and Jest tests!
+**Task:** Design Alignment for Maintenance and Search Mobile Screens
+**Status:** 🟡 IN PROGRESS
+**Progress:** Finished Phase 1 (Guarantor Web App flow) and Phase 2 (Lease Wizard Mobile Flow). Currently beginning analysis of Maintenance Flow and Search Screen designs to complete alignment.
 
 ## Completed Tasks
 
 | Task | Completed At | Commits | Notes |
 |------|-------------|---------|-------|
+| Stitch Design Integration (Phases 1-2) | 2026-06-04 | `f7e8e09`, `31b7d3a` | Integrated high-fidelity Stitch layouts for Guarantor Web flow (App.jsx, App.css, index.html) and Lease Onboarding Mobile screens (ContractsScreen.tsx, ContractDetailScreen.tsx). Implemented wizard step tracking, ID checksums, OTP grid, and drawing signatures. Passed Vite build and Jest suite. |
+| Refine Create/Edit Listing Layout, Card Click Navigation, and Clean Up Navigation Tabs | 2026-06-02 | `616300d` | Reordered fields in Create/Edit Listing screens (Price full width, City/Street in one row, Rooms/Floor/Size in one row). Shrank amenities chips to fit in a single row. Replaced empty image picker square with a dashed full-width button containing "+" and "להוספת תמונה לחצ/י פה". Added tap gesture handler on SwipeableCard to navigate directly to the ApartmentDetail screen when tapped. Removed the static mock "Home" (בית) tab screen entirely, so the app now defaults directly to the Swipe/Explore interface (for tenants) and Dashboard (for landlords). Verified everything with eslint and Jest tests! |
 | WhatsApp Integration & Mobile UI Features (Phases 1-6) | 2026-06-02 | `7477eac` | Implemented WhatsApp preference updates, NLP search, GDPR settings, refreshed Landlord Dashboard V2, circular trust score widget, verified badges, and haptic feedback. Passed Jest integrations and TS check. |
 | Fix W-1 — Missing Property Images in Swipe | 2026-05-31 | `[Local]` | Resolved property card blank background by introducing a beautiful local fallback illustration using Figma/Stitch design tokens. |
 | Admin-only Configuration Panel | 2026-05-31 | `f8dac32`, `bfee9e8`, `410a405` | Integrated AdminConfigScreen, AdminUsersScreen, AdminStatsScreen, updated types & AppNavigator.tsx bottom tabs. Fixed bottom-tab overlap clipping and resolved empty-phone user update 422 validation failure. |

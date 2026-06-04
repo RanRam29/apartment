@@ -18,6 +18,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import type { MainStackParamList, Match } from '../types';
 import { C } from '../theme';
 import { dirApp } from '../theme/dirAppTokens';
+import { fontFamily } from '../theme/fonts';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
 import { dirType } from '../theme/textStyles';
 
@@ -704,20 +705,20 @@ const styles = StyleSheet.create({
   list: { padding: 16, paddingBottom: 32 },
   card: {
     backgroundColor: dirApp.surfaceContainerLowest,
-    borderRadius: 14,
+    borderRadius: 16,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: `${dirApp.outlineVariant}AA`,
+    borderColor: `${dirApp.outlineVariant}66`,
     shadowColor: dirApp.primary,
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
-    shadowRadius: 8,
+    shadowRadius: 12,
     elevation: 2,
   },
-  cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 },
+  cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 },
   cardBadges: { flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 0 },
-  cardTitle: { color: dirApp.primary, fontWeight: '700', fontSize: 15, flex: 1, textAlign: 'right', marginLeft: 8 },
+  cardTitle: { color: dirApp.primary, fontFamily: fontFamily.bold, fontSize: 16, flex: 1, textAlign: 'right', marginLeft: 8 },
   fileBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -730,11 +731,11 @@ const styles = StyleSheet.create({
   fileBadgeText: { color: dirApp.secondary, fontSize: 10, fontWeight: '700' },
   statusBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
   statusText: { fontSize: 11, fontWeight: '700' },
-  cardSub: { color: dirApp.outline, fontSize: 12, textAlign: 'right', marginBottom: 4 },
-  cardRent: { color: dirApp.secondary, fontWeight: '800', fontSize: 15, textAlign: 'right', marginBottom: 8 },
+  cardSub: { color: dirApp.outline, fontFamily: fontFamily.regular, fontSize: 12, textAlign: 'right', marginBottom: 6 },
+  cardRent: { color: dirApp.secondary, fontFamily: fontFamily.extrabold, fontSize: 16, textAlign: 'right', marginBottom: 8 },
   cardBottom: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  depositText: { fontSize: 11, fontWeight: '600' },
-  cardDate: { color: dirApp.outline, fontSize: 11 },
+  depositText: { fontSize: 12, fontFamily: fontFamily.medium },
+  cardDate: { color: dirApp.outline, fontFamily: fontFamily.regular, fontSize: 11 },
   empty: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 },
   emptyText: { color: dirApp.outline, fontSize: 16, fontWeight: '600' },
   emptyHint: { color: dirApp.outline, fontSize: 13, textAlign: 'center', paddingHorizontal: 32 },
