@@ -4,14 +4,15 @@
 > The orchestrator (Claude Code) reads this file to update the main DASHBOARD.md.
 
 ## Current Task
-**Task:** Design Alignment for Search and Discovery Screens
-**Status:** 🟡 IN PROGRESS
-**Progress:** Finished Phase 1 (Guarantor Web App flow), Phase 2 (Lease Wizard Mobile Flow), and Phase 3 (Maintenance & SLA Flow). Currently beginning analysis of Search & Discovery Screen designs (Filters, List View, Map View) to complete alignment.
+**Task:** All Stitch Design Integration tasks completed!
+**Status:** 🟢 DONE
+**Progress:** Finished Phase 1 (Guarantor Web App), Phase 2 (Lease Wizard Mobile), Phase 3 (Maintenance & SLA), Phase 4 (Search & Discovery list grid/map carousel), and Phase 5 (Admin Stats approvals queue & Rent Ledger light-theme dashboard). All merged and pushed to main branch.
 
 ## Completed Tasks
 
 | Task | Completed At | Commits | Notes |
 |------|-------------|---------|-------|
+| Stitch Design Integration (Phases 4-5) | 2026-06-04 | `3355a43`, `43ba2a2` | Integrated high-fidelity Stitch layouts for Search & Discovery lists and maps (SearchScreen.tsx, MapScreen.tsx) with Leaflet price overlays, center FAB crosshair, bottom snap carousel, and bidirection sync. Redesigned LedgerScreen.tsx to a premium light theme with payment details and CPI adjustment breakdown/index modals. Integrated the Maintenance Approvals Queue with completed work ticket cards inside AdminStatsScreen.tsx. All eslint checks passed cleanly. |
 | Stitch Design Integration (Phases 1-3) | 2026-06-04 | `f7e8e09`, `31b7d3a`, `20dbfcc` | Integrated high-fidelity Stitch layouts for Guarantor Web flow (App.jsx, App.css, index.html), Lease Onboarding Mobile screens (ContractsScreen.tsx, ContractDetailScreen.tsx), and Maintenance & SLA Tracking Flow (MaintenanceScreen.tsx, api.ts, useMaintenanceStore.ts). Implemented wizard step tracking, ID checksums, OTP grid, SLA countdown timers, geofenced audit logs, and invoice uploads. Passed Vite build and Sequenced Postgres Jest suite. |
 | Refine Create/Edit Listing Layout, Card Click Navigation, and Clean Up Navigation Tabs | 2026-06-02 | `616300d` | Reordered fields in Create/Edit Listing screens (Price full width, City/Street in one row, Rooms/Floor/Size in one row). Shrank amenities chips to fit in a single row. Replaced empty image picker square with a dashed full-width button containing "+" and "להוספת תמונה לחצ/י פה". Added tap gesture handler on SwipeableCard to navigate directly to the ApartmentDetail screen when tapped. Removed the static mock "Home" (בית) tab screen entirely, so the app now defaults directly to the Swipe/Explore interface (for tenants) and Dashboard (for landlords). Verified everything with eslint and Jest tests! |
 | WhatsApp Integration & Mobile UI Features (Phases 1-6) | 2026-06-02 | `7477eac` | Implemented WhatsApp preference updates, NLP search, GDPR settings, refreshed Landlord Dashboard V2, circular trust score widget, verified badges, and haptic feedback. Passed Jest integrations and TS check. |
@@ -70,15 +71,19 @@ mobile/src/types/index.ts (modified)
 mobile/src/navigation/AppNavigator.tsx (modified)
 mobile/src/screens/AdminConfigScreen.tsx (created)
 mobile/src/screens/AdminUsersScreen.tsx (created)
-mobile/src/screens/AdminStatsScreen.tsx (created)
+mobile/src/screens/AdminStatsScreen.tsx (created/modified)
+mobile/src/screens/LedgerScreen.tsx (modified)
+mobile/src/screens/SearchScreen.tsx (modified)
+mobile/src/screens/MapScreen.tsx (modified)
 mobile/src/screens/PrivacySettingsScreen.tsx (created)
 mobile/src/components/SkeletonLoader.tsx (created)
 backend/tests/resendService.test.js (created)
 backend/tests/kycV3.test.js (created)
 backend/tests/tosAndRole.test.js (created)
-backend/tests/maintenanceV3.test.js (created)
+backend/tests/maintenanceV3.test.js (created/modified)
 backend/tests/guarantor.test.js (created)
 ```
 
 ## Last Updated
-2026-06-02 (WhatsApp Integration & Mobile UI Features completed)
+2026-06-04 (Stitch Design Integration completed)
+
