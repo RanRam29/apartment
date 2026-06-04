@@ -223,6 +223,7 @@ jest.mock('../src/models/mongo/ServiceReview', () => {
     find:              jest.fn(),
     create:            jest.fn(),
     aggregate:         jest.fn(),
+    deleteMany:        jest.fn(),
   };
   const ctor = jest.fn(() => ({}));
   return Object.assign(ctor, m);
@@ -731,6 +732,49 @@ describe('F14 — Services routes', () => {
       .set('Authorization', 'Bearer tenant')
       .send({ rating: 6, comment: 'טוב' });
     expect(res.status).toBe(422);
+  });
+
+  it('DELETE /api/services/:id — keeps reviews if listing deletion fails', async () => {
+    const serviceId = '665f1a3a2b4c5d6e7f8090a1';
+    const deleteOne = jest.fn(async () => {
+      throw new Error('delete failed');
+    });
+    ServiceListing.findById.mockResolvedValue({
+      ...mockService,
+      _id: serviceId,
+      providerId: 'user-tenant',
+      deleteOne,
+    });
+    ServiceReview.deleteMany.mockResolvedValue({ deletedCount: 2 });
+
+    const res = await request(app)
+      .delete(`/api/services/${serviceId}`)
+      .set('Authorization', 'Bearer tenant');
+
+    expect(res.status).toBe(500);
+    expect(deleteOne).toHaveBeenCalledTimes(1);
+    expect(ServiceReview.deleteMany).not.toHaveBeenCalled();
+  });
+
+  it('DELETE /api/services/:id — deletes reviews after listing deletion succeeds', async () => {
+    const serviceId = '665f1a3a2b4c5d6e7f8090a1';
+    const deleteOne = jest.fn(async () => undefined);
+    ServiceListing.findById.mockResolvedValue({
+      ...mockService,
+      _id: serviceId,
+      providerId: 'user-tenant',
+      deleteOne,
+    });
+    ServiceReview.deleteMany.mockResolvedValue({ deletedCount: 2 });
+
+    const res = await request(app)
+      .delete(`/api/services/${serviceId}`)
+      .set('Authorization', 'Bearer tenant');
+
+    expect(res.status).toBe(200);
+    expect(deleteOne).toHaveBeenCalledTimes(1);
+    expect(ServiceReview.deleteMany).toHaveBeenCalledWith({ serviceId });
+    expect(deleteOne.mock.invocationCallOrder[0]).toBeLessThan(ServiceReview.deleteMany.mock.invocationCallOrder[0]);
   });
 });
 
