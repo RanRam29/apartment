@@ -8,6 +8,22 @@ const { SYSTEM_CATEGORY, SYSTEM_SEVERITY, AUDIT_ACTIONS } = require('../constant
 
 let io;
 
+async function findAcceptedMatchForUser(matchId, userId) {
+  if (!matchId) return null;
+
+  const { Match } = require('../models');
+  const match = await Match.findOne({
+    where: { id: matchId, status: 'accepted' },
+    attributes: ['id', 'tenantId', 'landlordId'],
+  });
+
+  if (!match || (match.tenantId !== userId && match.landlordId !== userId)) {
+    return null;
+  }
+
+  return match;
+}
+
 function initSocket(server) {
   io = new Server(server, {
     cors: { origin: '*', methods: ['GET', 'POST'] },
@@ -88,9 +104,29 @@ function initSocket(server) {
     })();
 
     // Join a specific match chat room
-    socket.on('join_chat', (matchId) => {
-      socket.join(`chat:${matchId}`);
-      logger.debug(`User ${userId} joined chat:${matchId}`);
+    socket.on('join_chat', async (matchId, ack) => {
+      try {
+        const match = await findAcceptedMatchForUser(matchId, userId);
+        if (!match) {
+          return ack?.({ error: 'Unauthorized' });
+        }
+
+        socket.join(`chat:${matchId}`);
+        logger.debug(`User ${userId} joined chat:${matchId}`);
+        ack?.({ success: true });
+      } catch (err) {
+        logger.error('Socket join_chat error:', err.message);
+        logSystemEvent({
+          source: 'socket',
+          category: SYSTEM_CATEGORY.APPLICATION,
+          severity: SYSTEM_SEVERITY.ERROR,
+          event: 'socket.join_chat.error',
+          message: 'Socket join_chat failed',
+          actorId: userId,
+          metadata: { error: err.message },
+        });
+        ack?.({ error: 'Failed to join chat' });
+      }
     });
 
     socket.on('leave_chat', (matchId) => {
@@ -107,15 +143,10 @@ function initSocket(server) {
         }
 
         // Lazy-require to avoid circular dependency at module load time
-        const { Message, Match } = require('../models');
+        const { Message } = require('../models');
 
-        // Verify sender is a participant in an accepted match
-        const match = await Match.findOne({
-          where: { id: matchId, status: 'accepted' },
-          attributes: ['id', 'tenantId', 'landlordId'],
-        });
-
-        if (!match || (match.tenantId !== userId && match.landlordId !== userId)) {
+        const match = await findAcceptedMatchForUser(matchId, userId);
+        if (!match) {
           return ack?.({ error: 'Unauthorized' });
         }
 
@@ -168,10 +199,12 @@ function initSocket(server) {
 
     // Typing indicator — broadcast to other participants only
     socket.on('typing', ({ matchId }) => {
+      if (!socket.rooms.has(`chat:${matchId}`)) return;
       socket.to(`chat:${matchId}`).emit('user_typing', { userId, matchId });
     });
 
     socket.on('stop_typing', ({ matchId }) => {
+      if (!socket.rooms.has(`chat:${matchId}`)) return;
       socket.to(`chat:${matchId}`).emit('user_stop_typing', { userId, matchId });
     });
 
