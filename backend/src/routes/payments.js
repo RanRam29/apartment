@@ -10,7 +10,7 @@ const router = express.Router();
 
 function verifyWebhookSignature(req) {
   const secret = process.env.WEBHOOK_SECRET;
-  if (!secret) return true; // not configured — open in dev
+  if (!secret) return process.env.NODE_ENV !== 'production'; // unsigned webhooks are only allowed for local/test.
   const signatureHeader = req.headers['x-webhook-signature'] || req.headers['x-meshulam-signature'];
   const signature = Array.isArray(signatureHeader) ? signatureHeader[0] : signatureHeader;
   if (!signature) return false;
