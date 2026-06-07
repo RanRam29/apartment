@@ -6,7 +6,7 @@ describe('payments API flow', () => {
     jest.resetModules();
     mockPost = jest.fn();
 
-    (global as any).localStorage = {
+    (globalThis as any).localStorage = {
       getItem: jest.fn(() => null),
       setItem: jest.fn(),
       removeItem: jest.fn(),

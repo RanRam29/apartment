@@ -2,7 +2,7 @@ import React, { useEffect, useCallback, useRef, useState } from 'react';
 import {
   View, Text, StyleSheet, SafeAreaView,
   TouchableOpacity, Modal, ActivityIndicator, Animated,
-  ScrollView, RefreshControl,
+  ScrollView, RefreshControl, Dimensions,
 } from 'react-native';
 import SkeletonLoader from '../components/SkeletonLoader';
 import * as Haptics from 'expo-haptics';
@@ -12,13 +12,36 @@ import { useSwipeStore } from '../store/useSwipeStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { usePersonaIsLandlord } from '../navigation/AdminAppModeContext';
 import SwipeableCard from '../components/SwipeableCard';
-import { C } from '../theme';
-import { dirApp } from '../theme/dirAppTokens';
-import { dirType } from '../theme/textStyles';
 import type { Apartment, SwipeDirection } from '../types';
+import { C } from '../theme';
 import { fontFamily } from '../theme/fonts';
 
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
 const FREE_DAILY_LIMIT = 20;
+
+const colorsV3 = {
+  primary: '#00091b',
+  primaryContainer: '#002045',
+  onPrimaryContainer: '#7089b3',
+  secondary: '#006b5f',
+  secondaryContainer: '#9cefdf',
+  onSecondaryContainer: '#0b6f63',
+  onTertiaryContainer: '#009a7f',
+  background: '#f8f9ff',
+  surface: '#f8f9ff',
+  surfaceContainerLowest: '#ffffff',
+  surfaceContainerLow: '#f2f3f9',
+  surfaceContainer: '#eceef3',
+  surfaceContainerHigh: '#e7e8ee',
+  surfaceContainerHighest: '#e1e2e8',
+  onSurface: '#191c20',
+  onSurfaceVariant: '#44474e',
+  outline: '#74777f',
+  outlineVariant: '#c4c6cf',
+  actionCta: '#00cba9',
+  error: '#ba1a1a',
+};
 
 export default function SwipeScreen() {
   const navigation = useNavigation<any>();
@@ -91,7 +114,7 @@ export default function SwipeScreen() {
   if (personaLandlord) {
     return (
       <SafeAreaView style={styles.centered}>
-        <Ionicons name="business-outline" size={56} color={C.border} />
+        <Ionicons name="business-outline" size={56} color={colorsV3.outlineVariant} />
         <Text style={styles.emptyTitle}>ממשק השוכרים</Text>
         <Text style={[styles.emptySubtitle, styles.feedErrorDetail]}>
           גלילת דירות זמינה בממשק שוכר. עבור לשורת הבחירה למעלה ובחר “ממשק שוכר”, או השתמש בחשבון שוכר.
@@ -113,20 +136,17 @@ export default function SwipeScreen() {
       <SafeAreaView style={styles.container}>
         {/* Header skeleton */}
         <View style={styles.header}>
-          <View style={styles.headerLeft}>
+          <SkeletonLoader width={36} height={36} borderRadius={18} />
+          <SkeletonLoader width={100} height={24} borderRadius={6} />
+          <View style={{ flexDirection: 'row-reverse', gap: 4 }}>
             <SkeletonLoader width={36} height={36} borderRadius={18} />
-          </View>
-          <View style={styles.headerCenter}>
-            <SkeletonLoader width={100} height={24} borderRadius={6} />
-          </View>
-          <View style={styles.headerRight}>
             <SkeletonLoader width={36} height={36} borderRadius={18} />
           </View>
         </View>
 
         {/* Card skeleton */}
         <View style={[styles.deckContainer, { paddingHorizontal: 16 }]}>
-          <View style={{ backgroundColor: '#1e293b', borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1, borderRadius: 24, padding: 16, width: '100%', height: '90%' }}>
+          <View style={{ backgroundColor: '#ffffff', borderColor: '#e1e2e8', borderWidth: 1, borderRadius: 24, padding: 16, width: '100%', height: '90%' }}>
             <SkeletonLoader width="100%" height="60%" borderRadius={16} style={{ marginBottom: 16 }} />
             <SkeletonLoader width="80%" height={24} borderRadius={6} style={{ marginBottom: 12 }} />
             <SkeletonLoader width="40%" height={20} borderRadius={6} style={{ marginBottom: 16 }} />
@@ -167,7 +187,7 @@ export default function SwipeScreen() {
 
     return (
       <SafeAreaView style={styles.centered}>
-        <Ionicons name="alert-circle-outline" size={56} color={C.coral} />
+        <Ionicons name="alert-circle-outline" size={56} color={colorsV3.error} />
         <Text style={styles.emptyTitle}>{title}</Text>
         <Text style={[styles.emptySubtitle, styles.feedErrorDetail]}>{detail}</Text>
         <TouchableOpacity
@@ -189,12 +209,12 @@ export default function SwipeScreen() {
 
   if (!feedError && feedLoadState === 'success' && visibleCards.length === 0) {
     return (
-      <SafeAreaView style={{ flex: 1 }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: colorsV3.background }}>
         <ScrollView
           contentContainerStyle={[styles.centered, { flexGrow: 1 }]}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[C.cyan]} tintColor={C.cyan} />}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colorsV3.secondary]} tintColor={colorsV3.secondary} />}
         >
-          <Ionicons name="home-outline" size={56} color={C.border} />
+          <Ionicons name="home-outline" size={56} color={colorsV3.outlineVariant} />
           <Text style={styles.emptyTitle}>ראית את כל הדירות!</Text>
           <Text style={styles.emptySubtitle}>נסה לשנות את פילטרי החיפוש</Text>
           <TouchableOpacity style={styles.reloadBtn} onPress={() => loadFeed()}>
@@ -212,34 +232,44 @@ export default function SwipeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* ── Header (DirApp shell) ── */}
+      {/* ── Header (Stitch Discovery alignment) ── */}
       <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <TouchableOpacity style={styles.headerIconBtn} onPress={() => navigation.navigate('Profile')} accessibilityRole="button">
-            <Ionicons name="menu-outline" size={22} color={dirApp.primary} />
+        {/* Menu Button (Right-aligned in RTL, left in AppNavigator) */}
+        <TouchableOpacity
+          style={styles.headerIconBtn}
+          onPress={() => navigation.navigate('Profile')}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="menu-outline" size={24} color={colorsV3.primary} />
+        </TouchableOpacity>
+
+        <h1 style={{ display: 'none' }}>גילוי דירות להשכרה</h1>
+        <Text style={styles.headerBrand}>DirApp</Text>
+
+        <View style={styles.headerActions}>
+          {/* Notification Button */}
+          <TouchableOpacity
+            style={styles.headerIconBtn}
+            onPress={() => navigation.navigate('Matches')}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="notifications-outline" size={22} color={colorsV3.primary} />
           </TouchableOpacity>
-        </View>
-        <View style={styles.headerCenter}>
-          <Text style={[styles.headerBrand, dirType.heading, { color: dirApp.primary }]}>DirApp</Text>
-        </View>
-        <View style={styles.headerRight}>
-          {!isPremium && (
-            <View style={[
-              styles.quotaBadge,
-              dailyUsed >= effectiveLimit * 0.8 && styles.quotaBadgeWarn,
-            ]}>
-              <Text style={styles.quotaText}>{dailyUsed}/{effectiveLimit}</Text>
-            </View>
-          )}
-          <View style={styles.deckCountBadge}>
-            <Text style={styles.deckCountText}>{Math.max(0, deck.length - currentIndex)}</Text>
-          </View>
+
+          {/* Preferences Filter Tune Button */}
+          <TouchableOpacity
+            style={styles.headerIconBtn}
+            onPress={() => navigation.navigate('Preferences')}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="options-outline" size={22} color={colorsV3.primary} />
+          </TouchableOpacity>
         </View>
       </View>
 
       {!isPremium && (
         <View style={styles.quotaStrip}>
-          <Text style={[styles.quotaStripLabel, dirType.label, { color: dirApp.primary }]}>סוויפים יומיים</Text>
+          <Text style={styles.quotaStripLabel}>סוויפים יומיים</Text>
           <View style={styles.quotaSegments}>
             {Array.from({ length: 5 }, (_, i) => (
               <View
@@ -258,52 +288,63 @@ export default function SwipeScreen() {
       <View style={styles.deckContainer}>
         {[...visibleCards].reverse().map((apartment, i) => {
           const isTop = i === visibleCards.length - 1;
+          const trustScore = apartment.landlord?.trustScore;
+
           return (
-            <SwipeableCard
-              key={apartment.id}
-              apartment={apartment}
-              isTop={isTop}
-              onSwipe={(dir) => handleSwipe(apartment, dir)}
-              onPress={() => navigation.navigate('ApartmentDetail', { apartmentId: apartment.id })}
-            />
+            <View key={apartment.id} style={styles.cardWrapper}>
+              <SwipeableCard
+                apartment={apartment}
+                isTop={isTop}
+                onSwipe={(dir) => handleSwipe(apartment, dir)}
+                onPress={() => navigation.navigate('ApartmentDetail', { apartmentId: apartment.id })}
+              />
+
+              {/* Float Trust Score Badge Overlay (mockup styling) */}
+              {isTop && trustScore != null && (
+                <View style={styles.trustScoreBadge}>
+                  <Text style={styles.trustScoreText}>{trustScore}</Text>
+                </View>
+              )}
+            </View>
           );
         })}
       </View>
 
-      {/* ── Action buttons ── */}
+      {/* ── Action buttons (Mockup styled circles) ── */}
       <View style={styles.actions}>
-        <ActionButton
-          icon="close"
-          iconColor={C.danger}
-          bgColor={C.bgCard}
-          borderColor={dirApp.errorContainer}
-          size={28}
+        {/* Pass Button */}
+        <TouchableOpacity
+          style={styles.actionBtnPass}
           onPress={() => handleButtonSwipe('dislike')}
-        />
-        <ActionButton
-          icon="star"
-          iconColor={C.secondaryTeal}
-          bgColor={C.bgCard}
-          borderColor={dirApp.secondaryContainer}
-          size={22}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="close" size={32} color={colorsV3.error} />
+        </TouchableOpacity>
+
+        {/* Superlike Button */}
+        <TouchableOpacity
+          style={styles.actionBtnSuper}
           onPress={() => handleButtonSwipe('superlike')}
-        />
-        <ActionButton
-          icon="heart"
-          iconColor={C.onInverse.primary}
-          bgColor={C.primary}
-          borderColor="transparent"
-          size={28}
-          filled
+          activeOpacity={0.8}
+        >
+          <Ionicons name="star" size={22} color="#FFD700" />
+        </TouchableOpacity>
+
+        {/* Like Button */}
+        <TouchableOpacity
+          style={styles.actionBtnLike}
           onPress={() => handleButtonSwipe('like')}
-        />
+          activeOpacity={0.8}
+        >
+          <Ionicons name="heart" size={32} color={colorsV3.onSecondaryContainer} />
+        </TouchableOpacity>
       </View>
 
       {/* ── Undo FAB ── */}
       {undoVisible && (
         <Animated.View style={[styles.undoFab, { opacity: undoOpacity }]}>
-          <TouchableOpacity onPress={handleUndo} style={styles.undoBtn}>
-            <Ionicons name="arrow-undo" size={16} color={dirApp.primary} />
+          <TouchableOpacity onPress={handleUndo} style={styles.undoBtn} activeOpacity={0.8}>
+            <Ionicons name="arrow-undo" size={16} color={colorsV3.primary} />
             <Text style={styles.undoBtnText}>בטל</Text>
           </TouchableOpacity>
         </Animated.View>
@@ -314,16 +355,16 @@ export default function SwipeScreen() {
         <View style={styles.overlay}>
           <View style={styles.modalCard}>
             <View style={styles.matchHeartsRow}>
-              <Ionicons name="heart" size={28} color={C.coral} style={{ opacity: 0.45, marginRight: -6 }} />
+              <Ionicons name="heart" size={28} color="#ba1a1a" style={{ opacity: 0.45, marginRight: -6 }} />
               <View style={styles.matchIconRow}>
-                <Ionicons name="heart" size={40} color={C.coral} />
+                <Ionicons name="heart" size={40} color="#ba1a1a" />
               </View>
-              <Ionicons name="heart" size={28} color={C.coral} style={{ opacity: 0.45, marginLeft: -6 }} />
+              <Ionicons name="heart" size={28} color="#ba1a1a" style={{ opacity: 0.45, marginLeft: -6 }} />
             </View>
             <Text style={styles.matchTitle}>יש התאמה! 🎉</Text>
             {(lastMatch as any)?.apartment?.title ? (
               <View style={styles.matchAptRow}>
-                <Ionicons name="home-outline" size={13} color={C.textSub} />
+                <Ionicons name="home-outline" size={13} color={colorsV3.onSurfaceVariant} />
                 <Text style={styles.matchAptName} numberOfLines={1}>{(lastMatch as any).apartment.title}</Text>
               </View>
             ) : null}
@@ -332,10 +373,10 @@ export default function SwipeScreen() {
                 ? 'המשכיר אישר — תוכלו לדבר עכשיו!'
                 : 'ממתין לאישור המשכיר'}
             </Text>
-            <TouchableOpacity style={styles.primaryBtn} onPress={resetMatch}>
+            <TouchableOpacity style={styles.primaryBtn} onPress={resetMatch} activeOpacity={0.85}>
               <Text style={styles.primaryBtnText}>המשך לחפש</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.secondaryBtn} onPress={resetMatch}>
+            <TouchableOpacity style={styles.secondaryBtn} onPress={resetMatch} activeOpacity={0.8}>
               <Text style={styles.secondaryBtnText}>סגור</Text>
             </TouchableOpacity>
           </View>
@@ -346,18 +387,18 @@ export default function SwipeScreen() {
       <Modal visible={quotaExceeded} transparent animationType="fade">
         <View style={styles.overlay}>
           <View style={styles.modalCard}>
-            <View style={[styles.matchIconRow, { backgroundColor: `${dirApp.primary}0F` }]}>
-              <Ionicons name="flash" size={36} color={dirApp.primary} />
+            <View style={[styles.matchIconRow, { backgroundColor: 'rgba(0, 9, 27, 0.06)' }]}>
+              <Ionicons name="flash" size={36} color={colorsV3.primary} />
             </View>
             <Text style={styles.matchTitle}>הגעת למגבלה</Text>
             <Text style={styles.matchSub}>
               השתמשת ב-{dailyUsed}/{effectiveLimit} הזמות היומיות.{'\n'}שדרג לפרמיום לזמות ללא הגבלה!
             </Text>
-            <TouchableOpacity style={styles.premiumBtn} onPress={dismissQuota}>
-              <Ionicons name="star" size={15} color={C.onInverse.primary} />
+            <TouchableOpacity style={styles.premiumBtn} onPress={dismissQuota} activeOpacity={0.85}>
+              <Ionicons name="star" size={15} color="#ffffff" />
               <Text style={styles.primaryBtnText}>שדרג לפרמיום ₪29/חודש</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.secondaryBtn} onPress={dismissQuota}>
+            <TouchableOpacity style={styles.secondaryBtn} onPress={dismissQuota} activeOpacity={0.8}>
               <Text style={styles.secondaryBtnText}>המתן למחר</Text>
             </TouchableOpacity>
           </View>
@@ -367,50 +408,16 @@ export default function SwipeScreen() {
   );
 }
 
-function ActionButton({
-  icon,
-  iconColor,
-  bgColor,
-  borderColor,
-  size,
-  filled,
-  onPress,
-}: {
-  icon: keyof typeof Ionicons.glyphMap;
-  iconColor: string;
-  bgColor: string;
-  borderColor: string;
-  size: number;
-  filled?: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <TouchableOpacity
-      style={[
-        styles.actionBtn,
-        filled ? styles.actionBtnFilled : null,
-        { borderColor, backgroundColor: bgColor },
-      ]}
-      onPress={onPress}
-      activeOpacity={0.75}
-    >
-      <Ionicons name={icon} size={size} color={iconColor} />
-    </TouchableOpacity>
-  );
-}
-
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: dirApp.background },
-  centered: { flex: 1, backgroundColor: dirApp.background, justifyContent: 'center', alignItems: 'center', gap: 12 },
-
-  loadingText: { color: C.textSub, fontSize: 15, marginTop: 8, fontFamily: fontFamily.regular },
-  emptyTitle:  { fontSize: 20, fontWeight: '700', color: C.text, marginTop: 8, fontFamily: fontFamily.bold },
-  emptySubtitle: { fontSize: 14, color: C.textSub, fontFamily: fontFamily.regular },
+  container: { flex: 1, backgroundColor: colorsV3.background },
+  centered: { flex: 1, backgroundColor: colorsV3.background, justifyContent: 'center', alignItems: 'center', gap: 12 },
+  emptyTitle:  { fontSize: 20, fontWeight: '700', color: colorsV3.primary, marginTop: 8, fontFamily: fontFamily.bold },
+  emptySubtitle: { fontSize: 14, color: colorsV3.onSurfaceVariant, fontFamily: fontFamily.regular },
   reloadBtn: {
-    marginTop: 16, backgroundColor: dirApp.primaryContainer,
+    marginTop: 16, backgroundColor: colorsV3.primaryContainer,
     paddingHorizontal: 28, paddingVertical: 12, borderRadius: 14,
   },
-  reloadText: { color: C.onInverse.primary, fontWeight: '700', fontFamily: fontFamily.bold },
+  reloadText: { color: '#ffffff', fontWeight: '700', fontFamily: fontFamily.bold },
   feedErrorDetail: { textAlign: 'center', paddingHorizontal: 24, lineHeight: 20 },
   feedErrorOutlineBtn: {
     marginTop: 10,
@@ -418,23 +425,31 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 14,
     borderWidth: 2,
-    borderColor: dirApp.primary,
+    borderColor: colorsV3.primary,
   },
-  feedErrorOutlineBtnText: { color: dirApp.primary, fontWeight: '700', fontFamily: fontFamily.bold },
+  feedErrorOutlineBtnText: { color: colorsV3.primary, fontWeight: '700', fontFamily: fontFamily.bold },
   header: {
-    flexDirection: 'row', alignItems: 'center',
-    paddingHorizontal: 16, paddingTop: 6, paddingBottom: 8,
-  },
-  headerLeft: { flex: 1, alignItems: 'flex-start' },
-  headerCenter: { flex: 2, alignItems: 'center', justifyContent: 'center' },
-  headerBrand: {},
-  headerIconBtn: { padding: 6, borderRadius: 999 },
-  headerRight: {
-    flex: 1,
-    flexDirection: 'row',
+    flexDirection: 'row-reverse', // RTL header layout
     alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: 8,
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 10,
+  },
+  headerBrand: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: colorsV3.primary,
+    fontFamily: fontFamily.bold,
+  },
+  headerIconBtn: {
+    padding: 8,
+    borderRadius: 20,
+  },
+  headerActions: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: 4,
   },
   quotaStrip: {
     marginHorizontal: 16,
@@ -442,107 +457,158 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 12,
-    backgroundColor: dirApp.surfaceContainerLow,
-    flexDirection: 'row',
+    backgroundColor: colorsV3.surfaceContainerLow,
+    flexDirection: 'row-reverse',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  quotaStripLabel: {},
-  quotaSegments: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  quotaStripLabel: {
+    fontSize: 13,
+    color: colorsV3.primary,
+    fontFamily: fontFamily.medium,
+  },
+  quotaSegments: { flexDirection: 'row-reverse', alignItems: 'center', gap: 6 },
   quotaSeg: { width: 16, height: 6, borderRadius: 4 },
-  quotaSegOn: { backgroundColor: dirApp.secondary },
-  quotaSegOff: { backgroundColor: dirApp.outlineVariant },
-  quotaBadge: {
-    backgroundColor: C.cyanAlpha(0.12), borderRadius: 10,
-    paddingHorizontal: 8, paddingVertical: 3,
-    borderWidth: 1, borderColor: C.cyanAlpha(0.3),
-  },
-  quotaBadgeWarn: {
-    backgroundColor: C.coralAlpha(0.12),
-    borderColor: C.coralAlpha(0.3),
-  },
-  quotaText: { color: C.textSub, fontSize: 11, fontWeight: '600', fontFamily: fontFamily.semibold },
-  deckCountBadge: {
-    width: 26, height: 26, borderRadius: 13,
-    backgroundColor: C.border, justifyContent: 'center', alignItems: 'center',
-  },
-  deckCountText: { fontSize: 11, fontWeight: '700', color: C.textSub, fontFamily: fontFamily.bold },
+  quotaSegOn: { backgroundColor: colorsV3.secondary },
+  quotaSegOff: { backgroundColor: colorsV3.outlineVariant },
 
-  // Cards
+  // Card deck
   deckContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-
-  // Actions
-  actions: {
-    flexDirection: 'row', justifyContent: 'center',
-    alignItems: 'center', gap: 18,
-    paddingVertical: 18, paddingBottom: 24,
+  cardWrapper: {
+    position: 'relative',
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  actionBtn: {
-    width: 58, height: 58, borderRadius: 29,
-    borderWidth: 2, justifyContent: 'center', alignItems: 'center',
-    shadowColor: dirApp.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 10,
+  trustScoreBadge: {
+    position: 'absolute',
+    top: 24,
+    right: 24,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: colorsV3.onTertiaryContainer, // Teal trust indicator background (#009a7f)
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+    shadowColor: colorsV3.onTertiaryContainer,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.4,
+    shadowRadius: 15,
     elevation: 6,
+    zIndex: 999,
   },
-  actionBtnFilled: {
-    borderWidth: 0,
-    width: 62,
-    height: 62,
-    borderRadius: 31,
-    shadowOpacity: 0.18,
-    shadowRadius: 14,
-    elevation: 8,
+  trustScoreText: {
+    color: '#ffffff',
+    fontSize: 18,
+    fontWeight: '700',
+    fontFamily: fontFamily.bold,
   },
 
-  // Undo
-  undoFab: { position: 'absolute', bottom: 108, left: 20 },
+  // Actions row
+  actions: {
+    flexDirection: 'row-reverse', // RTL alignment
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 24,
+    paddingVertical: 20,
+    paddingBottom: 28,
+  },
+  actionBtnPass: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#ffffff',
+    borderWidth: 1.5,
+    borderColor: 'rgba(196, 201, 207, 0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: colorsV3.primaryContainer,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  actionBtnSuper: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#ffffff',
+    borderWidth: 1.5,
+    borderColor: 'rgba(196, 201, 207, 0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: colorsV3.primaryContainer,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  actionBtnLike: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#ffffff',
+    borderWidth: 1.5,
+    borderColor: 'rgba(196, 201, 207, 0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: colorsV3.primaryContainer,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+
+  // Undo button
+  undoFab: { position: 'absolute', bottom: 112, left: 24 },
   undoBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
-    backgroundColor: C.bgCard, borderRadius: 20,
+    backgroundColor: '#ffffff', borderRadius: 20,
     paddingHorizontal: 14, paddingVertical: 9,
-    borderWidth: 1, borderColor: C.border,
-    shadowColor: dirApp.primary, shadowOffset: { width: 0, height: 2 },
+    borderWidth: 1, borderColor: colorsV3.outlineVariant,
+    shadowColor: colorsV3.primaryContainer, shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08, shadowRadius: 6, elevation: 3,
   },
-  undoBtnText: { color: dirApp.primary, fontSize: 13, fontWeight: '600', fontFamily: fontFamily.semibold },
+  undoBtnText: { color: colorsV3.primary, fontSize: 13, fontWeight: '600', fontFamily: fontFamily.semibold },
 
   // Modals
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
   modalCard: {
-    backgroundColor: C.bgCard, borderRadius: 28, padding: 32,
+    backgroundColor: '#ffffff', borderRadius: 28, padding: 32,
     alignItems: 'center', width: '84%', gap: 12,
-    shadowColor: dirApp.primary, shadowOffset: { width: 0, height: 20 },
+    shadowColor: colorsV3.primary, shadowOffset: { width: 0, height: 20 },
     shadowOpacity: 0.15, shadowRadius: 30, elevation: 10,
   },
   matchHeartsRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
   matchAptRow: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
-    backgroundColor: C.bgCard, borderRadius: 10,
+    backgroundColor: '#ffffff', borderRadius: 10,
     paddingHorizontal: 12, paddingVertical: 6,
-    borderWidth: 1, borderColor: C.border,
+    borderWidth: 1, borderColor: colorsV3.outlineVariant,
   },
-  matchAptName: { color: C.textSub, fontSize: 13, maxWidth: 200, fontFamily: fontFamily.regular },
+  matchAptName: { color: colorsV3.onSurfaceVariant, fontSize: 13, maxWidth: 200, fontFamily: fontFamily.regular },
   matchIconRow: {
     width: 72, height: 72, borderRadius: 36,
-    backgroundColor: C.coralAlpha(0.1),
+    backgroundColor: 'rgba(186, 26, 26, 0.1)',
     justifyContent: 'center', alignItems: 'center',
   },
-  matchTitle: { fontSize: 24, fontWeight: '800', color: C.text, fontFamily: fontFamily.bold },
-  matchSub:   { fontSize: 14, color: C.textSub, textAlign: 'center', lineHeight: 20, fontFamily: fontFamily.regular },
+  matchTitle: { fontSize: 24, fontWeight: '800', color: colorsV3.primary, fontFamily: fontFamily.bold },
+  matchSub:   { fontSize: 14, color: colorsV3.onSurfaceVariant, textAlign: 'center', lineHeight: 20, fontFamily: fontFamily.regular },
   primaryBtn: {
-    backgroundColor: dirApp.primaryContainer, borderRadius: 14,
+    backgroundColor: colorsV3.primaryContainer, borderRadius: 14,
     paddingHorizontal: 32, paddingVertical: 14,
     width: '100%', alignItems: 'center',
   },
-  primaryBtnText: { color: C.onInverse.primary, fontWeight: '700', fontSize: 15, fontFamily: fontFamily.bold },
+  primaryBtnText: { color: '#ffffff', fontWeight: '700', fontSize: 15, fontFamily: fontFamily.bold },
   premiumBtn: {
     flexDirection: 'row', gap: 8,
-    backgroundColor: dirApp.primaryContainer, borderRadius: 14,
+    backgroundColor: colorsV3.primaryContainer, borderRadius: 14,
     paddingHorizontal: 24, paddingVertical: 14,
     width: '100%', alignItems: 'center', justifyContent: 'center',
   },
   secondaryBtn: { paddingVertical: 8 },
-  secondaryBtnText: { color: C.textSub, fontSize: 14, fontFamily: fontFamily.regular },
+  secondaryBtnText: { color: colorsV3.onSurfaceVariant, fontSize: 14, fontFamily: fontFamily.regular },
 });

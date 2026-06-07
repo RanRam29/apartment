@@ -4,14 +4,16 @@
 > The orchestrator (Claude Code) reads this file to update the main DASHBOARD.md.
 
 ## Current Task
-**Task:** Push layout and logout fixes to remote branch.
+**Task:** All Stitch Web screens integrated (W1, W2, W3).
 **Status:** 🟢 DONE
-**Progress:** Resolved the blank viewport rendering bug on desktop web browsers by absolutely positioning the sidebar and adding sceneContainerStyle. Added a dedicated "Logout" shortcut in the sidebar footer for easy user switching, and resolved all compilation/type issues across the mobile screens.
+**Progress:** W1 landing page, W2 responsive auth screens (Login, Register, Verification), W3 tenant dashboard (RenterJournalScreen responsive split layout), and W3 landlord dashboard (LandlordDashboard responsive split layout) are fully integrated. Clean TypeScript compilation and green Jest test suite verified.
 
 ## Completed Tasks
 
 | Task | Completed At | Commits | Notes |
 |------|-------------|---------|-------|
+| Stitch Web Screens Integration (W1, W2, W3) | 2026-06-07 | `[Local]` | Integrated high-fidelity Stitch layouts for W1 Landing Page, W2 Auth Flow (responsive mobile/desktop viewports), and W3 Tenant Dashboard (desktop split timeline layout). Added yoman link in Profile. All tests are passing green. |
+| Stitch Design Alignment & Integration (V3 Theme) | 2026-06-04 | `[Local]` | Re-themed and aligned all mobile client screens to the new Emerald & Navy visual identity. Fixed all related TypeScript compilation issues (OTP ref bindings, missing colorsV3, missing style properties, and icon names). Verified 100% clean compilation. |
 | Responsive Desktop Layout & Sidebar Logout Shortcut | 2026-06-04 | `b0d07ae` | Fixed blank main screen on desktop web browsers by absolutely positioning the sidebar and setting sceneContainerStyle for the navigators. Added a dedicated "Logout" (התנתקות) button directly in the desktop sidebar footer. Resolved TypeScript compilation errors in types/index.ts, api.ts, MaintenanceScreen.tsx, and mapScreenHtml.test.ts. |
 | Clean White/Slate Design Overhaul Cleanup | 2026-06-04 | `02c2cfe` | Overhauled MatchesScreen.tsx, MatchCard.tsx, ProfileScreen.tsx, LandlordDashboard.tsx, and LeadsScreen.tsx to clean white-slate aesthetic. Fixed syntax, missing imports, and compilation errors in LedgerScreen.tsx, MapScreen.tsx, and AppNavigator.tsx. Verified ESLint checks compile 100% cleanly. |
 | Stitch Design Integration (Phases 4-5) | 2026-06-04 | `3355a43`, `43ba2a2` | Integrated high-fidelity Stitch layouts for Search & Discovery lists and maps (SearchScreen.tsx, MapScreen.tsx) with Leaflet price overlays, center FAB crosshair, bottom snap carousel, and bidirection sync. Redesigned LedgerScreen.tsx to a premium light theme with payment details and CPI adjustment breakdown/index modals. Integrated the Maintenance Approvals Queue with completed work ticket cards inside AdminStatsScreen.tsx. All eslint checks passed cleanly. |
@@ -84,8 +86,16 @@ backend/tests/kycV3.test.js (created)
 backend/tests/tosAndRole.test.js (created)
 backend/tests/maintenanceV3.test.js (created/modified)
 backend/tests/guarantor.test.js (created)
+mobile/src/screens/LoginScreen.tsx (modified)
+mobile/src/screens/RegisterScreen.tsx (modified)
+mobile/src/screens/VerificationPendingScreen.tsx (modified)
+mobile/src/screens/RenterJournalScreen.tsx (modified)
+mobile/__tests__/authApiFlow.test.ts (modified)
+mobile/__tests__/landlordFlow.test.ts (modified)
+mobile/__tests__/paymentsFlow.test.ts (modified)
+mobile/__tests__/recommendationsStore.test.ts (modified)
 ```
 
 ## Last Updated
-2026-06-04 (Stitch Design Integration completed)
+2026-06-07 (Stitch Web Screens Integration completed)
 

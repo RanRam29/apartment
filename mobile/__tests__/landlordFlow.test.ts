@@ -6,7 +6,7 @@ describe('landlord API flow', () => {
     jest.resetModules();
     mockGet = jest.fn();
 
-    (global as any).localStorage = {
+    (globalThis as any).localStorage = {
       getItem: jest.fn(() => null),
       setItem: jest.fn(),
       removeItem: jest.fn(),

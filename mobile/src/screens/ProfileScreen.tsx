@@ -312,6 +312,9 @@ export default function ProfileScreen() {
           {showTenantQuickLinks && (
             <MenuItem icon="shield-checkmark-outline" label="אימות זהות" onPress={() => navigation.navigate('VerifyIdentity')} />
           )}
+          {showTenantQuickLinks && (
+            <MenuItem icon="time-outline" label="יומן השכירות שלי" onPress={() => navigation.navigate('RenterJournal')} />
+          )}
           <MenuItem icon="document-text-outline" label="החוזים שלי" onPress={() => navigation.navigate('Contracts')} />
           <MenuItem icon="cash-outline" label="תשלומי שכירות" onPress={() => navigation.navigate('RentPayments')} />
           <MenuItem icon="business-outline" label='נדל"ן מסחרי' onPress={() => navigation.navigate('Commercial')} />

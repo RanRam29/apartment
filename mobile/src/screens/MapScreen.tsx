@@ -76,14 +76,14 @@ export function buildHtml(markers: AptMarker[], tama38Url: string): string {
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body, #map { width: 100%; height: 100%; background: ${dirApp.background}; }
+    html, body, #map { width: 100%; height: 100%; background: #f8f9ff; }
     .apt-popup { font-family: sans-serif; text-align: right; direction: rtl; min-width: 140px; }
-    .apt-popup .price { color: ${dirApp.secondary}; font-weight: 700; font-size: 15px; }
-    .apt-popup .meta  { color: ${C.textMut}; font-size: 12px; margin-top: 2px; }
+    .apt-popup .price { color: #006b5f; font-weight: 700; font-size: 15px; }
+    .apt-popup .meta  { color: #74777f; font-size: 12px; margin-top: 2px; }
     .apt-popup .title { font-weight: 600; font-size: 13px; margin-bottom: 4px; }
-    .apt-popup .badge { display: inline-block; background: ${C.gold}; color: ${dirApp.primary}; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 6px; margin-bottom: 4px; }
-    .apt-popup .approx { color: ${C.gold}; font-size: 11px; margin-top: 4px; }
-    .tama-layer { fill: ${C.statusTone.caution}; fill-opacity: 0.18; stroke: ${C.statusTone.caution}; stroke-width: 1.5; }
+    .apt-popup .badge { display: inline-block; background: #FFD700; color: #00091b; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 6px; margin-bottom: 4px; }
+    .apt-popup .approx { color: #FFD700; font-size: 11px; margin-top: 4px; }
+    .tama-layer { fill: #f59e0b; fill-opacity: 0.18; stroke: #f59e0b; stroke-width: 1.5; }
     
     /* Price marker bubble styling matching Stitch spec */
     .price-marker-div {
@@ -132,7 +132,7 @@ export function buildHtml(markers: AptMarker[], tama38Url: string): string {
     } catch (e) {}
   }
 
-  // Draw custom SVG price markers (Blue-teal for normal, Deep Navy for active)
+  // Draw custom SVG price markers (Teal for normal, Deep Navy for active)
   function makeIcon(apt, isActive) {
     var price = apt.price;
     var label = '₪' + (price >= 1000 ? (price/1000).toFixed(1) + 'k' : price);
@@ -141,10 +141,10 @@ export function buildHtml(markers: AptMarker[], tama38Url: string): string {
     var w = isActive ? 80 : (promoted ? 70 : 64);
     var h = isActive ? 34 : (promoted ? 28 : 24);
     
-    // Stitch colors: active = deep navy blue (#002045), normal promoted = gold, normal = teal
-    var fill = isActive ? '#002045' : (promoted ? '${C.gold}' : '#005db6');
-    var textFill = isActive ? '#ffffff' : (promoted ? '${dirApp.primary}' : '#ffffff');
-    var stroke = isActive ? '#ffffff' : (promoted ? '${C.onInverse.primary}' : 'none');
+    // Stitch colors: active = deep navy blue (#002045), normal promoted = gold, normal = teal (#006b5f)
+    var fill = isActive ? '#002045' : (promoted ? '#FFD700' : '#006b5f');
+    var textFill = isActive ? '#ffffff' : (promoted ? '#00091b' : '#ffffff');
+    var stroke = isActive ? '#ffffff' : (promoted ? '#00091b' : 'none');
     var sw = isActive ? 3 : (promoted ? 2 : 0);
     
     var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + (h + 6) + '">'
