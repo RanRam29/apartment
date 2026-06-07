@@ -376,7 +376,7 @@ export default function SwipeScreen() {
               </View>
             ) : (
               <View style={styles.matchIconRow}>
-                <Ionicons name="mail-outline" size={40} color={dirApp.secondary} />
+                <Ionicons name="mail-outline" size={40} color={colorsV3.secondary} />
               </View>
             )}
             <Text style={styles.matchTitle}>

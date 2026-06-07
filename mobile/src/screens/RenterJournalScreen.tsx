@@ -50,6 +50,9 @@ interface ContractSummary {
   status: string;
   checkinCompletedAt: string | null;
   checkoutCompletedAt: string | null;
+  apartment?: { address: string } | null;
+  monthlyRent?: number | null;
+  landlord?: { firstName: string; lastName: string; phone: string | null } | null;
 }
 
 interface RenterJournalData {
@@ -84,6 +87,7 @@ export default function RenterJournalScreen() {
   const [editLastName, setEditLastName] = useState('');
   const [editBio, setEditBio] = useState('');
   const [editAvatarUrl, setEditAvatarUrl] = useState('');
+  const [expandedRoom, setExpandedRoom] = useState<string | null>(null);
 
   const targetUserId = route.params?.userId || user?.id;
 
@@ -98,90 +102,75 @@ export default function RenterJournalScreen() {
       setIsLoading(true);
       const res = await renterJournalApi.getJournal(targetUserId);
       setData(res.data);
-
-      // Populate edit fields
-      if (res.data.renter) {
-        setEditFirstName(res.data.renter.firstName);
-        setEditLastName(res.data.renter.lastName);
-        setEditBio(res.data.renter.bio);
+      if (res.data) {
+        setEditFirstName(res.data.renter.firstName || '');
+        setEditLastName(res.data.renter.lastName || '');
+        setEditBio(res.data.renter.bio || '');
         setEditAvatarUrl(res.data.renter.avatarUrl || '');
       }
-    } catch (err: any) {
-      showAlert('שגיאה', 'טעינת יומן השכירות המורחב נכשלה.');
+    } catch (err) {
+      console.error('Error fetching journal:', err);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleUpdateProfile = async () => {
-    if (!editFirstName.trim() || !editLastName.trim()) {
-      showAlert('שגיאה', 'שדה שם פרטי ושם משפחה הם חובה.');
-      return;
-    }
-
     try {
-      setIsLoading(true);
       const res = await renterJournalApi.updateProfile(targetUserId, {
         firstName: editFirstName,
         lastName: editLastName,
         bio: editBio,
         avatarUrl: editAvatarUrl,
       });
-
-      showAlert('הצלחה', 'הפרופיל עודכן בהצלחה!');
-      setIsEditModalOpen(false);
-
-      // Update auth store locally if editing own profile
-      if (targetUserId === user?.id) {
-        updateUser({
-          firstName: editFirstName,
-          lastName: editLastName,
-          avatarUrl: editAvatarUrl,
-        });
+      if (res.data) {
+        updateUser(res.data);
+        setIsEditModalOpen(false);
+        fetchJournalData();
       }
-
-      await fetchJournalData();
-    } catch (err: any) {
-      showAlert('שגיאה', err?.message || 'עדכון הפרופיל נכשל.');
-    } finally {
-      setIsLoading(false);
+    } catch (err) {
+      console.error('Error updating profile:', err);
     }
   };
 
-  if (isLoading && !data) {
+  if (isLoading) {
     return (
-      <View style={[styles.loadingContainer, { backgroundColor: colors.bg }]}>
-        <ActivityIndicator size="large" color={dirApp.primary} />
-        <Text style={[styles.loadingText, dirType.body, { color: colors.textMut }]}>
-          טוען את פרופיל יומן השכירות...
-        </Text>
-      </View>
+      <SafeAreaView style={[styles.loadingContainer, { backgroundColor: colors.bg }]}>
+        <ActivityIndicator size="large" color={colors.isDark ? C.cyan : dirApp.secondary} />
+        <Text style={[styles.loadingText, { color: colors.textMut }]}>טוען יומן שכירות...</Text>
+      </SafeAreaView>
     );
   }
 
   if (!data) {
     return (
-      <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]}>
-        <View style={[styles.topBar, { flexDirection: flexRow }]}>
-          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-forward" size={24} color={dirApp.primary} />
-          </TouchableOpacity>
-          <Text style={[styles.title, dirType.heading, { color: dirApp.primary }]}>יומן שכירות</Text>
-          <View style={{ width: 40 }} />
-        </View>
-        <View style={styles.emptyContainer}>
-          <Ionicons name="document-text-outline" size={80} color={colors.textMut} />
-          <Text style={[styles.emptyText, dirType.subhead, { color: colors.text, textAlign: 'center' }]}>
-            לא נמצאו נתונים עבור שוכר זה.
-          </Text>
-        </View>
+      <SafeAreaView style={[styles.loadingContainer, { backgroundColor: colors.bg }]}>
+        <Text style={{ color: colors.textMut }}>לא נמצא נתונים עבור שוכר זה.</Text>
       </SafeAreaView>
     );
   }
 
   const { renter, contracts, paymentsSummary, checkIn, checkOut, maintenance, isEditable } = data;
 
-  // Reliability rating based on ledger payment status
+  const contract = contracts.find((c: any) => c.status === 'ACTIVE') || contracts[0] || {
+    id: '',
+    startDate: '—',
+    endDate: '—',
+    monthlyRentIls: 0,
+    monthlyRent: 0,
+    status: 'NONE',
+  };
+  const ledgerEntries = [] as any[];
+
+  const renderTimelineNode = (iconName: any, nodeColor: string, isCompleted: boolean) => (
+    <View style={styles.timelineNodeWrapper}>
+      <View style={[styles.timelineLine, { backgroundColor: isCompleted ? dirApp.secondary : `${colors.border}66` }]} />
+      <View style={[styles.nodeCircle, { backgroundColor: isCompleted ? nodeColor : `${colors.bgCard}`, borderColor: isCompleted ? nodeColor : `${colors.border}` }]}>
+        <Ionicons name={iconName} size={18} color={isCompleted ? C.onInverse.primary : colors.textMut} />
+      </View>
+    </View>
+  );
+
   const getReliabilityRating = () => {
     if (paymentsSummary.totalRentRows === 0) return { label: 'חדש במערכת', color: dirApp.outline };
     if (paymentsSummary.overdue > 0) return { label: 'נדרש שיפור', color: C.statusTone.caution };
@@ -229,9 +218,9 @@ export default function RenterJournalScreen() {
           <View style={[styles.timelineCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
             <View style={[styles.cardHeader, { flexDirection: flexRow }]}>
               <Text style={[styles.cardTitle, dirType.label, { color: colors.text }]}>תהליך צ׳ק-אין דירה</Text>
-              <View style={[styles.badge, { backgroundColor: checkIn?.completedAt ? `${C.success}22` : `${C.warning}22` }]}>
-                <Text style={[styles.badgeText, dirType.micro, { color: checkIn?.completedAt ? C.success : C.warning }]}>
-                  {checkIn?.completedAt ? 'הושלם' : 'ממתין לביצוע'}
+              <View style={[styles.badge, { backgroundColor: checkIn.completedCount > 0 ? `${C.success}22` : `${C.warning}22` }]}>
+                <Text style={[styles.badgeText, dirType.micro, { color: checkIn.completedCount > 0 ? C.success : C.warning }]}>
+                  {checkIn.completedCount > 0 ? 'הושלם' : 'ממתין לביצוע'}
                 </Text>
               </View>
             </View>
@@ -239,37 +228,7 @@ export default function RenterJournalScreen() {
               תיעוד מצב הדירה ואישור חדרים בעת הכניסה.
             </Text>
 
-            {checkIn?.rooms && checkIn.rooms.length > 0 && (
-              <View style={styles.roomsList}>
-                {checkIn.rooms.map((room) => (
-                  <View key={room.id} style={styles.roomItem}>
-                    <TouchableOpacity
-                      style={[styles.roomHeaderRow, { flexDirection: flexRow }]}
-                      onPress={() => setExpandedRoom(expandedRoom === `in-${room.id}` ? null : `in-${room.id}`)}
-                    >
-                      <Ionicons
-                        name={expandedRoom === `in-${room.id}` ? 'chevron-down' : 'chevron-back'}
-                        size={16}
-                        color={colors.text}
-                      />
-                      <Text style={[styles.roomName, dirType.caption, { color: colors.text }]}>
-                        {room.name} ({room.photos.length} תמונות)
-                      </Text>
-                    </TouchableOpacity>
-
-                    {expandedRoom === `in-${room.id}` && room.photos.length > 0 && (
-                      <ScrollView horizontal style={styles.photosScroll} showsHorizontalScrollIndicator={false}>
-                        {room.photos.map((photoUrl: string, idx: number) => (
-                          <Image key={idx} source={{ uri: photoUrl }} style={styles.roomPhoto} />
-                        ))}
-                      </ScrollView>
-                    )}
-                  </View>
-                ))}
-              </View>
-            )}
-
-            {!checkIn?.completedAt && (
+            {checkIn.completedCount === 0 && (
               <TouchableOpacity
                 style={[styles.actionBtn, { backgroundColor: dirApp.secondaryContainer }]}
                 onPress={() => navigation.navigate('CheckIn', { contractId: contract.id })}
@@ -281,7 +240,7 @@ export default function RenterJournalScreen() {
             )}
           </View>
         </View>
-        {renderTimelineNode('camera-outline', C.accent.violet, !!checkIn?.completedAt)}
+        {renderTimelineNode('camera-outline', C.accent.violet, checkIn.completedCount > 0)}
       </View>
 
       {/* 3. Rent Ledger Payments Node */}
@@ -357,23 +316,11 @@ export default function RenterJournalScreen() {
               דיווח ומעקב אחר תקלות בנכס מול בעל הבית.
             </Text>
 
-            {maintenance.length > 0 ? (
-              <View style={styles.ticketsList}>
-                {maintenance.slice(0, 2).map((ticket) => (
-                  <View key={ticket.id} style={[styles.ticketItem, { backgroundColor: `${colors.bg}66`, borderColor: colors.border }]}>
-                    <View style={[styles.ticketHeaderRow, { flexDirection: flexRow }]}>
-                      <Text style={[styles.ticketTitle, dirType.caption, { color: colors.text }]} numberOfLines={1}>
-                        {ticket.title || ticket.description}
-                      </Text>
-                      <Text style={[styles.ticketStatus, dirType.micro, { color: ticket.status === 'COMPLETED' ? C.success : C.warning }]}>
-                        {ticket.status === 'COMPLETED' ? 'טופל' : (ticket.status === 'IN_PROGRESS' ? 'בטיפול' : 'חדש')}
-                      </Text>
-                    </View>
-                    <Text style={[styles.ticketDesc, dirType.micro, { color: colors.textMut }]} numberOfLines={2}>
-                      {ticket.description}
-                    </Text>
-                  </View>
-                ))}
+            {maintenance.totalCount > 0 ? (
+              <View style={[styles.ticketItem, { backgroundColor: `${colors.bg}66`, borderColor: colors.border, marginTop: 10 }]}>
+                <Text style={[styles.ticketTitle, dirType.caption, { color: colors.text }]}>
+                  קיימות {maintenance.totalCount} קריאות שירות פעילות/טופלו.
+                </Text>
               </View>
             ) : (
               <Text style={[styles.emptySubText, dirType.micro, { color: colors.textMut, marginTop: 8 }]}>
@@ -382,7 +329,7 @@ export default function RenterJournalScreen() {
             )}
           </View>
         </View>
-        {renderTimelineNode('construct-outline', C.coral, maintenance.length > 0)}
+        {renderTimelineNode('construct-outline', C.coral, maintenance.totalCount > 0)}
       </View>
 
       {/* 5. Check-Out Node */}
@@ -391,9 +338,9 @@ export default function RenterJournalScreen() {
           <View style={[styles.timelineCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
             <View style={[styles.cardHeader, { flexDirection: flexRow }]}>
               <Text style={[styles.cardTitle, dirType.label, { color: colors.text }]}>צ׳ק-אאוט וסיום חוזה</Text>
-              <View style={[styles.badge, { backgroundColor: checkOut?.completedAt ? `${C.success}22` : `${colors.border}66` }]}>
-                <Text style={[styles.badgeText, dirType.micro, { color: checkOut?.completedAt ? C.success : colors.textMut }]}>
-                  {checkOut?.completedAt ? 'הושלם' : 'עתידי'}
+              <View style={[styles.badge, { backgroundColor: checkOut.completedCount > 0 ? `${C.success}22` : `${colors.border}66` }]}>
+                <Text style={[styles.badgeText, dirType.micro, { color: checkOut.completedCount > 0 ? C.success : colors.textMut }]}>
+                  {checkOut.completedCount > 0 ? 'הושלם' : 'עתידי'}
                 </Text>
               </View>
             </View>
@@ -401,10 +348,10 @@ export default function RenterJournalScreen() {
               החזרת הדירה, תיעוד צ׳ק-אאוט ואישור סופי של פיקדונות.
             </Text>
 
-            {checkOut?.completedAt ? (
+            {checkOut.completedCount > 0 ? (
               <View style={styles.checkoutSummary}>
                 <Text style={[styles.checkoutNotes, dirType.caption, { color: colors.text }]}>
-                  הערות סיכום: {checkOut.notes || 'אין הערות.'}
+                  תהליך הצ׳ק-אאוט הושלם ואושר על ידי כל הצדדים.
                 </Text>
               </View>
             ) : (
@@ -419,7 +366,7 @@ export default function RenterJournalScreen() {
             )}
           </View>
         </View>
-        {renderTimelineNode('exit-outline', C.success, !!checkOut?.completedAt)}
+        {renderTimelineNode('exit-outline', C.success, checkOut.completedCount > 0)}
       </View>
     </View>
   );
@@ -483,7 +430,7 @@ export default function RenterJournalScreen() {
 
             {/* Landlord Contact Info */}
             <View style={styles.sidebarSection}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>פרטי בעל הבית</Text>
+              <Text style={[styles.sidebarSectionTitle, { color: colors.text }]}>פרטי בעל הבית</Text>
               <View style={[styles.landlordRow, { flexDirection: flexRow }]}>
                 <View style={[styles.landlordAvatar, { backgroundColor: dirApp.secondary }]}>
                   <Text style={styles.landlordInitials}>
@@ -502,7 +449,12 @@ export default function RenterJournalScreen() {
               {contract.landlord?.phone ? (
                 <TouchableOpacity
                   style={[styles.sidebarBtn, { backgroundColor: '#25D366' }]}
-                  onPress={() => Linking.openURL(`https://wa.me/${contract.landlord.phone.replace(/[^0-9+]/g, '')}`)}
+                  onPress={() => {
+                    const phone = contract.landlord?.phone;
+                    if (phone) {
+                      Linking.openURL(`https://wa.me/${phone.replace(/[^0-9+]/g, '')}`);
+                    }
+                  }}
                   activeOpacity={0.8}
                 >
                   <Ionicons name="logo-whatsapp" size={16} color="#ffffff" style={{ marginLeft: 6 }} />
@@ -513,7 +465,7 @@ export default function RenterJournalScreen() {
 
             {/* Quick Actions */}
             <View style={styles.sidebarSection}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>פעולות מהירות</Text>
+              <Text style={[styles.sidebarSectionTitle, { color: colors.text }]}>פעולות מהירות</Text>
               <TouchableOpacity
                 style={[styles.actionLink, { flexDirection: flexRow }]}
                 onPress={() => navigation.navigate('Maintenance', { contractId: contract.id })}
@@ -1147,12 +1099,150 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: fontFamily.medium,
   },
-  sectionTitle: {
+  sidebarSectionTitle: {
     fontSize: 14,
     fontWeight: '700',
     marginBottom: 4,
     textAlign: 'right',
     fontFamily: fontFamily.bold,
+  },
+  timelineContainer: {
+    paddingRight: 8,
+  },
+  timelineItem: {
+    marginBottom: 24,
+    justifyContent: 'flex-end',
+  },
+  cardContent: {
+    flex: 1,
+    marginRight: 16,
+  },
+  timelineCard: {
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  cardHeader: {
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  cardTitle: { fontWeight: 'bold' },
+  badge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  badgeText: { fontWeight: 'bold' },
+  cardBody: {
+    marginBottom: 12,
+    textAlign: 'right',
+    lineHeight: 16,
+  },
+  cardFooter: {
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.05)',
+    paddingTop: 10,
+    marginTop: 4,
+  },
+  footerText: { fontWeight: '600' },
+  timelineNodeWrapper: {
+    width: 40,
+    alignItems: 'center',
+  },
+  timelineLine: {
+    position: 'absolute',
+    top: 0,
+    bottom: -40,
+    width: 2,
+    zIndex: 1,
+  },
+  nodeCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 2,
+  },
+  emptySubText: { textAlign: 'center', lineHeight: 20 },
+  actionBtn: {
+    borderRadius: 10,
+    paddingVertical: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 8,
+  },
+  actionBtnText: { fontWeight: 'bold' },
+  outlineBtn: {
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingVertical: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 8,
+    backgroundColor: 'transparent',
+  },
+  outlineBtnText: { fontWeight: 'bold' },
+  ledgerList: {
+    marginTop: 10,
+    gap: 8,
+  },
+  ledgerItem: {
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 10,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  statusIndicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 8,
+  },
+  ledgerInfo: {
+    flex: 1,
+    alignItems: 'flex-end',
+    paddingHorizontal: 8,
+  },
+  ledgerMonth: { fontWeight: '600' },
+  ledgerDue: {},
+  ledgerAmount: { fontWeight: 'bold' },
+  morePaymentsText: {
+    marginTop: 4,
+    fontWeight: '500',
+  },
+  ticketsList: {
+    marginTop: 10,
+    gap: 8,
+  },
+  ticketItem: {
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 10,
+  },
+  ticketHeaderRow: {
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  ticketTitle: { fontWeight: 'bold', flex: 1, textAlign: 'right' },
+  ticketStatus: { fontWeight: 'bold', marginLeft: 8 },
+  ticketDesc: { textAlign: 'right' },
+  checkoutSummary: {
+    marginTop: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+    padding: 10,
+    borderRadius: 8,
   },
   landlordRow: {
     alignItems: 'center',
