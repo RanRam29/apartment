@@ -1,5 +1,5 @@
 const logger = require('../utils/logger');
-const { sanitizeObject } = require('../utils/logSanitizer');
+const { sanitizeObject, sanitizeString } = require('../utils/logSanitizer');
 const { SYSTEM_CATEGORY, SYSTEM_SEVERITY } = require('../constants/logging');
 
 let SystemEventModel = null;
@@ -16,7 +16,7 @@ async function logSystemEvent(event = {}) {
     category: event.category || SYSTEM_CATEGORY.APPLICATION,
     severity: event.severity || SYSTEM_SEVERITY.INFO,
     event: event.event || 'unknown_event',
-    message: event.message || 'System event',
+    message: sanitizeString(event.message || 'System event'),
     actorId: event.actorId || null,
     tags: Array.isArray(event.tags) ? event.tags : [],
     metadata: sanitizeObject(event.metadata || {}),

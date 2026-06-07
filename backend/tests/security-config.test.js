@@ -1,4 +1,5 @@
 const request = require('supertest');
+const jwt = require('jsonwebtoken');
 
 describe('Security configuration', () => {
   afterEach(() => {
@@ -6,6 +7,7 @@ describe('Security configuration', () => {
     delete process.env.CLIENT_ORIGIN;
     delete process.env.DATABASE_URL;
     delete process.env.POSTGRES_SSL;
+    delete process.env.JWT_SECRET;
   });
 
   it('uses a non-wildcard CORS origin when credentials are enabled', async () => {
@@ -36,5 +38,17 @@ describe('Security configuration', () => {
     process.env.JWT_SECRET = 'your_super_secret_jwt_key_change_in_production';
     ({ getJwtSecret } = require('../src/config/security'));
     expect(() => getJwtSecret()).toThrow('JWT_SECRET');
+  });
+
+  it('uses the normalized JWT secret for socket authentication', () => {
+    const normalizedSecret = 'socket-test-secret-with-enough-length';
+    process.env.JWT_SECRET = `"${normalizedSecret}"`;
+    const token = jwt.sign({ id: 'user-1', role: 'tenant' }, normalizedSecret);
+
+    const { verifySocketToken } = require('../src/config/socket');
+
+    expect(verifySocketToken(token)).toEqual(
+      expect.objectContaining({ id: 'user-1', role: 'tenant' })
+    );
   });
 });

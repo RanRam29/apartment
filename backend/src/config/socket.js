@@ -2,6 +2,7 @@ const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
 const logger = require('../utils/logger');
+const { getJwtSecret } = require('./security');
 const { logSystemEvent } = require('../services/systemEventService');
 const { logAudit } = require('../services/auditLogService');
 const { SYSTEM_CATEGORY, SYSTEM_SEVERITY, AUDIT_ACTIONS } = require('../constants/logging');
@@ -18,7 +19,7 @@ function initSocket(server) {
     const token = socket.handshake.auth.token;
     if (!token) return next(new Error('Authentication required'));
     try {
-      socket.user = jwt.verify(token, process.env.JWT_SECRET);
+      socket.user = verifySocketToken(token);
       next();
     } catch {
       logSystemEvent({
@@ -198,4 +199,8 @@ function getIO() {
   return io;
 }
 
-module.exports = { initSocket, getIO };
+function verifySocketToken(token) {
+  return jwt.verify(token, getJwtSecret());
+}
+
+module.exports = { initSocket, getIO, verifySocketToken };
