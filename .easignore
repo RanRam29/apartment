@@ -1,0 +1,41 @@
+# Backend — not needed for mobile build
+backend/
+ai-service/
+
+# Web apps — not needed for mobile build
+web/
+
+# IDE/tool folders
+.agents/
+.claude/
+.cursor/
+.playwright-mcp/
+.git/
+
+# Docs & media
+docs/
+scripts/
+scratch/
+*.docx
+A_professional_minimalist_logo.mp4
+assets/dirapp-logo-animated.mp4
+
+# Root-level files not needed
+/package-lock.json
+/package.json
+ARCHITECTURE.md
+ROADMAP.md
+MASTER.md
+BUGS.md
+CEO_DASHBOARD.md
+AGENT_PROTOCOL.md
+CLAUDE.md
+STATUS.md
+.cursorrules
+.easignore
+
+# Mobile build artifacts
+mobile/android.bak/
+mobile/android/.gradle/
+mobile/android/build/
+mobile/android/app/build/

@@ -188,6 +188,7 @@ export function buildHtml(markers: AptMarker[], tama38Url: string): string {
       + '<div class="price">₪' + Number(apt.price).toLocaleString() + '/חודש</div>'
       + '<div class="meta">' + escapeHtml(apt.rooms) + ' חדרים · ' + escapeHtml(apt.city) + '</div>'
       + approx
+      + '<button class="view-btn" onclick="postToHost({type:\'navigate\',apartmentId:\'' + escapeHtml(apt.id) + '\'})">צפה במודעה</button>'
       + '</div>'
     );
 
@@ -390,7 +391,9 @@ export default function MapScreen() {
   function handleMessage(event: any) {
     try {
       const msg = JSON.parse(event.nativeEvent.data);
-      if (msg.type === 'tama_loaded') setTamaStatus('loaded');
+      if (msg.type === 'navigate' && msg.apartmentId) {
+        navigation.navigate('ApartmentDetail', { apartmentId: msg.apartmentId });
+      } else if (msg.type === 'tama_loaded') setTamaStatus('loaded');
       else if (msg.type === 'tama_empty') setTamaStatus('empty');
       else if (msg.type === 'tama_error') setTamaStatus('error');
       else if (msg.type === 'marker_click') {

@@ -35,6 +35,7 @@ export interface AuditLogItem {
 export interface SystemEventItem {
   _id: string;
   createdAt: string;
+  requestId: string | null;
   source: string;
   category: 'application' | 'security' | 'integration' | 'performance';
   severity: 'debug' | 'info' | 'warn' | 'error' | 'critical';
@@ -194,7 +195,7 @@ export type MainStackParamList = {
   Services: undefined;
   IoT: undefined;
   LogsConsole: undefined;
-  RenterJournal: undefined;
+  RenterJournal: { userId?: string };
   Terms: undefined;
   ContractUpload: undefined;
   CheckIn: { contractId: string };

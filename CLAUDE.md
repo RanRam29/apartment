@@ -16,6 +16,8 @@
 | מסמך | מתי לקרוא |
 |------|-----------|
 | `MASTER.md` | **תמיד** — לפני כל עבודה |
+| `ROADMAP.md` | כשמתכננים פיצ'ר חדש או בודקים מה הבא |
+| `ARCHITECTURE.md` | כשעובדים על backend, DB, API, services |
 | `BUGS.md` | כשמדווחים על באג חדש או בודקים סטטוס |
 | `CEO_DASHBOARD.md` | כשראן שואל "מה המצב?" |
 | `AGENT_PROTOCOL.md` | כשכותבים briefing לעובד |
@@ -40,19 +42,10 @@
 - Frontend: `https://apartment-olive.vercel.app`
 - כניסה לבדיקה: `admin2@dirapp.com` / `Admin1234!`
 
-**באגים פתוחים — כולם אצל Antigravity:**
+**✅ כל הבאגים הידועים נסגרו (2026-06-01)**
 
-| # | תיאור | עדיפות |
-|---|--------|--------|
-| BUG-005 | כפתורי מודעות לא עובדים (Alert + tosAcceptedAt) | P1 |
-| BUG-006 | ToS "אשר והמשך" שבור + אין כפתור חזרה | P1 |
-| BUG-007 | Dashboard פיקטיבי — נתונים לא מחוברים | P1 |
-| BUG-008 | Chat navigation שבור | P1 |
-| BUG-003 | אישור ליד לא עובד | P1 |
-| BUG-009 | Trust Score מתחיל ב-0 במקום 50 | P2 |
-| BUG-004 | Admin panel לא נבדק E2E | P2 |
-
-> פירוט מלא + RCA: `BUGS.md`
+> פירוט היסטוריה: `BUGS.md`  
+> הבא בתור: V2-1 Stripe Connect — ראה `ROADMAP.md`
 
 ---
 

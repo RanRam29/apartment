@@ -1,6 +1,7 @@
 import 'react-native-gesture-handler';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, Linking, ActivityIndicator, View } from 'react-native';
+import { Alert, Linking, ActivityIndicator, View, Platform } from 'react-native';
+import * as Updates from 'expo-updates';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StatusBar } from 'expo-status-bar';
@@ -52,10 +53,32 @@ function AppInner() {
   );
 }
 
+async function checkForOTAUpdate() {
+  if (__DEV__ || Platform.OS === 'web') return;
+  try {
+    const update = await Updates.checkForUpdateAsync();
+    if (update.isAvailable) {
+      await Updates.fetchUpdateAsync();
+      Alert.alert(
+        'עדכון זמין',
+        'גרסה חדשה הורדה. האפליקציה תיטען מחדש.',
+        [{ text: 'עדכן עכשיו', onPress: () => Updates.reloadAsync() }],
+      );
+    }
+  } catch (e) {
+    // OTA check failed silently — not critical
+    console.log('OTA update check failed:', e);
+  }
+}
+
 export default function App() {
   const [fontsLoaded] = useFonts(rubikFonts);
   const [startupDone, setStartupDone] = useState(false);
   const finishStartup = useCallback(() => setStartupDone(true), []);
+
+  useEffect(() => {
+    checkForOTAUpdate();
+  }, []);
 
   if (!fontsLoaded) {
     return (

@@ -42,6 +42,8 @@ const USER_V3_COLUMNS = {
   active_role: { type: DataTypes.STRING(20), allowNull: true, defaultValue: 'tenant' },
   trust_score: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 50 },
   whatsapp_opt_in: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+  notification_preferences: { type: DataTypes.JSONB, allowNull: true, defaultValue: { push: true, email: true, paymentReminders: true, maintenance: true, whatsapp: false } },
+  bio: { type: DataTypes.TEXT, allowNull: true },
 };
 const APARTMENT_STREET_COLUMN = {
   street: { type: DataTypes.STRING(100), allowNull: true },
@@ -78,6 +80,22 @@ function isMissingApartmentsTableError(err) {
   return /apartments.*does not exist|relation "apartments" does not exist|No description found/i.test(message);
 }
 
+function isDuplicateColumnError(err) {
+  const code = err?.parent?.code || err?.original?.code || err?.code;
+  const message = String(err?.message || '');
+  return code === '42701' || /column .* already exists|duplicate column/i.test(message);
+}
+
+function isMissingColumnError(err, columnName) {
+  const code = err?.parent?.code || err?.original?.code || err?.code;
+  const message = String(err?.message || '');
+  return (
+    code === '42703' ||
+    new RegExp(`column .*${columnName}.* does not exist`, 'i').test(message) ||
+    new RegExp(`${columnName}.* does not exist`, 'i').test(message)
+  );
+}
+
 async function ensureApartmentStreetColumn(queryInterface = sequelize.getQueryInterface()) {
   let apartmentsTable;
   try {
@@ -91,21 +109,35 @@ async function ensureApartmentStreetColumn(queryInterface = sequelize.getQueryIn
 
   for (const [columnName, definition] of Object.entries(APARTMENT_STREET_COLUMN)) {
     if (!apartmentsTable[columnName]) {
-      await queryInterface.addColumn('apartments', columnName, definition);
-      logger.info(`Added missing apartments.${columnName} column`);
+      try {
+        await queryInterface.addColumn('apartments', columnName, definition);
+        logger.info(`Added missing apartments.${columnName} column`);
+      } catch (err) {
+        if (!isDuplicateColumnError(err)) {
+          throw err;
+        }
+        logger.info(`apartments.${columnName} column already added by another instance`);
+      }
     }
   }
 
   // One-time backfill + schema cleanup from legacy neighborhood column.
   if (apartmentsTable.neighborhood) {
-    await sequelize.query(`
-      UPDATE apartments
-      SET street = neighborhood
-      WHERE street IS NULL
-        AND neighborhood IS NOT NULL
-    `);
-    await queryInterface.removeColumn('apartments', 'neighborhood');
-    logger.info('Dropped legacy apartments.neighborhood column after backfill');
+    try {
+      await sequelize.query(`
+        UPDATE apartments
+        SET street = neighborhood
+        WHERE street IS NULL
+          AND neighborhood IS NOT NULL
+      `);
+      await queryInterface.removeColumn('apartments', 'neighborhood');
+      logger.info('Dropped legacy apartments.neighborhood column after backfill');
+    } catch (err) {
+      if (!isMissingColumnError(err, 'neighborhood')) {
+        throw err;
+      }
+      logger.info('Legacy apartments.neighborhood column was already removed by another instance');
+    }
   }
 }
 

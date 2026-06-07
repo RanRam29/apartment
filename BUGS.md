@@ -1,6 +1,6 @@
 # DirApp — Bug Tracker
 > **מנהל:** Claude Code (CTO)
-> **עדכון אחרון:** 2026-06-01
+> **עדכון אחרון:** 2026-06-04
 >
 > 📋 **איך לדווח באג:** כתוב בצ'אט (לי או לאנטיגרביטי) — אני מוסיף לפה עם BUG-ID מיידית.
 > 📖 **RCA:** חובה למלא אחרי כל תיקון. זה הזיכרון הארגוני שלנו.
@@ -13,9 +13,9 @@
 |--------|------|
 | 🔴 OPEN | 0 |
 | 🔵 IN_PROGRESS | 0 |
-| ✅ FIXED (ממתין אימות) | 1 |
+| ✅ FIXED (ממתין אימות) | 2 |
 | 🏁 CLOSED (RCA הושלם) | 10 |
-| **סה"כ** | **11** |
+| **סה"כ** | **12** |
 
 ---
 
@@ -34,6 +34,7 @@
 | [BUG-008](#bug-008) | לא ניתן להיכנס לצ'אטים | P1 | 🏁 CLOSED | ראן | Antigravity | 2026-05-28 |
 | [BUG-009](#bug-009) | Trust Score מתחיל ב-0 במקום 50 | P2 | 🏁 CLOSED | ראן | Antigravity | 2026-05-28 |
 | [BUG-011](#bug-011) | Login fails on Render cold start (timeout) | P2 | ✅ FIXED | ראן | Claude Code | 2026-06-01 |
+| [BUG-012](#bug-012) | NLP search returns 0 results — amenities filter too strict + role gate | P1 | ✅ FIXED | ראן | Claude Code | 2026-06-04 |
 
 ---
 
@@ -310,6 +311,35 @@
 
 ---
 
+
+### BUG-012
+**כותרת:** NLP search returns 0 results — amenities filter too strict + role gate
+**עדיפות:** P1
+**סטטוס:** ✅ FIXED (ממתין deploy)
+**מדווח על ידי:** ראן | **תאריך:** 2026-06-04
+**מטפל:** Claude Code
+
+**תיאור:**
+חיפוש "סטודיו בירושלים עם מעלית קרוב לרכבת" מחזיר 0 תוצאות למרות שקיימת מודעה "סטודיו עם גלריה" בירושלים.
+
+**Root Cause (שני גורמים):**
+
+**גורם 1 — Amenities filter too strict:**
+Gemini NLP parsed "מעלית" → `amenities: ["elevator"]`. Backend uses `Op.contains` which requires ALL listed amenities to exist on the apartment. If the listing doesn't have "elevator" tagged → 0 results. No fallback to relaxed search.
+
+**גורם 2 — `requireRole('tenant')` blocks landlord search:**
+`POST /api/recommendations/search` had `requireRole('tenant')` middleware. Landlords switching role to test search or comparing market listings would get 403.
+
+**Fix שיושם:**
+
+| קובץ | שינוי |
+|------|--------|
+| `backend/src/routes/recommendations.js` | Removed `requireRole('tenant')` from search route. Added two-pass search: strict first, then relaxes amenities+petsAllowed filters if 0 results. Returns `relaxed: true` flag. |
+| `mobile/src/screens/SearchScreen.tsx` | Shows hint "לא נמצאו דירות עם כל המתקנים — מוצגות תוצאות קרובות" when relaxed results shown |
+
+**Tests:** 5/5 recommendations tests pass, 3/3 screening tests pass.
+
+---
 
 ### BUG-011
 **כותרת:** Login fails on Render cold start — timeout 15s too short

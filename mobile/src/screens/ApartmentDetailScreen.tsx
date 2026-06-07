@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
-  SafeAreaView, ActivityIndicator, Dimensions, Modal, Alert,
+  SafeAreaView, ActivityIndicator, Dimensions, Modal,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
@@ -9,6 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { apartmentsApi, swipeApi, matchesApi } from '../services/api';
+import { showAlert } from '../utils/alert';
 import { useAuthStore } from '../store/useAuthStore';
 import type { MainStackParamList, Amenity } from '../types';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -180,10 +181,10 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
       const swipeRes = await swipeApi.record(apt.id, 'like');
       const { match } = swipeRes.data;
 
-      if (match) {
-        Alert.alert('יש התאמה! 🎉', 'נמצאה התאמה הדדית! מועבר לצ׳אט לקביעת ביקור.', [
+      if (match?.status === 'accepted') {
+        showAlert('יש התאמה! 🎉', 'המשכיר אישר — תוכלו לדבר עכשיו!', [
           {
-            text: 'המשך',
+            text: 'פתח צ׳אט',
             onPress: () => {
               navigation.navigate('Chat', {
                 matchId: match.id,
@@ -193,13 +194,13 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
           }
         ]);
       } else {
-        Alert.alert(
-          'בקשתך נשלחה ✉️',
-          'הבעת עניין בדירה נרשמה בהצלחה! המשכיר קיבל התראה. ברגע שתהיה התאמה, ייפתח ביניכם צ׳אט לתיאום ביקור.'
+        showAlert(
+          'הבקשה נשלחה ✉️',
+          'המשכיר קיבל התראה על ההתעניינות שלך. ברגע שיאשר, ייפתח ביניכם צ׳אט.'
         );
       }
     } catch (err: any) {
-      Alert.alert('שגיאה', 'לא ניתן לשלוח בקשה כרגע. אנא נסה שנית מאוחר יותר.');
+      showAlert('שגיאה', 'לא ניתן לשלוח בקשה כרגע. אנא נסה שנית מאוחר יותר.');
     }
   };
 
@@ -401,7 +402,7 @@ export default function ApartmentDetailScreen({ route, navigation }: Props) {
                       <TouchableOpacity
                         onLongPress={() => {
                           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-                          Alert.alert(
+                          showAlert(
                             'מדד אמינות משכיר',
                             `ציון אמינות: ${apt.landlord.trustScore}/100\n\nהציון מחושב אוטומטית לפי פרמטרים של אימות זהות (KYC), היסטוריית חוזים מוצלחת, אישור בעלות על הנכס ומהירות הטיפול בתקלות.`
                           );

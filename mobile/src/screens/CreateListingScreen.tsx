@@ -148,7 +148,7 @@ export default function CreateListingScreen({ navigation }: any) {
       setIsLoadingStreets(true);
       try {
         const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=il&addressdetails=1&accept-language=he&limit=100&q=${encodeURIComponent(`${q}, ${selectedCity}, ישראל`)}`,
+          `https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=il&addressdetails=1&accept-language=he&limit=100&street=${encodeURIComponent(q)}&city=${encodeURIComponent(selectedCity)}`,
           {
             signal: controller.signal,
             headers: { 'User-Agent': 'ApartmentApp/1.0 (CreateListing)' },
@@ -159,11 +159,7 @@ export default function CreateListingScreen({ navigation }: any) {
           ? data
               .map((item: any) => item?.address?.road || item?.address?.pedestrian || item?.address?.living_street || item?.address?.footway || item?.name)
               .filter(Boolean)
-              .filter((road: string) => {
-                const qNorm = normalizeText(q);
-                const words = normalizeText(road).split(/\s+/);
-                return words.some(word => word.startsWith(qNorm));
-              })
+              .filter((road: string) => normalizeText(road).includes(normalizeText(q)))
           : [];
         const unique = Array.from(new Set(parsed));
         setStreetSuggestions(unique.slice(0, 8));
@@ -292,29 +288,30 @@ export default function CreateListingScreen({ navigation }: any) {
               <Text style={styles.helperText}>{title.length}/100</Text>
             </Field>
 
-            <Field label="מחיר ₪ *">
-              <TextInput
-                style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
-                value={price}
-                onChangeText={(value) => setPrice(keepDigitsOnly(value))}
-                keyboardType="numeric"
-                placeholder="6500"
-                placeholderTextColor={colors.textMut}
-                textAlign="right"
-              />
-            </Field>
-
-            <Field label="ועד בית ₪">
-              <TextInput
-                style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
-                value={buildingFee}
-                onChangeText={(value) => setBuildingFee(keepDigitsOnly(value))}
-                keyboardType="numeric"
-                placeholder="250 (השאר ריק לחישוב מוערך)"
-                placeholderTextColor={colors.textMut}
-                textAlign="right"
-              />
-            </Field>
+            <View style={styles.row}>
+              <Field label="מחיר ₪ *" style={{ flex: 2 }}>
+                <TextInput
+                  style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
+                  value={price}
+                  onChangeText={(value) => setPrice(keepDigitsOnly(value))}
+                  keyboardType="numeric"
+                  placeholder="6500"
+                  placeholderTextColor={colors.textMut}
+                  textAlign="right"
+                />
+              </Field>
+              <Field label="ועד בית ₪" style={{ flex: 1 }}>
+                <TextInput
+                  style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }]}
+                  value={buildingFee}
+                  onChangeText={(value) => setBuildingFee(keepDigitsOnly(value))}
+                  keyboardType="numeric"
+                  placeholder="250"
+                  placeholderTextColor={colors.textMut}
+                  textAlign="right"
+                />
+              </Field>
+            </View>
 
             <View style={styles.row}>
               <Field label="עיר *" style={{ flex: 2 }}>

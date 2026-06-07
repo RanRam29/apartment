@@ -1,0 +1,24 @@
+- generic [ref=e155]:
+  - generic [ref=e160]:
+    - generic [ref=e162]: 
+    - generic [ref=e164] [cursor=pointer]: 
+    - generic [ref=e165]:
+      - generic [ref=e167]: ₪6,500/חודש
+      - generic [ref=e168]: דירת בדיקה
+      - generic [ref=e169]:  תל אביב
+      - generic [ref=e170]:
+        - generic [ref=e171]:
+          - generic [ref=e172]: 
+          - generic [ref=e173]: 3 חד׳
+        - generic [ref=e174]:
+          - generic [ref=e175]: 
+          - generic [ref=e176]: 2 צפיות
+      - generic [ref=e177]: בעל הדירה
+      - generic [ref=e178]:
+        - generic [ref=e180]: 
+        - generic [ref=e182]: Test2 Landlord2
+  - generic [ref=e183]:
+    - generic:
+      - generic:
+        - button "Go back" [ref=e185] [cursor=pointer]
+        - heading "פרטי דירה" [level=1] [ref=e188]

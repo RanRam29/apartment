@@ -23,7 +23,7 @@ export function formatLoginError(
   }
 
   if (status === 401) {
-    return 'אימייל או סיסמה שגויים. אם החשבון נוצר בסביבת שרת אחרת, צריך להירשם מחדש או להשתמש בשרת המתאים.';
+    return 'אימייל או סיסמה שגויים.';
   }
 
   if (status === 403 && code === 'EMAIL_NOT_VERIFIED') {

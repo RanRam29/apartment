@@ -407,11 +407,12 @@ router.get('/me', require('../middleware/auth').authenticate, async (req, res, n
 // PATCH /api/auth/profile — update name and/or phone
 router.patch('/profile', require('../middleware/auth').authenticate, async (req, res, next) => {
   try {
-    const { firstName, lastName, phone } = req.body;
+    const { firstName, lastName, phone, whatsappOptIn } = req.body;
     const updates = {};
     if (firstName && typeof firstName === 'string') updates.firstName = firstName.trim();
     if (lastName && typeof lastName === 'string') updates.lastName = lastName.trim();
     if (phone !== undefined) updates.phone = phone ? String(phone).trim() : null;
+    if (whatsappOptIn !== undefined) updates.whatsappOptIn = !!whatsappOptIn;
 
     if (Object.keys(updates).length === 0) {
       return res.status(422).json({ error: 'No valid fields to update' });
@@ -517,6 +518,135 @@ router.post('/block/:userId', require('../middleware/auth').authenticate, requir
     const isLocked = blockedCount >= 5;
     await user.update({ blockedCount, isLocked });
     res.json({ blockedCount, isLocked });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ─── GDPR / Privacy Routes ──────────────────────────────────────────────────
+
+// PUT /api/auth/notification-preferences — update notification preferences
+router.put('/notification-preferences', require('../middleware/auth').authenticate, async (req, res, next) => {
+  try {
+    const { push, email, paymentReminders, maintenance, whatsapp } = req.body;
+    const prefs = {};
+    if (push !== undefined) prefs.push = !!push;
+    if (email !== undefined) prefs.email = !!email;
+    if (paymentReminders !== undefined) prefs.paymentReminders = !!paymentReminders;
+    if (maintenance !== undefined) prefs.maintenance = !!maintenance;
+    if (whatsapp !== undefined) prefs.whatsapp = !!whatsapp;
+
+    const user = await User.findByPk(req.user.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const merged = { ...(user.notificationPreferences || {}), ...prefs };
+    await user.update({ notificationPreferences: merged, whatsappOptIn: merged.whatsapp });
+
+    await logAudit({
+      ...req.getAuditContext?.(),
+      actorId: req.user.id,
+      actorRole: req.user.role,
+      action: 'NOTIFICATION_PREFERENCES_UPDATE',
+      resourceType: 'user',
+      resourceId: user.id,
+      outcome: AUDIT_OUTCOMES.SUCCESS,
+      statusCode: 200,
+      metadata: { updatedPrefs: Object.keys(prefs) },
+    });
+    res.json({ notificationPreferences: merged });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /api/auth/export-data — GDPR data export (JSON)
+router.post('/export-data', require('../middleware/auth').authenticate, async (req, res, next) => {
+  try {
+    const { Apartment, Swipe, Match, LedgerRow } = require('../models');
+    const { UserKycProfile, RentalAgreement, AgreementParty, MaintenanceTicket } = require('../models');
+
+    const user = await User.findByPk(req.user.id, {
+      attributes: { exclude: ['passwordHash', 'verificationToken'] },
+    });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const [apartments, swipes, matches, agreements, ledgerRows, tickets] = await Promise.all([
+      Apartment.findAll({ where: { landlordId: req.user.id }, raw: true }),
+      Swipe.findAll({ where: { tenantId: req.user.id }, raw: true }),
+      Match.findAll({ where: { [require('sequelize').Op.or]: [{ tenantId: req.user.id }, { landlordId: req.user.id }] }, raw: true }),
+      AgreementParty.findAll({ where: { userId: req.user.id }, attributes: ['agreementId'], raw: true })
+        .then(parties => parties.length
+          ? RentalAgreement.findAll({ where: { id: parties.map(p => p.agreementId) }, raw: true })
+          : []),
+      AgreementParty.findAll({ where: { userId: req.user.id }, attributes: ['agreementId'], raw: true })
+        .then(parties => parties.length
+          ? LedgerRow.findAll({ where: { agreementId: parties.map(p => p.agreementId) }, raw: true })
+          : []),
+      MaintenanceTicket.findAll({ where: { reportedBy: req.user.id }, raw: true }).catch(() => []),
+    ]);
+
+    const exportData = {
+      exportedAt: new Date().toISOString(),
+      user: user.toJSON(),
+      apartments,
+      swipes,
+      matches,
+      agreements,
+      ledgerRows,
+      maintenanceTickets: tickets,
+    };
+
+    await logAudit({
+      ...req.getAuditContext?.(),
+      actorId: req.user.id,
+      actorRole: req.user.role,
+      action: 'GDPR_DATA_EXPORT',
+      resourceType: 'user',
+      resourceId: req.user.id,
+      outcome: AUDIT_OUTCOMES.SUCCESS,
+      statusCode: 200,
+    });
+
+    res.setHeader('Content-Disposition', `attachment; filename="dirapp-data-${req.user.id}.json"`);
+    res.json(exportData);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /api/auth/request-deletion — GDPR account deletion request
+router.post('/request-deletion', require('../middleware/auth').authenticate, async (req, res, next) => {
+  try {
+    const user = await User.findByPk(req.user.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    // Schedule deletion for 30 days from now (grace period)
+    const scheduledFor = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+    // Store deletion request in Redis (30 days TTL)
+    await safeCacheSet(`deletion:request:${req.user.id}`, {
+      userId: req.user.id,
+      requestedAt: new Date().toISOString(),
+      scheduledFor: scheduledFor.toISOString(),
+    }, 30 * 24 * 60 * 60);
+
+    await logAudit({
+      ...req.getAuditContext?.(),
+      actorId: req.user.id,
+      actorRole: req.user.role,
+      action: 'GDPR_DELETION_REQUEST',
+      resourceType: 'user',
+      resourceId: req.user.id,
+      outcome: AUDIT_OUTCOMES.SUCCESS,
+      statusCode: 200,
+      metadata: { scheduledFor: scheduledFor.toISOString() },
+    });
+
+    logger.info(`GDPR deletion request: user=${req.user.id} scheduledFor=${scheduledFor.toISOString()}`);
+    res.json({
+      message: 'בקשת מחיקה התקבלה. החשבון ימחק תוך 30 יום. ניתן לבטל בפנייה לתמיכה.',
+      scheduledFor: scheduledFor.toISOString(),
+    });
   } catch (err) {
     next(err);
   }

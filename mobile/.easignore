@@ -1,0 +1,11 @@
+../ai-service
+../.agents
+../.claude
+../.cursor
+../.playwright-mcp
+../docs
+../scripts
+../scratch
+../*.mp4
+../*.docx
+../package-lock.json

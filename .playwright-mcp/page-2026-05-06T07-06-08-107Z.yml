@@ -1,0 +1,11 @@
+- generic [ref=e10]:
+  - generic [ref=e15]: DirApp
+  - generic [ref=e18]:
+    - generic [ref=e19]: ברוך הבא
+    - generic [ref=e20]: התחבר לחשבונך
+    - textbox "אימייל" [ref=e21]
+    - textbox "סיסמה" [ref=e22]
+    - generic [ref=e24] [cursor=pointer]: כניסה
+    - generic [ref=e25] [cursor=pointer]:
+      - generic [ref=e26]: אין לך חשבון?
+      - generic [ref=e27]: הרשם עכשיו

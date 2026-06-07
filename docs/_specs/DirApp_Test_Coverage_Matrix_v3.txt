@@ -1,0 +1,154 @@
+DirApp
+Test Coverage Matrix
+גרסה 3.0 — מאי 2026
+# 1. Authentication + KYC
+# 2. Contract State Machine
+# 3. Financial Engine
+# 4. Maintenance
+# 5. Chat + Blocking
+# 6. Notifications + Storage
+# 7. Admin Panel
+# 8. Security + Edge Cases
+DirApp Test Coverage Matrix v3.0 — מאי 2026
+
+[TABLE]
+עדיפות | משמעות
+P0 | Blocker — חייב לעבור לפני launch
+P1 | קריטי — נדרש ב-MVP
+P2 | חשוב — רצוי לפני launch
+P3 | נחמד — גרסה הבאה
+[/TABLE]
+
+
+[TABLE]
+Test ID | אזור | תיאור | Pri | סטטוס
+JWT-001 | Auth | Register → JWT → protected route | P0 | קיים
+JWT-002 | Auth | Login → JWT expiry → refresh | P0 | קיים
+JWT-003 | Auth | Admin role → Admin routes בלבד | P0 | חדש
+JWT-004 | Auth | Switch role tenant/landlord → dashboard נכון | P0 | חדש
+KYC-001 | KYC | ID number checksum validation לפני Persona | P0 | קיים
+KYC-002 | KYC | Persona initiation → pending state | P0 | קיים
+KYC-003 | KYC | HMAC-SHA256 webhook validation | P0 | עודכן
+KYC-004 | KYC | APPROVED → checkAndUnlockContracts() | P0 | קיים
+KYC-005 | KYC | REJECTED image quality → הנחיה ספציפית | P1 | חדש
+KYC-006 | KYC | REJECTED liveness → הנחיה לתאורה | P1 | חדש
+KYC-007 | KYC | TIMEOUT 24h → push + email | P1 | חדש
+KYC-008 | KYC | Throttle — עיכוב גדל בין ניסיונות | P1 | חדש
+KYC-009 | KYC | תמונות KYC נמחקות אחרי 7 ימים | P0 | חדש
+KYC-010 | KYC | KYC renewal alert אחרי 5 שנים | P2 | חדש
+GUA-001 | ערב | Guarantor web link — תוקף 5 ימים | P0 | חדש
+GUA-002 | ערב | Guarantor link expired → error message | P0 | חדש
+GUA-003 | ערב | Guarantor decline → משכיר מקבל הודעה | P1 | חדש
+GUA-004 | ערב | Email reminder 24h לפני פקיעה | P1 | חדש
+[/TABLE]
+
+
+[TABLE]
+Test ID | אזור | תיאור | Pri | סטטוס
+SM-001 | State Machine | UPLOAD → validation → PENDING_SIGN | P0 | חדש
+SM-002 | State Machine | PENDING_SIGN → כולם חתמו → ACTIVE | P0 | עודכן
+SM-003 | State Machine | ACTIVE → 120 ימים → EXPIRING | P0 | חדש
+SM-004 | State Machine | EXPIRING → יום 0 → ENDED | P0 | חדש
+SM-005 | State Machine | PENDING_ACTIVATION → יום 0 → ACTIVE | P0 | חדש
+SM-006 | State Machine | Validation Gate — KYC missing → חסימה עם 422 | P0 | חדש
+SM-007 | State Machine | Validation Gate — חסר שוכר → חסימה | P0 | חדש
+UP-001 | Upload | PDF upload → Gemini extraction → שדות | P0 | חדש
+UP-002 | Upload | DOCX upload → extraction → אישור | P0 | חדש
+UP-003 | Upload | שדה ריק → חסימה עד מילוי | P0 | חדש
+UP-004 | Upload | סעיף בעייתי → התראה בלבד | P1 | חדש
+UP-005 | Upload | קובץ > 10MB → שגיאה ברורה | P0 | חדש
+OV-001 | אמת בעלות | שוכר בוחר "בדקתי" → מתועד ב-DB | P1 | חדש
+OV-002 | אמת בעלות | שוכר בוחר "דולג" → מתועד ב-DB | P1 | חדש
+CI-001 | Check-In | Upload תמונות לפי חדרים | P0 | חדש
+CI-002 | Check-In | אישור משכיר → הצהרה חתומה | P0 | חדש
+CI-003 | Check-In | חלון 5 ימים → התראה יומית | P0 | חדש
+CI-004 | Check-In | חלון פג → התראה לאדמין | P1 | חדש
+CO-001 | Check-Out | שוכר מעלה תמונות → התראה למשכיר | P0 | חדש
+CO-002 | Check-Out | משכיר דוחה → הערות → שוכר מתקן | P0 | חדש
+CO-003 | Check-Out | 3 סבבים + Auto-Confirm → ENDED | P1 | חדש
+CO-004 | Check-Out | חתימה "אישור החזרת נכס" → timestamp | P0 | חדש
+RN-001 | חידוש | חוזה חדש חתום → PENDING_ACTIVATION | P1 | חדש
+RN-002 | חידוש | יום 0 → ישן ENDED + חדש ACTIVE | P0 | חדש
+RN-003 | חידוש | ביטול חידוש → שני חותמים → נשמר | P1 | חדש
+RN-004 | חידוש | התראות נעצרות אחרי חתימה על חידוש | P1 | חדש
+[/TABLE]
+
+
+[TABLE]
+Test ID | אזור | תיאור | Pri | סטטוס
+LED-001 | Ledger | ACTIVE → יצירת כל שורות הלדגר אוטומטית | P0 | חדש
+LED-002 | Ledger | שורות לפי due_date נכון + סכום נכון | P0 | חדש
+LED-003 | Ledger | CPI enabled → שורות מכילות cpi_adjustment | P1 | חדש
+PAY-001 | תשלום | שוכר דיווח "שילמתי" → status=REPORTED | P0 | חדש
+PAY-002 | תשלום | שוכר מעלה אסמכתא → נשמר ב-R2 | P1 | חדש
+PAY-003 | תשלום | משכיר אישר → PAID + timestamp | P0 | חדש
+PAY-004 | תשלום | משכיר דחה → PENDING + התראה לשוכר | P0 | חדש
+PAY-005 | תשלום | 48 שעות ללא תגובה → Auto-Confirm PAID | P0 | חדש
+ALT-001 | התראות | T-5 → push למשכיר בלבד | P1 | חדש
+ALT-002 | התראות | יום 0 → push לשני הצדדים | P0 | חדש
+ALT-003 | התראות | יום +1 עד +5 → push יומי לשני | P0 | חדש
+ALT-004 | התראות | יום +5 → OVERDUE + התראה לאדמין | P0 | חדש
+[/TABLE]
+
+
+[TABLE]
+Test ID | אזור | תיאור | Pri | סטטוס
+MNT-001 | תקלות | שוכר פותח תקלה → התראה למשכיר | P0 | חדש
+MNT-002 | תקלות | משכיר "אני מטפל" → עדכון סטטוס | P1 | חדש
+MNT-003 | תקלות | משכיר "הזמן טכנאי" → deep link למידרג | P1 | חדש
+MNT-004 | תקלות | משכיר מעלה חשבונית → R2 + סכום | P1 | חדש
+MNT-005 | תקלות | 24h ללא מענה → התראה למשכיר | P1 | חדש
+MNT-006 | תקלות | שוכר מאשר סגירה → CLOSED | P1 | חדש
+[/TABLE]
+
+
+[TABLE]
+Test ID | אזור | תיאור | Pri | סטטוס
+CHT-001 | צ'אט | הודעה נשמרת ב-MongoDB + מגיעה real-time | P0 | קיים
+CHT-002 | צ'אט | סגירת צ'אט → ארכיב (לא מחיקה) | P1 | חדש
+CHT-003 | צ'אט | חוזה נחשף רק אחרי שיתוף מפורש | P0 | חדש
+CHT-004 | צ'אט | 10 העברות תיקון → חסימה | P1 | חדש
+BLK-001 | חסימה | חסימה → מונה מתעדכן | P1 | חדש
+BLK-002 | חסימה | 5 חסימות → נעילה + email לאדמין | P0 | חדש
+BLK-003 | חסימה | ביטול חסימה → מונה יורד | P1 | חדש
+[/TABLE]
+
+
+[TABLE]
+Test ID | אזור | תיאור | Pri | סטטוס
+NOT-001 | Push | Expo Push token registration | P0 | קיים
+NOT-002 | Push | Push נשלח ללא קשר לתפקיד פעיל | P0 | חדש
+NOT-003 | Email | Resend — הזמנת ערב עם template | P0 | חדש
+NOT-004 | Email | Resend — reminder 24h לפני פקיעת קישור | P1 | חדש
+STR-001 | R2 | Property image upload → R2 + compressed | P0 | עודכן
+STR-002 | R2 | Contract PDF → R2 private bucket | P0 | חדש
+STR-003 | R2 | Check-In photos → R2 checkin bucket | P0 | חדש
+STR-004 | R2 | Archive lifecycle → auto-delete 3 שנים | P2 | חדש
+STR-005 | R2 | תמונת KYC → נמחקת אחרי 7 ימים | P0 | חדש
+[/TABLE]
+
+
+[TABLE]
+Test ID | אזור | תיאור | Pri | סטטוס
+ADM-001 | Admin | Admin login → Admin routes | P0 | חדש
+ADM-002 | Admin | שינוי config value → נכנס לתוקף מיידי | P0 | חדש
+ADM-003 | Admin | ביטול נעילת משתמש | P0 | חדש
+ADM-004 | Admin | Override KYC status | P1 | חדש
+ADM-005 | Admin | צפייה בכל הלדגרים | P1 | חדש
+ADM-006 | Admin | ניהול ירושה — העברת נכס | P1 | חדש
+[/TABLE]
+
+
+[TABLE]
+Test ID | אזור | תיאור | Pri | סטטוס
+SEC-001 | Security | HMAC webhook — פינג מזויף נדחה | P0 | עודכן
+SEC-002 | Security | Presigned URL > 5 דקות → 403 | P0 | קיים
+SEC-003 | Security | Webhook idempotency — כפילות לא מבוצעת | P0 | קיים
+SEC-004 | Security | SQL injection → Sequelize parameterized | P0 | קיים
+SEC-005 | Security | Rate limiting — 100 req/min | P1 | קיים
+EDG-001 | Edge Cases | חוזה > 12 חודש → לדגר נכון | P0 | חדש
+EDG-002 | Edge Cases | חידוש עם שינוי מחיר → לדגר חדש נכון | P0 | חדש
+EDG-003 | Edge Cases | ערב דוחה → משכיר מוזמן להחליף | P1 | חדש
+EDG-004 | Edge Cases | Auto-Confirm מבוצע → לא מבוצע שוב | P0 | חדש
+[/TABLE]
+

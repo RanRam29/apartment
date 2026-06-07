@@ -1,0 +1,57 @@
+- generic [ref=e20]:
+  - generic [ref=e116]:
+    - generic [ref=e117]:
+      - generic [ref=e118]: המודעות שלי
+      - generic [ref=e119] [cursor=pointer]:
+        - generic [ref=e120]: 
+        - generic [ref=e121]: מודעה חדשה
+    - generic [ref=e124]:
+      - generic [ref=e126] [cursor=pointer]:
+        - generic [ref=e128]: 
+        - generic [ref=e129]:
+          - generic [ref=e130]: ;l'm
+          - generic [ref=e131]: test · 4 חד׳
+          - generic [ref=e132]: ₪7,666/חודש
+          - generic [ref=e133]:
+            - generic [ref=e134]: 
+            - generic [ref=e135]: "1"
+            - generic [ref=e136]: 
+            - generic [ref=e137]: "0"
+        - generic [ref=e139]: 
+      - generic [ref=e141] [cursor=pointer]:
+        - generic [ref=e143]: 
+        - generic [ref=e144]:
+          - generic [ref=e145]: דירת בדיקה
+          - generic [ref=e146]: תל אביב · 3 חד׳
+          - generic [ref=e147]: ₪6,500/חודש
+          - generic [ref=e148]:
+            - generic [ref=e149]: 
+            - generic [ref=e150]: "2"
+            - generic [ref=e151]: 
+            - generic [ref=e152]: "0"
+        - generic [ref=e154]: 
+  - tablist [ref=e88]:
+    - link "  דשבורד" [ref=e89] [cursor=pointer]:
+      - /url: /Main/Tabs/Dashboard
+      - generic:
+        - generic [ref=e91]: 
+        - generic [ref=e93]: 
+      - generic [ref=e94]: דשבורד
+    - link "  לידים" [ref=e95] [cursor=pointer]:
+      - /url: /Main/Tabs/Leads
+      - generic:
+        - generic [ref=e97]: 
+        - generic [ref=e99]: 
+      - generic [ref=e100]: לידים
+    - link "  מודעות" [active] [ref=e101] [cursor=pointer]:
+      - /url: /Main/Tabs/Listings
+      - generic:
+        - generic [ref=e103]: 
+        - generic [ref=e105]: 
+      - generic [ref=e106]: מודעות
+    - link "  פרופיל" [ref=e107] [cursor=pointer]:
+      - /url: /Main/Tabs/Profile
+      - generic:
+        - generic [ref=e109]: 
+        - generic [ref=e111]: 
+      - generic [ref=e112]: פרופיל

@@ -173,6 +173,7 @@ app.use('/api/v3/guarantor', require('./routes/guarantor'));
 app.use('/api/v3/ledger', require('./routes/ledger'));
 app.use('/api/v3/admin', require('./routes/admin'));
 app.use('/api/v3/admin/stats', require('./routes/adminStats'));
+app.use('/api/v3/renter-journal', require('./routes/renterJournal'));
 
 // WhatsApp webhook (no auth — Meta signs requests with HMAC)
 app.use('/webhooks/whatsapp', require('./routes/whatsapp'));

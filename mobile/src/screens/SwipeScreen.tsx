@@ -46,6 +46,7 @@ const colorsV3 = {
 export default function SwipeScreen() {
   const navigation = useNavigation<any>();
   const user = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
   const personaLandlord = usePersonaIsLandlord();
   const {
     deck, currentIndex, isLoading, lastMatch, feedError, feedLoadState,
@@ -190,19 +191,30 @@ export default function SwipeScreen() {
         <Ionicons name="alert-circle-outline" size={56} color={colorsV3.error} />
         <Text style={styles.emptyTitle}>{title}</Text>
         <Text style={[styles.emptySubtitle, styles.feedErrorDetail]}>{detail}</Text>
-        <TouchableOpacity
-          style={styles.reloadBtn}
-          onPress={() => {
-            clearFeedError();
-            loadFeed();
-            loadQuota();
-          }}
-        >
-          <Text style={styles.reloadText}>נסה שוב</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.feedErrorOutlineBtn} onPress={() => navigation.navigate('Profile')}>
-          <Text style={styles.feedErrorOutlineBtnText}>פתח פרופיל</Text>
-        </TouchableOpacity>
+        {status === 401 ? (
+          <TouchableOpacity
+            style={styles.reloadBtn}
+            onPress={() => { logout(); }}
+          >
+            <Text style={styles.reloadText}>התחבר מחדש</Text>
+          </TouchableOpacity>
+        ) : (
+          <>
+            <TouchableOpacity
+              style={styles.reloadBtn}
+              onPress={() => {
+                clearFeedError();
+                loadFeed();
+                loadQuota();
+              }}
+            >
+              <Text style={styles.reloadText}>נסה שוב</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.feedErrorOutlineBtn} onPress={() => navigation.navigate('Profile')}>
+              <Text style={styles.feedErrorOutlineBtnText}>פתח פרופיל</Text>
+            </TouchableOpacity>
+          </>
+        )}
       </SafeAreaView>
     );
   }
@@ -354,14 +366,22 @@ export default function SwipeScreen() {
       <Modal visible={!!lastMatch} transparent animationType="fade">
         <View style={styles.overlay}>
           <View style={styles.modalCard}>
-            <View style={styles.matchHeartsRow}>
-              <Ionicons name="heart" size={28} color="#ba1a1a" style={{ opacity: 0.45, marginRight: -6 }} />
-              <View style={styles.matchIconRow}>
-                <Ionicons name="heart" size={40} color="#ba1a1a" />
+            {lastMatch?.status === 'accepted' ? (
+              <View style={styles.matchHeartsRow}>
+                <Ionicons name="heart" size={28} color={C.coral} style={{ opacity: 0.45, marginRight: -6 }} />
+                <View style={styles.matchIconRow}>
+                  <Ionicons name="heart" size={40} color={C.coral} />
+                </View>
+                <Ionicons name="heart" size={28} color={C.coral} style={{ opacity: 0.45, marginLeft: -6 }} />
               </View>
-              <Ionicons name="heart" size={28} color="#ba1a1a" style={{ opacity: 0.45, marginLeft: -6 }} />
-            </View>
-            <Text style={styles.matchTitle}>יש התאמה! 🎉</Text>
+            ) : (
+              <View style={styles.matchIconRow}>
+                <Ionicons name="mail-outline" size={40} color={dirApp.secondary} />
+              </View>
+            )}
+            <Text style={styles.matchTitle}>
+              {lastMatch?.status === 'accepted' ? 'יש התאמה! 🎉' : 'הבקשה נשלחה! ✉️'}
+            </Text>
             {(lastMatch as any)?.apartment?.title ? (
               <View style={styles.matchAptRow}>
                 <Ionicons name="home-outline" size={13} color={colorsV3.onSurfaceVariant} />
@@ -371,7 +391,7 @@ export default function SwipeScreen() {
             <Text style={styles.matchSub}>
               {lastMatch?.status === 'accepted'
                 ? 'המשכיר אישר — תוכלו לדבר עכשיו!'
-                : 'ממתין לאישור המשכיר'}
+                : 'המשכיר קיבל התראה על ההתעניינות שלך. ברגע שיאשר, ייפתח ביניכם צ׳אט.'}
             </Text>
             <TouchableOpacity style={styles.primaryBtn} onPress={resetMatch} activeOpacity={0.85}>
               <Text style={styles.primaryBtnText}>המשך לחפש</Text>
@@ -514,7 +534,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 24,
     paddingVertical: 20,
-    paddingBottom: 28,
+    paddingBottom: 90,
   },
   actionBtnPass: {
     width: 64,
@@ -563,7 +583,7 @@ const styles = StyleSheet.create({
   },
 
   // Undo button
-  undoFab: { position: 'absolute', bottom: 112, left: 24 },
+  undoFab: { position: 'absolute', bottom: 170, left: 20 },
   undoBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     backgroundColor: '#ffffff', borderRadius: 20,

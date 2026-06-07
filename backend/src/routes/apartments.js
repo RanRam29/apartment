@@ -7,10 +7,43 @@ const { authenticate, requireRole } = require('../middleware/auth');
 const { geminiMarketingLimiter } = require('../middleware/geminiRateLimit');
 const { upload, uploadMany } = require('../services/uploadService');
 const { cacheGet, cacheSet, cacheDel } = require('../config/redis');
-const { generateMarketingCopy, COPY_STYLE_INSTRUCTIONS } = require('../services/geminiService');
+const { generateMarketingCopy, COPY_STYLE_INSTRUCTIONS, parseSearchQuery } = require('../services/geminiService');
+const axios = require('axios');
 const logger = require('../utils/logger');
 const { logAudit } = require('../services/auditLogService');
 const { AUDIT_ACTIONS, AUDIT_OUTCOMES } = require('../constants/logging');
+
+async function geocodeNominatim(params) {
+  const { data } = await axios.get('https://nominatim.openstreetmap.org/search', {
+    params: { format: 'jsonv2', countrycodes: 'il', limit: 1, ...params },
+    headers: { 'User-Agent': 'DirApp-Backend/1.0' },
+    timeout: 5000,
+  });
+  if (data?.[0]?.lat && data?.[0]?.lon) {
+    return { latitude: parseFloat(data[0].lat), longitude: parseFloat(data[0].lon) };
+  }
+  return null;
+}
+
+async function geocodeAddress(city, street) {
+  if (!city) return null;
+  try {
+    // 1) Structured: street + city (most accurate)
+    if (street) {
+      const r1 = await geocodeNominatim({ street, city });
+      if (r1) return r1;
+      // 2) Free-text fallback: "street, city, ישראל"
+      const r2 = await geocodeNominatim({ q: `${street}, ${city}, ישראל` });
+      if (r2) return r2;
+    }
+    // 3) City-only fallback (always returns at least city center)
+    return await geocodeNominatim({ q: `${city}, ישראל` });
+  } catch (err) {
+    logger.warn(`Geocode failed for "${street}, ${city}": ${err.message}`);
+    return null;
+  }
+}
+const RentalContract = require('../models/mongo/RentalContract');
 
 const router = express.Router();
 
@@ -97,6 +130,13 @@ router.post(
         images = await uploadMany(req.files, 'apartments');
       }
 
+      let lat = latitude ? parseFloat(latitude) : null;
+      let lng = longitude ? parseFloat(longitude) : null;
+      if (!lat || !lng) {
+        const geo = await geocodeAddress(city, street || neighborhood);
+        if (geo) { lat = geo.latitude; lng = geo.longitude; }
+      }
+
       const apartment = await Apartment.create({
         landlordId: req.user.id,
         title,
@@ -110,8 +150,8 @@ router.post(
         city,
         street: street || neighborhood || null,
         address,
-        latitude: latitude ? parseFloat(latitude) : null,
-        longitude: longitude ? parseFloat(longitude) : null,
+        latitude: lat,
+        longitude: lng,
         images,
         amenities: amenities ? JSON.parse(amenities) : [],
         availableFrom: availableFrom || null,
@@ -281,6 +321,18 @@ router.patch('/:id', authenticate, requireRole('landlord'), async (req, res, nex
       }
     }
 
+    // Re-geocode if city or street changed, or if coordinates are missing
+    const newCity = updates.city || apartment.city;
+    const newStreet = updates.street || updates.neighborhood || apartment.street;
+    const needsGeocode = (updates.city || updates.street || updates.neighborhood) || (!apartment.latitude || !apartment.longitude);
+    if (needsGeocode) {
+      const geo = await geocodeAddress(newCity, newStreet);
+      if (geo) {
+        updates.latitude = geo.latitude;
+        updates.longitude = geo.longitude;
+      }
+    }
+
     await apartment.update(updates);
     await cacheDel(`apartment:${apartment.id}`);
     const normalizedCity = typeof apartment.city === 'string' ? apartment.city.toLowerCase() : null;
@@ -315,6 +367,23 @@ router.delete('/:id', authenticate, requireRole('landlord'), async (req, res, ne
 
     const normalizedCity = typeof apartment.city === 'string' ? apartment.city.toLowerCase() : null;
     const aid = apartment.id;
+
+    if (RentalContract.db.readyState === 1) {
+      const activeContract = await RentalContract.findOne({
+        apartmentId: String(aid),
+        landlordId: req.user.id,
+        status: { $nin: ['terminated'] },
+      });
+      if (activeContract) {
+        return res.status(409).json({
+          error: 'Cannot delete apartment with an active rental contract',
+        });
+      }
+    } else if (process.env.NODE_ENV === 'production') {
+      return res.status(503).json({
+        error: 'Cannot delete apartment while contract data is unavailable',
+      });
+    }
 
     await sequelize.transaction(async (t) => {
       await Swipe.destroy({ where: { apartmentId: aid }, transaction: t });
@@ -379,32 +448,30 @@ router.post(
   }
 );
 
-// POST /api/apartments/search/nlp — NLP free-text search via Gemini
+// ─── POST /api/apartments/search/nlp — NLP free-text search via Gemini ──────
 router.post(
   '/search/nlp',
   authenticate,
-  requireRole('tenant'),
   [body('query').trim().isLength({ min: 2, max: 500 }).withMessage('Query must be 2-500 chars')],
   async (req, res, next) => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
 
-      const { query } = req.body;
+      const { query: nlpQuery } = req.body;
 
-      const { parseSearchQuery } = require('../services/geminiService');
-      const filters = await parseSearchQuery(query);
+      // Redis cache (6h)
+      const cacheKey = `nlp:${Buffer.from(nlpQuery).toString('base64').slice(0, 64)}`;
+      const cached = await cacheGet(cacheKey);
+      if (cached) return res.json({ ...cached, fromCache: true });
+
+      const filters = await parseSearchQuery(nlpQuery);
 
       // Build Sequelize where clause
       const where = { isActive: true };
-      
-      if (filters.city) {
-        where.city = { [Op.iLike]: `%${filters.city}%` };
-      }
+      if (filters.city) where.city = { [Op.iLike]: `%${filters.city}%` };
       const streetFilter = filters.street || filters.neighborhood;
-      if (streetFilter) {
-        where.street = { [Op.iLike]: `%${streetFilter}%` };
-      }
+      if (streetFilter) where.street = { [Op.iLike]: `%${streetFilter}%` };
       if (filters.minPrice || filters.maxPrice) {
         where.price = {};
         if (filters.minPrice) where.price[Op.gte] = filters.minPrice;
@@ -415,12 +482,8 @@ router.post(
         if (filters.minRooms) where.rooms[Op.gte] = filters.minRooms;
         if (filters.maxRooms) where.rooms[Op.lte] = filters.maxRooms;
       }
-      if (filters.amenities?.length) {
-        where.amenities = { [Op.contains]: filters.amenities };
-      }
-      if (filters.petsAllowed === true) {
-        where.petsAllowed = true;
-      }
+      if (filters.amenities?.length) where.amenities = { [Op.contains]: filters.amenities };
+      if (filters.petsAllowed === true) where.petsAllowed = true;
 
       // Exclude already-swiped apartments
       const swipedIds = await Swipe.findAll({
@@ -428,23 +491,50 @@ router.post(
         attributes: ['apartmentId'],
         raw: true,
       }).then((rows) => rows.map((r) => r.apartmentId));
-
-      if (swipedIds.length) {
-        where.id = { [Op.notIn]: swipedIds };
-      }
+      if (swipedIds.length) where.id = { [Op.notIn]: swipedIds };
 
       const apartments = await Apartment.findAll({
         where,
         include: [{ model: User, as: 'landlord', attributes: ['id', 'firstName', 'lastName', 'avatarUrl', 'isVerified', 'trustScore'] }],
-        order: [['likeCount', 'DESC'], ['createdAt', 'DESC']],
+        order: [['createdAt', 'DESC']],
         limit: 30,
       });
 
-      res.json({ apartments, parsed: filters, total: apartments.length });
+      const payload = { apartments, parsed: filters, total: apartments.length };
+      await cacheSet(cacheKey, payload, 21600); // 6h
+      res.json(payload);
     } catch (err) {
       next(err);
     }
   }
 );
+
+// ─── POST /api/apartments/geocode-backfill — backfill coordinates ──
+// Body: { "force": true } to re-geocode ALL listings (not just missing)
+router.post('/geocode-backfill', authenticate, requireRole('admin'), async (req, res, next) => {
+  try {
+    const force = req.body?.force === true;
+    const where = force ? {} : { [Op.or]: [{ latitude: null }, { longitude: null }] };
+    const listings = await Apartment.findAll({
+      where,
+      attributes: ['id', 'city', 'street'],
+    });
+    let updated = 0;
+    const failed = [];
+    for (const apt of listings) {
+      const geo = await geocodeAddress(apt.city, apt.street);
+      if (geo) {
+        await apt.update({ latitude: geo.latitude, longitude: geo.longitude });
+        updated++;
+      } else {
+        failed.push({ id: apt.id, city: apt.city, street: apt.street });
+      }
+      await new Promise((r) => setTimeout(r, 3500));
+    }
+    res.json({ total: listings.length, updated, failed });
+  } catch (err) {
+    next(err);
+  }
+});
 
 module.exports = router;

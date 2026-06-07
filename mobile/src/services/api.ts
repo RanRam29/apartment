@@ -104,6 +104,12 @@ api.interceptors.response.use(
     }
     if (error.response?.status === 401) {
       await storage.deleteItemAsync(TOKEN_KEY);
+      // Reset auth store so navigation redirects to login
+      const { useAuthStore } = require('../store/useAuthStore');
+      const state = useAuthStore.getState();
+      if (state.isAuthenticated) {
+        useAuthStore.setState({ user: null, token: null, isAuthenticated: false, needsOnboarding: false });
+      }
     }
     return Promise.reject(error);
   }
@@ -126,15 +132,16 @@ export const authApi = {
     api.patch('/auth/avatar', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
   switchRole: (role: 'tenant' | 'landlord') => api.patch('/auth/switch-role', { role }),
   updateUsersMe: (data: { whatsappOptIn?: boolean; phone?: string }) =>
-    api.put('/users/me', data),
+    api.patch('/auth/profile', data),
+  // Stub — WhatsApp unread count endpoint not yet implemented in backend
   getUnreadWhatsappCount: () =>
-    api.get('/v3/whatsapp/unread-count'),
+    Promise.resolve({ data: { count: 0 } }),
   updateNotificationPreferences: (prefs: any) =>
-    api.put('/users/me/notification-preferences', prefs),
+    api.put('/auth/notification-preferences', prefs),
   exportData: () =>
-    api.post('/users/me/export-data'),
+    api.post('/auth/export-data'),
   requestDeletion: () =>
-    api.post('/users/me/request-deletion'),
+    api.post('/auth/request-deletion'),
 };
 
 // ─── Apartments ───────────────────────────────────────────────────────────────
@@ -395,6 +402,11 @@ export const tosApi = {
 
 export const tenantApi = {
   getJournal: () => api.get('/tenant/journal'),
+};
+
+export const renterJournalApi = {
+  getJournal: (userId: string) => api.get(`/v3/renter-journal/${userId}`),
+  updateProfile: (userId: string, data: { firstName?: string; lastName?: string; bio?: string; avatarUrl?: string }) => api.put(`/v3/renter-journal/${userId}`, data),
 };
 
 // ─── Token helpers ────────────────────────────────────────────────────────────

@@ -40,8 +40,8 @@ export function jitterCoords(id: string, lat: number, lng: number): { lat: numbe
     h ^= id.charCodeAt(i);
     h = Math.imul(h, 16777619);
   }
-  const dx = (((h % 4001) - 2000) / 500000) * 15;
-  const dy = ((((h >> 16) % 4001) - 2000) / 500000) * 15;
+  const dx = ((h % 4001) - 2000) / 500000;
+  const dy = (((h >> 16) % 4001) - 2000) / 500000;
   return { lat: lat + dx, lng: lng + dy };
 }
 

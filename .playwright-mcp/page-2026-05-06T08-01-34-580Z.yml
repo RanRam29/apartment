@@ -1,0 +1,32 @@
+- generic [ref=e189]:
+  - generic [ref=e194]:
+    - generic [ref=e196]: 
+    - generic [ref=e198] [cursor=pointer]: 
+    - generic [ref=e199]:
+      - generic [ref=e201]: ₪7,666/חודש
+      - generic [ref=e202]: ;l'm
+      - generic [ref=e203]:  test, test
+      - generic [ref=e204]:
+        - generic [ref=e205]:
+          - generic [ref=e206]: 
+          - generic [ref=e207]: 4 חד׳
+        - generic [ref=e208]:
+          - generic [ref=e209]: 
+          - generic [ref=e210]: קומה 2
+        - generic [ref=e211]:
+          - generic [ref=e212]: 
+          - generic [ref=e213]: 50 מ"ר
+        - generic [ref=e214]:
+          - generic [ref=e215]: 
+          - generic [ref=e216]: 1 צפיות
+      - generic [ref=e217]: תיאור
+      - generic [ref=e218]: ;'klm';mn
+      - generic [ref=e219]: בעל הדירה
+      - generic [ref=e220]:
+        - generic [ref=e222]: 
+        - generic [ref=e224]: Test2 Landlord2
+  - generic [ref=e225]:
+    - generic:
+      - generic:
+        - button "Go back" [ref=e227] [cursor=pointer]
+        - heading "פרטי דירה" [level=1] [ref=e230]
