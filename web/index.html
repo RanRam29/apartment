@@ -1,511 +1,526 @@
-<!DOCTYPE html>
-<html lang="he" dir="rtl">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DirApp — מצא את הדירה שלך בהחלקה אחת</title>
-  <meta name="description" content="DirApp — אפליקציית הדירות החכמה לישראל. מצא את הדירה המושלמת בלי סוכנים ובלי עמלות." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    body {
-      font-family: 'Assistant', sans-serif;
-      background: #0d1b2a;
-      color: #f0f4f8;
-      -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
-    }
-    a { text-decoration: none; color: inherit; }
-    button, a { cursor: pointer; }
+<!DOCTYPE html><html dir="rtl" lang="he" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>DirApp - דף נחיתה עם אנימציות (W1) [LATEST]</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+        body {
+            font-family: 'Rubik', sans-serif;
+            background-color: #f8f9ff;
+            color: #191c20;
+            overflow-x: hidden;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-nav {
+            background: rgba(248, 249, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .hero-gradient {
+            background: radial-gradient(circle at 20% 30%, #002045 0%, #00091b 100%);
+        }
+        .mesh-bg {
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(170, 100%, 40%, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, hsla(214, 100%, 14%, 0.2) 0px, transparent 50%);
+        }
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0px 12px 24px rgba(0, 32, 69, 0.1);
+        }
+        .step-line::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: 100%;
+            width: 100%;
+            border-top: 2px dashed #00cba9;
+            z-index: -1;
+        }
 
-    /* ── NAVBAR ── */
-    .navbar {
-      position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
-      width: min(calc(100% - 48px), 960px); z-index: 1000;
-      background: rgba(13, 27, 42, 0.80);
-      backdrop-filter: blur(24px) saturate(1.8);
-      -webkit-backdrop-filter: blur(24px) saturate(1.8);
-      border: 1px solid rgba(0, 203, 169, 0.18);
-      border-radius: 100px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.30);
-      padding: 10px 20px;
-      display: flex; align-items: center; justify-content: space-between; gap: 16px;
-    }
-    .navbar-logo {
-      font-size: 1.1rem; font-weight: 800; color: #f0f4f8;
-      letter-spacing: -0.01em; display: flex; align-items: center; gap: 6px;
-    }
-    .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: #00cba9; }
-    .navbar-links { display: flex; align-items: center; gap: 28px; list-style: none; }
-    .navbar-links a { font-size: 0.88rem; color: rgba(240,244,248,0.65); transition: color 200ms; }
-    .navbar-links a:hover { color: #f0f4f8; }
-    .navbar-cta {
-      background: #00cba9; color: #0d1b2a;
-      font-family: 'Assistant', sans-serif; font-size: 0.875rem; font-weight: 800;
-      border: none; border-radius: 100px; padding: 8px 20px; white-space: nowrap;
-      transition: transform 200ms, box-shadow 200ms;
-    }
-    .navbar-cta:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,203,169,0.40); }
-    @media (max-width: 640px) {
-      .navbar { width: calc(100% - 32px); top: 12px; padding: 8px 16px; }
-      .navbar-links { display: none; }
-    }
+        /* Scroll Reveal Styles */
+        .scroll-reveal {
+            opacity: 0;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform, opacity;
+        }
 
-    /* ── HERO ── */
-    .hero {
-      min-height: 100vh;
-      display: flex; align-items: center; justify-content: center;
-      padding: 130px 24px 80px; position: relative;
-      background:
-        radial-gradient(ellipse 70% 50% at 50% 0%, rgba(0,203,169,0.10) 0%, transparent 60%),
-        radial-gradient(ellipse 50% 40% at 80% 80%, rgba(0,203,169,0.05) 0%, transparent 60%),
-        #0d1b2a;
-    }
-    .hero-container {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 60px;
-      width: min(calc(100% - 48px), 1040px);
-      margin: 0 auto;
-      text-align: right;
-    }
-    .hero-content {
-      flex: 1.2;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      text-align: right;
-    }
-    .hero-visual {
-      flex: 0.8;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    .hero-badge {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 5px 14px; border-radius: 100px;
-      background: rgba(0,203,169,0.12); border: 1px solid rgba(0,203,169,0.28);
-      font-size: 0.82rem; font-weight: 600; color: #00cba9;
-      margin-bottom: 28px;
-    }
-    .hero h1 {
-      font-size: clamp(2.4rem, 5.5vw, 4.4rem);
-      font-weight: 800; letter-spacing: -0.03em; color: #f0f4f8;
-      line-height: 1.15; max-width: 600px; margin-bottom: 20px;
-    }
-    .hero h1 span { color: #00cba9; }
-    .hero-subtitle {
-      font-size: 1.1rem; color: rgba(240,244,248,0.65);
-      max-width: 500px; line-height: 1.7; margin-bottom: 40px;
-    }
+        .reveal-up { transform: translateY(30px); }
+        .reveal-down { transform: translateY(-30px); }
+        .reveal-left { transform: translateX(30px); }
+        .reveal-right { transform: translateX(-30px); }
 
-    /* ── WAITLIST FORM ── */
-    .waitlist-form {
-      display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-start;
-      width: 100%; max-width: 480px; margin-bottom: 24px;
-    }
-    .waitlist-input {
-      flex: 1; min-width: 200px;
-      background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 100px; padding: 13px 20px;
-      font-family: 'Assistant', sans-serif; font-size: 0.95rem; color: #f0f4f8;
-      outline: none; transition: border-color 200ms;
-      direction: rtl;
-    }
-    .waitlist-input::placeholder { color: rgba(240,244,248,0.35); }
-    .waitlist-input:focus { border-color: rgba(0,203,169,0.55); }
-    .waitlist-btn {
-      background: #00cba9; color: #0d1b2a;
-      font-family: 'Assistant', sans-serif; font-size: 0.95rem; font-weight: 800;
-      border: none; border-radius: 100px; padding: 13px 28px; white-space: nowrap;
-      transition: transform 200ms, box-shadow 200ms;
-    }
-    .waitlist-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,203,169,0.35); }
-    .waitlist-note { font-size: 0.78rem; color: rgba(240,244,248,0.35); margin-top: 0px; margin-bottom: 0px; }
+        .scroll-reveal.active {
+            opacity: 1;
+            transform: translate(0, 0);
+        }
 
-    /* ── HERO CARD ── */
-    .hero-card {
-      background: rgba(44, 62, 80, 0.70);
-      backdrop-filter: blur(40px) saturate(1.8);
-      -webkit-backdrop-filter: blur(40px) saturate(1.8);
-      border: 1px solid rgba(0,203,169,0.18);
-      border-radius: 28px;
-      box-shadow: 0 24px 64px rgba(0,0,0,0.40);
-      padding: 24px; max-width: 400px; width: 100%;
-      animation: float 6s ease-in-out infinite;
-    }
-    @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-    @media (max-width: 900px) {
-      .hero-container {
-        flex-direction: column;
-        text-align: center;
-        gap: 48px;
-      }
-      .hero-content {
-        align-items: center;
-        text-align: center;
-      }
-      .waitlist-form {
-        justify-content: center;
-        margin-bottom: 32px;
-      }
-      .waitlist-note {
-        margin-top: -12px;
-        margin-bottom: 0px;
-      }
-    }
-    .card-img {
-      width: 100%; height: 190px; border-radius: 18px;
-      background: linear-gradient(135deg, #1a2e42 0%, #2c3e50 100%);
-      margin-bottom: 16px; overflow: hidden; position: relative;
-    }
-    .card-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 18px; }
-    .card-luxury {
-      position: absolute; top: 10px; right: 10px;
-      background: linear-gradient(135deg, #f59e0b, #d97706);
-      color: #fff; font-size: 0.7rem; font-weight: 800;
-      padding: 3px 10px; border-radius: 100px; letter-spacing: 0.04em;
-    }
-    .card-price {
-      font-size: 1.55rem; font-weight: 800; color: #f0f4f8;
-      letter-spacing: -0.02em; margin-bottom: 4px;
-    }
-    .card-price span { font-size: 0.9rem; font-weight: 400; color: rgba(240,244,248,0.55); }
-    .card-location { font-size: 0.88rem; color: rgba(240,244,248,0.55); margin-bottom: 14px; }
-    .card-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; }
-    .card-chip {
-      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 100px; padding: 3px 10px;
-      font-size: 0.78rem; color: rgba(240,244,248,0.70);
-    }
-    .card-actions { display: flex; gap: 12px; justify-content: center; }
-    .card-btn {
-      width: 56px; height: 56px; border-radius: 50%; border: none; font-size: 1.3rem;
-      display: flex; align-items: center; justify-content: center;
-      transition: transform 250ms cubic-bezier(0.34,1.56,0.64,1), box-shadow 200ms;
-    }
-    .card-btn-reject { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.30); }
-    .card-btn-reject:hover { transform: scale(1.12); box-shadow: 0 8px 24px rgba(239,68,68,0.30); }
-    .card-btn-like { background: rgba(0,203,169,0.15); border: 1px solid rgba(0,203,169,0.30); }
-    .card-btn-like:hover { transform: scale(1.12); box-shadow: 0 8px 24px rgba(0,203,169,0.30); }
-    .card-btn-super { background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.30); }
-    .card-btn-super:hover { transform: scale(1.12); box-shadow: 0 8px 24px rgba(245,158,11,0.30); }
+        /* Staggered delays */
+        .delay-1 { transition-delay: 100ms; }
+        .delay-2 { transition-delay: 200ms; }
+        .delay-3 { transition-delay: 300ms; }
+        .delay-4 { transition-delay: 400ms; }
+        .delay-5 { transition-delay: 500ms; }
+        .delay-6 { transition-delay: 600ms; }
 
-    /* ── STATS BAR ── */
-    .stats-bar {
-      background: rgba(0,203,169,0.06); border-top: 1px solid rgba(0,203,169,0.12);
-      border-bottom: 1px solid rgba(0,203,169,0.12);
-      padding: 36px 24px;
-    }
-    .stats-inner { max-width: 840px; margin: 0 auto; display: flex; gap: 0; flex-wrap: wrap; }
-    .stat-item { flex: 1; min-width: 160px; text-align: center; padding: 8px 16px; }
-    .stat-item + .stat-item { border-right: 1px solid rgba(255,255,255,0.08); }
-    .stat-num { font-size: 2.2rem; font-weight: 800; color: #00cba9; letter-spacing: -0.03em; }
-    .stat-label { font-size: 0.85rem; color: rgba(240,244,248,0.50); margin-top: 4px; }
-    @media (max-width: 640px) {
-      .stat-item + .stat-item { border-right: none; border-top: 1px solid rgba(255,255,255,0.08); }
-    }
-
-    /* ── FEATURES ── */
-    .features { padding: 96px 24px; max-width: 1040px; margin: 0 auto; }
-    .section-eyebrow {
-      text-align: center; font-size: 0.78rem; font-weight: 700;
-      letter-spacing: 0.14em; text-transform: uppercase; color: #00cba9; margin-bottom: 14px;
-    }
-    .section-title {
-      text-align: center; font-size: clamp(1.75rem, 3.5vw, 2.6rem);
-      font-weight: 800; letter-spacing: -0.03em; color: #f0f4f8; margin-bottom: 52px;
-    }
-    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-    @media (max-width: 768px) { .features-grid { grid-template-columns: 1fr; } }
-    .feature-card {
-      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 22px; padding: 28px;
-      transition: transform 300ms ease, box-shadow 300ms ease, border-color 300ms ease;
-    }
-    .feature-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 20px 48px rgba(0,0,0,0.25);
-      border-color: rgba(0,203,169,0.25);
-    }
-    .feature-icon {
-      width: 46px; height: 46px; border-radius: 14px;
-      background: rgba(0,203,169,0.12); border: 1px solid rgba(0,203,169,0.22);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.3rem; margin-bottom: 18px;
-    }
-    .feature-card h3 { font-size: 1.1rem; font-weight: 800; color: #f0f4f8; margin-bottom: 10px; }
-    .feature-card p { font-size: 0.9rem; color: rgba(240,244,248,0.55); line-height: 1.65; }
-
-    /* ── HOW IT WORKS ── */
-    .how { padding: 80px 24px; background: rgba(0,203,169,0.04); }
-    .how-inner { max-width: 720px; margin: 0 auto; }
-    .steps { display: flex; flex-direction: column; gap: 28px; margin-top: 48px; }
-    .step { display: flex; align-items: flex-start; gap: 20px; }
-    .step-num {
-      width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
-      background: rgba(0,203,169,0.15); border: 1px solid rgba(0,203,169,0.30);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1rem; font-weight: 800; color: #00cba9;
-    }
-    .step-body h4 { font-size: 1rem; font-weight: 800; color: #f0f4f8; margin-bottom: 6px; }
-    .step-body p { font-size: 0.88rem; color: rgba(240,244,248,0.55); line-height: 1.65; }
-
-    /* ── CTA SECTION ── */
-    .cta-section {
-      padding: 100px 24px; text-align: center; position: relative; overflow: hidden;
-      background: linear-gradient(160deg, #162839 0%, #0d1b2a 60%);
-    }
-    .cta-section::before {
-      content: ''; position: absolute; top: -30%; left: 50%; transform: translateX(-50%);
-      width: 600px; height: 400px; border-radius: 50%;
-      background: radial-gradient(circle, rgba(0,203,169,0.12) 0%, transparent 70%);
-      pointer-events: none;
-    }
-    .cta-inner { position: relative; z-index: 1; max-width: 560px; margin: 0 auto; }
-    .cta-section h2 {
-      font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 800;
-      letter-spacing: -0.03em; color: #f0f4f8; margin-bottom: 16px;
-    }
-    .cta-section h2 span { color: #00cba9; }
-    .cta-subtitle { font-size: 1rem; color: rgba(240,244,248,0.55); margin-bottom: 40px; line-height: 1.65; }
-    .cta-form { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; max-width: 440px; margin: 0 auto; }
-    .cta-input {
-      flex: 1; min-width: 190px;
-      background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 100px; padding: 13px 20px;
-      font-family: 'Assistant', sans-serif; font-size: 0.95rem; color: #f0f4f8;
-      outline: none; transition: border-color 200ms; direction: rtl;
-    }
-    .cta-input::placeholder { color: rgba(240,244,248,0.35); }
-    .cta-input:focus { border-color: rgba(0,203,169,0.55); }
-    .cta-btn {
-      background: #00cba9; color: #0d1b2a;
-      font-family: 'Assistant', sans-serif; font-size: 0.95rem; font-weight: 800;
-      border: none; border-radius: 100px; padding: 13px 28px; white-space: nowrap;
-      transition: transform 200ms, box-shadow 200ms;
-    }
-    .cta-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,203,169,0.35); }
-    .cta-note { font-size: 0.78rem; color: rgba(240,244,248,0.30); margin-top: 14px; }
-
-    /* ── FOOTER ── */
-    footer {
-      padding: 28px 24px; border-top: 1px solid rgba(255,255,255,0.06);
-      display: flex; align-items: center; justify-content: space-between;
-      flex-wrap: wrap; gap: 12px; max-width: 1040px; margin: 0 auto;
-    }
-    .footer-logo { font-size: 1rem; font-weight: 800; color: #f0f4f8; display: flex; align-items: center; gap: 6px; }
-    .footer-copy { font-size: 0.82rem; color: rgba(240,244,248,0.35); }
-    .footer-love { font-size: 0.82rem; color: rgba(240,244,248,0.35); }
-    .footer-love .heart { color: #ef4444; }
-    @media (max-width: 480px) { footer { justify-content: center; text-align: center; } }
-
-    /* ── FOCUS ── */
-    button:focus-visible, a:focus-visible { outline: 2px solid #00cba9; outline-offset: 3px; }
-  </style>
+        @media (prefers-reduced-motion: reduce) {
+            .scroll-reveal {
+                opacity: 1 !important;
+                transform: none !important;
+                transition: none !important;
+            }
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-tertiary-container": "#009a7f",
+                      "on-surface": "#191c20",
+                      "surface-low": "#eff4ff",
+                      "on-primary-fixed-variant": "#2e476e",
+                      "error": "#ba1a1a",
+                      "tertiary-fixed": "#5dfbd7",
+                      "primary-container": "#002045",
+                      "on-secondary-fixed": "#00201c",
+                      "inverse-primary": "#aec7f5",
+                      "inverse-on-surface": "#eff0f6",
+                      "surface-variant": "#e1e2e8",
+                      "landlord-green": "#00cba9",
+                      "on-secondary-container": "#0b6f63",
+                      "on-surface-variant": "#43474e",
+                      "admin-red": "#ba1a1a",
+                      "secondary-fixed": "#9ff2e2",
+                      "inverse-surface": "#2e3135",
+                      "surface-container": "#e5eeff",
+                      "background": "#f8f9ff",
+                      "on-primary-fixed": "#001b3c",
+                      "secondary-container": "#9cefdf",
+                      "on-primary-container": "#7089b3",
+                      "primary": "#00091b",
+                      "on-background": "#191c20",
+                      "primary-fixed-dim": "#aec7f5",
+                      "tertiary-fixed-dim": "#36debb",
+                      "on-primary": "#ffffff",
+                      "primary-fixed": "#d6e3ff",
+                      "on-secondary-fixed-variant": "#005047",
+                      "error-container": "#ffdad6",
+                      "secondary-fixed-dim": "#83d5c6",
+                      "on-tertiary": "#ffffff",
+                      "surface-tint": "#465f87",
+                      "outline-variant": "#c4c6cf",
+                      "surface-container-lowest": "#ffffff",
+                      "on-secondary": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "secondary": "#006b5f",
+                      "on-tertiary-fixed": "#002019",
+                      "tertiary-container": "#00261e",
+                      "surface": "#f8f9ff",
+                      "surface-container-highest": "#e1e2e8",
+                      "guarantor-purple": "#6b4fa0",
+                      "tertiary": "#000c08",
+                      "tenant-blue": "#002045",
+                      "on-tertiary-fixed-variant": "#005142",
+                      "surface-bright": "#f8f9ff",
+                      "surface-container-high": "#e7e8ee",
+                      "surface-dim": "#d8dae0",
+                      "outline": "#74777f",
+                      "surface-container-low": "#f2f3f9",
+                      "on-error": "#ffffff"
+              },
+              "spacing": {
+                      "margin-desktop": "32px",
+                      "input-height": "48px",
+                      "margin-mobile": "16px",
+                      "topbar-height": "64px",
+                      "sidebar-width": "260px",
+                      "button-height": "48px",
+                      "gutter": "24px"
+              },
+              "fontFamily": {
+                      "h3-web": ["Rubik"],
+                      "body": ["Rubik"],
+                      "display-web": ["Rubik"],
+                      "h2-web": ["Rubik"],
+                      "h1-web": ["Rubik"]
+              },
+              "fontSize": {
+                      "h3-web": ["22px", {"lineHeight": "30px", "fontWeight": "600"}],
+                      "body": ["16px", {"lineHeight": "26px", "fontWeight": "400"}],
+                      "display-web": ["48px", {"lineHeight": "56px", "fontWeight": "800"}],
+                      "h2-web": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                      "h1-web": ["36px", {"lineHeight": "44px", "fontWeight": "700"}]
+              }
+            },
+          },
+        }
+    </script>
 </head>
-<body>
+<body class="antialiased">
+<!-- 1. Navbar -->
+<nav class="fixed top-0 w-full z-50 glass-nav border-b border-outline-variant/20 h-[64px]">
+<div class="max-w-7xl mx-auto px-margin-desktop flex flex-row-reverse justify-between items-center h-full">
+<!-- Brand Logo -->
+<div class="flex items-center gap-2">
+<span class="font-h2-web text-tenant-blue font-extrabold tracking-tight">DirApp</span>
+</div>
+<!-- Navigation Links -->
+<div class="hidden md:flex flex-row-reverse gap-8 items-center font-body text-on-surface-variant">
+<a class="hover:text-landlord-green transition-colors" href="#features">יתרונות</a>
+<a class="hover:text-landlord-green transition-colors" href="#how-it-works">איך זה עובד</a>
+<a class="hover:text-landlord-green transition-colors" href="#join">הצטרפו</a>
+</div>
+<!-- CTA Primary -->
+<button class="bg-tenant-blue text-on-primary px-6 py-2 rounded-full font-label hover:bg-opacity-90 transition-all text-sm">
+                כניסה למערכת
+            </button>
+</div>
+</nav>
+<!-- 2. Hero Section -->
+<section class="hero-gradient mesh-bg pt-32 pb-20 px-margin-desktop overflow-hidden" style="background-position: 0.71875% 2.9149%;">
+<div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+<!-- Text Content -->
+<div class="text-right space-y-6 order-2 md:order-1">
+<h1 class="font-display-web text-on-primary leading-tight scroll-reveal reveal-right active">
+                    מצא את הדירה שלך <br>
+<span class="text-landlord-green">בהחלקה אחת</span>
+</h1>
+<p class="font-h3-web text-primary-fixed-dim max-w-xl scroll-reveal reveal-right delay-1 active">
+                    הדרך המודרנית, השקופה והבטוחה ביותר לשכור ולהשכיר דירות בישראל. בלי מתווכים, בלי כאבי ראש, הכל בדיגיטל.
+                </p>
+<div class="flex flex-row-reverse gap-4 pt-4 scroll-reveal reveal-right delay-2 active">
+<button class="bg-landlord-green text-tenant-blue px-8 py-3 rounded-full font-label font-bold text-lg hover:scale-105 transition-transform hover:shadow-xl hover:bg-opacity-90 transition-all duration-300">
+                        הצטרף כשוכר
+                    </button>
+<button class="border-2 border-primary-fixed-dim text-on-primary px-8 py-3 rounded-full font-label font-bold text-lg hover:bg-on-primary/10 transition-colors hover:scale-105 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-all duration-300">
+                        אני משכיר
+                    </button>
+</div>
+<!-- Trust Badges -->
+<div class="flex flex-row-reverse items-center gap-6 pt-8 opacity-70 scroll-reveal reveal-right delay-3 active">
+<div class="flex items-center gap-2 text-on-primary">
+<span class="material-symbols-outlined text-landlord-green">verified_user</span>
+<span class="text-sm">מאובטח ומוצפן</span>
+</div>
+<div class="flex items-center gap-2 text-on-primary">
+<span class="material-symbols-outlined text-landlord-green">check_circle</span>
+<span class="text-sm">100% דירות מאומתות</span>
+</div>
+</div>
+</div>
+<!-- 3D Phone Mockup -->
+<div class="relative order-1 md:order-2 flex justify-center items-center scroll-reveal reveal-left active">
+<div class="relative w-[300px] h-[600px] bg-primary rounded-[3rem] border-[8px] border-surface-variant shadow-2xl overflow-hidden">
+<img alt="Mobile App View" class="w-full h-full object-cover" data-alt="A high-end mobile app interface displayed on a modern smartphone mockup. The screen shows a vibrant property listing with high-resolution interior photography of a sun-drenched Tel Aviv apartment. The UI features sleek Action Teal swipe buttons and elegant typography in Trust Blue. The background is a sophisticated studio setting with soft atmospheric lighting, emphasizing a premium digital product experience." src="https://lh3.googleusercontent.com/aida/AP1WRLu-wMVk4K_GrU_txRVzsifpjrRuEhrlfgmCosUNLMPblmF-SPGbXbCuHOPMZoRJRx81tvt3qBo8o_WjJFZpFZkh5s6L_7-orVaEcmSonqbUq4r9Y48sZNpBx5N9jehbhc7Kgf9IR-ggUlNtrNewit41mMks_PYHMAzqI7uZ3nrLET3n39JMjGnFRTRR8zAWtDwJ2PjOchw5mfVvqXqmoWANx09tVqAxt-GARFMY0jOcmgqZiM-nXHE2pw">
+</div>
+<!-- Floating Elements -->
+<div class="absolute -right-10 top-20 bg-surface-container-lowest p-4 rounded-2xl shadow-lg border border-outline-variant/30 animate-bounce transition-all">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary">favorite</span>
+</div>
+<div>
+<p class="text-xs font-bold">דירה חדשה בקרבתך!</p>
+<p class="text-[10px] text-outline">רמת גן, 3 חדרים</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 3. Stats Bar -->
+<div class="bg-primary py-12 border-y border-on-primary-fixed-variant/20">
+<div class="max-w-7xl mx-auto px-margin-desktop grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+<div class="scroll-reveal reveal-up delay-1 active">
+<p class="font-display-web text-landlord-green text-3xl">5,000+</p>
+<p class="font-caption text-primary-fixed-dim">דירות להשכרה</p>
+</div>
+<div class="scroll-reveal reveal-up delay-2 active">
+<p class="font-display-web text-landlord-green text-3xl">12k</p>
+<p class="font-caption text-primary-fixed-dim">שוכרים פעילים</p>
+</div>
+<div class="scroll-reveal reveal-up delay-3 active">
+<p class="font-display-web text-landlord-green text-3xl">24h</p>
+<p class="font-caption text-primary-fixed-dim">זמן סגירת חוזה ממוצע</p>
+</div>
+<div class="scroll-reveal reveal-up delay-4 active">
+<p class="font-display-web text-landlord-green text-3xl">0%</p>
+<p class="font-caption text-primary-fixed-dim">דמי תיווך</p>
+</div>
+</div>
+</div>
+<!-- 4. Features Section -->
+<section class="py-24 px-margin-desktop bg-surface" id="features">
+<div class="max-w-7xl mx-auto text-center mb-16 scroll-reveal reveal-up active">
+<h2 class="font-h1-web text-tenant-blue mb-4">למה DirApp?</h2>
+<p class="font-body text-on-surface-variant">הכלים המתקדמים ביותר לשוכרים ומשכירים במקום אחד</p>
+</div>
+<div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Feature 1 -->
+<div class="feature-card group bg-surface-container-lowest p-8 rounded-2xl border border-outline-variant/30 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl scroll-reveal reveal-up delay-1 active">
+<span class="material-symbols-outlined text-4xl text-landlord-green mb-4 transition-transform duration-300 group-hover:scale-110">swipe_right</span>
+<h3 class="font-h3-web text-tenant-blue mb-2">SmartSwipe™</h3>
+<p class="font-body text-on-surface-variant text-sm mb-4">מערכת התאמה חכמה הלומדת את העדפותיך ומציגה רק את מה שבאמת רלוונטי עבורך.</p>
+<div class="flex items-center gap-1 text-landlord-green font-medium text-sm transition-all duration-300 group-hover:-translate-x-1">
+<span class="">למידע נוסף</span>
+<span class="material-symbols-outlined text-sm">arrow_back</span>
+</div>
+</div>
+<!-- Feature 2 -->
+<div class="feature-card group bg-surface-container-lowest p-8 rounded-2xl border border-outline-variant/30 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl scroll-reveal reveal-up delay-2 active">
+<span class="material-symbols-outlined text-4xl text-landlord-green mb-4 transition-transform duration-300 group-hover:scale-110">verified</span>
+<h3 class="font-h3-web text-tenant-blue mb-2">אימות דיירים ונכסים</h3>
+<p class="font-body text-on-surface-variant text-sm mb-4">פרופילים מאומתים בלבד. שקיפות מלאה לגבי היסטוריית השכירות ומצב הנכס.</p>
+<div class="flex items-center gap-1 text-landlord-green font-medium text-sm transition-all duration-300 group-hover:-translate-x-1">
+<span class="">למידע נוסף</span>
+<span class="material-symbols-outlined text-sm">arrow_back</span>
+</div>
+</div>
+<!-- Feature 3 -->
+<div class="feature-card group bg-surface-container-lowest p-8 rounded-2xl border border-outline-variant/30 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl scroll-reveal reveal-up delay-3 active">
+<span class="material-symbols-outlined text-4xl text-landlord-green mb-4 transition-transform duration-300 group-hover:scale-110">description</span>
+<h3 class="font-h3-web text-tenant-blue mb-2">חוזה דיגיטלי חכם</h3>
+<p class="font-body text-on-surface-variant text-sm mb-4">חתימה על חוזים תקניים ומאובטחים ישירות מהאפליקציה, עם ליווי משפטי מלא.</p>
+<div class="flex items-center gap-1 text-landlord-green font-medium text-sm transition-all duration-300 group-hover:-translate-x-1">
+<span class="">למידע נוסף</span>
+<span class="material-symbols-outlined text-sm">arrow_back</span>
+</div>
+</div>
+<!-- Feature 4 -->
+<div class="feature-card group bg-surface-container-lowest p-8 rounded-2xl border border-outline-variant/30 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl scroll-reveal reveal-up delay-4 active">
+<span class="material-symbols-outlined text-4xl text-landlord-green mb-4 transition-transform duration-300 group-hover:scale-110">payments</span>
+<h3 class="font-h3-web text-tenant-blue mb-2">ניהול תשלומים</h3>
+<p class="font-body text-on-surface-variant text-sm mb-4">גביית שכ"ד אוטומטית, ניהול ערבויות ותשלומים נלווים במערכת שקופה אחת.</p>
+<div class="flex items-center gap-1 text-landlord-green font-medium text-sm transition-all duration-300 group-hover:-translate-x-1">
+<span class="">למידע נוסף</span>
+<span class="material-symbols-outlined text-sm">arrow_back</span>
+</div>
+</div>
+<!-- Feature 5 -->
+<div class="feature-card group bg-surface-container-lowest p-8 rounded-2xl border border-outline-variant/30 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl scroll-reveal reveal-up delay-5 active">
+<span class="material-symbols-outlined text-4xl text-landlord-green mb-4 transition-transform duration-300 group-hover:scale-110">chat_bubble</span>
+<h3 class="font-h3-web text-tenant-blue mb-2">צ'אט מובנה</h3>
+<p class="font-body text-on-surface-variant text-sm mb-4">תקשורת ישירה ובטוחה בין שוכרים למשכירים ללא צורך בחשיפת פרטים אישיים בשלב ראשון.</p>
+<div class="flex items-center gap-1 text-landlord-green font-medium text-sm transition-all duration-300 group-hover:-translate-x-1">
+<span class="">למידע נוסף</span>
+<span class="material-symbols-outlined text-sm">arrow_back</span>
+</div>
+</div>
+<!-- Feature 6 -->
+<div class="feature-card group bg-surface-container-lowest p-8 rounded-2xl border border-outline-variant/30 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl scroll-reveal reveal-up delay-6 active">
+<span class="material-symbols-outlined text-4xl text-landlord-green mb-4 transition-transform duration-300 group-hover:scale-110">analytics</span>
+<h3 class="font-h3-web text-tenant-blue mb-2">דאשבורד משקיעים</h3>
+<p class="font-body text-on-surface-variant text-sm mb-4">כלי ניתוח מתקדמים למשכירים לניהול פורטפוליו נכסים, תשואות ותחזוקה.</p>
+<div class="flex items-center gap-1 text-landlord-green font-medium text-sm transition-all duration-300 group-hover:-translate-x-1">
+<span class="">למידע נוסף</span>
+<span class="material-symbols-outlined text-sm">arrow_back</span>
+</div>
+</div>
+</div>
+</section>
+<!-- 5. How It Works -->
+<section class="py-24 px-margin-desktop bg-surface-container-low overflow-hidden" id="how-it-works">
+<div class="max-w-7xl mx-auto text-center mb-20 scroll-reveal reveal-up active">
+<h2 class="font-h1-web text-tenant-blue mb-4">איך זה עובד?</h2>
+<p class="font-body text-on-surface-variant">תהליך פשוט ומהיר, מהחיפוש ועד המפתח</p>
+</div>
+<div class="max-w-7xl mx-auto flex flex-col md:flex-row-reverse justify-between items-center relative gap-12">
+<!-- Step 1 -->
+<div class="flex-1 flex flex-col items-center text-center z-10 scroll-reveal reveal-up delay-1 active">
+<div class="w-20 h-20 bg-landlord-green rounded-full flex items-center justify-center text-tenant-blue mb-6 shadow-xl shadow-landlord-green/20">
+<span class="material-symbols-outlined text-3xl font-bold">search</span>
+</div>
+<h4 class="font-h3-web text-tenant-blue mb-2">מחפשים ומוצאים</h4>
+<p class="font-body text-sm text-on-surface-variant max-w-[240px]">מגדירים העדפות ומתחילים להחליק בין דירות שעברו אימות מלא.</p>
+</div>
+<!-- Step 2 -->
+<div class="flex-1 flex flex-col items-center text-center z-10 relative scroll-reveal reveal-up delay-2 active">
+<div class="hidden md:block absolute top-10 right-full w-full border-t-2 border-dashed border-landlord-green opacity-30"></div>
+<div class="w-20 h-20 bg-landlord-green rounded-full flex items-center justify-center text-tenant-blue mb-6 shadow-xl shadow-landlord-green/20">
+<span class="material-symbols-outlined text-3xl font-bold">handshake</span>
+</div>
+<h4 class="font-h3-web text-tenant-blue mb-2">מתאימים ומתקדמים</h4>
+<p class="font-body text-sm text-on-surface-variant max-w-[240px]">שני הצדדים הביעו עניין? הצ'אט נפתח ואפשר לקבוע ביקור בנכס.</p>
+</div>
+<!-- Step 3 -->
+<div class="flex-1 flex flex-col items-center text-center z-10 relative scroll-reveal reveal-up delay-3 active">
+<div class="hidden md:block absolute top-10 right-full w-full border-t-2 border-dashed border-landlord-green opacity-30"></div>
+<div class="w-20 h-20 bg-landlord-green rounded-full flex items-center justify-center text-tenant-blue mb-6 shadow-xl shadow-landlord-green/20">
+<span class="material-symbols-outlined text-3xl font-bold">key</span>
+</div>
+<h4 class="font-h3-web text-tenant-blue mb-2">חותמים ועוברים</h4>
+<p class="font-body text-sm text-on-surface-variant max-w-[240px]">חתימה דיגיטלית על החוזה, העברת ערבויות וקבלת המפתח. מזל טוב!</p>
+</div>
+</div>
+</section>
+<!-- 6. For Landlords -->
+<section class="py-24 px-margin-desktop bg-surface-container-lowest">
+<div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-16">
+<!-- Mockup -->
+<div class="flex-1 w-full bg-surface-container rounded-3xl p-8 shadow-inner scroll-reveal reveal-right active">
+<div class="bg-white rounded-xl shadow-2xl overflow-hidden border border-outline-variant/50">
+<div class="bg-tenant-blue p-4 flex justify-between items-center text-on-primary">
+<span class="font-bold">ניהול נכסים - DirApp Admin</span>
+<div class="flex gap-2">
+<div class="w-3 h-3 rounded-full bg-error"></div>
+<div class="w-3 h-3 rounded-full bg-landlord-green"></div>
+</div>
+</div>
+<img alt="Landlord Dashboard" class="w-full h-auto grayscale opacity-90" data-alt="A sophisticated web-based management dashboard for landlords, rendered with a clean and authoritative Corporate Modern aesthetic. The interface displays complex data visualizations including property ROI charts, tenant payment status trackers, and automated maintenance request logs. The color scheme is dominated by Trust Blue and Action Teal accents, with a clear RTL layout. The lighting is bright and professional, suggesting a workspace for high-level asset management." src="https://lh3.googleusercontent.com/aida/AP1WRLuMWDiZ83BY7n8tQpXeFvwpWzvhkAvVnBRISfYct2P384H-dmzpzOPXIbFGvLlqUumZt_jcAFelVy2CAAtm11pRPy4J4yOKO0e5GyOw1MCXcECekxgjZu9xdOY3s1tTK7Ni2KlgjBxbYzg6WWLUsjn5qhDJufW-PQzyVGULsWWAQCo3MAZbzLiNIQqAiaiVeMgwu0Xze_zkMkd8UAYjN-YPLC9GezQzlsr03pXb_Is3ghFMW5uiPfzF">
+</div>
+</div>
+<!-- Content -->
+<div class="flex-1 text-right space-y-8 scroll-reveal reveal-left active">
+<h2 class="font-h1-web text-tenant-blue">ניהול נכסים מקצה לקצה</h2>
+<p class="font-body text-on-surface-variant">המשכירים המקצועיים בישראל כבר עברו לניהול דיגיטלי. DirApp חוסכת לך שעות של עבודה ידנית ובירוקרטיה.</p>
+<ul class="space-y-4">
+<li class="flex flex-row-reverse items-center gap-4 scroll-reveal reveal-up delay-1 active">
+<span class="material-symbols-outlined text-landlord-green bg-secondary-container p-2 rounded-full">check</span>
+<span class="font-body text-tenant-blue font-medium">סינון אוטומטי של דיירים לפי פרמטרים שאתה קובע</span>
+</li>
+<li class="flex flex-row-reverse items-center gap-4 scroll-reveal reveal-up delay-2 active">
+<span class="material-symbols-outlined text-landlord-green bg-secondary-container p-2 rounded-full">check</span>
+<span class="font-body text-tenant-blue font-medium">גביית שכ"ד אלקטרונית והפקת חשבוניות אוטומטית</span>
+</li>
+<li class="flex flex-row-reverse items-center gap-4 scroll-reveal reveal-up delay-3 active">
+<span class="material-symbols-outlined text-landlord-green bg-secondary-container p-2 rounded-full">check</span>
+<span class="font-body text-tenant-blue font-medium">ניהול ותיעוד קריאות שירות ותחזוקה מול אנשי מקצוע</span>
+</li>
+<li class="flex flex-row-reverse items-center gap-4 scroll-reveal reveal-up delay-4 active">
+<span class="material-symbols-outlined text-landlord-green bg-secondary-container p-2 rounded-full">check</span>
+<span class="font-body text-tenant-blue font-medium">גישה למאגר ערבויות ובדיקות רקע פיננסיות</span>
+</li>
+</ul>
+<button class="bg-tenant-blue text-on-primary px-10 py-4 rounded-full font-label font-bold text-lg hover:shadow-xl transition-all mt-4">
+                    התחל לנהל את הנכסים שלך
+                </button>
+</div>
+</div>
+</section>
+<!-- 7. CTA Section -->
+<section class="py-20 px-margin-desktop" id="join">
+<div class="max-w-5xl mx-auto bg-landlord-green rounded-[40px] p-12 text-center text-tenant-blue relative overflow-hidden scroll-reveal reveal-up active">
+<div class="absolute inset-0 mesh-bg opacity-20 pointer-events-none"></div>
+<div class="relative z-10 space-y-6">
+<h2 class="font-display-web text-4xl">מוכן/ה לדירה הבאה?</h2>
+<p class="font-h3-web max-w-2xl mx-auto opacity-80">הצטרפו לאלפי ישראלים שכבר שינו את הדרך בה הם מוצאים בית. הרשמו עכשיו וקבלו התראות על דירות חדשות לפני כולם.</p>
+<form class="flex flex-col md:flex-row-reverse gap-4 justify-center items-center mt-8 w-full" onsubmit="handleWaitlist(event)">
+<input class="w-full md:w-80 h-input-height rounded-full px-6 border-none text-right font-body focus:ring-2 focus:ring-tenant-blue shadow-lg" placeholder="הכנס אימייל" type="email" required>
+<button type="submit" class="bg-tenant-blue text-on-primary h-input-height px-10 rounded-full font-label font-bold hover:bg-opacity-90 transition-all shadow-lg">
+                        אני בפנים
+                    </button>
+</form>
+</div>
+</div>
+</section>
+<!-- 8. Footer -->
+<footer class="bg-primary text-on-primary-fixed-variant pt-20 pb-10 px-margin-desktop">
+<div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 text-right border-b border-on-primary-fixed-variant/20 pb-16">
+<!-- Brand Column -->
+<div class="space-y-4">
+<span class="font-h2-web text-landlord-green font-bold text-3xl">DirApp</span>
+<p class="font-caption text-primary-fixed-dim leading-relaxed">משנים את פני שוק השכירות בישראל באמצעות טכנולוגיה, אמון ושקיפות מלאה.</p>
+<div class="flex flex-row-reverse gap-4 pt-4">
+<a class="w-10 h-10 rounded-full bg-on-primary-fixed-variant/10 flex items-center justify-center hover:bg-landlord-green hover:text-tenant-blue transition-all" href="#">
+<span class="material-symbols-outlined text-xl">face_nod</span>
+</a>
+<a class="w-10 h-10 rounded-full bg-on-primary-fixed-variant/10 flex items-center justify-center hover:bg-landlord-green hover:text-tenant-blue transition-all" href="#">
+<span class="material-symbols-outlined text-xl">link</span>
+</a>
+<a class="w-10 h-10 rounded-full bg-on-primary-fixed-variant/10 flex items-center justify-center hover:bg-landlord-green hover:text-tenant-blue transition-all" href="#">
+<span class="material-symbols-outlined text-xl">camera_alt</span>
+</a>
+</div>
+</div>
+<!-- Links 1 -->
+<div>
+<h5 class="font-h3-web text-on-primary mb-6">המוצר</h5>
+<ul class="space-y-3 font-caption text-primary-fixed-dim">
+<li class=""><a class="hover:text-landlord-green transition-colors" href="#">חיפוש דירה</a></li>
+<li class=""><a class="hover:text-landlord-green transition-colors" href="#">פרסום נכס</a></li>
+<li class=""><a class="hover:text-landlord-green transition-colors" href="#">ניהול שוכרים</a></li>
+<li class=""><a class="hover:text-landlord-green transition-colors" href="#">מערכת חוזים</a></li>
+</ul>
+</div>
+<!-- Links 2 -->
+<div>
+<h5 class="font-h3-web text-on-primary mb-6">החברה</h5>
+<ul class="space-y-3 font-caption text-primary-fixed-dim">
+<li class=""><a class="hover:text-landlord-green transition-colors" href="#">אודותינו</a></li>
+<li class=""><a class="hover:text-landlord-green transition-colors" href="#">קריירה</a></li>
+<li class=""><a class="hover:text-landlord-green transition-colors" href="#">בלוג</a></li>
+<li class=""><a class="hover:text-landlord-green transition-colors" href="#">צור קשר</a></li>
+</ul>
+</div>
+<!-- Links 3 -->
+<div>
+<h5 class="font-h3-web text-on-primary mb-6">משפטי וקהילה</h5>
+<ul class="space-y-3 font-caption text-primary-fixed-dim">
+<li class=""><a class="hover:text-landlord-green transition-colors" href="#">מדיניות פרטיות</a></li>
+<li class=""><a class="hover:text-landlord-green transition-colors" href="#">תקנון האתר</a></li>
+<li class=""><a class="hover:text-landlord-green transition-colors" href="#">פורום משכירים</a></li>
+<li class=""><a class="hover:text-landlord-green transition-colors" href="#">שאלות ותשובות</a></li>
+</ul>
+</div>
+</div>
+<div class="max-w-7xl mx-auto mt-8 flex flex-col md:flex-row-reverse justify-between items-center gap-4">
+<p class="font-caption text-primary-fixed-dim opacity-60">© 2024 DirApp. כל הזכויות שמורות.</p>
+<div class="flex gap-6 opacity-60">
+<img alt="Payment Method 1" class="h-6 grayscale" data-alt="Icon of Visa payment logo in a minimalist monochrome style to fit the dark footer theme." src="https://lh3.googleusercontent.com/aida/AP1WRLv4fJr0SUW0gdpFAYCvCHOPZwO0V6lLYic4agfglslWoWB1qXcxjDu2Br6jsiVGqYnowah6cBXLxHTB5AbCcjnMv36Bs0S69mbq1JgOHNTxkwLpgbs4h56o4E_qOoSsWRRZszX58Vj5gYM125ss1XYn1e9pQ1Ky8FJGc9QZ7yYi1Bm8Uqc_LCa1ngyR3TsD-72VgY54M-ZsE0fl6fnS6cCi7tpZ1akPsKy1FaZDn1l2OmAI1d5UdeneUw">
+<img alt="Payment Method 2" class="h-6 grayscale" data-alt="Icon of Mastercard payment logo in a minimalist monochrome style to fit the dark footer theme." src="https://lh3.googleusercontent.com/aida/AP1WRLscbhxJLEni9mA7vt9qD8z4bJZEZxeFiskubdUicoZAHfHbvi5rJkjvGkfU0IkRV7zgit8BOSb7VE29BkG0XX5NZfjMqbF0Y661Q_PXGnMB-x2c3nCri4xRJ6dfrvrI2G8UbXxqnFoHjynmPqdxpMq8X3brV5RvEYPtpcww9NLc3--PWWQNnrbSfohoa4ypP39B5tqHz5tgy3SgGj1wgBdcG3xjtDcdRxKXJondl66Jbzivkcpm_Gp7AA">
+</div>
+</div>
+</footer>
+<script>
+    // Micro-interactions and subtle effects
+    document.addEventListener('mousemove', (e) => {
+        const mesh = document.querySelector('.mesh-bg');
+        if (mesh) {
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            mesh.style.backgroundPosition = `${x * 20}% ${y * 20}%`;
+        }
+    });
 
-  <!-- NAVBAR -->
-  <nav class="navbar" role="navigation" aria-label="ניווט ראשי">
-    <div class="navbar-logo">
-      <div class="logo-dot"></div>
-      DirApp
-    </div>
-    <ul class="navbar-links">
-      <li><a href="#features">יתרונות</a></li>
-      <li><a href="#how">איך זה עובד</a></li>
-      <li><a href="#waitlist">הצטרפו</a></li>
-    </ul>
-    <button class="navbar-cta" onclick="document.getElementById('hero-email').focus()">הצטרפו לרשימה</button>
-  </nav>
+    // Smooth scrolling
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            if(targetId === '#') return;
+            const target = document.querySelector(targetId);
+            if(target) {
+                target.scrollIntoView({
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
 
-  <!-- HERO -->
-  <section class="hero" aria-labelledby="hero-heading">
-    <div class="hero-container">
-      
-      <!-- Right Side: Content -->
-      <div class="hero-content">
-        <div class="hero-badge">🚀 בקרוב בישראל</div>
-        <h1 id="hero-heading">
-          מצא את הדירה שלך<br />
-          ב<span>החלקה אחת</span>.
-        </h1>
-        <p class="hero-subtitle">
-          DirApp מביאה לך את דירות השכירות הכי מתאימות — בלי סוכנים, בלי עמלות, עם AI שמבין מה אתה/את באמת מחפש/ת.
-        </p>
-        <form class="waitlist-form" onsubmit="handleWaitlist(event)" id="waitlist">
-          <input
-            id="hero-email"
-            class="waitlist-input"
-            type="email"
-            placeholder="האימייל שלך"
-            required
-            aria-label="כתובת אימייל"
-          />
-          <button class="waitlist-btn" type="submit">הצטרפו עכשיו ←</button>
-        </form>
-        <p class="waitlist-note">כבר 2,400+ אנשים ברשימת ההמתנה · ללא ספאם</p>
-      </div>
+    // Intersection Observer for Scroll Reveal
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('active');
+                // Optional: stop observing once revealed
+                // revealObserver.unobserve(entry.target);
+            }
+        });
+    }, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px' // Slightly offset trigger point
+    });
 
-      <!-- Left Side: Interactive Mock Card -->
-      <div class="hero-visual">
-        <div class="hero-card" role="img" aria-label="דוגמה לכרטיס דירה">
-          <div class="card-img">
-            <img
-              src="https://images.unsplash.com/photo-1502672023488-203a3bb6e526?auto=format&fit=crop&w=800&h=380&q=80"
-              alt="דירה בפלורנטין, תל אביב"
-              loading="lazy"
-            />
-            <div class="card-luxury">LUXURY</div>
-          </div>
-          <div class="card-price">₪8,500 <span>/חודש</span></div>
-          <div class="card-location">📍 פלורנטין, תל אביב</div>
-          <div class="card-chips">
-            <span class="card-chip">🛏 3 חדרים</span>
-            <span class="card-chip">📐 78 מ"ר</span>
-            <span class="card-chip">🅿️ חניה</span>
-            <span class="card-chip">☀️ מרפסת</span>
-          </div>
-          <div class="card-actions">
-            <button class="card-btn card-btn-reject" aria-label="דלג">✕</button>
-            <button class="card-btn card-btn-super" aria-label="Super Like">★</button>
-            <button class="card-btn card-btn-like" aria-label="אהבתי">♥</button>
-          </div>
-        </div>
-      </div>
+    document.querySelectorAll('.scroll-reveal').forEach(el => {
+        revealObserver.observe(el);
+    });
 
-    </div>
-  </section>
-
-  <!-- STATS BAR -->
-  <div class="stats-bar">
-    <div class="stats-inner">
-      <div class="stat-item">
-        <div class="stat-num">₪50B+</div>
-        <div class="stat-label">שוק השכירות השנתי בישראל</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-num">2.4M</div>
-        <div class="stat-label">שוכרים פעילים בישראל</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-num">3 שבועות</div>
-        <div class="stat-label">זמן ממוצע לחיפוש דירה (ללא DirApp)</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-num">0 ₪</div>
-        <div class="stat-label">עמלת תיווך לשוכר</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- FEATURES -->
-  <section class="features" id="features" aria-labelledby="features-heading">
-    <div class="section-eyebrow">למה DirApp</div>
-    <h2 class="section-title" id="features-heading">חיפוש דירות שלא הכרתם</h2>
-
-    <div class="features-grid">
-      <article class="feature-card">
-        <div class="feature-icon">👆</div>
-        <h3>החלק, אהב, דלג</h3>
-        <p>חוויית UX מוכרת מאפליקציות היכרויות — רק לדירות. ימינה לאהוב, שמאלה לדלג. Simple as that.</p>
-      </article>
-      <article class="feature-card">
-        <div class="feature-icon">🤖</div>
-        <h3>AI שמכיר אותך</h3>
-        <p>חפש "3 חדרים בתל אביב ליד הים עד 8,000 ₪" — DirApp מבינה אותך בעברית טבעית ומחזירה תוצאות מדויקות.</p>
-      </article>
-      <article class="feature-card">
-        <div class="feature-icon">💰</div>
-        <h3>עלות חודשית אמיתית</h3>
-        <p>לא רק שכירות — גם ארנונה, ועד בית ועלויות נסתרות. DirApp מראה את המחיר האמיתי לפני שתחליט.</p>
-      </article>
-      <article class="feature-card">
-        <div class="feature-icon">🏠</div>
-        <h3>מאגר ישיר מהמשכירים</h3>
-        <p>הדירות מגיעות ישירות מבעלי הנכסים — ללא תיווך, ללא עמלות, עם תמונות אמיתיות ותיאורים מלאים.</p>
-      </article>
-      <article class="feature-card">
-        <div class="feature-icon">📝</div>
-        <h3>חוזה דיגיטלי בדקות</h3>
-        <p>מצאתם דירה? חתמו על חוזה ישירות מהאפליקציה — פיקדון, תנאים, הכל מוסדר בלחיצת כפתור.</p>
-      </article>
-      <article class="feature-card">
-        <div class="feature-icon">🗺️</div>
-        <h3>מפה חכמה + תמ"א 38</h3>
-        <p>ראו את כל הדירות על מפה, עם שכבת פרויקטי תמ"א 38 ומידע על תחבורה ושירותים בסביבה.</p>
-      </article>
-    </div>
-  </section>
-
-  <!-- HOW IT WORKS -->
-  <section class="how" id="how" aria-labelledby="how-heading">
-    <div class="how-inner">
-      <div class="section-eyebrow">התהליך</div>
-      <h2 class="section-title" id="how-heading">מחיפוש לחוזה — בשלושה צעדים</h2>
-      <div class="steps">
-        <div class="step">
-          <div class="step-num">1</div>
-          <div class="step-body">
-            <h4>הגדר העדפות תוך 30 שניות</h4>
-            <p>תקציב, ערים, מספר חדרים. ה-AI מתחיל לסנן עבורך מרגע שסיימת.</p>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-num">2</div>
-          <div class="step-body">
-            <h4>החלק על דירות</h4>
-            <p>כל החלקה מלמדת את ה-AI מה אתה/את אוהב/ת — הפיד משתפר עם כל שימוש.</p>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-num">3</div>
-          <div class="step-body">
-            <h4>Match, שוחח, חתום</h4>
-            <p>כשהמשכיר מגיב בחיוב — Match! פתח/י צ'אט, קבע/י ביקור, חתמו על חוזה דיגיטלי.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA -->
-  <section class="cta-section" aria-labelledby="cta-heading">
-    <div class="cta-inner">
-      <h2 id="cta-heading">מוכן/ה לדירה <span>הבאה שלך</span>?</h2>
-      <p class="cta-subtitle">
-        הצטרפו לאלפי הישראלים שכבר ברשימת ההמתנה — נעדכן אתכם ברגע שנשיק.
-      </p>
-      <form class="cta-form" onsubmit="handleWaitlist(event)">
-        <input
-          class="cta-input"
-          type="email"
-          placeholder="האימייל שלך"
-          required
-          aria-label="כתובת אימייל"
-        />
-        <button class="cta-btn" type="submit">הצטרפו ←</button>
-      </form>
-      <p class="cta-note">ללא ספאם · ניתן להסרה בכל עת</p>
-    </div>
-  </section>
-
-  <!-- FOOTER -->
-  <footer>
-    <div style="max-width:1040px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-      <div class="footer-logo"><div class="logo-dot"></div> DirApp</div>
-      <div class="footer-copy">© 2026 DirApp · כל הזכויות שמורות</div>
-      <div class="footer-love">Made with <span class="heart">♥</span> in Tel Aviv</div>
-    </div>
-  </footer>
-
-  <script>
     function handleWaitlist(e) {
       e.preventDefault();
       const input = e.target.querySelector('input[type="email"]');
@@ -513,13 +528,16 @@
       const btn = e.target.querySelector('button[type="submit"]');
       if (btn) {
         btn.textContent = '✓ נרשמת!';
-        btn.style.background = '#059669';
+        btn.style.backgroundColor = '#059669';
         btn.disabled = true;
         if (input) { input.value = ''; input.disabled = true; }
       }
-      // TODO: wire to your email capture backend / Mailchimp / etc.
       console.log('Waitlist signup:', email);
     }
-  </script>
-</body>
-</html>
+</script>
+
+
+
+
+</body></html>
+
