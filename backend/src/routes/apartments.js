@@ -8,6 +8,7 @@ const { geminiMarketingLimiter } = require('../middleware/geminiRateLimit');
 const { upload, uploadMany } = require('../services/uploadService');
 const { cacheGet, cacheSet, cacheDel } = require('../config/redis');
 const { generateMarketingCopy, COPY_STYLE_INSTRUCTIONS } = require('../services/geminiService');
+const RentalContract = require('../models/mongo/RentalContract');
 const logger = require('../utils/logger');
 const { logAudit } = require('../services/auditLogService');
 const { AUDIT_ACTIONS, AUDIT_OUTCOMES } = require('../constants/logging');
@@ -312,6 +313,15 @@ router.delete('/:id', authenticate, requireRole('landlord'), async (req, res, ne
 
     const normalizedCity = typeof apartment.city === 'string' ? apartment.city.toLowerCase() : null;
     const aid = apartment.id;
+    const hasOpenContract = await RentalContract.exists({
+      apartmentId: String(aid),
+      status: { $ne: 'terminated' },
+    });
+    if (hasOpenContract) {
+      return res.status(409).json({
+        error: 'Cannot delete apartment while a contract is active or pending',
+      });
+    }
 
     await sequelize.transaction(async (t) => {
       await Swipe.destroy({ where: { apartmentId: aid }, transaction: t });
