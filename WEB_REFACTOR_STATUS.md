@@ -50,7 +50,7 @@
 
 | # | Task | Screen | Status | Date | Notes |
 |---|------|--------|--------|------|-------|
-| C1 | Contracts List + Detail + Upload | W7 | ❌ | — | 3 pages + Gemini OCR upload |
+| C1 | Contracts List + Detail + Upload | W7 | ✅ | 2026-06-09 | List + detail + 3-step upload wizard (Cursor) |
 | C2 | Digital Signature Modal | W7 | ❌ | — | Canvas signature + KYC gate |
 | C3 | Ledger / Payments | W7 | ❌ | — | Role-aware (tenant report / landlord confirm) |
 | C4 | Maintenance | W7 | ❌ | — | Tickets + side panel detail |
@@ -88,6 +88,7 @@ Merge order: Claude Code merges all branches → main → deploy
 | 2026-06-09 | Claude Code | A1-A6 DONE + deployed to Vercel production | A7 next session |
 | 2026-06-09 | Antigravity | B1 DONE (Landlord Dashboard) | B2 (Leads) |
 | 2026-06-09 | Claude Code | Created Cursor brief (BRIEF_CURSOR_WEB_REFACTOR.md) | Cursor starts C1 |
+| 2026-06-09 | Cursor | C1 DONE — contracts list, detail, upload wizard | C2 signature modal |
 
 ---
 

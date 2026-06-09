@@ -206,6 +206,59 @@ export interface AdminConfig {
   description?: string;
 }
 
+export interface AgreementParty {
+  id: string;
+  agreementId: string;
+  userId: string;
+  role: "tenant" | "landlord";
+  user?: User;
+}
+
+export interface ContractAmendmentV3 {
+  id: string;
+  contractId: string;
+  proposedBy: "landlord" | "tenant";
+  field: string;
+  oldValue: string;
+  newValue: string;
+  reason?: string;
+  status: "pending" | "approved" | "rejected";
+  createdAt: string;
+}
+
+export interface RentalAgreementV3 {
+  id: string;
+  landlordId: string;
+  propertyId: string;
+  status: ContractStatus;
+  startDate: string | null;
+  endDate: string | null;
+  monthlyRentIls: number | string | null;
+  paymentDueDay?: number | null;
+  cpiLinked?: boolean;
+  documentUrl?: string;
+  extractedFields?: Record<string, unknown>;
+  landlordSignedAt?: string | null;
+  parties?: AgreementParty[];
+  amendments?: ContractAmendmentV3[];
+  createdAt: string;
+}
+
+export interface ContractUploadResponse {
+  agreement: RentalAgreementV3;
+  extracted: Record<string, unknown>;
+}
+
+export interface ContractListItem {
+  id: string;
+  propertyName: string;
+  propertyAddress: string;
+  status: ContractStatus | string;
+  startDate: string;
+  endDate: string;
+  monthlyRent: number;
+}
+
 /* API Response wrappers */
 export interface LoginResponse {
   token: string;
