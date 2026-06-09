@@ -20,6 +20,7 @@ export interface User {
   tosAcceptedAt: string | null;
   whatsappOptIn: boolean;
   avatarUrl?: string;
+  isVerified?: boolean;
   createdAt: string;
 }
 
