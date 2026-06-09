@@ -50,11 +50,11 @@
 
 | # | Task | Screen | Status | Date | Notes |
 |---|------|--------|--------|------|-------|
-| C1 | Contracts List + Detail + Upload | W7 | ❌ | — | 3 pages + Gemini OCR upload |
-| C2 | Digital Signature Modal | W7 | ❌ | — | Canvas signature + KYC gate |
-| C3 | Ledger / Payments | W7 | ❌ | — | Role-aware (tenant report / landlord confirm) |
-| C4 | Maintenance | W7 | ❌ | — | Tickets + side panel detail |
-| C5 | Check-In / Check-Out | W7 | ❌ | — | Room tabs + photo upload + fix rounds |
+| C1 | Contracts List + Detail + Upload | W7 | ✅ | 2026-06-09 | List + detail + 3-step upload wizard (Cursor) |
+| C2 | Digital Signature Modal | W7 | ✅ | 2026-06-09 | Canvas + KYC gate + contract detail integration |
+| C3 | Ledger / Payments | W7 | ✅ | 2026-06-09 | Role-aware ledger table + report modal |
+| C4 | Maintenance | W7 | ✅ | 2026-06-09 | Tickets list + side panel + create modal |
+| C5 | Check-In / Check-Out | W7 | ✅ | 2026-06-09 | Room tabs + photo upload + checkout review |
 
 ---
 
@@ -92,6 +92,8 @@ Merge order: Claude Code merges all branches → main → deploy
 | 2026-06-09 | Claude Code | A1-A6 DONE + deployed to Vercel production | A7 next session |
 | 2026-06-09 | Antigravity | B3-B6 DONE: Completed Profile, Property Detail, Notifications, and Notification Preferences pages | Next: B7 (Gamification) |
 | 2026-06-09 | Claude Code | Created Cursor brief (BRIEF_CURSOR_WEB_REFACTOR.md) | Cursor starts C1 |
+| 2026-06-09 | Cursor | C1 DONE — contracts list, detail, upload wizard | C2 signature modal |
+| 2026-06-09 | Cursor | C2-C5 DONE — signature, payments, maintenance, checkin | Sprint C complete |
 
 ---
 
@@ -104,7 +106,7 @@ Merge order: Claude Code merges all branches → main → deploy
 | Cursor unblocked (Sprint C) | 2026-06-09 | ✅ |
 | Landing + Auth + Dashboard live | 2026-06-09 | ✅ |
 | All search/match/chat (A7-A9) | — | ❌ |
-| All contracts/payments (C1-C5) | — | ❌ |
+| All contracts/payments (C1-C5) | 2026-06-09 | ✅ |
 | All landlord/admin (B1-B14) | — | ❌ |
 | Final merge + E2E | — | ❌ |
 | Production deploy (full) | — | ❌ |

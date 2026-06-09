@@ -206,6 +206,100 @@ export interface AdminConfig {
   description?: string;
 }
 
+export interface AgreementParty {
+  id: string;
+  agreementId: string;
+  userId: string;
+  role: "tenant" | "guarantor";
+  signedAt?: string | null;
+  user?: User;
+}
+
+export interface AgreementRoom {
+  id: string;
+  agreementId: string;
+  name: string;
+  type: "builtin" | "custom";
+  checkinPhotos?: string[];
+  checkoutPhotos?: string[];
+  checkoutNotes?: string | null;
+}
+
+export interface LedgerRowV3 {
+  id: string;
+  agreementId: string;
+  period: string;
+  dueDate: string;
+  amount: number | string;
+  status: LedgerRowStatus;
+  receiptR2Key?: string | null;
+  reportedByTenant?: string | null;
+  confirmedByLandlord?: string | null;
+  notes?: string | null;
+}
+
+export interface MaintenanceTicketV3 {
+  id: string;
+  agreementId: string;
+  reporterId: string;
+  description: string;
+  photoR2Key?: string | null;
+  status: "OPEN" | "IN_PROGRESS" | "WAITING_INVOICE" | "CLOSED" | "ESCALATED";
+  landlordResponse?: string | null;
+  landlordNote?: string | null;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface ContractAmendmentV3 {
+  id: string;
+  contractId: string;
+  proposedBy: "landlord" | "tenant";
+  field: string;
+  oldValue: string;
+  newValue: string;
+  reason?: string;
+  status: "pending" | "approved" | "rejected";
+  createdAt: string;
+}
+
+export interface RentalAgreementV3 {
+  id: string;
+  landlordId: string;
+  propertyId: string;
+  status: ContractStatus;
+  startDate: string | null;
+  endDate: string | null;
+  monthlyRentIls: number | string | null;
+  paymentDueDay?: number | null;
+  cpiLinked?: boolean;
+  documentUrl?: string;
+  extractedFields?: Record<string, unknown>;
+  landlordSignedAt?: string | null;
+  landlordId?: string;
+  parties?: AgreementParty[];
+  rooms?: AgreementRoom[];
+  amendments?: ContractAmendmentV3[];
+  checkinCompletedAt?: string | null;
+  checkoutCompletedAt?: string | null;
+  createdAt: string;
+}
+
+export interface ContractUploadResponse {
+  agreement: RentalAgreementV3;
+  extracted: Record<string, unknown>;
+}
+
+export interface ContractListItem {
+  id: string;
+  propertyName: string;
+  propertyAddress: string;
+  status: ContractStatus | string;
+  startDate: string;
+  endDate: string;
+  monthlyRent: number;
+}
+
 /* API Response wrappers */
 export interface LoginResponse {
   token: string;
