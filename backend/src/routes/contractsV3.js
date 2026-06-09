@@ -3,7 +3,8 @@ const multer = require('multer');
 const router = express.Router();
 const { authenticate, requireRole } = require('../middleware/auth');
 const { uploadAndExtract, transitionState, validateGate, renewContract, activateRenewal } = require('../services/contractServiceV3');
-const { RentalAgreement, AgreementParty, AgreementRoom, OwnershipVerification, ContractAmendment } = require('../models');
+const { Op } = require('sequelize');
+const { RentalAgreement, AgreementParty, AgreementRoom, OwnershipVerification, ContractAmendment, Apartment } = require('../models');
 const { getPresignedUrl, uploadFile, BUCKETS } = require('../services/r2Service');
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
@@ -28,7 +29,53 @@ router.post('/upload',
   }
 );
 
-// 2. Get contract details
+// 2. List agreements for current user (landlord / tenant / admin)
+router.get('/', async (req, res, next) => {
+  try {
+    const role = req.user.activeRole || req.user.role;
+    let agreements;
+
+    if (role === 'landlord') {
+      agreements = await RentalAgreement.findAll({
+        where: { landlordId: req.user.id },
+        order: [['createdAt', 'DESC']],
+        limit: 100,
+      });
+    } else if (role === 'admin') {
+      agreements = await RentalAgreement.findAll({
+        order: [['createdAt', 'DESC']],
+        limit: 100,
+      });
+    } else {
+      const parties = await AgreementParty.findAll({
+        where: { userId: req.user.id, role: 'tenant' },
+      });
+      const ids = parties.map((p) => p.agreementId);
+      agreements = ids.length
+        ? await RentalAgreement.findAll({
+            where: { id: { [Op.in]: ids } },
+            order: [['createdAt', 'DESC']],
+          })
+        : [];
+    }
+
+    const payload = await Promise.all(
+      agreements.map(async (a) => {
+        const json = a.toJSON();
+        const apt = await Apartment.findByPk(a.propertyId, {
+          attributes: ['id', 'title', 'address', 'city'],
+        });
+        return { ...json, apartment: apt };
+      })
+    );
+
+    res.json({ agreements: payload, total: payload.length });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// 3. Get contract details
 router.get('/:id', async (req, res, next) => {
   try {
     const agreement = await RentalAgreement.findByPk(req.params.id, {

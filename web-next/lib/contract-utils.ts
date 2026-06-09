@@ -1,4 +1,4 @@
-import type { Contract, ContractListItem, ContractStatus } from "@/lib/types";
+import type { Contract, ContractListItem, ContractStatus, RentalAgreementV3 } from "@/lib/types";
 
 const LEGACY_STATUS_MAP: Record<string, ContractStatus> = {
   draft: "UPLOAD",
@@ -28,6 +28,30 @@ export function legacyContractToListItem(c: Record<string, unknown>): ContractLi
     endDate: String(c.endDate || "").slice(0, 10),
     monthlyRent: Number(c.monthlyRent || c.monthlyRentIls || 0),
   };
+}
+
+export function v3AgreementToListItem(
+  a: RentalAgreementV3 & { apartment?: { title?: string; address?: string; city?: string } }
+): ContractListItem {
+  return {
+    id: a.id,
+    propertyName: a.apartment?.title || `נכס ${a.propertyId?.slice(0, 8) || ""}`,
+    propertyAddress: a.apartment?.address || a.apartment?.city || "—",
+    status: normalizeContractStatus(a.status),
+    startDate: String(a.startDate || "").slice(0, 10),
+    endDate: String(a.endDate || "").slice(0, 10),
+    monthlyRent: Number(a.monthlyRentIls || 0),
+  };
+}
+
+export function mergeContractListItems(...groups: ContractListItem[][]): ContractListItem[] {
+  const map = new Map<string, ContractListItem>();
+  for (const group of groups) {
+    for (const item of group) {
+      if (item.id) map.set(item.id, item);
+    }
+  }
+  return Array.from(map.values()).sort((a, b) => b.startDate.localeCompare(a.startDate));
 }
 
 export function contractToListItem(c: Contract): ContractListItem {

@@ -13,6 +13,7 @@ import {
 } from "@/lib/contract-utils";
 import { ContractStatusBadge } from "@/components/shared/ContractStatusBadge";
 import { SignatureModal } from "@/components/contracts/SignatureModal";
+import { InviteTenantForm } from "@/components/contracts/InviteTenantForm";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -313,6 +314,14 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
         onClose={() => setSignModalOpen(false)}
         onSigned={() => mutate()}
       />
+
+      {isLandlord && tenants.length === 0 && ["UPLOAD", "PENDING_SIGN"].includes(agreement.status) && (
+        <InviteTenantForm
+          contractId={id}
+          propertyId={agreement.propertyId}
+          onInvited={() => mutate()}
+        />
+      )}
 
       {isLandlord && agreement.status === "UPLOAD" && (
         <div className="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant soft-shadow">

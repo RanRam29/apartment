@@ -4,8 +4,13 @@ import { useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import useSWR from "swr";
 import { api } from "@/lib/api";
-import type { Contract } from "@/lib/types";
-import { contractToListItem, legacyContractToListItem } from "@/lib/contract-utils";
+import type { Contract, RentalAgreementV3 } from "@/lib/types";
+import {
+  contractToListItem,
+  legacyContractToListItem,
+  mergeContractListItems,
+  v3AgreementToListItem,
+} from "@/lib/contract-utils";
 
 const fetcher = <T,>(url: string) => api<T>(url);
 
@@ -19,24 +24,34 @@ export function ContractSelector({ value, onChange, label = "בחר חוזה" }:
   const searchParams = useSearchParams();
   const urlContractId = searchParams.get("contractId");
 
-  const { data, isLoading } = useSWR<{ contracts: Contract[] }>("/api/contracts", fetcher);
+  const { data: legacyData, isLoading: legacyLoading } = useSWR<{ contracts: Contract[] }>(
+    "/api/contracts",
+    fetcher
+  );
+  const { data: v3Data, isLoading: v3Loading } = useSWR<{ agreements: RentalAgreementV3[] }>(
+    "/api/v3/contracts",
+    fetcher
+  );
 
   const options = useMemo(() => {
-    const raw = data?.contracts || [];
-    return raw.map((c) => {
+    const legacyItems = (legacyData?.contracts || []).map((c) => {
       const legacy = c as unknown as Record<string, unknown>;
-      const item = legacy.apartmentTitle || legacy._id
-        ? legacyContractToListItem(legacy)
-        : contractToListItem(c);
-      return { id: item.id, label: `${item.propertyName} — ${item.propertyAddress}` };
+      if (legacy.apartmentTitle || legacy._id) {
+        return legacyContractToListItem(legacy);
+      }
+      return contractToListItem(c);
     });
-  }, [data]);
+    const v3Items = (v3Data?.agreements || []).map((a) => v3AgreementToListItem(a));
+    return mergeContractListItems(legacyItems, v3Items);
+  }, [legacyData, v3Data]);
 
   useEffect(() => {
     if (value) return;
     const initial = urlContractId || options[0]?.id;
     if (initial) onChange(initial);
   }, [value, urlContractId, options, onChange]);
+
+  const isLoading = legacyLoading || v3Loading;
 
   return (
     <div>
@@ -51,7 +66,7 @@ export function ContractSelector({ value, onChange, label = "בחר חוזה" }:
         >
           {options.map((opt) => (
             <option key={opt.id} value={opt.id}>
-              {opt.label}
+              {opt.propertyName} — {opt.propertyAddress}
             </option>
           ))}
         </select>

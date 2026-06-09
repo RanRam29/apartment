@@ -4,8 +4,13 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import useSWR from "swr";
 import { api } from "@/lib/api";
-import type { Contract } from "@/lib/types";
-import { contractToListItem, legacyContractToListItem } from "@/lib/contract-utils";
+import type { Contract, RentalAgreementV3 } from "@/lib/types";
+import {
+  contractToListItem,
+  legacyContractToListItem,
+  mergeContractListItems,
+  v3AgreementToListItem,
+} from "@/lib/contract-utils";
 import { ContractStatusBadge } from "@/components/shared/ContractStatusBadge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
@@ -26,21 +31,28 @@ export default function ContractsPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const isLandlord = user?.activeRole === "landlord" || user?.role === "landlord";
 
-  const { data, error, isLoading, mutate } = useSWR<{ contracts: Contract[] }>(
-    "/api/contracts",
-    fetcher
-  );
+  const { data: legacyData, error: legacyError, isLoading: legacyLoading, mutate } = useSWR<{
+    contracts: Contract[];
+  }>("/api/contracts", fetcher);
+
+  const { data: v3Data, error: v3Error, isLoading: v3Loading } = useSWR<{
+    agreements: RentalAgreementV3[];
+  }>("/api/v3/contracts", fetcher);
+
+  const isLoading = legacyLoading || v3Loading;
+  const error = legacyError || v3Error;
 
   const items = useMemo(() => {
-    const raw = data?.contracts || [];
-    return raw.map((c) => {
+    const legacyItems = (legacyData?.contracts || []).map((c) => {
       const legacy = c as unknown as Record<string, unknown>;
       if (legacy.apartmentTitle || legacy._id) {
         return legacyContractToListItem(legacy);
       }
       return contractToListItem(c);
     });
-  }, [data]);
+    const v3Items = (v3Data?.agreements || []).map((a) => v3AgreementToListItem(a));
+    return mergeContractListItems(legacyItems, v3Items);
+  }, [legacyData, v3Data]);
 
   const filtered = useMemo(() => {
     if (statusFilter === "all") return items;

@@ -94,6 +94,7 @@ Merge order: Claude Code merges all branches → main → deploy
 | 2026-06-09 | Claude Code | Created Cursor brief (BRIEF_CURSOR_WEB_REFACTOR.md) | Cursor starts C1 |
 | 2026-06-09 | Cursor | C1 DONE — contracts list, detail, upload wizard | C2 signature modal |
 | 2026-06-09 | Cursor | C2-C5 DONE — signature, payments, maintenance, checkin | Sprint C complete |
+| 2026-06-09 | Cursor | Merged wind + cursor branches to main; v3 list API + invite tenant | Deploy + E2E |
 
 ---
 
@@ -108,5 +109,6 @@ Merge order: Claude Code merges all branches → main → deploy
 | All search/match/chat (A7-A9) | — | ❌ |
 | All contracts/payments (C1-C5) | 2026-06-09 | ✅ |
 | All landlord/admin (B1-B14) | — | ❌ |
-| Final merge + E2E | — | ❌ |
+| Branches merged to main (B2-B6 + C1-C5) | 2026-06-09 | ✅ |
+| Final merge + E2E | — | 🔵 |
 | Production deploy (full) | — | ❌ |
