@@ -82,16 +82,26 @@ router.get('/:id', async (req, res, next) => {
       include: [
         { model: AgreementParty, as: 'parties' },
         { model: AgreementRoom, as: 'rooms' },
-        { model: ContractAmendment, as: 'amendments' },
       ],
     });
     if (!agreement) return res.status(404).json({ error: 'Agreement not found' });
 
-    const docUrl = agreement.r2DocKey
-      ? await getPresignedUrl(BUCKETS.CONTRACT_DOCS, agreement.r2DocKey)
-      : null;
+    let amendments = [];
+    try {
+      amendments = await ContractAmendment.findAll({
+        where: { contractId: agreement.id },
+        order: [['createdAt', 'DESC']],
+      });
+    } catch (_) {
+      amendments = [];
+    }
 
-    res.json({ ...agreement.toJSON(), documentUrl: docUrl });
+    let docUrl = null;
+    if (agreement.r2DocKey) {
+      docUrl = await getPresignedUrl(BUCKETS.CONTRACT_DOCS, agreement.r2DocKey);
+    }
+
+    res.json({ ...agreement.toJSON(), amendments, documentUrl: docUrl });
   } catch (err) {
     next(err);
   }

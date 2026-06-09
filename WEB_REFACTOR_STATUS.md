@@ -96,6 +96,7 @@ Merge order: Claude Code merges all branches → main → deploy
 | 2026-06-09 | Cursor | C2-C5 DONE — signature, payments, maintenance, checkin | Sprint C complete |
 | 2026-06-09 | Cursor | Merged wind + cursor branches to main; v3 list API + invite tenant | Deploy + E2E |
 | 2026-06-09 | Cursor | Deployed Render backend + Vercel web-next; smoke test passed | A7 / B7+ |
+| 2026-06-09 | Cursor | E2E API 15/17; UI login/contracts/payments OK; contract detail 500 (R2 presign) — fix local | Deploy backend fix |
 
 ---
 
@@ -111,5 +112,5 @@ Merge order: Claude Code merges all branches → main → deploy
 | All contracts/payments (C1-C5) | 2026-06-09 | ✅ |
 | All landlord/admin (B1-B14) | — | ❌ |
 | Branches merged to main (B2-B6 + C1-C5) | 2026-06-09 | ✅ |
-| Final merge + E2E | 2026-06-09 | 🔵 smoke OK |
+| Final merge + E2E | 2026-06-09 | 🔵 15/17 API + UI (detail 500) |
 | Production deploy (full) | 2026-06-09 | ✅ backend Render + web-next Vercel |

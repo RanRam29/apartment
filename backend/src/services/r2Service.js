@@ -16,9 +16,17 @@ async function uploadFile(bucket, key, buffer, contentType) {
 }
 
 async function getPresignedUrl(bucket, key) {
-  return getSignedUrl(client, new GetObjectCommand({ Bucket: bucket, Key: key }), {
-    expiresIn: PRESIGN_EXPIRY_SECONDS,
-  });
+  if (!process.env.R2_ACCOUNT_ID || !process.env.R2_ACCESS_KEY_ID || !process.env.R2_SECRET_ACCESS_KEY) {
+    return null;
+  }
+  if (!bucket || !key) return null;
+  try {
+    return await getSignedUrl(client, new GetObjectCommand({ Bucket: bucket, Key: key }), {
+      expiresIn: PRESIGN_EXPIRY_SECONDS,
+    });
+  } catch {
+    return null;
+  }
 }
 
 async function deleteFile(bucket, key) {

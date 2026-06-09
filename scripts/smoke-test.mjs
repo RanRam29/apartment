@@ -34,7 +34,7 @@ async function main() {
     ["legacy_contracts", "/api/contracts"],
     ["v3_contracts_list", "/api/v3/contracts"],
     ["landlord_dashboard", "/api/landlord/dashboard"],
-    ["profile", "/api/users/profile"],
+    ["profile", "/api/auth/me"],
   ]) {
     const r = await req(path, { headers: h });
     const summary = typeof r.body === "object"
