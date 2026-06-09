@@ -33,7 +33,7 @@
 | # | Task | Screen | Status | Date | Notes |
 |---|------|--------|--------|------|-------|
 | B1 | Landlord Dashboard | W3 | ✅ | 2026-06-09 | Completed high-fidelity dashboard with real data and mock fallbacks |
-| B2 | Leads Management | W8 | ❌ | — | |
+| B2 | Leads Management | W8 | ✅ | 2026-06-09 | Rebuilt high-fidelity leads view, grid/list toggling, accept/reject APIs, and details panel drawer |
 | B3 | Profile & Settings | W8 | ❌ | — | |
 | B4 | Property Detail | W8 | ❌ | — | |
 | B5 | Notifications Center | W9 | ❌ | — | |
@@ -67,6 +67,7 @@
 | 2026-06-09 | Claude Code | Created WEB_REFACTOR_PLAN.md + STATUS.md | Awaiting CEO approval to start |
 | 2026-06-09 | Claude Code | A1+A2 DONE: Next.js 16, Tailwind 4, DirApp DS, shadcn/ui (15 components), RTL layout, auth system, API client, TypeScript types | Next: A3 (Login + Register) |
 | 2026-06-09 | Antigravity | B1 DONE: Landlord Dashboard implemented with stats, properties, leads, expiring contracts, alerts, cash flow, and FAB | Next: B2 (Leads Management) |
+| 2026-06-09 | Antigravity | B2 DONE: Leads Management page implemented with tab filters, grid/list view switcher, accept/reject controls, and slide-out tenant details drawer | Next: B3 (Profile & Settings) |
 
 ---
 
