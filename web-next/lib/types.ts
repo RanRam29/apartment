@@ -210,8 +210,45 @@ export interface AgreementParty {
   id: string;
   agreementId: string;
   userId: string;
-  role: "tenant" | "landlord";
+  role: "tenant" | "guarantor";
+  signedAt?: string | null;
   user?: User;
+}
+
+export interface AgreementRoom {
+  id: string;
+  agreementId: string;
+  name: string;
+  type: "builtin" | "custom";
+  checkinPhotos?: string[];
+  checkoutPhotos?: string[];
+  checkoutNotes?: string | null;
+}
+
+export interface LedgerRowV3 {
+  id: string;
+  agreementId: string;
+  period: string;
+  dueDate: string;
+  amount: number | string;
+  status: LedgerRowStatus;
+  receiptR2Key?: string | null;
+  reportedByTenant?: string | null;
+  confirmedByLandlord?: string | null;
+  notes?: string | null;
+}
+
+export interface MaintenanceTicketV3 {
+  id: string;
+  agreementId: string;
+  reporterId: string;
+  description: string;
+  photoR2Key?: string | null;
+  status: "OPEN" | "IN_PROGRESS" | "WAITING_INVOICE" | "CLOSED" | "ESCALATED";
+  landlordResponse?: string | null;
+  landlordNote?: string | null;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 export interface ContractAmendmentV3 {
@@ -239,8 +276,12 @@ export interface RentalAgreementV3 {
   documentUrl?: string;
   extractedFields?: Record<string, unknown>;
   landlordSignedAt?: string | null;
+  landlordId?: string;
   parties?: AgreementParty[];
+  rooms?: AgreementRoom[];
   amendments?: ContractAmendmentV3[];
+  checkinCompletedAt?: string | null;
+  checkoutCompletedAt?: string | null;
   createdAt: string;
 }
 

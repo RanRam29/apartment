@@ -12,6 +12,7 @@ import {
   normalizeContractStatus,
 } from "@/lib/contract-utils";
 import { ContractStatusBadge } from "@/components/shared/ContractStatusBadge";
+import { SignatureModal } from "@/components/contracts/SignatureModal";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -40,6 +41,7 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
   const [amendReason, setAmendReason] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [signModalOpen, setSignModalOpen] = useState(false);
 
   const isLandlord = user?.activeRole === "landlord" || user?.role === "landlord";
 
@@ -200,6 +202,10 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
   const rent = Number(agreement.monthlyRentIls || 0);
   const amendments = agreement.amendments || [];
   const tenants = agreement.parties?.filter((p) => p.role === "tenant") || [];
+  const userParty = agreement.parties?.find((p) => p.userId === user?.id);
+  const landlordSigned = !!agreement.landlordSignedAt;
+  const userSigned = isLandlord ? landlordSigned : !!userParty?.signedAt;
+  const canSign = agreement.status === "PENDING_SIGN" && !userSigned;
 
   return (
     <div className="space-y-6">
@@ -267,6 +273,46 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
           </div>
         </div>
       </div>
+
+      {canSign && (
+        <div className="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant soft-shadow">
+          <h2 className="text-[18px] font-semibold text-tenant-blue mb-2">חתימה על החוזה</h2>
+          <p className="text-[14px] text-on-surface-variant mb-4">
+            החוזה ממתין לחתימתך. לאחר שכל הצדדים יחתמו, החוזה יופעל אוטומטית.
+          </p>
+          <button
+            type="button"
+            onClick={() => setSignModalOpen(true)}
+            className="h-[48px] px-8 bg-landlord-green text-white font-bold rounded-full"
+          >
+            חתום על החוזה
+          </button>
+        </div>
+      )}
+
+      {agreement.status === "ACTIVE" && (
+        <div className="flex flex-wrap gap-3">
+          <Link href={`/payments?contractId=${id}`} className="h-10 px-4 flex items-center gap-2 rounded-full border border-outline-variant text-[14px] font-medium hover:border-landlord-green">
+            <span className="material-symbols-outlined text-[18px]">payments</span>
+            תשלומים
+          </Link>
+          <Link href={`/maintenance?contractId=${id}`} className="h-10 px-4 flex items-center gap-2 rounded-full border border-outline-variant text-[14px] font-medium hover:border-landlord-green">
+            <span className="material-symbols-outlined text-[18px]">build</span>
+            תחזוקה
+          </Link>
+          <Link href={`/checkin?contractId=${id}`} className="h-10 px-4 flex items-center gap-2 rounded-full border border-outline-variant text-[14px] font-medium hover:border-landlord-green">
+            <span className="material-symbols-outlined text-[18px]">photo_camera</span>
+            כניסה / יציאה
+          </Link>
+        </div>
+      )}
+
+      <SignatureModal
+        contractId={id}
+        open={signModalOpen}
+        onClose={() => setSignModalOpen(false)}
+        onSigned={() => mutate()}
+      />
 
       {isLandlord && agreement.status === "UPLOAD" && (
         <div className="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant soft-shadow">

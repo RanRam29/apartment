@@ -61,6 +61,22 @@ export function formatDateRange(start: string, end: string): string {
   return `${start || "—"} – ${end || "—"}`;
 }
 
+export const LEDGER_STATUS_LABELS: Record<string, { label: string; className: string }> = {
+  PENDING: { label: "ממתין", className: "bg-surface-container-high text-on-surface-variant" },
+  REPORTED: { label: "דווח", className: "bg-[#fff3cd] text-[#856404]" },
+  PAID: { label: "שולם", className: "bg-[#9cefdf] text-[#0b6f63]" },
+  OVERDUE: { label: "באיחור", className: "bg-[#ffcdd2] text-[#c62828]" },
+  DISPUTED: { label: "במחלוקת", className: "bg-[#ffe0b2] text-[#e65100]" },
+};
+
+export const TICKET_STATUS_LABELS: Record<string, { label: string; className: string }> = {
+  OPEN: { label: "פתוח", className: "bg-[#ffcdd2] text-[#c62828]" },
+  IN_PROGRESS: { label: "בטיפול", className: "bg-[#fff3cd] text-[#856404]" },
+  WAITING_INVOICE: { label: "ממתין לחשבונית", className: "bg-[#ffe0b2] text-[#e65100]" },
+  ESCALATED: { label: "הסלמה", className: "bg-[#ffe0b2] text-[#e65100]" },
+  CLOSED: { label: "סגור", className: "bg-[#9cefdf] text-[#0b6f63]" },
+};
+
 export const AMENDMENT_FIELD_LABELS: Record<string, string> = {
   monthlyRentIls: "שכר דירה",
   startDate: "תאריך התחלה",
