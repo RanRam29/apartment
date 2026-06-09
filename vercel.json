@@ -1,6 +1,4 @@
 {
-  "buildCommand": "cd web-next && npm install && npm run build",
-  "outputDirectory": "web-next/.next",
   "framework": "nextjs",
   "nodeVersion": "22.x"
 }
