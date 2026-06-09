@@ -276,7 +276,6 @@ export interface RentalAgreementV3 {
   documentUrl?: string;
   extractedFields?: Record<string, unknown>;
   landlordSignedAt?: string | null;
-  landlordId?: string;
   parties?: AgreementParty[];
   rooms?: AgreementRoom[];
   amendments?: ContractAmendmentV3[];
