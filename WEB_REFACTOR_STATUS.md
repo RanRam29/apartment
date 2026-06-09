@@ -33,14 +33,14 @@
 | B4 | Property Detail | W8 | ✅ | 2026-06-09 | Built high-fidelity property page with gallery grid, monthly cost, and swipe endpoint |
 | B5 | Notifications Center | W9 | ✅ | 2026-06-09 | Rebuilt notifications list view with category filters and mark-as-read |
 | B6 | Notification Preferences | W9 | ✅ | 2026-06-09 | Mapped dedicated settings page with WhatsApp phone status validation |
-| B7 | Gamification & Rating | — | ❌ | — | |
-| B8 | Renter Journal | — | ❌ | — | |
-| B9 | Admin Dashboard | W5 | ❌ | — | |
-| B10 | Admin User Management | W5 | ❌ | — | |
-| B11 | Admin Config Panel | W5 | ❌ | — | |
-| B12 | Guarantor Portal | W4 | ❌ | — | |
-| B13 | Error States (404, Offline) | Edge | ❌ | — | |
-| B14 | Dark Mode | — | ❌ | — | |
+| B7 | Gamification & Rating | — | ✅ | 2026-06-09 | Completed SWR integrations, leaderboard table, and badge cabinets |
+| B8 | Renter Journal | — | ✅ | 2026-06-09 | Dotted vertical timeline mapping payments, rooms check-in photos, and service tickets |
+| B9 | Admin Dashboard | W5 | ✅ | 2026-06-09 | Bento KPI panels, Cashflow SVG line charts, conic payment charts, security events, and audit logs |
+| B10 | Admin User Management | W5 | ✅ | 2026-06-09 | User manager with role filters, KYC overrides, account unlocking, and cascading deleting |
+| B11 | Admin Config Panel | W5 | ✅ | 2026-06-09 | Accordion sections for AppConfig keys with inline edits and yellow glow alerts |
+| B12 | Guarantor Portal | W4 | ✅ | 2026-06-09 | Public dynamic step-by-step wizard, Israeli ID checksum, canvas signature, and SMS OTP verification |
+| B13 | Error States (404, Offline) | Edge | ✅ | 2026-06-09 | Glassmorphic page with custom illustrations and auth dashboard redirects |
+| B14 | Dark Mode | — | ✅ | 2026-06-09 | Injected ThemeProvider from next-themes and added toggler button to TopBar |
 
 ---
 
