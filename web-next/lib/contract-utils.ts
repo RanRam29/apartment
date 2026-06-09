@@ -19,10 +19,11 @@ export function normalizeContractStatus(status: string): ContractStatus | string
 
 export function legacyContractToListItem(c: Record<string, unknown>): ContractListItem {
   const id = String(c.id || c._id || "");
+  const apt = c.apartment as { title?: string; address?: string } | undefined;
   return {
     id,
-    propertyName: String(c.apartmentTitle || c.apartment?.title || "נכס"),
-    propertyAddress: String(c.apartmentAddress || c.apartment?.address || "—"),
+    propertyName: String(c.apartmentTitle || apt?.title || "נכס"),
+    propertyAddress: String(c.apartmentAddress || apt?.address || "—"),
     status: normalizeContractStatus(String(c.status || "")),
     startDate: String(c.startDate || "").slice(0, 10),
     endDate: String(c.endDate || "").slice(0, 10),
