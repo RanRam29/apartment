@@ -1,6 +1,6 @@
 # DirApp — MASTER STATUS DOCUMENT
 > **מנהל: Claude Code (Orchestrator)**  
-> **עדכון אחרון:** 2026-06-01  
+> **עדכון אחרון:** 2026-06-09  
 > **כלל ברזל:** זה המסמך היחיד שסומך עליו. כל שינוי קוד → עדכון כאן.
 
 ---
@@ -10,7 +10,8 @@
 | רכיב | כתובת | סטטוס |
 |------|--------|--------|
 | Backend (Render) | `https://apartment-backend-v24y.onrender.com` | ✅ פועל |
-| Frontend (Vercel) | `https://apartment-olive.vercel.app` | ✅ פועל |
+| Frontend — Mobile (Vercel) | `https://apartment-olive.vercel.app` | ✅ פועל |
+| Frontend — Web (Vercel) | `https://web-next-indol-gamma.vercel.app` | ✅ פועל (26 pages) |
 | PostgreSQL | Supabase (via `DATABASE_URL`) | ✅ פועל |
 | MongoDB | Atlas | ✅ פועל |
 | Redis | Upstash / Render Redis | ✅ פועל |
@@ -208,9 +209,10 @@
 | **NF1 — Trust Score** | M5 ✅ + M6 ✅ | Antigravity | ✅ אומת E2E 2026-06-01 |
 | **NF2 — Renter Journal** | M1+M3+M4+M8+M9 | Antigravity | ✅ אומת E2E 2026-06-01 |
 | **V2-3 — Contract Amendment** | M2 | Antigravity | ✅ אומת E2E 2026-06-01 |
-| **V2-4 — NLP Search** | — | Claude Code + Antigravity | 🟡 Backend + UI ready, BUG-012 fixed (amenities fallback + role gate) |
-| **V2-7 — GDPR Privacy** | — | Claude Code + Antigravity | 🟡 Backend routes ready, UI needed |
-| **WhatsApp opt-in** | Phase 2 | Claude Code + Antigravity | 🟡 Backend field ready, UI needed |
+| **V2-4 — NLP Search** | — | Claude Code + Antigravity | ✅ Backend + Web UI deployed (search page with NLP) |
+| **V2-7 — GDPR Privacy** | — | Claude Code + Antigravity | ✅ Backend routes + Web profile page (3 buttons) |
+| **WhatsApp opt-in** | Phase 2 | Claude Code + Antigravity | ✅ Backend field + Web profile toggle |
+| **Web Refactor** | — | כל הצוות | ✅ 26 pages deployed — see `WEB_REFACTOR_STATUS.md` |
 | V2-1 — Stripe Connect | M5 | TBD | ❌ לא התחיל |
 
 ---
@@ -254,6 +256,7 @@
 
 | תאריך | גרסה | שינוי | מי |
 |--------|------|--------|-----|
+| 2026-06-09 | 3.0 | Web Refactor complete — 26 pages deployed. Sprint A (Search/Matches/Chat/Verify), Sprint B (Admin/Gamification/Journal/Guarantor/DarkMode), Sprint C (Contracts/Payments/Maintenance/CheckIn). URL: `web-next-indol-gamma.vercel.app` | All |
 | 2026-06-02 | 2.3 | 3 backend features: NLP Search endpoint (V2-4), WhatsApp opt-in + notification prefs (User model), GDPR routes (export/deletion/prefs) | Claude Code |
 | 2026-06-02 | 2.2 | Code Audit + 4 fixes: PaymentLedger/ProtocolEvidence→index.js, rateLimit.js, scoreCompatibility, scheduleReminder stub | Claude Code |
 | 2026-06-02 | 2.2 | ARCHITECTURE.md v3.2 — מעודכן לקוד האמיתי (service names, User schema, geminiService API, notificationService API) | Claude Code |

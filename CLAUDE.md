@@ -39,7 +39,8 @@
 
 **פרודקשן:**
 - Backend: `https://apartment-backend-v24y.onrender.com`
-- Frontend: `https://apartment-olive.vercel.app`
+- Frontend (Mobile): `https://apartment-olive.vercel.app`
+- Frontend (Web): `https://web-next-indol-gamma.vercel.app`
 - כניסה לבדיקה: `admin2@dirapp.com` / `Admin1234!`
 
 **✅ כל הבאגים הידועים נסגרו (2026-06-01)**
