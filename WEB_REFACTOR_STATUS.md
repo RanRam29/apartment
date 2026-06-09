@@ -118,4 +118,4 @@ Merge order: Claude Code merges all branches → main → deploy
 | All landlord/admin (B1-B14) | 2026-06-09 | ✅ |
 | Branches merged to main (B2-B6 + C1-C5) | 2026-06-09 | ✅ |
 | Final merge + E2E | 2026-06-09 | ✅ All Sprint A+B+C merged to main |
-| Production deploy (full) | 2026-06-09 | ✅ `web-next-indol-gamma.vercel.app` (26 pages, main branch) |
+| Production deploy (full) | 2026-06-09 | ✅ `apartment-olive.vercel.app` (26 pages, main branch) |

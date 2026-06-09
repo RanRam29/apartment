@@ -10,8 +10,7 @@
 | רכיב | כתובת | סטטוס |
 |------|--------|--------|
 | Backend (Render) | `https://apartment-backend-v24y.onrender.com` | ✅ פועל |
-| Frontend — Mobile (Vercel) | `https://apartment-olive.vercel.app` | ✅ פועל |
-| Frontend — Web (Vercel) | `https://web-next-indol-gamma.vercel.app` | ✅ פועל (26 pages) |
+| Frontend (Vercel) | `https://apartment-olive.vercel.app` | ✅ פועל (web-next, 26 pages) |
 | PostgreSQL | Supabase (via `DATABASE_URL`) | ✅ פועל |
 | MongoDB | Atlas | ✅ פועל |
 | Redis | Upstash / Render Redis | ✅ פועל |
@@ -256,7 +255,7 @@
 
 | תאריך | גרסה | שינוי | מי |
 |--------|------|--------|-----|
-| 2026-06-09 | 3.0 | Web Refactor complete — 26 pages deployed. Sprint A (Search/Matches/Chat/Verify), Sprint B (Admin/Gamification/Journal/Guarantor/DarkMode), Sprint C (Contracts/Payments/Maintenance/CheckIn). URL: `web-next-indol-gamma.vercel.app` | All |
+| 2026-06-09 | 3.0 | Web Refactor complete — 26 pages deployed. Sprint A (Search/Matches/Chat/Verify), Sprint B (Admin/Gamification/Journal/Guarantor/DarkMode), Sprint C (Contracts/Payments/Maintenance/CheckIn). URL: `apartment-olive.vercel.app` | All |
 | 2026-06-02 | 2.3 | 3 backend features: NLP Search endpoint (V2-4), WhatsApp opt-in + notification prefs (User model), GDPR routes (export/deletion/prefs) | Claude Code |
 | 2026-06-02 | 2.2 | Code Audit + 4 fixes: PaymentLedger/ProtocolEvidence→index.js, rateLimit.js, scoreCompatibility, scheduleReminder stub | Claude Code |
 | 2026-06-02 | 2.2 | ARCHITECTURE.md v3.2 — מעודכן לקוד האמיתי (service names, User schema, geminiService API, notificationService API) | Claude Code |

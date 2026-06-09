@@ -1,10 +1,6 @@
 {
-  "buildCommand": "cd mobile && node scripts/assert-public-api-url.mjs && npm install --legacy-peer-deps && npx expo export --platform web && node scripts/patch-web-index.js",
-  "outputDirectory": "mobile/dist",
-  "framework": null,
-  "nodeVersion": "22.x",
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/.*", "dest": "/index.html" }
-  ]
+  "buildCommand": "cd web-next && npm install && npm run build",
+  "outputDirectory": "web-next/.next",
+  "framework": "nextjs",
+  "nodeVersion": "22.x"
 }
