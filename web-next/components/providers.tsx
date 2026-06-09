@@ -17,7 +17,7 @@ export function Providers({ children }: { children: ReactNode }) {
       const decoded = decodeToken(stored);
       if (decoded) {
         setTokenState(stored);
-        api<{ user: User }>("/api/users/profile", { token: stored })
+        api<{ user: User }>("/api/auth/me", { token: stored })
           .then((res) => setUser(res.user))
           .catch(() => {
             removeToken();
@@ -49,12 +49,11 @@ export function Providers({ children }: { children: ReactNode }) {
     async (newRole: "tenant" | "landlord") => {
       if (!token) return;
       try {
-        const res = await api<{ user: User; token: string }>(
-          "/api/users/switch-role",
-          { method: "PUT", body: { role: newRole }, token }
+        await api<{ activeRole: string }>(
+          "/api/auth/switch-role",
+          { method: "PATCH", body: { role: newRole }, token }
         );
-        setToken(res.token);
-        setTokenState(res.token);
+        const res = await api<{ user: User }>("/api/auth/me", { token });
         setUser(res.user);
       } catch (e) {
         console.error("Switch role failed:", e);
