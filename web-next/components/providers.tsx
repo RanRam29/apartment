@@ -6,6 +6,8 @@ import { getToken, setToken, removeToken, decodeToken } from "@/lib/auth";
 import { api } from "@/lib/api";
 import type { User } from "@/lib/types";
 
+import { ThemeProvider } from "next-themes";
+
 export function Providers({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setTokenState] = useState<string | null>(null);
@@ -64,7 +66,10 @@ export function Providers({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider value={{ user, token, isLoading, login, logout, switchRole }}>
-      {children}
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+        {children}
+      </ThemeProvider>
     </AuthContext.Provider>
   );
 }
+
