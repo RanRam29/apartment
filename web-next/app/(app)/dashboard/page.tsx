@@ -1,10 +1,15 @@
 "use client";
 
 import { useAuth } from "@/hooks/useAuth";
+import { LandlordDashboard } from "@/components/dashboard/LandlordDashboard";
 
 export default function DashboardPage() {
   const { user, switchRole } = useAuth();
   const role = user?.activeRole || user?.role || "tenant";
+
+  if (role === "landlord") {
+    return <LandlordDashboard />;
+  }
 
   return (
     <div className="space-y-6">
@@ -15,7 +20,6 @@ export default function DashboardPage() {
         </h1>
         <p className="text-[16px] text-on-surface-variant mb-6">
           {role === "tenant" && "ברוכים הבאים לדשבורד השוכר"}
-          {role === "landlord" && "ברוכים הבאים לדשבורד המשכיר"}
           {role === "admin" && "ברוכים הבאים לפאנל הניהול"}
         </p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-[14px] text-on-surface-variant">
@@ -45,7 +49,7 @@ export default function DashboardPage() {
           <div className="flex gap-3">
             <button
               onClick={() => switchRole("tenant")}
-              disabled={role === "tenant"}
+              disabled={role as string === "tenant"}
               className={`h-[48px] px-6 rounded-full text-[14px] font-medium transition-all ${
                 role === "tenant"
                   ? "bg-landlord-green text-white"
@@ -56,9 +60,9 @@ export default function DashboardPage() {
             </button>
             <button
               onClick={() => switchRole("landlord")}
-              disabled={role === "landlord"}
+              disabled={role as string === "landlord"}
               className={`h-[48px] px-6 rounded-full text-[14px] font-medium transition-all ${
-                role === "landlord"
+                role as string === "landlord"
                   ? "bg-landlord-green text-white"
                   : "border border-outline-variant text-on-surface-variant hover:border-landlord-green"
               }`}
@@ -76,3 +80,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+

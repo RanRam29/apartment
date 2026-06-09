@@ -28,11 +28,11 @@
 
 ## Antigravity — Sprint B (UI + Admin + Polish)
 
-**BLOCKED until:** Claude Code completes A1-A4 (foundation)
+**STATUS:** UNBLOCKED (Sprint A Foundation completed)
 
 | # | Task | Screen | Status | Date | Notes |
 |---|------|--------|--------|------|-------|
-| B1 | Landlord Dashboard | W3 | ❌ | — | |
+| B1 | Landlord Dashboard | W3 | ✅ | 2026-06-09 | Completed high-fidelity dashboard with real data and mock fallbacks |
 | B2 | Leads Management | W8 | ❌ | — | |
 | B3 | Profile & Settings | W8 | ❌ | — | |
 | B4 | Property Detail | W8 | ❌ | — | |
@@ -66,6 +66,7 @@
 |------|-------|------|------|
 | 2026-06-09 | Claude Code | Created WEB_REFACTOR_PLAN.md + STATUS.md | Awaiting CEO approval to start |
 | 2026-06-09 | Claude Code | A1+A2 DONE: Next.js 16, Tailwind 4, DirApp DS, shadcn/ui (15 components), RTL layout, auth system, API client, TypeScript types | Next: A3 (Login + Register) |
+| 2026-06-09 | Antigravity | B1 DONE: Landlord Dashboard implemented with stats, properties, leads, expiring contracts, alerts, cash flow, and FAB | Next: B2 (Leads Management) |
 
 ---
 
