@@ -34,11 +34,14 @@ beforeAll(async () => {
   ]);
 
   const res = await request(app).post('/api/auth/register').send(USER);
-  userToken = res.body.token;
   userId = res.body.user?.id;
   if (res.body.verificationToken) {
     await request(app).get(`/api/auth/verify/${res.body.verificationToken}`);
   }
+  const loginRes = await request(app)
+    .post('/api/auth/login')
+    .send({ email: USER.email, password: USER.password });
+  userToken = loginRes.body.token;
 }, 30_000);
 
 afterAll(async () => {

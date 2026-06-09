@@ -8,8 +8,10 @@ process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED = 'false';
 process.env.JWT_SECRET = 'test_jwt_secret_for_verification_tests';
 
 const request = require('supertest');
+const jwt = require('jsonwebtoken');
 const { sequelize } = require('../src/config/database');
 const { initRedis, getRedisClient } = require('../src/config/redis');
+const { getJwtSecret } = require('../src/config/security');
 const app = require('../src/app');
 const { generateStrongTestPassword } = require('./helpers/testCredentials');
 
@@ -44,11 +46,19 @@ beforeAll(async () => {
     request(app).post('/api/auth/register').send(LANDLORD),
     request(app).post('/api/auth/register').send(TENANT),
   ]);
-  landlordToken = llRes.body.token;
-  tenantToken = tnRes.body.token;
+  if (llRes.body.verificationToken) {
+    await request(app).get(`/api/auth/verify/${llRes.body.verificationToken}`);
+  }
   if (tnRes.body.verificationToken) {
     await request(app).get(`/api/auth/verify/${tnRes.body.verificationToken}`);
   }
+
+  const [llLogin, tnLogin] = await Promise.all([
+    request(app).post('/api/auth/login').send({ email: LANDLORD.email, password: LANDLORD.password }),
+    request(app).post('/api/auth/login').send({ email: TENANT.email, password: TENANT.password }),
+  ]);
+  landlordToken = llLogin.body.token;
+  tenantToken = tnLogin.body.token;
 }, 30_000);
 
 afterAll(async () => {
@@ -76,6 +86,42 @@ describe('POST /api/apartments', () => {
       .field('rooms', '3')
       .field('city', 'תל אביב');
     expect(res.status).toBe(403);
+  });
+
+  it('rejects a valid JWT for an unverified landlord', async () => {
+    const email = `unverified_landlord_${Date.now()}@test.com`;
+    const registerRes = await request(app)
+      .post('/api/auth/register')
+      .send({
+        email,
+        password: generateStrongTestPassword(),
+        firstName: 'Unverified',
+        lastName: 'Landlord',
+        role: 'landlord',
+      });
+    expect(registerRes.status).toBe(201);
+
+    const staleRegistrationToken = jwt.sign(
+      {
+        id: registerRes.body.user.id,
+        role: 'landlord',
+        email,
+        isPremium: false,
+      },
+      getJwtSecret(),
+      { expiresIn: '7d' }
+    );
+
+    const res = await request(app)
+      .post('/api/apartments')
+      .set('Authorization', `Bearer ${staleRegistrationToken}`)
+      .field('title', 'Unverified Listing')
+      .field('price', '5000')
+      .field('rooms', '3')
+      .field('city', 'תל אביב');
+
+    expect(res.status).toBe(403);
+    expect(res.body.code).toBe('EMAIL_NOT_VERIFIED');
   });
 
   it('returns 422 for missing required fields', async () => {

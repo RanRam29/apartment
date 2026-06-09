@@ -64,19 +64,18 @@ afterAll(async () => {
 });
 
 describe('POST /api/auth/register', () => {
-  it('registers a landlord and returns a JWT', async () => {
+  it('registers a landlord and returns a verification challenge without a JWT', async () => {
     const res = await request(app)
       .post('/api/auth/register')
       .send(LANDLORD);
 
     expect(res.status).toBe(201);
-    expect(typeof res.body.token).toBe('string');
+    expect(res.body.token).toBeUndefined();
     expect(res.body.user.email).toBe(LANDLORD.email);
     expect(res.body.user.role).toBe('landlord');
     expect(res.body.user.passwordHash).toBeUndefined();
     expect(res.body.verificationRequired).toBe(true);
     expect(typeof res.body.verificationToken).toBe('string');
-    authToken = res.body.token;
     verificationToken = res.body.verificationToken;
   });
 
@@ -171,6 +170,7 @@ describe('POST /api/auth/login after verification', () => {
     expect(typeof res.body.token).toBe('string');
     expect(res.body.user.role).toBe('landlord');
     expect(res.body.user.isVerified).toBe(true);
+    authToken = res.body.token;
   });
 });
 

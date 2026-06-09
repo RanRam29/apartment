@@ -43,11 +43,19 @@ beforeAll(async () => {
     request(app).post('/api/auth/register').send(LANDLORD),
     request(app).post('/api/auth/register').send(TENANT),
   ]);
-  landlordToken = llRes.body.token;
-  tenantToken = tnRes.body.token;
+  if (llRes.body.verificationToken) {
+    await request(app).get(`/api/auth/verify/${llRes.body.verificationToken}`);
+  }
   if (tnRes.body.verificationToken) {
     await request(app).get(`/api/auth/verify/${tnRes.body.verificationToken}`);
   }
+
+  const [llLogin, tnLogin] = await Promise.all([
+    request(app).post('/api/auth/login').send({ email: LANDLORD.email, password: LANDLORD.password }),
+    request(app).post('/api/auth/login').send({ email: TENANT.email, password: TENANT.password }),
+  ]);
+  landlordToken = llLogin.body.token;
+  tenantToken = tnLogin.body.token;
 
   // Create a listing and generate a lead via swipe
   const aptRes = await request(app)

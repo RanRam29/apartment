@@ -38,7 +38,7 @@ describe('useAuthStore', () => {
     expect(useAuthStore.getState().user?.email).toBe('u@test.com');
   });
 
-  it('register saves token and sets onboarding for tenant', async () => {
+  it('register saves token and sets onboarding for tenant when registration returns a session', async () => {
     (authApi.register as jest.Mock).mockResolvedValue({
       data: { token: 'tok-reg', user: mockUser },
     });
@@ -48,6 +48,20 @@ describe('useAuthStore', () => {
     expect(tokenStorage.save).toHaveBeenCalledWith('tok-reg');
     expect(useAuthStore.getState().needsOnboarding).toBe(true);
     expect(useAuthStore.getState().isAuthenticated).toBe(true);
+  });
+
+  it('register leaves user unauthenticated when email verification is required', async () => {
+    (authApi.register as jest.Mock).mockResolvedValue({
+      data: { verificationRequired: true, user: mockUser },
+    });
+    await useAuthStore.getState().register({
+      email: 'u@test.com', password: 'pass', firstName: 'A', lastName: 'B', role: 'tenant',
+    } as any);
+    expect(tokenStorage.save).not.toHaveBeenCalled();
+    expect(useAuthStore.getState().isAuthenticated).toBe(false);
+    expect(useAuthStore.getState().token).toBeNull();
+    expect(useAuthStore.getState().user).toBeNull();
+    expect(useAuthStore.getState().needsOnboarding).toBe(false);
   });
 
   it('register does not set onboarding for landlord', async () => {

@@ -10,6 +10,7 @@ const { cacheGet, cacheSet, cacheDel } = require('../config/redis');
 const { getJwtSecret } = require('../config/security');
 const { sendVerificationEmail } = require('../services/emailService');
 const logger = require('../utils/logger');
+const { isEmailVerificationEnforced } = require('../utils/emailVerification');
 const { logAudit } = require('../services/auditLogService');
 const { AUDIT_ACTIONS, AUDIT_OUTCOMES } = require('../constants/logging');
 
@@ -101,14 +102,25 @@ router.post('/register', registerValidator, async (req, res, next) => {
       });
     }
 
-    const token = signTokenOr503(user, res);
-    if (!token) return;
+    const verificationRequired = isEmailVerificationEnforced();
+    let token = null;
+    let verificationToken = null;
 
-    const verificationToken = await issueVerificationTokenForUser(user);
-    try {
-      await user.update({ verificationToken, verifiedAt: null });
-    } catch (err) {
-      logger.warn(`Failed to persist verification token for user ${user.id}: ${err.message}`);
+    if (verificationRequired) {
+      verificationToken = await issueVerificationTokenForUser(user);
+      try {
+        await user.update({ verificationToken, verifiedAt: null });
+      } catch (err) {
+        logger.warn(`Failed to persist verification token for user ${user.id}: ${err.message}`);
+      }
+    } else {
+      try {
+        await user.update({ isVerified: true, verifiedAt: new Date(), verificationToken: null });
+      } catch (err) {
+        logger.warn(`Failed to auto-verify user ${user.id}: ${err.message}`);
+      }
+      token = signTokenOr503(user, res);
+      if (!token) return;
     }
 
     logger.info(`New user registered: ${user.id} (${role})`);
@@ -125,8 +137,7 @@ router.post('/register', registerValidator, async (req, res, next) => {
     });
 
     const payload = {
-      token,
-      verificationRequired: true,
+      verificationRequired,
       user: {
         id: user.id,
         email: user.email,
@@ -137,6 +148,7 @@ router.post('/register', registerValidator, async (req, res, next) => {
         isPremium: user.isPremium,
       },
     };
+    if (token) payload.token = token;
     if (process.env.NODE_ENV === 'test' && verificationToken) payload.verificationToken = verificationToken;
 
     res.status(201).json(payload);
@@ -195,11 +207,10 @@ router.post('/login', loginValidator, async (req, res, next) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    const smtpConfigured = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
     // Require verified email when SMTP is configured (production-like), or always in tests.
     // Without SMTP (local dev), auto-verify so developers can log in without mail infra.
     if (!user.isVerified) {
-      if (smtpConfigured || process.env.NODE_ENV === 'test') {
+      if (isEmailVerificationEnforced()) {
         return res.status(403).json({
           error: 'Please verify your email before logging in',
           code: 'EMAIL_NOT_VERIFIED',
