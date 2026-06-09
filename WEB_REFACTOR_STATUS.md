@@ -14,16 +14,16 @@
 | A4 | Layout: Sidebar + TopBar + auth guard | W3 shell | ✅ | 2026-06-09 | Role-aware sidebar (tenant/landlord/admin), TopBar, redirect if no auth |
 | A5 | Landing Page (SSG) | W1 | ✅ | 2026-06-09 | 8 sections, scroll animations, hero, features, footer |
 | A6 | Tenant Dashboard | W3 tenant | ✅ | 2026-06-09 | Quick actions, apartments, contracts table, trust score, notifications |
-| A7 | Search Grid + NLP + Detail | W6 | ❌ | — | Next session |
-| A8 | Matches List | W6 | ❌ | — | |
-| A9 | Chat (Socket.io) | W6 | ❌ | — | |
-| A15 | Email Verification | W2 | ❌ | — | |
+| A7 | Search Grid + NLP + Detail | W6 | ✅ | 2026-06-09 | NLP search bar, filter sidebar (city/price/rooms/amenities/pets), grid+list view, sort, pagination, apartment card |
+| A8 | Matches List | W6 | ✅ | 2026-06-09 | Tabs (all/pending/accepted/rejected), match cards, accept/reject, unread badges |
+| A9 | Chat (Socket.io) | W6 | ✅ | 2026-06-09 | Chat sidebar + message area, send/receive, polling fallback, date separators, read receipts |
+| A15 | Email Verification | W2 | ✅ | 2026-06-09 | Verify token on load, success redirect, error + resend, no-token state |
 
 ---
 
 ## Antigravity — Sprint B (Dashboards + Profiles + Admin)
 
-**STATUS:** UNBLOCKED — working
+**STATUS:** ✅ COMPLETE — merged to main
 
 | # | Task | Screen | Status | Date | Notes |
 |---|------|--------|--------|------|-------|
@@ -72,8 +72,8 @@
 ## Work Division
 
 ```
-Claude Code:  A7-A9, A15  — Search, Matches, Chat, Email Verify (management + core UX)
-Antigravity:  B1-B14      — Dashboards, Profiles, Admin, Guarantor, Polish
+Claude Code:  A7-A9, A15  — Search, Matches, Chat, Email Verify (management + core UX) ✅ ALL DONE
+Antigravity:  B1-B14      — Dashboards, Profiles, Admin, Guarantor, Polish ✅ ALL DONE
 Cursor:       C1-C5       — Contracts, Payments, Maintenance, Check-In/Out
 ```
 
@@ -97,6 +97,11 @@ Merge order: Claude Code merges all branches → main → deploy
 | 2026-06-09 | Cursor | Merged wind + cursor branches to main; v3 list API + invite tenant | Deploy + E2E |
 | 2026-06-09 | Cursor | Deployed Render backend + Vercel web-next; smoke test passed | A7 / B7+ |
 | 2026-06-09 | Cursor | E2E API 15/17; UI login/contracts/payments OK; contract detail 500 (R2 presign) — fix local | Deploy backend fix |
+| 2026-06-09 | Claude Code | A7 DONE: Search Grid + NLP search bar + filters sidebar + grid/list view + sort + pagination + ApartmentCard | Next: A8 (Matches) |
+| 2026-06-09 | Claude Code | A8+A9 DONE: Matches page (tabs, cards, accept/reject) + Chat (sidebar, messages, send, polling, date groups) | Next: A15 (Email Verify) |
+| 2026-06-09 | Claude Code | A15 DONE: Email verification page (verify/success/error/resend) | Sprint A COMPLETE |
+| 2026-06-09 | Antigravity | B7-B14 DONE: Gamification, Journal, Admin (Dashboard+Users+Config), Guarantor Portal, 404, Dark Mode | Sprint B COMPLETE |
+| 2026-06-09 | Claude Code | Reviewed + merged wind/web-refactor-ui → main. Fixed: kept Cursor's Sprint C files (Antigravity had deleted them). Build: 26 pages, 0 errors | All sprints done |
 
 ---
 
@@ -108,9 +113,9 @@ Merge order: Claude Code merges all branches → main → deploy
 | Antigravity unblocked (Sprint B) | 2026-06-09 | ✅ |
 | Cursor unblocked (Sprint C) | 2026-06-09 | ✅ |
 | Landing + Auth + Dashboard live | 2026-06-09 | ✅ |
-| All search/match/chat (A7-A9) | — | ❌ |
+| All search/match/chat (A7-A9) | 2026-06-09 | ✅ |
 | All contracts/payments (C1-C5) | 2026-06-09 | ✅ |
-| All landlord/admin (B1-B14) | — | ❌ |
+| All landlord/admin (B1-B14) | 2026-06-09 | ✅ |
 | Branches merged to main (B2-B6 + C1-C5) | 2026-06-09 | ✅ |
 | Final merge + E2E | 2026-06-09 | 🔵 15/17 API + UI (detail 500) |
 | Production deploy (full) | 2026-06-09 | ✅ backend Render + web-next Vercel |
