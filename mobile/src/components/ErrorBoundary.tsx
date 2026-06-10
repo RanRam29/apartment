@@ -9,13 +9,13 @@ import { dirApp } from '../theme/dirAppTokens';
 
 import { clientLogsApi } from '../services/api';
 
-interface State { hasError: boolean }
+interface State { hasError: boolean; errorMessage: string }
 
 export class ErrorBoundary extends React.Component<React.PropsWithChildren, State> {
-  state: State = { hasError: false };
+  state: State = { hasError: false, errorMessage: '' };
 
-  static getDerivedStateFromError(): State {
-    return { hasError: true };
+  static getDerivedStateFromError(error: Error): State {
+    return { hasError: true, errorMessage: error?.message || 'Unknown error' };
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
@@ -41,9 +41,10 @@ export class ErrorBoundary extends React.Component<React.PropsWithChildren, Stat
         <Ionicons name="warning-outline" size={64} color={C.danger} />
         <Text style={styles.title}>משהו השתבש</Text>
         <Text style={styles.message}>אירעה שגיאה בלתי צפויה. נסה שוב.</Text>
+        <Text style={styles.errorDetail} selectable>{this.state.errorMessage}</Text>
         <TouchableOpacity
           style={styles.btn}
-          onPress={() => this.setState({ hasError: false })}
+          onPress={() => this.setState({ hasError: false, errorMessage: '' })}
           accessibilityRole="button"
           accessibilityLabel="נסה שוב"
         >
@@ -61,6 +62,7 @@ const styles = StyleSheet.create({
   },
   title: { fontSize: 22, fontWeight: '800', color: C.onInverse.primary },
   message: { fontSize: 14, color: C.textMut, textAlign: 'center' },
+  errorDetail: { fontSize: 11, color: C.coral, textAlign: 'center', marginTop: 8, paddingHorizontal: 16 },
   btn: {
     backgroundColor: C.cyan, borderRadius: 12,
     paddingVertical: 14, paddingHorizontal: 32, marginTop: 8,

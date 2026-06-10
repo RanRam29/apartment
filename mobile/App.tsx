@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, Linking, ActivityIndicator, View, Platform } from 'react-native';
 import * as Updates from 'expo-updates';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
@@ -90,17 +91,19 @@ export default function App() {
 
   return (
     <ErrorBoundary>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <ThemeProvider>
-          {!startupDone ? (
-            <StartupIntroGate onFinish={finishStartup} />
-          ) : (
-            <QueryClientProvider client={queryClient}>
-              <AppInner />
-            </QueryClientProvider>
-          )}
-        </ThemeProvider>
-      </GestureHandlerRootView>
+      <SafeAreaProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <ThemeProvider>
+            {!startupDone ? (
+              <StartupIntroGate onFinish={finishStartup} />
+            ) : (
+              <QueryClientProvider client={queryClient}>
+                <AppInner />
+              </QueryClientProvider>
+            )}
+          </ThemeProvider>
+        </GestureHandlerRootView>
+      </SafeAreaProvider>
     </ErrorBoundary>
   );
 }

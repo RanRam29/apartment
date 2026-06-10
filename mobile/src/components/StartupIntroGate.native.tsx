@@ -1,14 +1,29 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, StatusBar, StyleSheet, Text, View } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
-import { useEventListener } from 'expo';
-import { useVideoPlayer, VideoView } from 'expo-video';
 import { C } from '../theme';
 import { dirApp } from '../theme/dirAppTokens';
 
-const SOURCE = require('../../assets/startup/StartUpLogo.mp4');
 const STORAGE_KEY = 'dirapp_startup_intro_seen';
 const MAX_MS = 15_000;
+
+let VideoView: any = null;
+let useVideoPlayer: any = null;
+let useEventListener: any = null;
+let VIDEO_SOURCE: any = null;
+let videoAvailable = false;
+
+try {
+  const expoVideo = require('expo-video');
+  const expo = require('expo');
+  VideoView = expoVideo.VideoView;
+  useVideoPlayer = expoVideo.useVideoPlayer;
+  useEventListener = expo.useEventListener;
+  VIDEO_SOURCE = require('../../assets/startup/StartUpLogo.mp4');
+  videoAvailable = true;
+} catch {
+  // expo-video not available — skip intro
+}
 
 interface Props {
   onFinish: () => void;
@@ -21,14 +36,14 @@ function StartupIntroVideo({
   onPlayToEnd: () => void;
   onPlayerError: () => void;
 }) {
-  const player = useVideoPlayer(SOURCE, (p) => {
+  const player = useVideoPlayer!(VIDEO_SOURCE, (p: any) => {
     p.loop = false;
     p.muted = true;
     p.play();
   });
 
-  useEventListener(player, 'playToEnd', onPlayToEnd);
-  useEventListener(player, 'statusChange', ({ status }) => {
+  useEventListener!(player, 'playToEnd', onPlayToEnd);
+  useEventListener!(player, 'statusChange', ({ status }: { status: string }) => {
     if (status === 'error') onPlayerError();
   });
 
@@ -81,6 +96,10 @@ export default function StartupIntroGate({ onFinish }: Props) {
     let cancelled = false;
     (async () => {
       try {
+        if (!videoAvailable) {
+          if (!cancelled) finishWithoutMarking();
+          return;
+        }
         const v = await SecureStore.getItemAsync(STORAGE_KEY);
         if (cancelled) return;
         if (v === '1') {
