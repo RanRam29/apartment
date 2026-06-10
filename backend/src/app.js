@@ -162,6 +162,9 @@ app.use('/api/iot', iotRoutes);
 app.use('/api/admin/logs', adminLogsRoutes);
 app.use('/api/logs', logsRoutes);
 app.use('/api/tenant', require('./routes/journal'));
+// v1 lease lifecycle (Fair Rental Law state machine)
+app.use('/api/v1/agreements', require('./routes/agreements'));
+
 // v3 routes (DirApp MVP v3.0)
 const contractsV3Routes = require('./routes/contractsV3');
 app.use('/api/v3/contracts', contractsV3Routes);

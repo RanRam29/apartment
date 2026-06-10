@@ -18,7 +18,7 @@
 | Git repo | `github.com/RanRam29/apartment` (branch: `main`) | ✅ פועל |
 
 **Worktrees:**
-- `C:\apartmentapp` → branch `main` (Orchestrator — Claude Code)
+- `C:\apartmentapp` → branch `cursor/lease-lifecycle-fixes` (Cursor — lease lifecycle sprint, WIP)
 - `C:\apartmentapp-cursor` → branch `cursor/financial-admin` (Cursor)
 - `C:\apartmentapp-windsurf` → branch `main` / `wind/identity-platform` (Antigravity)
 
@@ -79,7 +79,17 @@
 | פיצ'ר | סטטוס | בדיקה אחרונה | הערות |
 |--------|--------|--------------|-------|
 | Contract Upload + Gemini OCR (M1) | ✅ | 2026-05-30 | אומת E2E, הועלה ונותח בהצלחה על ידי ה-AI של Gemini |
-| State Machine v3 (M2) | ✅ | 2026-05-30 | אומת E2E, מעברי סטטוס מלאים של UPLOAD→PENDING_SIGN→ACTIVE |
+| State Machine v3 (M2) | 🟡 | 2026-05-24 | **Lease Lifecycle Engine (Cursor WIP)** — ENUM מתוקן ל-DRAFT→…→SIGNED→ACTIVE |
+
+### Lease Lifecycle Engine (Cursor — `cursor/lease-lifecycle-fixes`)
+| Task | סטטוס | הערות |
+|------|--------|-------|
+| Task 1 — RentalAgreement ENUM + שדות חסרים | ✅ | 2026-05-24 — STRING status + lifecycle columns; UserKycProfile.roleType; DB ensure helpers |
+| Task 2 — LedgerRow master, PaymentLedger removed | ✅ | 2026-05-24 — PaymentLedger.js deleted; grep zero |
+| Task 3 — SIGNED transition + lock baseCpiIndex | ✅ | 2026-05-24 — POST /transition READY_SIGN→SIGNED; AppConfig cpi_index_current |
+| Task 4 — seedLedgerRows (12 rows on SIGNED) | ✅ | 2026-05-24 — ledgerSeedService.js; 21/21 tests pass |
+| Task 5 — checkinUnlock cron (48h before start) | ✅ | 2026-05-24 — cron/checkinUnlock.js; server.js 09:00 daily |
+| Route mount `/api/v1/agreements` | ✅ | 2026-05-24 — was missing from app.js |
 | חתימה על חוזה | ✅ | 2026-05-30 | אומת E2E, חתימה דיגיטלית מה-UI עם showAlert |
 | Validation Gate (KYC + שדות) | ✅ | 2026-05-30 | אומת E2E, מניעת חתימה ללא אימות זהות/KYC |
 | "אמת בעלות" לשוכר | ✅ | 2026-05-30 | אומת E2E, תמיכה ב-VerifyOwnership לשוכר/משכיר |

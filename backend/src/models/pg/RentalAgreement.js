@@ -11,14 +11,21 @@ const RentalAgreement = sequelize.define('RentalAgreement', {
     type: DataTypes.UUID,
     allowNull: false,
   },
+  tenantId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
   propertyId: {
     type: DataTypes.UUID,
     allowNull: false,
   },
   status: {
-    type: DataTypes.ENUM('UPLOAD', 'PENDING_SIGN', 'ACTIVE', 'EXPIRING', 'PENDING_ACTIVATION', 'ENDED'),
+    type: DataTypes.STRING(30),
     allowNull: false,
-    defaultValue: 'UPLOAD',
+    defaultValue: 'DRAFT',
+    validate: {
+      isIn: [['DRAFT', 'PENDING_REVIEW', 'READY_SIGN', 'SIGNED', 'ACTIVE', 'EXPIRING', 'ENDED']],
+    },
   },
   startDate: {
     type: DataTypes.DATEONLY,
@@ -41,6 +48,27 @@ const RentalAgreement = sequelize.define('RentalAgreement', {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
+  baseCpiIndex: {
+    type: DataTypes.DECIMAL(10, 4),
+    allowNull: true,
+  },
+  optionMonths: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  optionNoticeDays: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    defaultValue: 60,
+  },
+  habitabilityDeclaration: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+  },
+  behavioralClauses: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+  },
   r2DocKey: {
     type: DataTypes.STRING(512),
     allowNull: true,
@@ -50,6 +78,14 @@ const RentalAgreement = sequelize.define('RentalAgreement', {
     allowNull: true,
   },
   landlordSignedAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
+  tenantSignedAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
+  checkinUnlockedAt: {
     type: DataTypes.DATE,
     allowNull: true,
   },

@@ -61,6 +61,9 @@ AgreementParty.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 RentalAgreement.hasMany(AgreementRoom, { foreignKey: 'agreementId', as: 'rooms' });
 AgreementRoom.belongsTo(RentalAgreement, { foreignKey: 'agreementId', as: 'agreement' });
 
+RentalAgreement.hasMany(AgreementGuarantor, { foreignKey: 'agreementId', as: 'guarantors' });
+AgreementGuarantor.belongsTo(RentalAgreement, { foreignKey: 'agreementId', as: 'agreement' });
+
 RentalAgreement.hasMany(OwnershipVerification, { foreignKey: 'agreementId', as: 'ownershipVerifications' });
 OwnershipVerification.belongsTo(RentalAgreement, { foreignKey: 'agreementId', as: 'agreement' });
 
@@ -77,12 +80,8 @@ User.hasMany(WhatsAppMessage, { foreignKey: 'userId', as: 'whatsappMessages' });
 MaintenanceTicket.belongsTo(RentalAgreement, { foreignKey: 'agreementId', as: 'agreement' });
 RentalAgreement.hasMany(MaintenanceTicket, { foreignKey: 'agreementId', as: 'maintenanceTickets' });
 
-// Financial + Protocol Evidence (previously unregistered)
-const PaymentLedger = require('./pg/PaymentLedger');
+// Protocol Evidence
 const ProtocolEvidence = require('./pg/ProtocolEvidence');
-
-RentalAgreement.hasMany(PaymentLedger, { foreignKey: 'agreementId', as: 'paymentLedgerRows' });
-PaymentLedger.belongsTo(RentalAgreement, { foreignKey: 'agreementId', as: 'agreement' });
 
 RentalAgreement.hasMany(ProtocolEvidence, { foreignKey: 'agreementId', as: 'protocolEvidence' });
 ProtocolEvidence.belongsTo(RentalAgreement, { foreignKey: 'agreementId', as: 'agreement' });
@@ -112,7 +111,6 @@ module.exports = {
   ContractAmendment,
   WhatsAppMessage,
   WhatsAppConversationState,
-  PaymentLedger,
   ProtocolEvidence,
 };
 

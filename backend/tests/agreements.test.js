@@ -32,8 +32,8 @@ const { initRedis, getRedisClient } = require('../src/config/redis');
 const app = require('../src/app');
 const {
   User, Apartment, RentalAgreement, UserKycProfile,
-  PaymentLedger, AgreementGuarantor, MaintenanceTicket,
-  ProtocolEvidence,
+  AgreementGuarantor, MaintenanceTicket,
+  ProtocolEvidence, LedgerRow,
 } = require('../src/models');
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -45,7 +45,10 @@ function signToken(user) {
 }
 
 beforeAll(async () => {
+  const { ensureRentalAgreementLifecycleColumns, ensureUserKycRoleTypeColumn } = require('../src/config/database');
   await sequelize.sync({ force: false });
+  await ensureRentalAgreementLifecycleColumns();
+  await ensureUserKycRoleTypeColumn();
   await initRedis();
 
   const hash = await bcrypt.hash('Test1234!', 12);
@@ -100,7 +103,7 @@ describe('Database schema', () => {
     const qi = sequelize.getQueryInterface();
     const tables = await qi.showAllTables();
     const required = [
-      'rental_agreements', 'payment_ledger', 'agreement_guarantors',
+      'rental_agreements', 'ledger_rows', 'agreement_guarantors',
       'maintenance_tickets', 'protocol_evidence', 'user_kyc_profiles',
     ];
     for (const table of required) {
