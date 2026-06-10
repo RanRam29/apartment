@@ -84,12 +84,12 @@
 ### Lease Lifecycle Engine (Cursor — `cursor/lease-lifecycle-fixes`)
 | Task | סטטוס | הערות |
 |------|--------|-------|
-| Task 1 — RentalAgreement ENUM + שדות חסרים | ✅ | 2026-05-24 — STRING status + lifecycle columns; UserKycProfile.roleType; DB ensure helpers |
-| Task 2 — LedgerRow master, PaymentLedger removed | ✅ | 2026-05-24 — PaymentLedger.js deleted; grep zero |
-| Task 3 — SIGNED transition + lock baseCpiIndex | ✅ | 2026-05-24 — POST /transition READY_SIGN→SIGNED; AppConfig cpi_index_current |
-| Task 4 — seedLedgerRows (12 rows on SIGNED) | ✅ | 2026-05-24 — ledgerSeedService.js; 21/21 tests pass |
-| Task 5 — checkinUnlock cron (48h before start) | ✅ | 2026-05-24 — cron/checkinUnlock.js; server.js 09:00 daily |
-| Route mount `/api/v1/agreements` | ✅ | 2026-05-24 — was missing from app.js |
+| Task 1 — RentalAgreement ENUM + שדות חסרים | ✅ | 2026-06-10 — STRING status + lifecycle columns; UserKycProfile.roleType; DB ensure helpers |
+| Task 2 — LedgerRow master, PaymentLedger removed | ✅ | 2026-06-10 — PaymentLedger.js deleted; grep zero |
+| Task 3 — SIGNED transition + lock baseCpiIndex | ✅ | 2026-06-10 — POST /transition READY_SIGN→SIGNED; AppConfig cpi_index_current |
+| Task 4 — seedLedgerRows (12 rows on SIGNED) | ✅ | 2026-06-10 — ledgerSeedService.js; 21/21 tests pass |
+| Task 5 — checkinUnlock cron (48h before start) | ✅ | 2026-06-10 — cron/checkinUnlock.js; server.js 09:00 daily |
+| Route mount `/api/v1/agreements` | ✅ | 2026-06-10 — was missing from app.js |
 | חתימה על חוזה | ✅ | 2026-05-30 | אומת E2E, חתימה דיגיטלית מה-UI עם showAlert |
 | Validation Gate (KYC + שדות) | ✅ | 2026-05-30 | אומת E2E, מניעת חתימה ללא אימות זהות/KYC |
 | "אמת בעלות" לשוכר | ✅ | 2026-05-30 | אומת E2E, תמיכה ב-VerifyOwnership לשוכר/משכיר |
@@ -265,6 +265,7 @@
 
 | תאריך | גרסה | שינוי | מי |
 |--------|------|--------|-----|
+| 2026-06-10 | 3.1 | Lease Lifecycle Engine — ENUM fix, SIGNED transition, ledger seed (12 rows), checkinUnlock cron, PaymentLedger removed, 21/21 tests | Cursor + Claude Code |
 | 2026-06-09 | 3.0 | Web Refactor complete — 26 pages deployed. Sprint A (Search/Matches/Chat/Verify), Sprint B (Admin/Gamification/Journal/Guarantor/DarkMode), Sprint C (Contracts/Payments/Maintenance/CheckIn). URL: `apartment-olive.vercel.app` | All |
 | 2026-06-02 | 2.3 | 3 backend features: NLP Search endpoint (V2-4), WhatsApp opt-in + notification prefs (User model), GDPR routes (export/deletion/prefs) | Claude Code |
 | 2026-06-02 | 2.2 | Code Audit + 4 fixes: PaymentLedger/ProtocolEvidence→index.js, rateLimit.js, scoreCompatibility, scheduleReminder stub | Claude Code |
