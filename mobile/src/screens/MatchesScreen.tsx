@@ -99,7 +99,7 @@ export default function MatchesScreen() {
           >
             <Ionicons name="menu-outline" size={24} color={colorsV3.primary} />
           </TouchableOpacity>
-          <h1 style={{ display: 'none' }}>רשימת התכתבויות</h1>
+
           <Text style={styles.headerTitle}>{isLandlord ? 'הודעות' : 'התאמות'}</Text>
           <TouchableOpacity 
             style={styles.headerIconBtn}

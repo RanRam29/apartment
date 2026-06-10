@@ -132,7 +132,7 @@ export default function LoginScreen({ onSwitch }: Props) {
         <View style={styles.logoBadge}>
           <Ionicons name="business" size={32} color="#9ff2e2" />
         </View>
-        <h1 style={{ display: 'none' }}>התחברות ל-DirApp</h1>
+
         <Text style={styles.title}>ברוך הבא</Text>
         <Text style={styles.subtitle}>התחבר כדי לנהל את הנכסים שלך ב-DirApp</Text>
       </View>

@@ -255,7 +255,7 @@ export default function SwipeScreen() {
           <Ionicons name="menu-outline" size={24} color={colorsV3.primary} />
         </TouchableOpacity>
 
-        <h1 style={{ display: 'none' }}>גילוי דירות להשכרה</h1>
+
         <Text style={styles.headerBrand}>DirApp</Text>
 
         <View style={styles.headerActions}>

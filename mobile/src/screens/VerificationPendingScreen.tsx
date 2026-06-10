@@ -157,7 +157,7 @@ export default function VerificationPendingScreen() {
             <Ionicons name="mail-unread" size={48} color={colorsV3.secondary} />
           </View>
 
-          <h1 style={{ display: 'none' }}>אימות כתובת אימייל</h1>
+
           <Text style={styles.title}>בדוק את המייל שלך</Text>
           <Text style={styles.subtitle}>
             שלחנו קוד אימות וקישור לכתובת:{'\n'}
