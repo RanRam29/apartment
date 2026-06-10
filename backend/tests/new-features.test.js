@@ -208,6 +208,7 @@ jest.mock('../src/models/mongo/ServiceReview', () => {
     find:              jest.fn(),
     create:            jest.fn(),
     aggregate:         jest.fn(),
+    deleteMany:        jest.fn(),
   };
   const ctor = jest.fn(() => ({}));
   return Object.assign(ctor, m);
@@ -693,6 +694,25 @@ describe('F14 — Services routes', () => {
       .set('Authorization', 'Bearer tenant')
       .send({ rating: 6, comment: 'טוב' });
     expect(res.status).toBe(422);
+  });
+
+  it('DELETE /api/services/:id — preserves reviews if listing delete fails', async () => {
+    const service = {
+      ...mockService,
+      _id: '507f1f77bcf86cd799439011',
+      deleteOne: jest.fn(async () => {
+        throw new Error('delete failed');
+      }),
+    };
+    ServiceListing.findById.mockResolvedValue(service);
+
+    const res = await request(app)
+      .delete('/api/services/507f1f77bcf86cd799439011')
+      .set('Authorization', 'Bearer tenant');
+
+    expect(res.status).toBe(500);
+    expect(service.deleteOne).toHaveBeenCalledTimes(1);
+    expect(ServiceReview.deleteMany).not.toHaveBeenCalled();
   });
 });
 
