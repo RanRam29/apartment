@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { authGuard, requireKyc, requireAgreementRole } = require('../middleware/authGuard');
 const { stateLockGuard } = require('../middleware/stateLockGuard');
-const { RentalAgreement, UserKycProfile, AgreementGuarantor, Apartment } = require('../models');
+const { RentalAgreement, UserKycProfile, AgreementGuarantor, Apartment, AppConfig } = require('../models');
+const { seedLedgerRows } = require('../services/ledgerSeedService');
 
 router.use(authGuard);
 
@@ -40,7 +41,7 @@ router.get('/:id', async (req, res, next) => {
   try {
     const agreement = await RentalAgreement.findByPk(req.params.id, {
       include: [
-        { model: Apartment, as: 'property', attributes: ['id', 'title', 'address', 'city'] },
+        { model: Apartment, as: 'apartment', attributes: ['id', 'title', 'address', 'city'] },
         { model: AgreementGuarantor, as: 'guarantors' },
       ],
     });
@@ -181,6 +182,29 @@ router.post('/:id/transition',
 
       if (errors.length > 0) {
         return res.status(422).json({ error: 'Transition blocked', reasons: errors });
+      }
+
+      if (targetStatus === 'SIGNED') {
+        const config = await AppConfig.findOne({ where: { key: 'cpi_index_current' } });
+        const cpiIndex = config?.value
+          ? parseFloat(config.value)
+          : (agreement.baseCpiIndex ? parseFloat(agreement.baseCpiIndex) : 100);
+
+        const now = new Date();
+        await agreement.update({
+          status: 'SIGNED',
+          tenantSignedAt: agreement.tenantSignedAt || now,
+          landlordSignedAt: agreement.landlordSignedAt || now,
+          baseCpiIndex: cpiIndex,
+        });
+
+        const ledgerRows = await seedLedgerRows(agreement);
+        return res.json({
+          status: agreement.status,
+          baseCpiIndex: agreement.baseCpiIndex,
+          ledgerRowsCreated: ledgerRows.length,
+          message: 'Agreement signed and ledger seeded',
+        });
       }
 
       await agreement.update({ status: targetStatus });

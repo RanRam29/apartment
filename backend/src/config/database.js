@@ -161,11 +161,83 @@ async function ensureContractAmendmentsTable(queryInterface = sequelize.getQuery
   }
 }
 
+const RENTAL_AGREEMENT_LIFECYCLE_COLUMNS = {
+  tenant_id: { type: DataTypes.UUID, allowNull: true },
+  option_months: { type: DataTypes.INTEGER, allowNull: true },
+  option_notice_days: { type: DataTypes.INTEGER, allowNull: true, defaultValue: 60 },
+  habitability_declaration: { type: DataTypes.JSONB, allowNull: true },
+  behavioral_clauses: { type: DataTypes.JSONB, allowNull: true },
+  base_cpi_index: { type: DataTypes.DECIMAL(10, 4), allowNull: true },
+  tenant_signed_at: { type: DataTypes.DATE, allowNull: true },
+  checkin_unlocked_at: { type: DataTypes.DATE, allowNull: true },
+};
+
+const USER_KYC_ROLE_TYPE_COLUMN = {
+  role_type: { type: DataTypes.STRING(20), allowNull: true },
+};
+
+async function ensureRentalAgreementLifecycleColumns(queryInterface = sequelize.getQueryInterface()) {
+  let table;
+  try {
+    table = await queryInterface.describeTable('rental_agreements');
+  } catch (err) {
+    if (isMissingUsersTableError(err)) return;
+    throw err;
+  }
+
+  for (const [columnName, definition] of Object.entries(RENTAL_AGREEMENT_LIFECYCLE_COLUMNS)) {
+    if (!table[columnName]) {
+      try {
+        await queryInterface.addColumn('rental_agreements', columnName, definition);
+        logger.info(`Added missing rental_agreements.${columnName} column`);
+      } catch (err) {
+        if (!isDuplicateColumnError(err)) throw err;
+      }
+    }
+  }
+
+  // Legacy ENUM (UPLOAD, PENDING_SIGN, …) → VARCHAR for new lifecycle values
+  if (table.status?.type && /enum/i.test(String(table.status.type))) {
+    try {
+      await sequelize.query(`
+        ALTER TABLE rental_agreements
+        ALTER COLUMN status TYPE VARCHAR(30)
+        USING status::text
+      `);
+      logger.info('Migrated rental_agreements.status from ENUM to VARCHAR(30)');
+    } catch (err) {
+      logger.warn(`rental_agreements.status migration skipped: ${err.message}`);
+    }
+  }
+}
+
+async function ensureUserKycRoleTypeColumn(queryInterface = sequelize.getQueryInterface()) {
+  let table;
+  try {
+    table = await queryInterface.describeTable('user_kyc_profiles');
+  } catch (err) {
+    return;
+  }
+
+  for (const [columnName, definition] of Object.entries(USER_KYC_ROLE_TYPE_COLUMN)) {
+    if (!table[columnName]) {
+      try {
+        await queryInterface.addColumn('user_kyc_profiles', columnName, definition);
+        logger.info(`Added missing user_kyc_profiles.${columnName} column`);
+      } catch (err) {
+        if (!isDuplicateColumnError(err)) throw err;
+      }
+    }
+  }
+}
+
 async function initPostgres() {
   await sequelize.authenticate();
   await ensureUserVerificationColumns();
   await ensureApartmentStreetColumn();
   await ensureContractAmendmentsTable();
+  await ensureRentalAgreementLifecycleColumns();
+  await ensureUserKycRoleTypeColumn();
   const syncAlter =
     process.env.NODE_ENV === 'development' ||
     process.env.POSTGRES_SYNC_ALTER === 'true';
@@ -177,5 +249,13 @@ async function initPostgres() {
   logger.info('PostgreSQL connected, synced, and AppConfig seeded');
 }
 
-module.exports = { sequelize, initPostgres, ensureUserVerificationColumns, ensureApartmentStreetColumn, ensureContractAmendmentsTable };
+module.exports = {
+  sequelize,
+  initPostgres,
+  ensureUserVerificationColumns,
+  ensureApartmentStreetColumn,
+  ensureContractAmendmentsTable,
+  ensureRentalAgreementLifecycleColumns,
+  ensureUserKycRoleTypeColumn,
+};
 

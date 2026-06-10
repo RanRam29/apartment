@@ -22,6 +22,7 @@ const CONFIG_DEFAULTS = {
   // ── Payments ──
   late_fee_percentage: '2', payment_reminder_days_before: '3',
   payment_grace_period_days: '5', deposit_months_default: '2', cpi_auto_adjust: 'true',
+  cpi_index_current: '100.0000',
   // ── Chat ──
   max_message_length: '2000', chat_image_max_size_mb: '5', chat_history_retention_days: '365',
   // ── Notifications ──

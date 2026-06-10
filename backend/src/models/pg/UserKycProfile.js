@@ -24,6 +24,10 @@ const UserKycProfile = sequelize.define('UserKycProfile', {
     allowNull: true,
     unique: true,
   },
+  roleType: {
+    type: DataTypes.STRING(20),
+    allowNull: true,
+  },
 }, {
   tableName: 'user_kyc_profiles',
   indexes: [
