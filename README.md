@@ -4,6 +4,8 @@
 
 **Live demo:** [apartment-olive.vercel.app](https://apartment-olive.vercel.app) · **API:** [apartment-backend-v24y.onrender.com/health](https://apartment-backend-v24y.onrender.com/health)
 
+> **Try it yourself** — log in with the demo account: `demo@dirapp.com` / `DirappDemo2026!` (tenant role — swipe the feed, match, chat, search in natural language). *Note: the API runs on a free tier and may take ~30s to wake up on first request.*
+
 ![Node.js](https://img.shields.io/badge/Node.js-Express-339933?logo=nodedotjs&logoColor=white)
 ![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)
 ![React Native](https://img.shields.io/badge/React%20Native-Expo%2053-61DAFB?logo=react&logoColor=black)
