@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const router = express.Router();
 const { authenticate, requireRole } = require('../middleware/auth');
+const { loadAgreement, requireAgreementLandlord } = require('../middleware/agreementAccess');
 const { uploadAndExtract, transitionState, validateGate, renewContract, activateRenewal } = require('../services/contractServiceV3');
 const { Op } = require('sequelize');
 const { RentalAgreement, AgreementParty, AgreementRoom, OwnershipVerification, ContractAmendment, Apartment } = require('../models');
@@ -76,7 +77,7 @@ router.get('/', async (req, res, next) => {
 });
 
 // 3. Get contract details
-router.get('/:id', async (req, res, next) => {
+router.get('/:id', loadAgreement(), async (req, res, next) => {
   try {
     const agreement = await RentalAgreement.findByPk(req.params.id, {
       include: [
@@ -108,7 +109,7 @@ router.get('/:id', async (req, res, next) => {
 });
 
 // 3. Update extracted fields (manual corrections)
-router.patch('/:id/fields', requireRole('landlord'), async (req, res, next) => {
+router.patch('/:id/fields', requireRole('landlord'), loadAgreement(), requireAgreementLandlord, async (req, res, next) => {
   try {
     const agreement = await RentalAgreement.findByPk(req.params.id);
     if (!agreement) return res.status(404).json({ error: 'Agreement not found' });
@@ -129,7 +130,7 @@ router.patch('/:id/fields', requireRole('landlord'), async (req, res, next) => {
 });
 
 // 4. Invite tenant to contract
-router.post('/:id/invite-tenant', requireRole('landlord'), async (req, res, next) => {
+router.post('/:id/invite-tenant', requireRole('landlord'), loadAgreement(), requireAgreementLandlord, async (req, res, next) => {
   try {
     const { tenantUserId } = req.body;
     if (!tenantUserId) return res.status(400).json({ error: 'tenantUserId is required' });
@@ -149,7 +150,7 @@ router.post('/:id/invite-tenant', requireRole('landlord'), async (req, res, next
 });
 
 // 5. Validation gate check
-router.get('/:id/validate', async (req, res, next) => {
+router.get('/:id/validate', loadAgreement(), async (req, res, next) => {
   try {
     const result = await validateGate(req.params.id);
     res.json(result);
@@ -159,7 +160,7 @@ router.get('/:id/validate', async (req, res, next) => {
 });
 
 // 6. State transition
-router.post('/:id/transition', async (req, res, next) => {
+router.post('/:id/transition', loadAgreement(), requireAgreementLandlord, async (req, res, next) => {
   try {
     const { targetStatus } = req.body;
     const agreement = await transitionState(req.params.id, targetStatus);
@@ -171,7 +172,7 @@ router.post('/:id/transition', async (req, res, next) => {
 });
 
 // 7. Sign contract
-router.post('/:id/sign', async (req, res, next) => {
+router.post('/:id/sign', loadAgreement(), async (req, res, next) => {
   try {
     const agreement = await RentalAgreement.findByPk(req.params.id);
     if (!agreement) return res.status(404).json({ error: 'Agreement not found' });
@@ -214,8 +215,12 @@ router.post('/:id/sign', async (req, res, next) => {
 });
 
 // 8. Ownership verification by tenant
-router.post('/:id/verify-ownership', async (req, res, next) => {
+router.post('/:id/verify-ownership', loadAgreement(), async (req, res, next) => {
   try {
+    // Only tenant parties record ownership verification (landlord verifying themselves is meaningless)
+    if (!req.agreementAccess.isParty && !req.agreementAccess.isAdmin) {
+      return res.status(403).json({ error: 'Only a tenant party may verify ownership' });
+    }
     const { choice } = req.body; // 'verified' or 'skipped'
     if (!['verified', 'skipped'].includes(choice)) {
       return res.status(400).json({ error: 'choice must be "verified" or "skipped"' });
@@ -234,6 +239,7 @@ router.post('/:id/verify-ownership', async (req, res, next) => {
 
 // 9. Upload check-in photos for a room
 router.post('/:id/checkin/:roomId/photos',
+  loadAgreement(),
   upload.array('photos', 20),
   async (req, res, next) => {
     try {
@@ -266,7 +272,7 @@ router.post('/:id/checkin/:roomId/photos',
 );
 
 // 10. Complete check-in (landlord confirms)
-router.post('/:id/checkin/complete', requireRole('landlord'), async (req, res, next) => {
+router.post('/:id/checkin/complete', requireRole('landlord'), loadAgreement(), requireAgreementLandlord, async (req, res, next) => {
   try {
     const agreement = await RentalAgreement.findByPk(req.params.id, {
       include: [{ model: AgreementRoom, as: 'rooms' }],
@@ -288,6 +294,7 @@ router.post('/:id/checkin/complete', requireRole('landlord'), async (req, res, n
 
 // 11. Upload check-out photos for a room
 router.post('/:id/checkout/:roomId/photos',
+  loadAgreement(),
   upload.array('photos', 20),
   async (req, res, next) => {
     try {
@@ -315,11 +322,13 @@ router.post('/:id/checkout/:roomId/photos',
 );
 
 // 12. Landlord reviews check-out (approve or add notes)
-router.post('/:id/checkout/review', requireRole('landlord'), async (req, res, next) => {
+router.post('/:id/checkout/review', requireRole('landlord'), loadAgreement(), requireAgreementLandlord, async (req, res, next) => {
   try {
     const { roomId, notes, approved } = req.body;
     const room = await AgreementRoom.findByPk(roomId);
-    if (!room) return res.status(404).json({ error: 'Room not found' });
+    if (!room || room.agreementId !== req.params.id) {
+      return res.status(404).json({ error: 'Room not found' });
+    }
 
     if (!approved && notes) {
       await room.update({ checkoutNotes: notes, checkoutPhotos: [] });
@@ -333,7 +342,7 @@ router.post('/:id/checkout/review', requireRole('landlord'), async (req, res, ne
 });
 
 // 13. Complete check-out — both parties sign
-router.post('/:id/checkout/complete', async (req, res, next) => {
+router.post('/:id/checkout/complete', loadAgreement(), async (req, res, next) => {
   try {
     const agreement = await RentalAgreement.findByPk(req.params.id);
     if (!agreement) return res.status(404).json({ error: 'Agreement not found' });
@@ -348,6 +357,8 @@ router.post('/:id/checkout/complete', async (req, res, next) => {
 // 14. Renew contract (creates a PENDING_ACTIVATION copy)
 router.post('/:id/renew',
   requireRole('landlord'),
+  loadAgreement(),
+  requireAgreementLandlord,
   upload.single('contract'),
   async (req, res, next) => {
     try {
@@ -361,7 +372,7 @@ router.post('/:id/renew',
 );
 
 // 16. Propose contract amendment (restricted to ACTIVE status, max 10 amendments)
-router.post('/:id/amend/propose', async (req, res, next) => {
+router.post('/:id/amend/propose', loadAgreement(), async (req, res, next) => {
   try {
     const agreement = await RentalAgreement.findByPk(req.params.id);
     if (!agreement) return res.status(404).json({ error: 'Agreement not found' });
@@ -412,7 +423,7 @@ router.post('/:id/amend/propose', async (req, res, next) => {
 });
 
 // 17. Approve contract amendment
-router.post('/:id/amend/:aId/approve', async (req, res, next) => {
+router.post('/:id/amend/:aId/approve', loadAgreement(), async (req, res, next) => {
   try {
     const agreement = await RentalAgreement.findByPk(req.params.id);
     if (!agreement) return res.status(404).json({ error: 'Agreement not found' });
@@ -463,7 +474,7 @@ router.post('/:id/amend/:aId/approve', async (req, res, next) => {
 });
 
 // 18. Reject contract amendment
-router.post('/:id/amend/:aId/reject', async (req, res, next) => {
+router.post('/:id/amend/:aId/reject', loadAgreement(), async (req, res, next) => {
   try {
     const agreement = await RentalAgreement.findByPk(req.params.id);
     if (!agreement) return res.status(404).json({ error: 'Agreement not found' });

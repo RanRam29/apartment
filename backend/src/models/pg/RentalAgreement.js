@@ -24,7 +24,7 @@ const RentalAgreement = sequelize.define('RentalAgreement', {
     allowNull: false,
     defaultValue: 'DRAFT',
     validate: {
-      isIn: [['DRAFT', 'PENDING_REVIEW', 'READY_SIGN', 'SIGNED', 'ACTIVE', 'EXPIRING', 'ENDED']],
+      isIn: [['DRAFT', 'PENDING_REVIEW', 'READY_SIGN', 'SIGNED', 'UPLOAD', 'PENDING_SIGN', 'PENDING_ACTIVATION', 'ACTIVE', 'EXPIRING', 'ENDED']],
     },
   },
   startDate: {
