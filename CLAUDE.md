@@ -40,7 +40,7 @@
 **פרודקשן:**
 - Backend: `https://apartment-backend-v24y.onrender.com`
 - Frontend: `https://apartment-olive.vercel.app`
-- כניסה לבדיקה: `admin2@dirapp.com` / `Admin1234!`
+- כניסה לבדיקה: `admin2@dirapp.com` — הסיסמה ב-`.env.local` המקומי (`ADMIN_TEST_PASSWORD`), לא בריפו
 
 **✅ כל הבאגים הידועים נסגרו (2026-06-01)**
 
