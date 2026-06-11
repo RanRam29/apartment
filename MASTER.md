@@ -221,7 +221,7 @@
 | **V2-4 — NLP Search** | — | Claude Code + Antigravity | ✅ Backend + Web UI deployed (search page with NLP) |
 | **V2-7 — GDPR Privacy** | — | Claude Code + Antigravity | ✅ Backend routes + Web profile page (3 buttons) |
 | **WhatsApp opt-in** | Phase 2 | Claude Code + Antigravity | ✅ Backend field + Web profile toggle |
-| **Web Refactor** | — | כל הצוות | ✅ 26 pages deployed — see `WEB_REFACTOR_STATUS.md` |
+| **Web Refactor** | — | כל הצוות | ✅ 26 pages deployed — see `docs/internal/WEB_REFACTOR_STATUS.md` |
 | V2-1 — Stripe Connect | M5 | TBD | ❌ לא התחיל |
 
 ---

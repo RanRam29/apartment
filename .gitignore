@@ -39,6 +39,20 @@ apartment/
 # GitHub account recovery codes — never commit
 *recovery-codes*
 
+# Local AI-tooling config & skills (per-machine, not part of the product)
+.agents/
+.claude/
+.cursor/
+.qodo/
+
+# Debug artifacts / scratch work
+.playwright-mcp/
+scratch/
+mobile/android.bak/
+
+# Marketing media exports (large binaries; final assets live in assets/)
+A_professional_minimalist_logo.mp4
+
 # Stitch / local HTML+PNG design dumps under .cursor/<n>/ (~MB). Runtime tokens live in
 # mobile/src/theme/dirAppTokens.ts — commit code + docs, not exports.
 .cursor/1/

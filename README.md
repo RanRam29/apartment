@@ -1,163 +1,115 @@
-# DirApp — Israeli Apartment Rental Matching Platform
+# DirApp — Apartment Rental Platform 🏠
 
-A Tinder-style apartment rental platform for Israel. Swipe on apartments, get matched with landlords, chat in real-time, and search using natural language powered by Gemini AI.
+> A full-stack, production-deployed rental platform for the Israeli market — from Tinder-style apartment discovery, through digital lease signing with KYC identity verification, to ongoing rent ledger, maintenance and WhatsApp automation.
+
+**Live demo:** [apartment-olive.vercel.app](https://apartment-olive.vercel.app) · **API:** [apartment-backend-v24y.onrender.com/health](https://apartment-backend-v24y.onrender.com/health)
+
+![Node.js](https://img.shields.io/badge/Node.js-Express-339933?logo=nodedotjs&logoColor=white)
+![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)
+![React Native](https://img.shields.io/badge/React%20Native-Expo%2053-61DAFB?logo=react&logoColor=black)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Sequelize-4169E1?logo=postgresql&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose-47A248?logo=mongodb&logoColor=white)
+![Tests](https://img.shields.io/badge/Tests-Jest%20%C2%B7%2050%2B%20suites-C21325?logo=jest&logoColor=white)
 
 ---
+
+## What it does
+
+**For tenants** — swipe through apartments, match with landlords, chat in real time, search in natural language ("3 rooms in Tel Aviv near the beach under 6000₪" → parsed by Gemini AI), sign a lease digitally, report rent payments, open maintenance tickets — even via WhatsApp.
+
+**For landlords** — ranked leads with AI lead-scoring, contract upload with AI (OCR) analysis, a full lease lifecycle engine (`DRAFT → READY_SIGN → SIGNED → ACTIVE → ENDED`), automatic rent ledger with CPI indexation, check-in/check-out photo protocols, and an analytics dashboard.
+
+**For admins** — config panel (50+ runtime keys), user management, KYC overrides, and a stats dashboard with 56 metrics across 8 sections.
+
+## Feature highlights
+
+| Domain | Highlights |
+|--------|-----------|
+| 🔍 Discovery | Swipe feed (Redis-cached), matching engine, real-time chat (Socket.io), NLP search |
+| 🪪 Identity (KYC) | Persona integration, HMAC-SHA256 webhooks, auto photo retention/deletion (7 days) |
+| 📋 Contracts | Upload + Gemini OCR analysis, digital signing, validation gates, guarantor web flow, amendments & renewals |
+| 💰 Payments | Auto-seeded payment ledger (12 rows on signing), tenant report → landlord confirm → auto-confirm 48h, overdue alerts, CPI indexation cron |
+| 🏡 Check-in/out | Room-by-room photo protocols on Cloudflare R2, mutual declarations, 3-round repair cycles |
+| 📱 WhatsApp | Meta Cloud API integration — 8 Hebrew templates, conversational state machine, payment confirmation & maintenance tickets from chat |
+| 🔔 Notifications | Expo Push + transactional email (Resend), scheduled cron alerts (lease expiry 120/90/60/45/30 days) |
+| 🛡️ Trust & Safety | Trust Score engine, audit log, GDPR endpoints (export / deletion), rate limiting |
 
 ## Architecture
 
+```mermaid
+flowchart LR
+    M[Mobile<br/>React Native · Expo 53] --> API
+    W[Web<br/>Next.js 16 · React 19<br/>Vercel] --> API
+    WA[WhatsApp<br/>Meta Cloud API] --> API
+
+    API[Backend API<br/>Node.js · Express · Socket.io<br/>Render]
+
+    API --> PG[(PostgreSQL<br/>Supabase)]
+    API --> MG[(MongoDB<br/>Atlas)]
+    API --> RD[(Redis<br/>Upstash)]
+    API --> R2[(Cloudflare R2<br/>images & contracts)]
+    API --> GM[Gemini AI<br/>OCR · NLP search]
+    API --> PS[Persona<br/>KYC]
+    API --> RS[Resend<br/>email]
 ```
-Mobile (React Native / Expo)
-         ↓ REST + WebSocket
-Backend (Node.js / Express)  ←→  Gemini API (NLP + marketing copy)
-         ↓              ↓
-   PostgreSQL        MongoDB
-  Redis (cache)
-Optional: AI Service (Python / FastAPI) — scoring / duplicate NLP
-   Cloudinary (images)  +  Meshulam (payments)
-```
 
-See [`Info/AI_Capabilities_Current_State.md`](Info/AI_Capabilities_Current_State.md) and [`Info/ADR_AI_Service_Strategy.md`](Info/ADR_AI_Service_Strategy.md).
+Full details: [ARCHITECTURE.md](ARCHITECTURE.md) · DB schema docs: [docs/obsidian-db](docs/obsidian-db) · System design specs: [Info/](Info/)
 
----
-
-## Stack
+## Tech stack
 
 | Layer | Technology |
 |-------|-----------|
-| Mobile | React Native (Expo 51), Zustand, React Query, Reanimated 3 |
-| Backend | Node.js, Express, Sequelize, Mongoose, Socket.io |
-| Databases | PostgreSQL (users/apartments/matches), MongoDB (chat/preferences) |
-| Cache | Redis (feed cache, session, NLP query cache) |
-| AI | **Gemini 1.5 Flash** via Node (`geminiService`); optional Python `ai-service` (NLP/scoring) |
-| Messaging | Apache Kafka (optional in dev/small deploys) |
-| Images | Cloudinary (unsigned upload) |
-| Payments | Meshulam (Israeli payment gateway) |
-| Infrastructure | Docker Compose (dev), Kubernetes (prod) |
+| Web | Next.js 16, React 19, Tailwind, shadcn/ui, SWR, react-hook-form + Zod |
+| Mobile | React Native 0.79 (Expo 53), Zustand, Reanimated |
+| Backend | Node.js, Express, Sequelize (PostgreSQL), Mongoose (MongoDB), Socket.io |
+| Data | PostgreSQL (core domain), MongoDB (chat/preferences), Redis (cache), Cloudflare R2 (objects) |
+| AI | Gemini (contract OCR, NLP search, marketing copy); optional Python FastAPI scoring service |
+| Integrations | Persona (KYC), WhatsApp Meta Cloud API, Resend (email), Expo Push |
+| Ops | Render (API, auto-deploy), Vercel (web), GitHub Actions CI, node-cron jobs, Jest (50+ suites) |
+
+## Repository structure
+
+```
+├── backend/          Node.js REST + WebSocket API (30 route modules, 24 services, 54 test suites)
+├── web-next/         Next.js web client — 26 pages (deployed to Vercel)
+├── mobile/           React Native (Expo) app
+├── ai-service/       Python FastAPI — recommendation & lead-scoring (optional)
+├── infrastructure/   Kubernetes manifests (alternative deploy target)
+├── docs/             Product specs, DB schema vault, internal plans
+├── Info/             System design docs (HLD/LLD, ERD, security, CI/CD)
+└── docker-compose.yml  Local dev environment
+```
+
+## Running locally
+
+```bash
+# Infrastructure
+docker compose up -d postgres mongodb redis
+
+# Backend (http://localhost:3000)
+cd backend && cp .env.example .env && npm install && npm run dev
+
+# Web (http://localhost:3001)
+cd web-next && npm install && npm run dev
+
+# Mobile
+cd mobile && npm install && npx expo start
+
+# Tests
+cd backend && npm test
+```
+
+Required keys are documented in `backend/.env.example` (Gemini, R2, Persona, Resend — all have free tiers).
+
+## Engineering process
+
+This project is built with an AI-orchestrated multi-agent workflow (Claude Code as orchestrator, with parallel agent worktrees), with disciplined status tracking:
+
+- [MASTER.md](MASTER.md) — single source of truth for feature status (verified-in-production matrix)
+- [BUGS.md](BUGS.md) — bug triage with root-cause analysis
+- [ROADMAP.md](ROADMAP.md) — milestone planning (M1–M16 + V2)
+- CI on every push (GitHub Actions), auto-deploy to Render/Vercel, Jest coverage gates
 
 ---
 
-## Quick Start (Development)
-
-### Prerequisites
-- Docker + Docker Compose
-- Node.js 20+
-- Python 3.12+
-- Expo CLI (`npm i -g expo-cli`)
-
-### 1. Clone & configure
-
-```bash
-git clone https://github.com/ranram29/apartment-.git
-cd apartment-
-
-cp backend/.env.example backend/.env
-cp ai-service/.env.example ai-service/.env
-# Fill in GEMINI_API_KEY, Cloudinary, Meshulam keys
-```
-
-### 2. Start infrastructure
-
-```bash
-docker compose up -d postgres mongodb redis kafka
-```
-
-### 3. Start backend
-
-```bash
-cd backend
-npm install
-npm run dev
-# API running at http://localhost:3000
-```
-
-### 4. Start AI service
-
-```bash
-cd ai-service
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn app:app --reload --port 8000
-```
-
-### 5. Start mobile app
-
-```bash
-cd mobile
-npm install
-npx expo start
-# Scan QR with Expo Go app
-```
-
----
-
-## API Reference
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/auth/register` | Register (tenant or landlord) |
-| POST | `/api/auth/login` | Login → JWT |
-| GET | `/api/apartments/feed` | Swipe feed (Redis cached) |
-| POST | `/api/swipe` | Record swipe → triggers match |
-| GET | `/api/matches` | List matches |
-| POST | `/api/matches/:id/accept` | Landlord accepts match |
-| GET | `/api/chat/:matchId` | Paginated messages |
-| POST | `/api/recommendations/search` | NLP search (Gemini) |
-| GET | `/api/landlord/dashboard` | Landlord analytics |
-| POST | `/api/payments/premium` | Upgrade to premium (Meshulam) |
-
----
-
-## Environment Variables
-
-See `backend/.env.example` and `ai-service/.env.example` for all required variables.
-
-Key variables:
-- `GEMINI_API_KEY` — get free at [aistudio.google.com](https://aistudio.google.com/app/apikey)
-- `CLOUDINARY_CLOUD_NAME` + `CLOUDINARY_UPLOAD_PRESET` — free at cloudinary.com
-- `MESHULAM_API_KEY` — meshulam.co.il (Israeli payment gateway)
-
----
-
-## Production Deploy (Kubernetes)
-
-```bash
-kubectl apply -f infrastructure/k8s/namespace.yaml
-cp infrastructure/k8s/secrets.yaml.example infrastructure/k8s/secrets.yaml
-# Edit secrets.yaml with real values
-kubectl apply -f infrastructure/k8s/secrets.yaml
-kubectl apply -f infrastructure/k8s/
-```
-
----
-
-## Project Structure
-
-```
-├── backend/           Node.js API
-│   └── src/
-│       ├── config/    DB connections (PG, Mongo, Redis, Kafka, Socket.io)
-│       ├── models/    Sequelize (pg/) + Mongoose (mongo/) models
-│       ├── routes/    auth, apartments, swipe, matches, chat, recommendations, landlord, payments
-│       ├── services/  matchingService, geminiService, uploadService
-│       └── middleware/ auth (JWT), errorHandler, rateLimiter
-├── mobile/            React Native (Expo)
-│   └── src/
-│       ├── screens/   AuthScreen, SwipeScreen, MatchesScreen, ChatScreen, LandlordDashboard, LeadsScreen, SearchScreen
-│       ├── components/ ApartmentCard, SwipeableCard, MatchCard
-│       ├── store/     useAuthStore, useSwipeStore, useChatStore (Zustand)
-│       ├── services/  api.ts (axios + SecureStore)
-│       └── navigation/ AppNavigator (role-based tabs)
-├── ai-service/        Python FastAPI
-│   └── src/
-│       ├── nlp_search.py          Gemini NLP parser + listing summary
-│       ├── recommendation_engine.py Content-based + behavioural scoring
-│       ├── lead_scoring.py        Lead ranking for landlords
-│       └── routes/                FastAPI routers
-├── infrastructure/
-│   └── k8s/           Kubernetes manifests (namespace, deployments, HPA, ingress)
-└── docker-compose.yml  Full local dev environment
-```
-
-
-you can use also the data in Info folder (.md files)
+*Built by [Ran Ram](https://github.com/RanRam29) · 2026*

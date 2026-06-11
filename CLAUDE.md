@@ -19,8 +19,8 @@
 | `ROADMAP.md` | כשמתכננים פיצ'ר חדש או בודקים מה הבא |
 | `ARCHITECTURE.md` | כשעובדים על backend, DB, API, services |
 | `BUGS.md` | כשמדווחים על באג חדש או בודקים סטטוס |
-| `CEO_DASHBOARD.md` | כשראן שואל "מה המצב?" |
-| `AGENT_PROTOCOL.md` | כשכותבים briefing לעובד |
+| `docs/internal/CEO_DASHBOARD.md` | כשראן שואל "מה המצב?" |
+| `docs/internal/AGENT_PROTOCOL.md` | כשכותבים briefing לעובד |
 | `.cursorrules` | context מלא לCursor/Antigravity |
 
 ---
