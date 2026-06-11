@@ -265,6 +265,7 @@
 
 | תאריך | גרסה | שינוי | מי |
 |--------|------|--------|-----|
+| 2026-06-11 | 3.2 | Repo public-ready: README תדמיתי, docs/internal, untrack tooling; seeder לא מאפס סיסמאות אדמין (ADMIN_SEED_PASSWORD); רוטציית סיסמאות אדמין בפרודקשן (ב-`.env.local`); הריפו הפך PUBLIC | Claude Code |
 | 2026-06-10 | 3.1 | Lease Lifecycle Engine — ENUM fix, SIGNED transition, ledger seed (12 rows), checkinUnlock cron, PaymentLedger removed, 21/21 tests | Cursor + Claude Code |
 | 2026-06-09 | 3.0 | Web Refactor complete — 26 pages deployed. Sprint A (Search/Matches/Chat/Verify), Sprint B (Admin/Gamification/Journal/Guarantor/DarkMode), Sprint C (Contracts/Payments/Maintenance/CheckIn). URL: `apartment-olive.vercel.app` | All |
 | 2026-06-02 | 2.3 | 3 backend features: NLP Search endpoint (V2-4), WhatsApp opt-in + notification prefs (User model), GDPR routes (export/deletion/prefs) | Claude Code |
