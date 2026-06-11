@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const bcrypt = require('bcryptjs');
 const { Op } = require('sequelize');
 const { sequelize } = require('../config/database');
 const { authenticate, requireRole } = require('../middleware/auth');
@@ -96,9 +97,16 @@ router.put('/users/:id', async (req, res, next) => {
       isVerified,
       isLocked,
       blockedCount,
+      password,
     } = req.body;
 
     const updateData = {};
+    if (password !== undefined) {
+      if (typeof password !== 'string' || password.length < 10) {
+        return res.status(400).json({ error: 'Password must be a string of at least 10 characters' });
+      }
+      updateData.passwordHash = await bcrypt.hash(password, 12);
+    }
     if (firstName !== undefined) updateData.firstName = firstName;
     if (lastName !== undefined) updateData.lastName = lastName;
     if (email !== undefined) updateData.email = email;

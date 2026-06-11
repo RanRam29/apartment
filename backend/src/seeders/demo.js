@@ -4,6 +4,7 @@
  * Safe to run multiple times (skips existing emails / duplicate titles per landlord).
  */
 require('dotenv').config();
+const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const { initPostgres } = require('../config/database');
 const { User, Apartment, Swipe, Match } = require('../models');
@@ -17,11 +18,16 @@ function resolveDemoPassword() {
 const DEMO_PASSWORD = resolveDemoPassword();
 const DEMO_SEED_ENABLED_VALUE = 'true';
 
+// Admin passwords are managed via ADMIN_SEED_PASSWORD. When unset, existing
+// admin passwords are never touched, and newly created admin accounts get a
+// random one-time password (rotate afterwards via the admin API).
+const ADMIN_PASSWORD = process.env.ADMIN_SEED_PASSWORD || null;
+
 const ADMIN_ACCOUNTS = [
-  { email: 'admin1@dirapp.com', firstName: 'Admin', lastName: 'One', password: 'Admin1234!', role: 'landlord' },
-  { email: 'admin@dirapp.com', firstName: 'רן', lastName: 'רן', password: 'Admin1234!', role: 'admin' },
-  { email: 'admin2@dirapp.com', firstName: 'Admin', lastName: 'Two', password: 'Admin1234!', role: 'admin' },
-  { email: 'mobile1@dirapp.com', firstName: 'בדיקה', lastName: 'בדיקה', password: 'Admin1234!', role: 'landlord' },
+  { email: 'admin1@dirapp.com', firstName: 'Admin', lastName: 'One', role: 'landlord' },
+  { email: 'admin@dirapp.com', firstName: 'רן', lastName: 'רן', role: 'admin' },
+  { email: 'admin2@dirapp.com', firstName: 'Admin', lastName: 'Two', role: 'admin' },
+  { email: 'mobile1@dirapp.com', firstName: 'בדיקה', lastName: 'בדיקה', role: 'landlord' },
 ];
 
 const LANDLORDS = [
@@ -41,14 +47,14 @@ async function seed() {
 
   // Create admin accounts (always, idempotent)
   for (const a of ADMIN_ACCOUNTS) {
-    const adminHash = await bcrypt.hash(a.password, 12);
+    const adminHash = await bcrypt.hash(ADMIN_PASSWORD || crypto.randomBytes(18).toString('base64url'), 12);
     const [user, created] = await User.findOrCreate({
       where: { email: a.email },
       defaults: { email: a.email, passwordHash: adminHash, firstName: a.firstName, lastName: a.lastName, role: a.role, isVerified: true, tosAcceptedAt: new Date(), tosVersion: '3.0', trustScore: 50 },
     });
     if (!created) {
       await user.update({
-        passwordHash: adminHash,
+        ...(ADMIN_PASSWORD ? { passwordHash: adminHash } : {}),
         role: a.role,
         isVerified: true,
         tosAcceptedAt: user.tosAcceptedAt || new Date(),
@@ -100,7 +106,7 @@ async function seed() {
   // Seed pre-made match for investor demo: admin2 (tenant) ↔ admin1's first apartment
   await seedDemoMatch(admin1);
 
-  console.log('\n📋 Admin accounts (password: Admin1234!):');
+  console.log('\n📋 Admin accounts (password: ADMIN_SEED_PASSWORD env var, or random if unset):');
   ADMIN_ACCOUNTS.forEach((a) => {
     const label = a.role === 'landlord' ? 'Landlord' : 'Tenant ';
     console.log(`  ${label}: ${a.email}`);
@@ -120,7 +126,7 @@ async function seed() {
 async function autoSeed(queryInterface) {
   try {
     // Always ensure admin accounts exist (upsert regardless of DB state)
-    const adminHash = await bcrypt.hash('Admin1234!', 12);
+    const adminHash = await bcrypt.hash(ADMIN_PASSWORD || crypto.randomBytes(18).toString('base64url'), 12);
     for (const a of ADMIN_ACCOUNTS) {
       const [user, created] = await User.findOrCreate({
         where: { email: a.email },
@@ -131,9 +137,10 @@ async function autoSeed(queryInterface) {
         const updates = {};
         if (!user.tosAcceptedAt) { updates.tosAcceptedAt = new Date(); updates.tosVersion = '3.0'; }
         if (!user.isVerified) { updates.isVerified = true; }
-        // Always sync password hash so admin accounts stay accessible
-        updates.passwordHash = adminHash;
-        await user.update(updates);
+        // Sync password hash only when explicitly managed via ADMIN_SEED_PASSWORD —
+        // never silently reset rotated production passwords
+        if (ADMIN_PASSWORD) updates.passwordHash = adminHash;
+        if (Object.keys(updates).length) await user.update(updates);
       }
     }
 
@@ -168,7 +175,7 @@ async function autoSeed(queryInterface) {
       }
     }
     if (admin1) await seedDemoMatch(admin1);
-    console.log('Initial seed complete. admin1@dirapp.com / Admin1234! (22 listings); admin@dirapp.com for empty-landlord tests.');
+    console.log('Initial seed complete. admin1@dirapp.com (22 listings); admin@dirapp.com for empty-landlord tests.');
   } catch (err) {
     console.warn('Auto-seed skipped:', err.message);
   }
