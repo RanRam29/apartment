@@ -193,6 +193,7 @@ app.use('/api/v3/contracts', contractsV3Routes);
 app.use('/api/v3/kyc', require('./routes/kycV3'));
 app.use('/api/v3/maintenance', require('./routes/maintenanceV3'));
 app.use('/api/v3/guarantor', require('./routes/guarantor'));
+app.use('/api/v3/claims', require('./routes/claimsV3'));
 app.use('/api/v3/ledger', require('./routes/ledger'));
 app.use('/api/v3/admin', require('./routes/admin'));
 app.use('/api/v3/admin/stats', require('./routes/adminStats'));
