@@ -279,6 +279,8 @@
 
 | תאריך | גרסה | שינוי | מי |
 |--------|------|--------|-----|
+| 2026-06-12 | 3.5 | Scheduled Notifications — `scheduled_notifications` table (UUID, JSONB payload, dedupeKey, retry≤3), `scheduleReminder`/`cancelReminder` ב-notificationService, cron delivery כל 5 דקות, 7/7 tests | Claude Code |
+| 2026-06-12 | 3.4 | Dead-End Audit — 9 logic gaps closed: change-password endpoint + UI (היה שדה מת), notification prefs per-category keys persisted (נזרקו בשקט), fake WhatsApp OTP הוחלף ב-opt-in אמיתי, fake 2FA toggle הושבת, stub route נמחק, JSON 404 ל-API, error boundaries ל-web-next, cron safety wrapper, tx swallow ב-admin delete. Tests: change-password 6/6, build web-next ✅ | Claude Code |
 | 2026-06-12 | 3.3 | Security Hardening Sprint — 7 vulnerabilities found in code review, all fixed: Contracts V3 IDOR (P0), Ledger IDOR (P0), trust proxy + per-IP rate limit, GDPR deletion cron, verification token hashing+expiry, chat imageUrl XSS, frontend JWT base64url decode. Branch `fix/security-idor-hardening`, 44/44 security tests pass | Claude Code + Cursor + Antigravity |
 | 2026-06-11 | 3.2 | Repo public-ready: README תדמיתי, docs/internal, untrack tooling; seeder לא מאפס סיסמאות אדמין (ADMIN_SEED_PASSWORD); רוטציית סיסמאות אדמין בפרודקשן (ב-`.env.local`); הריפו הפך PUBLIC | Claude Code |
 | 2026-06-10 | 3.1 | Lease Lifecycle Engine — ENUM fix, SIGNED transition, ledger seed (12 rows), checkinUnlock cron, PaymentLedger removed, 21/21 tests | Cursor + Claude Code |

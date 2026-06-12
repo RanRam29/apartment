@@ -80,9 +80,13 @@ async function startServer() {
     });
     const cleanupHours = parseInt(process.env.AUDIT_RETENTION_CLEANUP_HOURS || '24', 10);
     setInterval(async () => {
-      const deleted = await cleanupOldAuditLogs();
-      if (deleted > 0) {
-        logger.info(`Audit retention cleanup removed ${deleted} rows`);
+      try {
+        const deleted = await cleanupOldAuditLogs();
+        if (deleted > 0) {
+          logger.info(`Audit retention cleanup removed ${deleted} rows`);
+        }
+      } catch (err) {
+        logger.error(`Audit retention cleanup failed: ${err.message}`);
       }
     }, Math.max(1, cleanupHours) * 60 * 60 * 1000);
     initSocket(server);
@@ -99,18 +103,25 @@ async function startServer() {
     const { runCpiAdjustment } = require('./cron/cpiAdjustment');
     const { runCheckinUnlock } = require('./cron/checkinUnlock');
     const { runAccountDeletion } = require('./cron/accountDeletion');
+    const { runScheduledNotifications } = require('./cron/scheduledNotifications');
 
     if (process.env.NODE_ENV !== 'test') {
-      cron.schedule('0 2 * * *', runAccountDeletion);
-      cron.schedule('0 8 * * *', runLedgerDueAlerts);     // Daily 08:00
-      cron.schedule('0 9 * * *', runExpiringAlerts);       // Daily 09:00
-      cron.schedule('0 9 * * *', runCheckinUnlock);        // Daily 09:00 — unlock check-in 48h before start
-      cron.schedule('59 23 * * *', runLedgerOverdue);      // Daily 23:59
-      cron.schedule('0 * * * *', runPaymentAutoConfirm);   // Every hour
-      cron.schedule('0 * * * *', runMaintenanceAlerts);    // Every hour
-      cron.schedule('0 0 * * *', runKycRenewal);           // Daily midnight
-      cron.schedule('0 0 1 * *', runR2Cleanup);            // Monthly 1st
-      cron.schedule('0 0 1 1 *', runCpiAdjustment);        // Jan 1 yearly
+      // A rejected cron run must never become an unhandled rejection (process crash risk)
+      const safeCron = (name, fn) => () =>
+        Promise.resolve()
+          .then(fn)
+          .catch((err) => logger.error(`Cron ${name} failed: ${err.message}`));
+      cron.schedule('0 2 * * *', safeCron('accountDeletion', runAccountDeletion));
+      cron.schedule('0 8 * * *', safeCron('ledgerDueAlerts', runLedgerDueAlerts));     // Daily 08:00
+      cron.schedule('0 9 * * *', safeCron('expiringAlerts', runExpiringAlerts));       // Daily 09:00
+      cron.schedule('0 9 * * *', safeCron('checkinUnlock', runCheckinUnlock));         // Daily 09:00 — unlock check-in 48h before start
+      cron.schedule('59 23 * * *', safeCron('ledgerOverdue', runLedgerOverdue));       // Daily 23:59
+      cron.schedule('0 * * * *', safeCron('paymentAutoConfirm', runPaymentAutoConfirm)); // Every hour
+      cron.schedule('0 * * * *', safeCron('maintenanceAlerts', runMaintenanceAlerts)); // Every hour
+      cron.schedule('0 0 * * *', safeCron('kycRenewal', runKycRenewal));               // Daily midnight
+      cron.schedule('0 0 1 * *', safeCron('r2Cleanup', runR2Cleanup));                 // Monthly 1st
+      cron.schedule('0 0 1 1 *', safeCron('cpiAdjustment', runCpiAdjustment));         // Jan 1 yearly
+      cron.schedule('*/5 * * * *', safeCron('scheduledNotifications', runScheduledNotifications)); // Every 5 min
       logger.info('V3 platform cron jobs scheduled successfully');
     }
   } catch (err) {

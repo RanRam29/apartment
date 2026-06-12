@@ -80,6 +80,11 @@ User.hasMany(WhatsAppMessage, { foreignKey: 'userId', as: 'whatsappMessages' });
 MaintenanceTicket.belongsTo(RentalAgreement, { foreignKey: 'agreementId', as: 'agreement' });
 RentalAgreement.hasMany(MaintenanceTicket, { foreignKey: 'agreementId', as: 'maintenanceTickets' });
 
+// Scheduled notifications (delivered by cron/scheduledNotifications.js)
+const ScheduledNotification = require('./pg/ScheduledNotification');
+ScheduledNotification.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+User.hasMany(ScheduledNotification, { foreignKey: 'userId', as: 'scheduledNotifications' });
+
 // Protocol Evidence
 const ProtocolEvidence = require('./pg/ProtocolEvidence');
 
@@ -112,5 +117,6 @@ module.exports = {
   WhatsAppMessage,
   WhatsAppConversationState,
   ProtocolEvidence,
+  ScheduledNotification,
 };
 
