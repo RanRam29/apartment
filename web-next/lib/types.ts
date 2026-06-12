@@ -31,6 +31,8 @@ export interface Apartment {
   address: string;
   city: string;
   neighborhood?: string;
+  latitude?: number | null;
+  longitude?: number | null;
   price: number;
   rooms: number;
   floor?: number;
