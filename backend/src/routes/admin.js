@@ -141,10 +141,12 @@ router.delete('/users/:id', async (req, res, next) => {
     }
 
     // 1. Delete matches
-    await Match.destroy({ where: { [Op.or]: [{ tenantId: userId }, { landlordId: userId }] }, transaction }).catch(() => {});
+    // No .catch() here: a failed statement aborts the Postgres transaction,
+    // so swallowing it only masks the root cause of the rollback.
+    await Match.destroy({ where: { [Op.or]: [{ tenantId: userId }, { landlordId: userId }] }, transaction });
 
     // 2. Delete swipes
-    await Swipe.destroy({ where: { tenantId: userId }, transaction }).catch(() => {});
+    await Swipe.destroy({ where: { tenantId: userId }, transaction });
 
     // 3. Delete agreements, maintenance tickets, ledger rows
     const userAgreements = await RentalAgreement.findAll({

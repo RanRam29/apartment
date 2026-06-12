@@ -254,28 +254,30 @@ export default function LandingPage() {
           <div>
             <h5 className="text-[22px] leading-[30px] font-semibold text-white mb-6">המוצר</h5>
             <ul className="space-y-3 text-[12px] text-[#aec7f5]">
-              <li><a className="hover:text-landlord-green transition-colors" href="#">חיפוש דירה</a></li>
-              <li><a className="hover:text-landlord-green transition-colors" href="#">פרסום נכס</a></li>
-              <li><a className="hover:text-landlord-green transition-colors" href="#">ניהול שוכרים</a></li>
-              <li><a className="hover:text-landlord-green transition-colors" href="#">מערכת חוזים</a></li>
+              <li><a className="hover:text-landlord-green transition-colors" href="/search">חיפוש דירה</a></li>
+              <li><a className="hover:text-landlord-green transition-colors" href="/register">פרסום נכס</a></li>
+              <li><a className="hover:text-landlord-green transition-colors" href="/dashboard">ניהול שוכרים</a></li>
+              <li><a className="hover:text-landlord-green transition-colors" href="/contracts">מערכת חוזים</a></li>
             </ul>
           </div>
           <div>
             <h5 className="text-[22px] leading-[30px] font-semibold text-white mb-6">החברה</h5>
             <ul className="space-y-3 text-[12px] text-[#aec7f5]">
-              <li><a className="hover:text-landlord-green transition-colors" href="#">אודותינו</a></li>
-              <li><a className="hover:text-landlord-green transition-colors" href="#">קריירה</a></li>
-              <li><a className="hover:text-landlord-green transition-colors" href="#">בלוג</a></li>
-              <li><a className="hover:text-landlord-green transition-colors" href="#">צור קשר</a></li>
+              {/* Content pages not built yet — plain text until they exist, no dead anchors */}
+              <li>אודותינו</li>
+              <li>קריירה</li>
+              <li>בלוג</li>
+              <li><a className="hover:text-landlord-green transition-colors" href="mailto:support@dirapp.com">צור קשר</a></li>
             </ul>
           </div>
           <div>
             <h5 className="text-[22px] leading-[30px] font-semibold text-white mb-6">משפטי וקהילה</h5>
             <ul className="space-y-3 text-[12px] text-[#aec7f5]">
-              <li><a className="hover:text-landlord-green transition-colors" href="#">מדיניות פרטיות</a></li>
-              <li><a className="hover:text-landlord-green transition-colors" href="#">תקנון האתר</a></li>
-              <li><a className="hover:text-landlord-green transition-colors" href="#">פורום משכירים</a></li>
-              <li><a className="hover:text-landlord-green transition-colors" href="#">שאלות ותשובות</a></li>
+              {/* Legal pages not built yet — plain text until they exist, no dead anchors */}
+              <li>מדיניות פרטיות</li>
+              <li>תקנון האתר</li>
+              <li>פורום משכירים</li>
+              <li>שאלות ותשובות</li>
             </ul>
           </div>
         </div>

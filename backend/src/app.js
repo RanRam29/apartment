@@ -246,10 +246,6 @@ app.get('/api/v3/whatsapp/unread-count', userAuth, async (req, res, next) => {
   }
 });
 
-app.put('/api/users/me/notification-preferences', userAuth, (req, res) => {
-  res.json({ ok: true, preferences: req.body });
-});
-
 app.post('/api/users/me/export-data', userAuth, async (req, res, next) => {
   try {
     const user = await User.findByPk(req.user.id, { attributes: { exclude: ['passwordHash'] } });
@@ -270,6 +266,11 @@ app.post('/api/users/me/request-deletion', userAuth, async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+});
+
+// Terminal JSON 404 for unknown API routes (instead of Express HTML default)
+app.use('/api', (req, res) => {
+  res.status(404).json({ error: 'Not found', path: req.originalUrl });
 });
 
 app.use(errorHandler);

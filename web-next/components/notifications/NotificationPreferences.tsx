@@ -41,11 +41,10 @@ export function NotificationPreferences() {
     systemWhatsapp: false,
   });
 
-  // WhatsApp verification code
+  // WhatsApp opt-in
   const [phone, setPhone] = useState(user?.phone || "");
-  const [verificationCode, setVerificationCode] = useState("");
-  const [codeSent, setCodeSent] = useState(false);
-  const [isSendingCode, setIsSendingCode] = useState(false);
+  const [isSavingPhone, setIsSavingPhone] = useState(false);
+  const [phoneMessage, setPhoneMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -165,22 +164,31 @@ export function NotificationPreferences() {
     }
   }
 
-  // Send WhatsApp verification code
-  async function handleSendCode() {
+  // Save phone number + enable WhatsApp opt-in
+  async function handleEnableWhatsapp() {
+    if (!token) return;
+    setPhoneMessage(null);
     if (!phone.trim()) {
-      alert("נא להזין מספר טלפון");
+      setPhoneMessage({ type: "error", text: "נא להזין מספר טלפון" });
       return;
     }
-    setIsSendingCode(true);
+    setIsSavingPhone(true);
     try {
-      // Stub code simulation
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      setCodeSent(true);
-      alert("קוד אימות נשלח ל-WhatsApp שלך!");
-    } catch (err) {
-      console.error(err);
+      await api<{ user: User }>("/api/users/me", {
+        method: "PUT",
+        body: { phone: phone.trim(), whatsappOptIn: true },
+        token,
+      });
+      setMasterWhatsapp(true);
+      // Refresh user context so the new phone/opt-in survive navigation
+      const userRes = await api<{ user: User }>("/api/auth/me", { token });
+      login(token, userRes.user);
+      setPhoneMessage({ type: "success", text: "עדכוני WhatsApp הופעלו בהצלחה!" });
+    } catch (err: any) {
+      console.error("WhatsApp opt-in failed:", err);
+      setPhoneMessage({ type: "error", text: err?.message || "שגיאה בשמירת מספר הטלפון" });
     } finally {
-      setIsSendingCode(false);
+      setIsSavingPhone(false);
     }
   }
 
@@ -545,36 +553,20 @@ export function NotificationPreferences() {
                 className="flex-grow h-button-h bg-surface border border-outline-variant rounded-lg px-4 focus:ring-2 focus:ring-landlord-green outline-none text-left dir-ltr"
               />
               <button
-                onClick={handleSendCode}
-                disabled={isSendingCode}
+                onClick={handleEnableWhatsapp}
+                disabled={isSavingPhone}
                 className="bg-[#25D366] hover:bg-[#1fb356] text-white px-6 rounded-full font-bold transition-all active:scale-95 shadow-md disabled:opacity-50"
               >
-                {isSendingCode ? "שולח..." : "שלח קוד"}
+                {isSavingPhone ? "שומר..." : "הפעל עדכונים"}
               </button>
             </div>
-            {codeSent && (
-              <div className="mt-4 flex gap-2">
-                <input
-                  type="text"
-                  value={verificationCode}
-                  onChange={(e) => setVerificationCode(e.target.value)}
-                  placeholder="קוד אימות..."
-                  className="w-1/2 h-10 border border-outline-variant rounded px-3 text-center outline-none bg-surface"
-                />
-                <button
-                  onClick={() => {
-                    alert("קוד האימות אושר בהצלחה!");
-                    setMasterWhatsapp(true);
-                    setCodeSent(false);
-                  }}
-                  className="bg-tenant-blue text-white px-4 rounded font-bold text-caption"
-                >
-                  אמת קוד
-                </button>
-              </div>
+            {phoneMessage && (
+              <p className={`mt-3 text-[12px] font-bold ${phoneMessage.type === "success" ? "text-landlord-green" : "text-admin-red"}`}>
+                {phoneMessage.text}
+              </p>
             )}
             <p className="mt-3 text-[11px] text-on-surface-variant opacity-75">
-              בלחיצה על &apos;שלח קוד&apos; הנך מאשר/ת קבלת מסרים ב-WhatsApp מ-DirApp
+              בלחיצה על &apos;הפעל עדכונים&apos; הנך מאשר/ת קבלת מסרים ב-WhatsApp מ-DirApp
             </p>
           </div>
         </div>

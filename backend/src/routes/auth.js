@@ -533,18 +533,79 @@ router.post('/block/:userId', require('../middleware/auth').authenticate, requir
   }
 });
 
+// POST /api/auth/change-password — authenticated password change
+router.post('/change-password', require('../middleware/auth').authenticate, async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(422).json({ error: 'currentPassword and newPassword are required' });
+    }
+    if (typeof newPassword !== 'string' || newPassword.length < 8) {
+      return res.status(422).json({ error: 'New password must be at least 8 characters' });
+    }
+
+    const user = await User.findByPk(req.user.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    let valid = false;
+    try {
+      valid = await bcrypt.compare(currentPassword, user.passwordHash);
+    } catch (err) {
+      logger.warn(`bcrypt.compare failed for change-password ${user.email}: ${err.message}`);
+    }
+    if (!valid) {
+      await logAudit({
+        ...req.getAuditContext?.(),
+        actorId: req.user.id,
+        actorRole: req.user.role,
+        action: 'PASSWORD_CHANGE',
+        resourceType: 'user',
+        resourceId: user.id,
+        outcome: AUDIT_OUTCOMES.FAILURE,
+        statusCode: 401,
+      });
+      return res.status(401).json({ error: 'Current password is incorrect' });
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    await user.update({ passwordHash });
+
+    await logAudit({
+      ...req.getAuditContext?.(),
+      actorId: req.user.id,
+      actorRole: req.user.role,
+      action: 'PASSWORD_CHANGE',
+      resourceType: 'user',
+      resourceId: user.id,
+      outcome: AUDIT_OUTCOMES.SUCCESS,
+      statusCode: 200,
+    });
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // ─── GDPR / Privacy Routes ──────────────────────────────────────────────────
 
 // PUT /api/auth/notification-preferences — update notification preferences
 router.put('/notification-preferences', require('../middleware/auth').authenticate, async (req, res, next) => {
   try {
-    const { push, email, paymentReminders, maintenance, whatsapp } = req.body;
+    const ALLOWED_PREF_KEYS = [
+      // master toggles
+      'push', 'email', 'paymentReminders', 'maintenance', 'whatsapp',
+      // per-category toggles (web preference matrix)
+      'paymentsPush', 'paymentsEmail', 'paymentsWhatsapp',
+      'contractsPush', 'contractsEmail', 'contractsWhatsapp',
+      'maintenancePush', 'maintenanceEmail', 'maintenanceWhatsapp',
+      'matchesPush', 'matchesEmail', 'matchesWhatsapp',
+      'chatPush', 'chatEmail', 'chatWhatsapp',
+      'systemPush', 'systemEmail', 'systemWhatsapp',
+    ];
     const prefs = {};
-    if (push !== undefined) prefs.push = !!push;
-    if (email !== undefined) prefs.email = !!email;
-    if (paymentReminders !== undefined) prefs.paymentReminders = !!paymentReminders;
-    if (maintenance !== undefined) prefs.maintenance = !!maintenance;
-    if (whatsapp !== undefined) prefs.whatsapp = !!whatsapp;
+    for (const key of ALLOWED_PREF_KEYS) {
+      if (req.body[key] !== undefined) prefs[key] = !!req.body[key];
+    }
 
     const user = await User.findByPk(req.user.id);
     if (!user) return res.status(404).json({ error: 'User not found' });

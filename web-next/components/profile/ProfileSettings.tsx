@@ -59,8 +59,10 @@ export function ProfileSettings() {
   const [isSavingLifestyle, setIsSavingLifestyle] = useState(false);
 
   // Security & GDPR States
+  const [currentPassword, setCurrentPassword] = useState("");
   const [password, setPassword] = useState("");
-  const [is2FA, setIs2FA] = useState(true);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [passwordMessage, setPasswordMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
   const [gdprMessage, setGdprMessage] = useState<string | null>(null);
@@ -242,6 +244,36 @@ export function ProfileSettings() {
       alert("שגיאה בשמירת השאלון");
     } finally {
       setIsSavingLifestyle(false);
+    }
+  }
+
+  // Handle Password Change
+  async function handleChangePassword() {
+    if (!token) return;
+    setPasswordMessage(null);
+    if (!currentPassword) {
+      setPasswordMessage({ type: "error", text: "יש להזין את הסיסמה הנוכחית" });
+      return;
+    }
+    if (password.length < 8) {
+      setPasswordMessage({ type: "error", text: "הסיסמה החדשה חייבת להכיל לפחות 8 תווים" });
+      return;
+    }
+    setIsChangingPassword(true);
+    try {
+      await api("/api/auth/change-password", {
+        method: "POST",
+        body: { currentPassword, newPassword: password },
+        token,
+      });
+      setPasswordMessage({ type: "success", text: "הסיסמה עודכנה בהצלחה!" });
+      setCurrentPassword("");
+      setPassword("");
+    } catch (err: any) {
+      console.error("Password change failed:", err);
+      setPasswordMessage({ type: "error", text: err?.message || "שגיאה בעדכון הסיסמה" });
+    } finally {
+      setIsChangingPassword(false);
     }
   }
 
@@ -717,43 +749,58 @@ export function ProfileSettings() {
             <h3 className="text-h3-web font-bold text-tenant-blue border-b border-outline-variant pb-4">פרטיות ואבטחה</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-              {/* Password Change stub */}
+              {/* Password Change */}
               <div className="space-y-6">
                 <div className="space-y-2">
                   <label className="text-label font-bold text-on-surface">שינוי סיסמה</label>
-                  <div className="relative">
-                    <input
-                      type="password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="w-full h-input-h border border-outline-variant rounded-lg px-4 bg-surface-container-low outline-none"
-                    />
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline">
-                      visibility
-                    </span>
-                  </div>
+                  <input
+                    type="password"
+                    placeholder="סיסמה נוכחית"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    className="w-full h-input-h border border-outline-variant rounded-lg px-4 bg-surface-container-low outline-none"
+                  />
+                  <input
+                    type="password"
+                    placeholder="סיסמה חדשה (לפחות 8 תווים)"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full h-input-h border border-outline-variant rounded-lg px-4 bg-surface-container-low outline-none"
+                  />
                   {password.length > 0 && (
                     <div className="w-full h-1 bg-surface-container rounded-full mt-2 overflow-hidden">
-                      <div className={`h-full ${password.length > 6 ? "bg-landlord-green w-full" : "bg-admin-red w-1/3"}`} />
+                      <div className={`h-full ${password.length >= 8 ? "bg-landlord-green w-full" : "bg-admin-red w-1/3"}`} />
                     </div>
                   )}
                   {password.length > 0 && (
-                    <span className={`text-caption font-bold ${password.length > 6 ? "text-landlord-green" : "text-admin-red"}`}>
-                      {password.length > 6 ? "סיסמה חזקה" : "סיסמה חלשה מדי"}
+                    <span className={`text-caption font-bold ${password.length >= 8 ? "text-landlord-green" : "text-admin-red"}`}>
+                      {password.length >= 8 ? "סיסמה תקינה" : "סיסמה קצרה מדי (מינימום 8 תווים)"}
                     </span>
                   )}
+                  {passwordMessage && (
+                    <p className={`text-caption font-bold ${passwordMessage.type === "success" ? "text-landlord-green" : "text-admin-red"}`}>
+                      {passwordMessage.text}
+                    </p>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleChangePassword}
+                    disabled={isChangingPassword}
+                    className="bg-tenant-blue hover:opacity-90 text-white font-bold px-6 h-button-h rounded-full transition-all soft-shadow active:scale-[0.98] disabled:opacity-50"
+                  >
+                    {isChangingPassword ? "מעדכן..." : "עדכן סיסמה"}
+                  </button>
                 </div>
 
-                {/* 2FA SMS Toggle */}
-                <div className="flex items-center justify-between p-4 bg-surface-container-low rounded-lg border border-outline-variant/30">
+                {/* 2FA — not yet supported by the backend; disabled until implemented */}
+                <div className="flex items-center justify-between p-4 bg-surface-container-low rounded-lg border border-outline-variant/30 opacity-60">
                   <div>
                     <div className="text-label font-bold text-tenant-blue">אימות דו-שלבי (2FA)</div>
-                    <div className="text-caption text-on-surface-variant">אבטחת החשבון בכניסה באמצעות קוד SMS</div>
+                    <div className="text-caption text-on-surface-variant">יהיה זמין בקרוב</div>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" checked={is2FA} onChange={(e) => setIs2FA(e.target.checked)} className="sr-only peer" />
-                    <div className="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:-translate-x-full rtl:peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-landlord-green"></div>
+                  <label className="relative inline-flex items-center cursor-not-allowed">
+                    <input type="checkbox" checked={false} disabled className="sr-only peer" />
+                    <div className="w-11 h-6 bg-surface-variant rounded-full peer after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5"></div>
                   </label>
                 </div>
               </div>
