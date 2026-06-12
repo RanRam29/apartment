@@ -52,6 +52,8 @@
 | פיצ'ר | סטטוס | בדיקה אחרונה | הערות |
 |--------|--------|--------------|-------|
 | Register / Login / JWT | ✅ | 2026-05-28 | עובד |
+| Google Sign-In web | ✅ | 2026-06-12 | כפתור Google Sign-In וקביעת תפקיד ראשונית |
+| Google Sign-In mobile ❌ | ❌ | 2026-06-12 | דרוש Redirect URIs וקלאיינט נפרד (TODO) |
 | Email verification (Resend) | ✅ | 2026-05-28 | עובד |
 | `admin@dirapp.com` login | ✅ | 2026-05-28 | **BUG-002 CLOSED** — תוקן `ed0e874`, אומת בייצור |
 | `admin1@dirapp.com` login | ✅ | 2026-05-28 | תוקן יחד עם admin@ |

@@ -36,6 +36,8 @@ const USER_VERIFICATION_COLUMNS = {
 // v3.0 columns added by Cascade (multi-tenant, ToS, blocking)
 const USER_V3_COLUMNS = {
   tos_accepted_at: { type: DataTypes.DATE, allowNull: true },
+  google_id: { type: DataTypes.STRING(64), allowNull: true, unique: true },
+  role_selected_at: { type: DataTypes.DATE, allowNull: true },
   tos_version: { type: DataTypes.STRING(20), allowNull: true },
   blocked_count: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
   is_locked: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },

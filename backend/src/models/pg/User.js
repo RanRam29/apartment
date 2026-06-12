@@ -66,6 +66,15 @@ const User = sequelize.define('User', {
     type: DataTypes.DATE,
     allowNull: true,
   },
+  googleId: {
+    type: DataTypes.STRING(64),
+    allowNull: true,
+    unique: true,
+  },
+  roleSelectedAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
   tosVersion: {
     type: DataTypes.STRING(20),
     allowNull: true,

@@ -108,6 +108,7 @@ router.post('/register', registerValidator, async (req, res, next) => {
       lastName,
       role,
       phone: phone || null,
+      roleSelectedAt: new Date(),
     });
 
     // Create empty preferences doc in MongoDB for tenants (fire-and-forget)
@@ -736,6 +737,193 @@ router.post('/unblock/:userId', require('../middleware/auth').authenticate, requ
     const isLocked = blockedCount >= 5;
     await user.update({ blockedCount, isLocked });
     res.json({ blockedCount, isLocked });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /api/auth/google — Google Sign-In verification and login
+router.post('/google', async (req, res, next) => {
+  try {
+    const { credential } = req.body;
+    if (!credential) {
+      return res.status(400).json({ error: 'Credential is required' });
+    }
+
+    // Verify Google ID token via Google's tokeninfo API
+    const verifyUrl = `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`;
+    const response = await fetch(verifyUrl);
+    if (!response.ok) {
+      await logAudit({
+        ...req.getAuditContext?.(),
+        action: AUDIT_ACTIONS.USER_LOGIN_FAILED,
+        resourceType: 'user',
+        resourceId: null,
+        outcome: AUDIT_OUTCOMES.FAILURE,
+        statusCode: 401,
+        metadata: { provider: 'google', error: 'Token verification failed' },
+      });
+      return res.status(401).json({ error: 'Invalid Google token' });
+    }
+
+    const payload = await response.json();
+    const googleClientId = process.env.GOOGLE_CLIENT_ID;
+
+    if (payload.aud !== googleClientId) {
+      logger.warn(`Google login client ID mismatch: expected ${googleClientId}, got ${payload.aud}`);
+      return res.status(401).json({ error: 'Invalid Google token client ID' });
+    }
+
+    if (String(payload.email_verified) !== 'true') {
+      return res.status(401).json({ error: 'Google email not verified' });
+    }
+
+    const email = payload.email;
+    const googleId = payload.sub;
+
+    let user = await User.findOne({ where: { googleId } });
+    if (!user) {
+      user = await User.findOne({ where: { email } });
+      if (user) {
+        // Link existing account
+        await user.update({ googleId });
+        logger.info(`Linked existing user email ${email} to Google ID ${googleId}`);
+      } else {
+        // Create new user
+        const randomPassword = crypto.randomBytes(32).toString('hex');
+        const passwordHash = await bcrypt.hash(randomPassword, 12);
+        
+        const firstName = payload.given_name || payload.name?.split(' ')[0] || 'משתמש';
+        const lastName = payload.family_name || payload.name?.split(' ').slice(1).join(' ') || 'חדש';
+        const avatarUrl = payload.picture || null;
+
+        user = await User.create({
+          email,
+          googleId,
+          firstName,
+          lastName,
+          avatarUrl,
+          passwordHash,
+          isVerified: true,
+          verifiedAt: new Date(),
+          role: 'tenant',
+          roleSelectedAt: null,
+        });
+        logger.info(`Created new user ${user.id} via Google Sign-In`);
+      }
+    }
+
+    if (user.isLocked) {
+      return res.status(403).json({ error: 'Account locked', code: 'ACCOUNT_LOCKED' });
+    }
+
+    await user.update({ lastActiveAt: new Date() });
+
+    const token = signTokenOr503(user, res);
+    if (!token) return;
+
+    // Cache basic user profile for fast lookups
+    await safeCacheSet(`user:${user.id}`, {
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      role: user.role,
+      avatarUrl: user.avatarUrl,
+    }, 3600);
+
+    await logAudit({
+      ...req.getAuditContext?.(),
+      actorId: user.id,
+      actorRole: user.role,
+      action: AUDIT_ACTIONS.USER_LOGIN_SUCCESS,
+      resourceType: 'user',
+      resourceId: user.id,
+      outcome: AUDIT_OUTCOMES.SUCCESS,
+      statusCode: 200,
+      metadata: { provider: 'google', email: user.email },
+    });
+
+    res.json({
+      token,
+      needsRoleSelection: !user.roleSelectedAt,
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+        activeRole: user.activeRole || user.role,
+        avatarUrl: user.avatarUrl,
+        isVerified: user.isVerified,
+        isPremium: user.isPremium,
+        tosAcceptedAt: user.tosAcceptedAt,
+        kycStatus: user.kycStatus,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /api/auth/set-role — Set user role (first-time selection only)
+router.post('/set-role', require('../middleware/auth').authenticate, async (req, res, next) => {
+  try {
+    const { role } = req.body;
+    if (!['tenant', 'landlord'].includes(role)) {
+      return res.status(400).json({ error: 'Role must be tenant or landlord' });
+    }
+
+    const user = await User.findByPk(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (user.roleSelectedAt) {
+      return res.status(409).json({ error: 'Role already selected' });
+    }
+
+    await user.update({
+      role,
+      activeRole: role,
+      roleSelectedAt: new Date(),
+    });
+
+    if (role === 'tenant') {
+      UserPreferences.create({ userId: user.id }).catch((err) => {
+        logger.warn(`Failed to create UserPreferences doc: ${err?.message || err}`);
+      });
+    }
+
+    const token = signTokenOr503(user, res);
+    if (!token) return;
+
+    // Update user cache
+    await safeCacheSet(`user:${user.id}`, {
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      role: user.role,
+      avatarUrl: user.avatarUrl,
+    }, 3600);
+
+    res.json({
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+        activeRole: user.activeRole || user.role,
+        avatarUrl: user.avatarUrl,
+        isVerified: user.isVerified,
+        isPremium: user.isPremium,
+        tosAcceptedAt: user.tosAcceptedAt,
+        kycStatus: user.kycStatus,
+      },
+    });
   } catch (err) {
     next(err);
   }
