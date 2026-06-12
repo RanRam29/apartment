@@ -116,6 +116,10 @@ const User = sequelize.define('User', {
     type: DataTypes.DATE,
     allowNull: true,
   },
+  onboardingState: {
+    type: DataTypes.JSONB,
+    defaultValue: {},
+  },
 }, {
   tableName: 'users',
   indexes: [

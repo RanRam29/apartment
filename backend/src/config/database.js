@@ -48,6 +48,7 @@ const USER_V3_COLUMNS = {
   bio: { type: DataTypes.TEXT, allowNull: true },
   deletion_requested_at: { type: DataTypes.DATE, allowNull: true },
   verification_token_expires_at: { type: DataTypes.DATE, allowNull: true },
+  onboarding_state: { type: DataTypes.JSONB, allowNull: true, defaultValue: {} },
 };
 const APARTMENT_STREET_COLUMN = {
   street: { type: DataTypes.STRING(100), allowNull: true },

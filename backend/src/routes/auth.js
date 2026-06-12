@@ -435,6 +435,12 @@ router.patch('/profile', require('../middleware/auth').authenticate, async (req,
     if (!user) return res.status(404).json({ error: 'User not found' });
 
     await user.update(updates);
+    if (updates.whatsappOptIn === true) {
+      try {
+        const { applyTrustEvent } = require('../services/trustScoreService');
+        await applyTrustEvent(user.id, 'whatsapp_opt_in');
+      } catch (_) {}
+    }
     const { passwordHash: _, ...safeUser } = user.toJSON();
     await logAudit({
       ...req.getAuditContext?.(),
@@ -615,6 +621,12 @@ router.put('/notification-preferences', require('../middleware/auth').authentica
 
     const merged = { ...(user.notificationPreferences || {}), ...prefs };
     await user.update({ notificationPreferences: merged, whatsappOptIn: merged.whatsapp });
+    if (merged.whatsapp === true) {
+      try {
+        const { applyTrustEvent } = require('../services/trustScoreService');
+        await applyTrustEvent(user.id, 'whatsapp_opt_in');
+      } catch (_) {}
+    }
 
     await logAudit({
       ...req.getAuditContext?.(),

@@ -188,6 +188,8 @@ app.use('/api/v1/agreements', require('./routes/agreements'));
 // v3 routes (DirApp MVP v3.0)
 const contractsV3Routes = require('./routes/contractsV3');
 app.use('/api/v3/contracts', contractsV3Routes);
+app.use('/api/v3/trust', require('./routes/trust'));
+app.use('/api/v3/onboarding', require('./routes/onboarding'));
 
 // CASCADE routes
 app.use('/api/v3/kyc', require('./routes/kycV3'));
@@ -223,6 +225,12 @@ app.put('/api/users/me', userAuth, async (req, res, next) => {
     }
 
     await user.update(updates);
+    if (updates.whatsappOptIn === true) {
+      try {
+        const { applyTrustEvent } = require('./services/trustScoreService');
+        await applyTrustEvent(user.id, 'whatsapp_opt_in');
+      } catch (_) {}
+    }
     const { passwordHash: _, ...safeUser } = user.toJSON();
     res.json({ user: safeUser });
   } catch (err) {

@@ -57,6 +57,12 @@ async function handleWebhook(rawBody, signature) {
       const gamificationService = require('./gamificationService');
       await gamificationService.awardPoints(kyc.userId, 'identity_verified').catch(() => {});
     } catch (_) {}
+
+    // Trigger Trust Score!
+    try {
+      const { applyTrustEvent } = require('./trustScoreService');
+      await applyTrustEvent(kyc.userId, 'kyc_approved');
+    } catch (_) {}
   }
 
   return { processed: true, status: newStatus };
