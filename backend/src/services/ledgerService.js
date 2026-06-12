@@ -1,4 +1,5 @@
 const { LedgerRow, RentalAgreement, AgreementParty } = require('../models');
+const { recalcTrustScoreForAgreement } = require('./trustScoreService');
 
 const HEBREW_MONTHS = ['ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני', 'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'];
 
@@ -69,6 +70,7 @@ async function confirmPayment(ledgerRowId, actor) {
     status: 'PAID',
     confirmedByLandlord: new Date(),
   });
+  await recalcTrustScoreForAgreement(row.agreementId);
   return row;
 }
 
@@ -98,6 +100,7 @@ async function autoConfirmStalePayments() {
 
   for (const row of stale) {
     await row.update({ status: 'PAID', confirmedByLandlord: new Date(), notes: 'Auto-confirmed after 48h' });
+    await recalcTrustScoreForAgreement(row.agreementId);
   }
   return stale.length;
 }

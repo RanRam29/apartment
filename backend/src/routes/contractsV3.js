@@ -348,6 +348,8 @@ router.post('/:id/checkout/complete', loadAgreement(), async (req, res, next) =>
     if (!agreement) return res.status(404).json({ error: 'Agreement not found' });
 
     await agreement.update({ checkoutCompletedAt: new Date() });
+    const { recalcTrustScoreForAgreement } = require('../services/trustScoreService');
+    await recalcTrustScoreForAgreement(agreement.id);
     res.json({ checkoutCompleted: true });
   } catch (err) {
     next(err);
