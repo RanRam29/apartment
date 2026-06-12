@@ -1,6 +1,6 @@
 # DirApp — MASTER STATUS DOCUMENT
 > **מנהל: Claude Code (Orchestrator)**  
-> **עדכון אחרון:** 2026-06-12  
+> **עדכון אחרון:** 2026-06-12 (v3.6)  
 > **כלל ברזל:** זה המסמך היחיד שסומך עליו. כל שינוי קוד → עדכון כאן.
 
 ---
@@ -229,14 +229,17 @@
 
 | פיצ'ר | תלויות | אחריות | סטטוס |
 |--------|---------|---------|--------|
-| **NF1 — Trust Score** | M5 ✅ + M6 ✅ | Antigravity | ✅ אומת E2E 2026-06-01 |
+| **NF1 — Trust Score** | M5 ✅ + M6 ✅ | Antigravity | ✅ UI; **auto-calc backend** 🟡 → ✅ Cursor K6 (`trustScoreService`, hooks PAID+checkout) |
 | **NF2 — Renter Journal** | M1+M3+M4+M8+M9 | Antigravity | ✅ אומת E2E 2026-06-01 |
 | **V2-3 — Contract Amendment** | M2 | Antigravity | ✅ אומת E2E 2026-06-01 |
 | **V2-4 — NLP Search** | — | Claude Code + Antigravity | ✅ Backend + Web UI deployed (search page with NLP) |
 | **V2-7 — GDPR Privacy** | — | Claude Code + Antigravity | ✅ Backend routes + Web profile page (3 buttons) |
 | **WhatsApp opt-in** | Phase 2 | Claude Code + Antigravity | ✅ Backend field + Web profile toggle |
 | **Web Refactor** | — | כל הצוות | ✅ 26 pages deployed — see `docs/internal/WEB_REFACTOR_STATUS.md` |
-| V2-1 — Stripe Connect | M5 | TBD | ❌ לא התחיל |
+| V2-1 — Stripe Connect | M5 | TBD | ❌ RFC only — `docs/internal/RFC-stripe-connect.md` |
+| **V2-2 — Guarantor Claims** | M7 ✅ | Cursor | ✅ Backend K8 — `warranty_claims`, `/api/v3/claims`, 7/7 tests |
+| **V2-5 — Trust Score auto-calc** | M5 ✅ | Cursor | ✅ K6 — `recalcTrustScore()` hooks |
+| **Admin scheduled notifications** | 225bf29 | Cursor | ✅ K7 — list + cancel endpoints, 4/4 tests |
 
 ---
 
@@ -279,6 +282,7 @@
 
 | תאריך | גרסה | שינוי | מי |
 |--------|------|--------|-----|
+| 2026-06-12 | 3.6 | Cursor K6–K9: Trust Score auto-calc (`trustScoreService`), admin scheduled-notifications CRUD, warranty claims (V2-2), branch cleanup 83→52 remote branches | Cursor |
 | 2026-06-12 | 3.5 | Scheduled Notifications — `scheduled_notifications` table (UUID, JSONB payload, dedupeKey, retry≤3), `scheduleReminder`/`cancelReminder` ב-notificationService, cron delivery כל 5 דקות, 7/7 tests | Claude Code |
 | 2026-06-12 | 3.4 | Dead-End Audit — 9 logic gaps closed: change-password endpoint + UI (היה שדה מת), notification prefs per-category keys persisted (נזרקו בשקט), fake WhatsApp OTP הוחלף ב-opt-in אמיתי, fake 2FA toggle הושבת, stub route נמחק, JSON 404 ל-API, error boundaries ל-web-next, cron safety wrapper, tx swallow ב-admin delete. Tests: change-password 6/6, build web-next ✅ | Claude Code |
 | 2026-06-12 | 3.3 | Security Hardening Sprint — 7 vulnerabilities found in code review, all fixed: Contracts V3 IDOR (P0), Ledger IDOR (P0), trust proxy + per-IP rate limit, GDPR deletion cron, verification token hashing+expiry, chat imageUrl XSS, frontend JWT base64url decode. Branch `fix/security-idor-hardening`, 44/44 security tests pass | Claude Code + Cursor + Antigravity |
