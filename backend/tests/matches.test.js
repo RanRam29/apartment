@@ -12,6 +12,7 @@ const { sequelize } = require('../src/config/database');
 const { initRedis, getRedisClient } = require('../src/config/redis');
 const app = require('../src/app');
 const { generateStrongTestPassword } = require('./helpers/testCredentials');
+const { registerVerifyAndLogin } = require('./helpers/authFlow');
 jest.setTimeout(30_000);
 
 const ts = Date.now();
@@ -41,15 +42,10 @@ beforeAll(async () => {
     initRedis(),
   ]);
 
-  const [llRes, tnRes] = await Promise.all([
-    request(app).post('/api/auth/register').send(LANDLORD),
-    request(app).post('/api/auth/register').send(TENANT),
-  ]);
-  landlordToken = llRes.body.token;
-  tenantToken = tnRes.body.token;
-  if (tnRes.body.verificationToken) {
-    await request(app).get(`/api/auth/verify/${tnRes.body.verificationToken}`);
-  }
+  const landlordAuth = await registerVerifyAndLogin(request, app, LANDLORD);
+  const tenantAuth = await registerVerifyAndLogin(request, app, TENANT);
+  landlordToken = landlordAuth.token;
+  tenantToken = tenantAuth.token;
 
   // Create an apartment, then swipe like to generate a pending match
   const aptRes = await request(app)

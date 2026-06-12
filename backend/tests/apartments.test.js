@@ -12,6 +12,8 @@ const { sequelize } = require('../src/config/database');
 const { initRedis, getRedisClient } = require('../src/config/redis');
 const app = require('../src/app');
 const { generateStrongTestPassword } = require('./helpers/testCredentials');
+const { registerVerifyAndLogin } = require('./helpers/authFlow');
+const { Match } = require('../src/models');
 
 const ts = Date.now();
 const TEST_PASSWORD = generateStrongTestPassword();
@@ -33,6 +35,8 @@ const TENANT = {
 let landlordToken = '';
 let tenantToken = '';
 let apartmentId = '';
+let landlordId = '';
+let tenantId = '';
 
 beforeAll(async () => {
   await Promise.all([
@@ -40,15 +44,12 @@ beforeAll(async () => {
     initRedis(),
   ]);
 
-  const [llRes, tnRes] = await Promise.all([
-    request(app).post('/api/auth/register').send(LANDLORD),
-    request(app).post('/api/auth/register').send(TENANT),
-  ]);
-  landlordToken = llRes.body.token;
-  tenantToken = tnRes.body.token;
-  if (tnRes.body.verificationToken) {
-    await request(app).get(`/api/auth/verify/${tnRes.body.verificationToken}`);
-  }
+  const landlordAuth = await registerVerifyAndLogin(request, app, LANDLORD);
+  const tenantAuth = await registerVerifyAndLogin(request, app, TENANT);
+  landlordToken = landlordAuth.token;
+  tenantToken = tenantAuth.token;
+  landlordId = landlordAuth.user?.id;
+  tenantId = tenantAuth.user?.id;
 }, 30_000);
 
 afterAll(async () => {
@@ -218,6 +219,36 @@ describe('DELETE /api/apartments/:id', () => {
       .set('Authorization', `Bearer ${landlordToken}`);
     expect(res.status).toBe(200);
     expect(res.body.message).toMatch(/deleted/i);
+  });
+
+  it('blocks deletion when the listing has an active match', async () => {
+    if (!landlordId || !tenantId) return;
+    const aptRes = await request(app)
+      .post('/api/apartments')
+      .set('Authorization', `Bearer ${landlordToken}`)
+      .field('title', 'Matched Apartment')
+      .field('price', '6500')
+      .field('rooms', '3')
+      .field('city', 'תל אביב')
+      .field('street', 'דיזנגוף');
+    const activeApartmentId = aptRes.body.apartment?.id;
+    if (!activeApartmentId) return;
+
+    const match = await Match.create({
+      tenantId,
+      landlordId,
+      apartmentId: activeApartmentId,
+      status: 'accepted',
+    });
+
+    const res = await request(app)
+      .delete(`/api/apartments/${activeApartmentId}`)
+      .set('Authorization', `Bearer ${landlordToken}`);
+    expect(res.status).toBe(409);
+    expect(res.body.code).toBe('APARTMENT_HAS_ACTIVE_MATCHES');
+
+    const stillExists = await Match.findByPk(match.id);
+    expect(stillExists).toBeTruthy();
   });
 
   it('returns 404 when deleting same apartment again (already destroyed)', async () => {

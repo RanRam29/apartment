@@ -65,6 +65,15 @@ function isMissingApartmentsTableError(err) {
   return /apartments.*does not exist|relation "apartments" does not exist|No description found/i.test(message);
 }
 
+function isMissingColumnError(err, columnName) {
+  const message = String(err?.message || '');
+  return err?.original?.code === '42703' || new RegExp(`column .*${columnName}.* does not exist`, 'i').test(message);
+}
+
+function isDuplicateColumnError(err) {
+  return err?.original?.code === '42701' || /column .* already exists/i.test(String(err?.message || ''));
+}
+
 async function ensureApartmentStreetColumn(queryInterface = sequelize.getQueryInterface()) {
   let apartmentsTable;
   try {
@@ -78,21 +87,38 @@ async function ensureApartmentStreetColumn(queryInterface = sequelize.getQueryIn
 
   for (const [columnName, definition] of Object.entries(APARTMENT_STREET_COLUMN)) {
     if (!apartmentsTable[columnName]) {
-      await queryInterface.addColumn('apartments', columnName, definition);
-      logger.info(`Added missing apartments.${columnName} column`);
+      try {
+        await queryInterface.addColumn('apartments', columnName, definition);
+        logger.info(`Added missing apartments.${columnName} column`);
+      } catch (err) {
+        if (!isDuplicateColumnError(err)) throw err;
+        logger.info(`apartments.${columnName} column already exists; continuing migration`);
+      }
     }
   }
 
   // One-time backfill + schema cleanup from legacy neighborhood column.
   if (apartmentsTable.neighborhood) {
-    await sequelize.query(`
-      UPDATE apartments
-      SET street = neighborhood
-      WHERE street IS NULL
-        AND neighborhood IS NOT NULL
-    `);
-    await queryInterface.removeColumn('apartments', 'neighborhood');
-    logger.info('Dropped legacy apartments.neighborhood column after backfill');
+    try {
+      await sequelize.query(`
+        UPDATE apartments
+        SET street = neighborhood
+        WHERE street IS NULL
+          AND neighborhood IS NOT NULL
+      `);
+    } catch (err) {
+      if (!isMissingColumnError(err, 'neighborhood')) throw err;
+      logger.info('Legacy apartments.neighborhood column already removed; skipping backfill');
+      return;
+    }
+
+    try {
+      await queryInterface.removeColumn('apartments', 'neighborhood');
+      logger.info('Dropped legacy apartments.neighborhood column after backfill');
+    } catch (err) {
+      if (!isMissingColumnError(err, 'neighborhood')) throw err;
+      logger.info('Legacy apartments.neighborhood column already removed; continuing migration');
+    }
   }
 }
 

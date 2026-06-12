@@ -60,6 +60,18 @@ describe('useAuthStore', () => {
     expect(useAuthStore.getState().needsOnboarding).toBe(false);
   });
 
+  it('register leaves the session unauthenticated when verification is required before token issuance', async () => {
+    (authApi.register as jest.Mock).mockResolvedValue({
+      data: { verificationRequired: true, user: mockUser },
+    });
+    await useAuthStore.getState().register({
+      email: 'u@test.com', password: 'pass', firstName: 'A', lastName: 'B', role: 'tenant',
+    } as any);
+    expect(tokenStorage.save).not.toHaveBeenCalled();
+    expect(useAuthStore.getState().isAuthenticated).toBe(false);
+    expect(useAuthStore.getState().token).toBeNull();
+  });
+
   it('logout clears token and user', async () => {
     (authApi.logout as jest.Mock).mockResolvedValue({});
     useAuthStore.setState({ user: mockUser, token: 'tok', isAuthenticated: true, isLoading: false, needsOnboarding: false });

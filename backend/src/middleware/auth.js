@@ -26,6 +26,24 @@ function requireRole(...roles) {
   };
 }
 
+function requireCurrentRole(...roles) {
+  return async (req, res, next) => {
+    try {
+      const user = await User.findByPk(req.user?.id, { attributes: ['id', 'role'] });
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      if (!roles.includes(user.role)) {
+        return res.status(403).json({ error: 'Insufficient permissions' });
+      }
+      req.user.role = user.role;
+      next();
+    } catch (err) {
+      next(err);
+    }
+  };
+}
+
 async function requireVerified(req, res, next) {
   try {
     const user = await User.findByPk(req.user?.id, { attributes: ['id', 'isVerified'] });
@@ -41,4 +59,4 @@ async function requireVerified(req, res, next) {
   }
 }
 
-module.exports = { authenticate, requireRole, requireVerified };
+module.exports = { authenticate, requireRole, requireCurrentRole, requireVerified };

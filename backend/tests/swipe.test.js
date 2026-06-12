@@ -12,6 +12,7 @@ const { sequelize } = require('../src/config/database');
 const { initRedis, getRedisClient } = require('../src/config/redis');
 const app = require('../src/app');
 const { generateStrongTestPassword } = require('./helpers/testCredentials');
+const { registerVerifyAndLogin } = require('./helpers/authFlow');
 
 const ts = Date.now();
 const TEST_PASSWORD = generateStrongTestPassword();
@@ -41,17 +42,10 @@ beforeAll(async () => {
     initRedis(),
   ]);
 
-  const [llRes, tnRes] = await Promise.all([
-    request(app).post('/api/auth/register').send(LANDLORD),
-    request(app).post('/api/auth/register').send(TENANT),
-  ]);
-  landlordToken = llRes.body.token;
-  tenantToken = tnRes.body.token;
-
-  // Verify tenant email so swipe endpoints are accessible
-  if (tnRes.body.verificationToken) {
-    await request(app).get(`/api/auth/verify/${tnRes.body.verificationToken}`);
-  }
+  const landlordAuth = await registerVerifyAndLogin(request, app, LANDLORD);
+  const tenantAuth = await registerVerifyAndLogin(request, app, TENANT);
+  landlordToken = landlordAuth.token;
+  tenantToken = tenantAuth.token;
 
   const [apt1Res, apt2Res] = await Promise.all([
     request(app)

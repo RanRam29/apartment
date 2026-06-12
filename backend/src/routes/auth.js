@@ -45,6 +45,11 @@ function signToken(user) {
   );
 }
 
+function isEmailVerificationEnforced() {
+  const smtpConfigured = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+  return smtpConfigured || process.env.NODE_ENV === 'test';
+}
+
 /** Returns a JWT or sends 503 if signing fails (e.g. JWT_SECRET missing on the host). */
 function signTokenOr503(user, res) {
   try {
@@ -101,14 +106,17 @@ router.post('/register', registerValidator, async (req, res, next) => {
       });
     }
 
-    const token = signTokenOr503(user, res);
-    if (!token) return;
-
     const verificationToken = await issueVerificationTokenForUser(user);
     try {
       await user.update({ verificationToken, verifiedAt: null });
     } catch (err) {
       logger.warn(`Failed to persist verification token for user ${user.id}: ${err.message}`);
+    }
+
+    let token = null;
+    if (!isEmailVerificationEnforced()) {
+      token = signTokenOr503(user, res);
+      if (!token) return;
     }
 
     logger.info(`New user registered: ${user.id} (${role})`);
@@ -125,7 +133,6 @@ router.post('/register', registerValidator, async (req, res, next) => {
     });
 
     const payload = {
-      token,
       verificationRequired: true,
       user: {
         id: user.id,
@@ -137,6 +144,7 @@ router.post('/register', registerValidator, async (req, res, next) => {
         isPremium: user.isPremium,
       },
     };
+    if (token) payload.token = token;
     if (process.env.NODE_ENV === 'test' && verificationToken) payload.verificationToken = verificationToken;
 
     res.status(201).json(payload);
@@ -195,11 +203,10 @@ router.post('/login', loginValidator, async (req, res, next) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    const smtpConfigured = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
     // Require verified email when SMTP is configured (production-like), or always in tests.
     // Without SMTP (local dev), auto-verify so developers can log in without mail infra.
     if (!user.isVerified) {
-      if (smtpConfigured || process.env.NODE_ENV === 'test') {
+      if (isEmailVerificationEnforced()) {
         return res.status(403).json({
           error: 'Please verify your email before logging in',
           code: 'EMAIL_NOT_VERIFIED',

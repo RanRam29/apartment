@@ -19,6 +19,9 @@ jest.mock('../src/services/api', () => ({
     getMessages: jest.fn(),
     sendMessage: jest.fn(),
   },
+  clientLogsApi: {
+    event: jest.fn(() => Promise.resolve({})),
+  },
   tokenStorage: {
     get: jest.fn(),
   },

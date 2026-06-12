@@ -313,6 +313,17 @@ router.delete('/:id', authenticate, requireRole('landlord'), async (req, res, ne
     const normalizedCity = typeof apartment.city === 'string' ? apartment.city.toLowerCase() : null;
     const aid = apartment.id;
 
+    const liveMatchCount = await Match.count({
+      where: { apartmentId: aid, status: { [Op.in]: ['pending', 'accepted'] } },
+    });
+    if (liveMatchCount > 0) {
+      return res.status(409).json({
+        error: 'Cannot delete a listing with active matches',
+        code: 'APARTMENT_HAS_ACTIVE_MATCHES',
+        activeMatches: liveMatchCount,
+      });
+    }
+
     await sequelize.transaction(async (t) => {
       await Swipe.destroy({ where: { apartmentId: aid }, transaction: t });
       await Match.destroy({ where: { apartmentId: aid }, transaction: t });

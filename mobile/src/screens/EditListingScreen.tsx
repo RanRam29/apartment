@@ -11,6 +11,7 @@ import { apartmentsApi } from '../services/api';
 import { C } from '../theme';
 import type { Amenity, MainStackParamList } from '../types';
 import { CITY_CENTER_BY_NAME } from '../constants/cityCenters';
+import { addressCityName, cityNamesMatch, normalizeText } from '../utils/israeliAddress';
 
 const AMENITY_OPTIONS: { key: Amenity; label: string }[] = [
   { key: 'parking',      label: '🚗 חניה' },
@@ -82,10 +83,6 @@ export default function EditListingScreen({ route, navigation }: Props) {
     return withoutCodeChars.slice(0, 100);
   }
 
-  function normalizeText(value: string) {
-    return value.trim().toLowerCase();
-  }
-
   function getCityMatches(query: string) {
     const q = normalizeText(query);
     if (q.length < 2) return [];
@@ -112,13 +109,12 @@ export default function EditListingScreen({ route, navigation }: Props) {
       );
       const data = await res.json();
       if (!Array.isArray(data)) return false;
-      const cityNorm = normalizeText(cityName);
       const streetNorm = normalizeText(streetName);
       return data.some((item: any) => {
         const address = item?.address || {};
-        const candidateCity = normalizeText(address.city || address.town || address.village || address.municipality || '');
+        const candidateCity = addressCityName(address);
         const candidateStreet = normalizeText(address.road || '');
-        return candidateCity === cityNorm && candidateStreet === streetNorm;
+        return cityNamesMatch(candidateCity, cityName) && candidateStreet === streetNorm;
       });
     } catch {
       return false;
@@ -155,9 +151,9 @@ export default function EditListingScreen({ route, navigation }: Props) {
               .map((item: any) => item?.address)
               .filter(Boolean)
               .filter((address: any) => {
-                const addressCity = normalizeText(address?.city || address?.town || address?.village || address?.municipality || '');
+                const addressCity = addressCityName(address);
                 const streetName = normalizeText(address?.road || '');
-                return addressCity === normalizeText(selectedCity) && streetName.startsWith(normalizeText(q));
+                return cityNamesMatch(addressCity, selectedCity) && streetName.startsWith(normalizeText(q));
               })
               .map((address: any) => address?.road)
               .filter(Boolean)
@@ -202,7 +198,11 @@ export default function EditListingScreen({ route, navigation }: Props) {
       Alert.alert('שגיאה', 'יש לבחור עיר קיימת בישראל מתוך ההצעות');
       return;
     }
-    const isStreetValid = await validateStreetInCity(cityValue, streetValue);
+    const originalStreet = String(apt?.street ?? apt?.neighborhood ?? '').trim();
+    const addressUnchanged =
+      cityNamesMatch(String(apt?.city ?? ''), cityValue) &&
+      normalizeText(originalStreet) === normalizeText(streetValue);
+    const isStreetValid = addressUnchanged || (await validateStreetInCity(cityValue, streetValue));
     if (!isStreetValid) {
       Alert.alert('שגיאה', 'יש לבחור רחוב שקיים בעיר שנבחרה');
       return;

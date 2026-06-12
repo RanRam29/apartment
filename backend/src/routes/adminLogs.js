@@ -1,6 +1,6 @@
 const express = require('express');
 const { Op } = require('sequelize');
-const { authenticate, requireRole } = require('../middleware/auth');
+const { authenticate, requireCurrentRole } = require('../middleware/auth');
 const { AuditLog } = require('../models');
 const SystemEvent = require('../models/mongo/SystemEvent');
 const { logAudit } = require('../services/auditLogService');
@@ -14,7 +14,7 @@ function parseLimit(raw, fallback = 50, max = 200) {
   return Math.min(max, n);
 }
 
-router.use(authenticate, requireRole('admin'));
+router.use(authenticate, requireCurrentRole('admin'));
 
 router.get('/audit', async (req, res, next) => {
   try {

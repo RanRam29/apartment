@@ -13,6 +13,7 @@ const { sequelize } = require('../src/config/database');
 const { initRedis, getRedisClient } = require('../src/config/redis');
 const app = require('../src/app');
 const { generateStrongTestPassword } = require('./helpers/testCredentials');
+const { registerVerifyAndLogin } = require('./helpers/authFlow');
 
 const ts = Date.now();
 const USER = {
@@ -33,12 +34,9 @@ beforeAll(async () => {
     initRedis(),
   ]);
 
-  const res = await request(app).post('/api/auth/register').send(USER);
-  userToken = res.body.token;
-  userId = res.body.user?.id;
-  if (res.body.verificationToken) {
-    await request(app).get(`/api/auth/verify/${res.body.verificationToken}`);
-  }
+  const auth = await registerVerifyAndLogin(request, app, USER);
+  userToken = auth.token;
+  userId = auth.user?.id;
 }, 30_000);
 
 afterAll(async () => {

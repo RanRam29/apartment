@@ -13,6 +13,7 @@ const { sequelize } = require('../src/config/database');
 const { initRedis, getRedisClient } = require('../src/config/redis');
 const app = require('../src/app');
 const { generateStrongTestPassword } = require('./helpers/testCredentials');
+const { registerVerifyAndLogin } = require('./helpers/authFlow');
 
 const ts = Date.now();
 const TEST_PASSWORD = generateStrongTestPassword();
@@ -53,15 +54,10 @@ beforeAll(async () => {
     mongoAvailable = false;
   }
 
-  const [llRes, tnRes] = await Promise.all([
-    request(app).post('/api/auth/register').send(LANDLORD),
-    request(app).post('/api/auth/register').send(TENANT),
-  ]);
-  landlordToken = llRes.body.token;
-  tenantToken = tnRes.body.token;
-  if (tnRes.body.verificationToken) {
-    await request(app).get(`/api/auth/verify/${tnRes.body.verificationToken}`);
-  }
+  const landlordAuth = await registerVerifyAndLogin(request, app, LANDLORD);
+  const tenantAuth = await registerVerifyAndLogin(request, app, TENANT);
+  landlordToken = landlordAuth.token;
+  tenantToken = tenantAuth.token;
 
   // Build: apartment → swipe → pending match → accept match (chat requires accepted match)
   const aptRes = await request(app)
@@ -134,7 +130,7 @@ describe('GET /api/chat/:matchId — with accepted match', () => {
   it('outsider cannot read the chat', async () => {
     if (!acceptedMatchId) return;
     // Register a third-party user
-    const outsider = await request(app).post('/api/auth/register').send({
+    const outsider = await registerVerifyAndLogin(request, app, {
       email: `outsider_${ts}@test.com`,
       password: generateStrongTestPassword(),
       firstName: 'Out',
@@ -143,7 +139,7 @@ describe('GET /api/chat/:matchId — with accepted match', () => {
     });
     const res = await request(app)
       .get(`/api/chat/${acceptedMatchId}`)
-      .set('Authorization', `Bearer ${outsider.body.token}`);
+      .set('Authorization', `Bearer ${outsider.token}`);
     expect(res.status).toBe(404);
   });
 });

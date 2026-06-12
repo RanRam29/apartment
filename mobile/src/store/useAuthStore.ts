@@ -45,6 +45,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     await tokenStorage.clear();
     const res = await authApi.register(data);
     const { token, user } = res.data;
+    if (!token) {
+      set({ user: null, token: null, isAuthenticated: false, needsOnboarding: false });
+      return;
+    }
     await tokenStorage.save(token);
     set({ user, token, isAuthenticated: true, needsOnboarding: data.role === 'tenant' });
   },

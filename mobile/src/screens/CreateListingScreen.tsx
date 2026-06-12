@@ -12,6 +12,7 @@ import { apartmentsApi } from '../services/api';
 import type { Amenity } from '../types';
 import { C } from '../theme';
 import { CITY_CENTER_BY_NAME } from '../constants/cityCenters';
+import { addressCityName, cityNamesMatch, normalizeText } from '../utils/israeliAddress';
 
 const AMENITY_OPTIONS: { key: Amenity; label: string }[] = [
   { key: 'parking',     label: '🚗 חניה' },
@@ -67,10 +68,6 @@ export default function CreateListingScreen({ navigation }: any) {
     return withoutCodeChars.slice(0, 100);
   }
 
-  function normalizeText(value: string) {
-    return value.trim().toLowerCase();
-  }
-
   function getCityMatches(query: string) {
     const q = normalizeText(query);
     if (q.length < 2) return [];
@@ -97,13 +94,12 @@ export default function CreateListingScreen({ navigation }: any) {
       );
       const data = await res.json();
       if (!Array.isArray(data)) return false;
-      const cityNorm = normalizeText(cityName);
       const streetNorm = normalizeText(streetName);
       return data.some((item: any) => {
         const address = item?.address || {};
-        const candidateCity = normalizeText(address.city || address.town || address.village || address.municipality || '');
+        const candidateCity = addressCityName(address);
         const candidateStreet = normalizeText(address.road || '');
-        return candidateCity === cityNorm && candidateStreet === streetNorm;
+        return cityNamesMatch(candidateCity, cityName) && candidateStreet === streetNorm;
       });
     } catch {
       return false;
@@ -140,9 +136,9 @@ export default function CreateListingScreen({ navigation }: any) {
               .map((item: any) => item?.address)
               .filter(Boolean)
               .filter((address: any) => {
-                const addressCity = normalizeText(address?.city || address?.town || address?.village || address?.municipality || '');
+                const addressCity = addressCityName(address);
                 const streetName = normalizeText(address?.road || '');
-                return addressCity === normalizeText(selectedCity) && streetName.startsWith(normalizeText(q));
+                return cityNamesMatch(addressCity, selectedCity) && streetName.startsWith(normalizeText(q));
               })
               .map((address: any) => address?.road)
               .filter(Boolean)
