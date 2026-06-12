@@ -240,6 +240,7 @@
 | **WhatsApp opt-in** | Phase 2 | Claude Code + Antigravity | ✅ Backend field + Web profile toggle |
 | **Web Refactor** | — | כל הצוות | ✅ 26 pages deployed — see `docs/internal/WEB_REFACTOR_STATUS.md` |
 | V2-1 — Stripe Connect | M5 | TBD | ❌ לא התחיל |
+| **NF3 — Smart Onboarding + Trust Score v2** | M5 ✅ M11 ✅ Phase 2 ✅ | Cursor + Antigravity + Claude Code | ❌ מתוכנן — plan: `docs/superpowers/plans/2026-06-12-onboarding-trust-score-plan.md` (אחרי P0 של ספרינט 06-12) |
 
 ---
 

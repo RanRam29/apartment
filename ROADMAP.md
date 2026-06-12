@@ -267,12 +267,31 @@
 ---
 
 ### V2-5 — Tenant Credit Scoring 🟡
+> ⚠️ מוחלף ע"י **V2-9 (NF3)** — ראה למטה. הציון הקיים מסונכרן מנקודות engagement ללא תקרה — סתירה לאפיון.
+
 | פיצ'ר | סטטוס | הערות |
 |--------|--------|-------|
 | Trust Score field | ✅ | users.trustScore = 50 default |
 | Auto-calc post-checkout | 🟡 | Field קיים, workflow חסר |
 | Landlord visibility | 🟡 | — |
 | Appeal process | ❌ | — |
+
+---
+
+### V2-9 — Smart Onboarding + Trust Score v2 (NF3) ❌
+> אפיון מלא + חלוקת משימות: `docs/superpowers/plans/2026-06-12-onboarding-trust-score-plan.md`
+
+| פיצ'ר | סטטוס | תלויות | אחריות |
+|--------|--------|---------|---------|
+| TrustScoreService (0-100, event-driven) + `trust_score_events` | ❌ | M5 ✅ M11 ✅ | Cursor |
+| ניתוק trustScore ממערכת הנקודות + מיגרציה | ❌ | — | Cursor |
+| Event hooks (KYC, ownership, ledger, signing, maintenance) | ❌ | — | Cursor + Claude Code |
+| Crons: streak, response-time + WhatsApp reinforcement | ❌ | Phase 2 ✅ | Cursor |
+| API: /api/v3/trust/me, simulate, onboarding/checklist | ❌ | — | Claude Code |
+| Onboarding Wizard web (מסלול שוכר/משכיר) | ❌ | API | Antigravity |
+| Profile Completion widget | ❌ | API | Antigravity |
+| Trust Score Hub (ציון מעגלי + היסטוריה + סימולציה) | ❌ | API | Antigravity |
+| Feed boost לפי ציון (200%/300%) | ❌ | שלב 2 | TBD |
 
 ---
 
