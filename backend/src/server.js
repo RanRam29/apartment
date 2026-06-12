@@ -101,6 +101,7 @@ async function startServer() {
     const { runAccountDeletion } = require('./cron/accountDeletion');
 
     if (process.env.NODE_ENV !== 'test') {
+      cron.schedule('0 2 * * *', runAccountDeletion);
       cron.schedule('0 8 * * *', runLedgerDueAlerts);     // Daily 08:00
       cron.schedule('0 9 * * *', runExpiringAlerts);       // Daily 09:00
       cron.schedule('0 9 * * *', runCheckinUnlock);        // Daily 09:00 — unlock check-in 48h before start
@@ -110,7 +111,6 @@ async function startServer() {
       cron.schedule('0 0 * * *', runKycRenewal);           // Daily midnight
       cron.schedule('0 0 1 * *', runR2Cleanup);            // Monthly 1st
       cron.schedule('0 0 1 1 *', runCpiAdjustment);        // Jan 1 yearly
-      cron.schedule('0 2 * * *', runAccountDeletion);      // Daily 02:00 — GDPR anonymization
       logger.info('V3 platform cron jobs scheduled successfully');
     }
   } catch (err) {

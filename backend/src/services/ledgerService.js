@@ -1,8 +1,15 @@
-const { LedgerRow, RentalAgreement } = require('../models');
+const { LedgerRow, RentalAgreement, AgreementParty } = require('../models');
 
 const HEBREW_MONTHS = ['ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני', 'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'];
 
+function notFound() {
+  return Object.assign(new Error('Ledger row not found'), { status: 404 });
+}
+
 async function generateLedger(agreementId) {
+  const existing = await LedgerRow.count({ where: { agreementId } });
+  if (existing > 0) return [];
+
   const agreement = await RentalAgreement.findByPk(agreementId);
   if (!agreement) throw new Error('Agreement not found');
 
@@ -31,10 +38,17 @@ async function generateLedger(agreementId) {
   return LedgerRow.bulkCreate(rows);
 }
 
-async function reportPayment(ledgerRowId, tenantId, receiptR2Key) {
+async function reportPayment(ledgerRowId, actor, receiptR2Key) {
   const row = await LedgerRow.findByPk(ledgerRowId);
-  if (!row) throw Object.assign(new Error('Ledger row not found'), { status: 404 });
+  if (!row) throw notFound();
   if (row.status === 'PAID') throw Object.assign(new Error('Already paid'), { status: 422 });
+
+  if (actor.role !== 'admin') {
+    const party = await AgreementParty.findOne({
+      where: { agreementId: row.agreementId, userId: actor.id },
+    });
+    if (!party) throw notFound();
+  }
 
   await row.update({
     status: 'REPORTED',
@@ -44,9 +58,12 @@ async function reportPayment(ledgerRowId, tenantId, receiptR2Key) {
   return row;
 }
 
-async function confirmPayment(ledgerRowId) {
-  const row = await LedgerRow.findByPk(ledgerRowId);
-  if (!row) throw Object.assign(new Error('Ledger row not found'), { status: 404 });
+async function confirmPayment(ledgerRowId, actor) {
+  const row = await LedgerRow.findByPk(ledgerRowId, {
+    include: [{ model: RentalAgreement, as: 'agreement', attributes: ['id', 'landlordId'] }],
+  });
+  if (!row?.agreement) throw notFound();
+  if (actor.role !== 'admin' && row.agreement.landlordId !== actor.id) throw notFound();
 
   await row.update({
     status: 'PAID',
@@ -55,9 +72,12 @@ async function confirmPayment(ledgerRowId) {
   return row;
 }
 
-async function rejectPayment(ledgerRowId) {
-  const row = await LedgerRow.findByPk(ledgerRowId);
-  if (!row) throw Object.assign(new Error('Ledger row not found'), { status: 404 });
+async function rejectPayment(ledgerRowId, actor) {
+  const row = await LedgerRow.findByPk(ledgerRowId, {
+    include: [{ model: RentalAgreement, as: 'agreement', attributes: ['id', 'landlordId'] }],
+  });
+  if (!row?.agreement) throw notFound();
+  if (actor.role !== 'admin' && row.agreement.landlordId !== actor.id) throw notFound();
 
   await row.update({
     status: 'PENDING',
