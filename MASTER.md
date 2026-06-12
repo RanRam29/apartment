@@ -240,7 +240,7 @@
 | **WhatsApp opt-in** | Phase 2 | Claude Code + Antigravity | ✅ Backend field + Web profile toggle |
 | **Web Refactor** | — | כל הצוות | ✅ 26 pages deployed — see `docs/internal/WEB_REFACTOR_STATUS.md` |
 | V2-1 — Stripe Connect | M5 | TBD | ❌ לא התחיל |
-| **NF3 — Smart Onboarding + Trust Score v2** | M5 ✅ M11 ✅ Phase 2 ✅ | Cursor + Antigravity + Claude Code | ❌ מתוכנן — plan: `docs/superpowers/plans/2026-06-12-onboarding-trust-score-plan.md` (אחרי P0 של ספרינט 06-12) |
+| **NF3 — Smart Onboarding + Trust Score v2** | M5 ✅ M11 ✅ Phase 2 ✅ | Cursor + Antigravity + Claude Code | 🟡 Core Backend Completed (17/17 tests passing; pending frontend UI & Cursor cron hooks) |
 
 ---
 
@@ -283,6 +283,7 @@
 
 | תאריך | גרסה | שינוי | מי |
 |--------|------|--------|-----|
+| 2026-06-12 | 3.7 | Trust Score Core & Onboarding APIs (NF3) — `TrustScoreEvent` model, `trustScoreService` (apply event, revoke rolling, get trust status), gamification points system decoupled from `trustScore`, GET `/api/v3/trust/me`, GET `/api/v3/trust/simulate`, GET `/api/v3/onboarding/checklist`, POST `/api/v3/onboarding/step/:key/dismiss`, hooks for KYC approved, agreements SIGNED transition, and WhatsApp opt-in profile settings, 17/17 tests passing. | Antigravity |
 | 2026-06-12 | 3.6 | Maps (OSM/Leaflet, zero-cost) — `components/map/` ב-web-next: מפת מיקום בעמוד דירה (Circle ~200m לפרטיות), מבט מפה בעמוד חיפוש (markers עם מחיר), `latitude/longitude` ב-types. Backend geocoding (Nominatim) כבר היה קיים. אומת DOM מקומית (tiles+markers+circle); E2E פרודקשן ממתין | Claude Code |
 | 2026-06-12 | 3.5 | Scheduled Notifications — `scheduled_notifications` table (UUID, JSONB payload, dedupeKey, retry≤3), `scheduleReminder`/`cancelReminder` ב-notificationService, cron delivery כל 5 דקות, 7/7 tests | Claude Code |
 | 2026-06-12 | 3.4 | Dead-End Audit — 9 logic gaps closed: change-password endpoint + UI (היה שדה מת), notification prefs per-category keys persisted (נזרקו בשקט), fake WhatsApp OTP הוחלף ב-opt-in אמיתי, fake 2FA toggle הושבת, stub route נמחק, JSON 404 ל-API, error boundaries ל-web-next, cron safety wrapper, tx swallow ב-admin delete. Tests: change-password 6/6, build web-next ✅ | Claude Code |
