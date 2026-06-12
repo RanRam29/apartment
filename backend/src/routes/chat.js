@@ -6,6 +6,7 @@ const { authenticate } = require('../middleware/auth');
 const { getIO } = require('../config/socket');
 const { cacheGet, cacheSet, cacheDel, getRedisClient } = require('../config/redis');
 const { sendPushNotification } = require('../services/pushService');
+const { isSafeImageUrl } = require('../utils/safeUrl');
 
 const router = express.Router();
 
@@ -83,6 +84,9 @@ router.post(
       const content = req.body.content.trim();
       if (!content.length || content.length > 2000) {
         return res.status(422).json({ error: 'Message must be 1-2000 chars' });
+      }
+      if (imageUrl !== undefined && imageUrl !== null && !isSafeImageUrl(imageUrl)) {
+        return res.status(422).json({ error: 'imageUrl must be a valid https URL' });
       }
 
       const message = await Message.create({

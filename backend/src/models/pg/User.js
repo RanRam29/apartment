@@ -99,6 +99,14 @@ const User = sequelize.define('User', {
     type: DataTypes.TEXT,
     allowNull: true,
   },
+  deletionRequestedAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
+  verificationTokenExpiresAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
 }, {
   tableName: 'users',
   indexes: [

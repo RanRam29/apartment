@@ -15,10 +15,26 @@ const { AUDIT_ACTIONS, AUDIT_OUTCOMES } = require('../constants/logging');
 
 const router = express.Router();
 
+const VERIFICATION_TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
+
+function hashVerificationToken(raw) {
+  return crypto.createHash('sha256').update(raw).digest('hex');
+}
+
 async function issueVerificationTokenForUser(user) {
   const verificationToken = crypto.randomBytes(32).toString('hex');
   const verificationCacheKey = `email:verify:${verificationToken}`;
   await safeCacheSet(verificationCacheKey, { userId: user.id }, 24 * 60 * 60);
+
+  try {
+    await user.update({
+      verificationToken: hashVerificationToken(verificationToken),
+      verificationTokenExpiresAt: new Date(Date.now() + VERIFICATION_TOKEN_TTL_MS),
+      verifiedAt: null,
+    });
+  } catch (err) {
+    logger.warn(`Failed to persist verification token for user ${user.id}: ${err.message}`);
+  }
 
   const appBaseUrl =
     process.env.APP_BASE_URL ||
@@ -105,11 +121,6 @@ router.post('/register', registerValidator, async (req, res, next) => {
     if (!token) return;
 
     const verificationToken = await issueVerificationTokenForUser(user);
-    try {
-      await user.update({ verificationToken, verifiedAt: null });
-    } catch (err) {
-      logger.warn(`Failed to persist verification token for user ${user.id}: ${err.message}`);
-    }
 
     logger.info(`New user registered: ${user.id} (${role})`);
     await logAudit({
@@ -268,13 +279,20 @@ router.get('/verify/:token', async (req, res, next) => {
     const token = req.params.token;
     if (!token || token.length < 20) return res.status(400).json({ error: 'Invalid or expired verification token' });
 
-    // Prefer DB token (used by some tests and production flows)
-    const userByToken = await User.findOne({ where: { verificationToken: token } });
+    // DB lookup: hashed token (new) with legacy plaintext fallback for in-flight tokens
+    const tokenHash = hashVerificationToken(token);
+    const userByToken =
+      (await User.findOne({ where: { verificationToken: tokenHash } })) ||
+      (await User.findOne({ where: { verificationToken: token } }));
     if (userByToken) {
+      if (userByToken.verificationTokenExpiresAt && userByToken.verificationTokenExpiresAt < new Date()) {
+        return res.status(400).json({ error: 'Invalid or expired verification token' });
+      }
       await userByToken.update({
         isVerified: true,
         verifiedAt: new Date(),
         verificationToken: null,
+        verificationTokenExpiresAt: null,
       });
       await cacheDel(`email:verify:${token}`).catch(() => {});
       await logAudit({
@@ -325,9 +343,6 @@ router.post('/verify/resend', async (req, res, next) => {
     const user = await User.findOne({ where: { email } });
     if (user && !user.isVerified) {
       const verificationToken = await issueVerificationTokenForUser(user);
-      user.update({ verificationToken, verifiedAt: null }).catch((err) =>
-        logger.warn(`Failed to persist resend verification token: ${err.message}`)
-      );
 
       const payload = {
         message: 'If the email exists and is unverified, a verification link has been sent',
@@ -349,12 +364,7 @@ router.post('/resend-verification', require('../middleware/auth').authenticate, 
     if (!user) return res.status(404).json({ error: 'User not found' });
     if (user.isVerified) return res.status(400).json({ error: 'Account already verified' });
 
-    const verificationToken = await issueVerificationTokenForUser(user);
-    try {
-      await user.update({ verificationToken, verifiedAt: null });
-    } catch (err) {
-      logger.warn(`Failed to persist verification token (resend-verification): ${err.message}`);
-    }
+    await issueVerificationTokenForUser(user);
 
     res.json({ ok: true, message: 'Verification email sent' });
   } catch (err) {
@@ -620,10 +630,14 @@ router.post('/request-deletion', require('../middleware/auth').authenticate, asy
     const user = await User.findByPk(req.user.id);
     if (!user) return res.status(404).json({ error: 'User not found' });
 
+    if (!user.deletionRequestedAt) {
+      await user.update({ deletionRequestedAt: new Date() });
+    }
+
     // Schedule deletion for 30 days from now (grace period)
     const scheduledFor = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
-    // Store deletion request in Redis (30 days TTL)
+    // Store deletion request in Redis (30 days TTL — informational copy)
     await safeCacheSet(`deletion:request:${req.user.id}`, {
       userId: req.user.id,
       requestedAt: new Date().toISOString(),

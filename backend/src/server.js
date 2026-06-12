@@ -98,6 +98,7 @@ async function startServer() {
     const { runR2Cleanup } = require('./cron/r2Cleanup');
     const { runCpiAdjustment } = require('./cron/cpiAdjustment');
     const { runCheckinUnlock } = require('./cron/checkinUnlock');
+    const { runAccountDeletion } = require('./cron/accountDeletion');
 
     if (process.env.NODE_ENV !== 'test') {
       cron.schedule('0 8 * * *', runLedgerDueAlerts);     // Daily 08:00
@@ -109,6 +110,7 @@ async function startServer() {
       cron.schedule('0 0 * * *', runKycRenewal);           // Daily midnight
       cron.schedule('0 0 1 * *', runR2Cleanup);            // Monthly 1st
       cron.schedule('0 0 1 1 *', runCpiAdjustment);        // Jan 1 yearly
+      cron.schedule('0 2 * * *', runAccountDeletion);      // Daily 02:00 — GDPR anonymization
       logger.info('V3 platform cron jobs scheduled successfully');
     }
   } catch (err) {

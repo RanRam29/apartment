@@ -8,6 +8,7 @@ const { logSystemEvent } = require('../services/systemEventService');
 const { logAudit } = require('../services/auditLogService');
 const { SYSTEM_CATEGORY, SYSTEM_SEVERITY, AUDIT_ACTIONS } = require('../constants/logging');
 const { isAllowedCorsOrigin } = require('./corsOrigins');
+const { isSafeImageUrl } = require('../utils/safeUrl');
 
 let io;
 
@@ -176,6 +177,12 @@ function initSocket(server) {
 
         if (!matchId || !content?.trim()) {
           return ack?.({ error: 'matchId and content are required' });
+        }
+        if (content.trim().length > 2000) {
+          return ack?.({ error: 'Message must be 1-2000 chars' });
+        }
+        if (imageUrl !== undefined && imageUrl !== null && !isSafeImageUrl(imageUrl)) {
+          return ack?.({ error: 'imageUrl must be a valid https URL' });
         }
 
         // Lazy-require to avoid circular dependency at module load time

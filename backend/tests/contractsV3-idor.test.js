@@ -2,7 +2,7 @@ process.env.JWT_SECRET = 'test_jwt_secret_for_idor_tests';
 const request = require('supertest');
 const app = require('../src/app');
 const { User, Apartment, RentalAgreement, AgreementParty } = require('../src/models');
-const { sequelize } = require('../src/config/database');
+const { sequelize, ensureUserVerificationColumns } = require('../src/config/database');
 const { initRedis } = require('../src/config/redis');
 
 // Mock R2 so presigned URLs don't require credentials
@@ -35,6 +35,7 @@ describe('Contracts V3 — IDOR protection', () => {
 
   beforeAll(async () => {
     await sequelize.sync({ force: false });
+    await ensureUserVerificationColumns();
     await initRedis().catch(() => {});
 
     landlord = await registerUser('landlord', 'owner');

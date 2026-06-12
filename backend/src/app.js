@@ -32,6 +32,7 @@ const logger = require('./utils/logger');
 const { isAllowedCorsOrigin } = require('./config/corsOrigins');
 
 const app = express();
+app.set('trust proxy', 1);
 
 app.use(helmet());
 app.use(
@@ -83,7 +84,26 @@ const globalLimiter = rateLimit({
   },
 });
 
-// Stricter limit for auth endpoints to prevent brute-force
+const authIpLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many auth attempts, please try again later' },
+  handler: (req, res) => {
+    logSystemEvent({
+      source: 'rate-limit',
+      category: SYSTEM_CATEGORY.SECURITY,
+      severity: SYSTEM_SEVERITY.WARN,
+      event: 'rate_limit.auth_ip',
+      message: 'Auth per-IP rate limit exceeded',
+      requestId: req.requestContext?.requestId,
+      metadata: { ip: req.ip, path: req.path },
+    });
+    res.status(429).json({ error: 'Too many auth attempts, please try again later' });
+  },
+});
+
 const authLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 10,
@@ -142,8 +162,8 @@ app.use('/api/contracts', tosAuthenticate, requireTos);
 
 app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
-app.use('/api/auth', authLimiter, authRoutes);
-app.use('/api/auth', authLimiter, verifyRoutes);
+app.use('/api/auth', authIpLimiter, authLimiter, authRoutes);
+app.use('/api/auth', authIpLimiter, authLimiter, verifyRoutes);
 app.use('/api/apartments', apartmentRoutes);
 app.use('/api/swipe', swipeLimiter, swipeRoutes);
 app.use('/api/matches', matchRoutes);
@@ -181,11 +201,6 @@ app.use('/api/v3/renter-journal', require('./routes/renterJournal'));
 // WhatsApp webhook (no auth — Meta signs requests with HMAC)
 app.use('/webhooks/whatsapp', require('./routes/whatsapp'));
 
-// v3 routes (Cursor Agent: Financial + Admin)
-const ledgerRoutes = require('./routes/ledger');
-const adminRoutes = require('./routes/admin');
-app.use('/api/v3/ledger', ledgerRoutes);
-app.use('/api/v3/admin', adminRoutes);
 
 // User / Me preference updates and GDPR stubs
 const { authenticate: userAuth } = require('./middleware/auth');
@@ -244,8 +259,17 @@ app.post('/api/users/me/export-data', userAuth, async (req, res, next) => {
   }
 });
 
-app.post('/api/users/me/request-deletion', userAuth, (req, res) => {
-  res.json({ ok: true, message: 'בקשת מחיקת החשבון התקבלה בהצלחה ותטופל תוך 30 יום.' });
+app.post('/api/users/me/request-deletion', userAuth, async (req, res, next) => {
+  try {
+    const user = await User.findByPk(req.user.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (!user.deletionRequestedAt) {
+      await user.update({ deletionRequestedAt: new Date() });
+    }
+    res.json({ ok: true, message: 'בקשת מחיקת החשבון התקבלה בהצלחה ותטופל תוך 30 יום.' });
+  } catch (err) {
+    next(err);
+  }
 });
 
 app.use(errorHandler);
