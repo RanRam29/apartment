@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useApi } from "@/hooks/useApi";
 import { api } from "@/lib/api";
 import type { Match } from "@/lib/types";
+import { toast } from "sonner";
 import { ChatSidebar } from "./ChatSidebar";
 import { ChatMessages } from "./ChatMessages";
 
@@ -96,8 +97,9 @@ export function ChatPage() {
       });
       setMessages((prev) => [...prev, res.message]);
       refreshMatches();
-    } catch (err) {
+    } catch (err: any) {
       console.error("Send message failed:", err);
+      toast.error(err?.message || "שליחת ההודעה נכשלה. אנא נסה שוב.");
     } finally {
       setSending(false);
     }

@@ -9,11 +9,17 @@ export interface DecodedToken {
   exp: number;
 }
 
+function base64UrlDecode(input: string): string {
+  const b64 = input.replace(/-/g, "+").replace(/_/g, "/");
+  const padded = b64.padEnd(Math.ceil(b64.length / 4) * 4, "=");
+  return atob(padded);
+}
+
 export function decodeToken(token: string): DecodedToken | null {
   try {
     const payload = token.split(".")[1];
-    const decoded = JSON.parse(atob(payload));
-    return decoded;
+    if (!payload) return null;
+    return JSON.parse(base64UrlDecode(payload));
   } catch {
     return null;
   }

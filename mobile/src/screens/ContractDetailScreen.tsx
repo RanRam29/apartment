@@ -95,6 +95,7 @@ export default function ContractDetailScreen({ route, navigation }: any) {
     approveAmendment,
     rejectAmendment,
     isLoading,
+    error,
   } = useContractStore();
   const { user } = useAuthStore();
 
@@ -184,6 +185,32 @@ export default function ContractDetailScreen({ route, navigation }: any) {
       showAlert('שגיאה', err?.message || 'דחיית ההצעה נכשלה.');
     }
   };
+
+  if (error && !activeContract) {
+    return (
+      <View style={[styles.loadingContainer, { backgroundColor: colors.bg, padding: 20 }]}>
+        <Ionicons name="alert-circle-outline" size={48} color={C.danger || '#ba1a1a'} />
+        <Text style={[styles.loadingText, { color: colors.text, marginTop: 12, fontSize: 16, fontWeight: 'bold' }]}>
+          לא ניתן לטעון את החוזה
+        </Text>
+        <Text style={{ color: colors.textMut, textAlign: 'center', marginTop: 8, marginBottom: 20 }}>
+          {error}
+        </Text>
+        <TouchableOpacity
+          onPress={() => fetchContract(contractId).catch(() => {})}
+          style={[styles.primaryBtn, { width: 140, height: 44, borderRadius: 10 }]}
+        >
+          <Text style={styles.btnText}>נסה שוב</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={[styles.outlineBtn, { width: 140, height: 44, borderRadius: 10, marginTop: 10 }]}
+        >
+          <Text style={[styles.outlineBtnText, { color: colors.text }]}>חזרה</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   if (isLoading || !activeContract) {
     return (

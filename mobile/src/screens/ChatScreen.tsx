@@ -99,6 +99,8 @@ export default function ChatScreen() {
     setSending(true);
     try {
       await sendMessage(matchId, text);
+    } catch (err: any) {
+      Alert.alert('שגיאה', err?.response?.data?.error || err?.message || 'שליחת ההודעה נכשלה.');
     } finally {
       setSending(false);
     }
