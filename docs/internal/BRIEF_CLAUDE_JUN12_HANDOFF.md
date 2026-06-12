@@ -14,7 +14,7 @@
 | K6 | P1 | V2-5 Trust Score auto-calc | `cursor/trust-score-auto-calc` | `81f3033` | 5/5 |
 | K7 | P2 | Admin scheduled notifications | `cursor/admin-scheduled-notifications` | `dc43efa` | 4/4 |
 | K8 | P2 | V2-2 Guarantor Claims (backend) | `cursor/guarantor-claims` | `7d91466` | 7/7 |
-| K9 | P3 | Branch cleanup (remote) | `cursor/branch-cleanup` | `21ed148` | — |
+| K9 | P3 | Branch cleanup (remote) + handoff brief | `cursor/branch-cleanup` | `9dfec98` | — |
 
 **סה"כ tests חדשים:** 16/16 passing (runInBand).
 
