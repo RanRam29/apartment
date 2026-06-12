@@ -166,5 +166,28 @@ describe('Trust Score Step 2 - Service Logic', () => {
     expect(landlordOwnershipTask).toBeDefined();
     expect(landlordOwnershipTask.points).toBe(25);
   });
+
+  it('should prove that awarding gamification points does NOT modify trustScore', async () => {
+    // Mock UserPoints MongoDB models for the test
+    const UserPoints = require('../src/models/mongo/UserPoints');
+    jest.spyOn(UserPoints, 'findOne').mockResolvedValue(null);
+    jest.spyOn(UserPoints.prototype, 'save').mockResolvedValue(true);
+
+    const { awardPoints } = require('../src/services/gamificationService');
+
+    // Make sure starting trustScore is 50
+    let updatedUser = await User.findByPk(testUser.id);
+    expect(updatedUser.trustScore).toBe(50);
+
+    // Award contract_signed points (+50 gamification points)
+    await awardPoints(testUser.id, 'contract_signed');
+
+    // Wait for the async database update to run
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    // Retrieve user and check trustScore remains 50
+    updatedUser = await User.findByPk(testUser.id);
+    expect(updatedUser.trustScore).toBe(50);
+  });
 });
 

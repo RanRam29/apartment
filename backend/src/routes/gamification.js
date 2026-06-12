@@ -62,9 +62,7 @@ router.get('/me', authenticate, async (req, res, next) => {
     const userId = String(req.user.id);
     let doc = await UserPoints.findOne({ userId });
     if (!doc) {
-      // Find starting trustScore from Postgres User
-      const user = await User.findByPk(userId, { attributes: ['trustScore'] });
-      const startingPoints = user ? (user.trustScore ?? 50) : 50;
+      const startingPoints = 50;
       doc = new UserPoints({
         userId,
         points: startingPoints,
@@ -100,7 +98,7 @@ router.post('/award', authenticate, async (req, res, next) => {
 
     const userId = String(req.user.id);
     const prevDoc = await UserPoints.findOne({ userId });
-    const prevPoints = prevDoc ? prevDoc.points : (req.user.trustScore ?? 50);
+    const prevPoints = prevDoc ? prevDoc.points : 50;
 
     const result = await gamificationService.awardPoints(userId, action);
 
