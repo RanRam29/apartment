@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="he"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .tap-highlight-transparent { -webkit-tap-highlight-color: transparent; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .glass-effect { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-tint": "#465f87",
+                        "surface-container-high": "#e7e8ee",
+                        "on-tertiary-fixed": "#002019",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#36debb",
+                        "secondary-container": "#9cefdf",
+                        "on-secondary-fixed-variant": "#005047",
+                        "surface-container": "#eceef3",
+                        "primary": "#00091b",
+                        "error-container": "#ffdad6",
+                        "surface-container-low": "#f2f3f9",
+                        "on-secondary-container": "#0b6f63",
+                        "primary-fixed": "#d6e3ff",
+                        "on-tertiary-fixed-variant": "#005142",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed": "#00201c",
+                        "tertiary-fixed": "#5dfbd7",
+                        "secondary-fixed-dim": "#83d5c6",
+                        "tertiary-container": "#00261e",
+                        "on-secondary": "#ffffff",
+                        "surface-dim": "#d8dae0",
+                        "on-surface-variant": "#44474e",
+                        "surface-variant": "#e1e2e8",
+                        "on-error": "#ffffff",
+                        "surface-container-highest": "#e1e2e8",
+                        "on-primary-container": "#7089b3",
+                        "error": "#ba1a1a",
+                        "on-primary-fixed-variant": "#2e476e",
+                        "background": "#f8f9ff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "outline": "#74777f",
+                        "surface": "#f8f9ff",
+                        "inverse-surface": "#2e3135",
+                        "on-surface": "#191c20",
+                        "surface-bright": "#f8f9ff",
+                        "inverse-on-surface": "#eff0f6",
+                        "tertiary": "#000c08",
+                        "on-primary-fixed": "#001b3c",
+                        "inverse-primary": "#aec7f5",
+                        "primary-fixed-dim": "#aec7f5"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "3xl": "32px",
+                        "sm": "8px",
+                        "5xl": "48px",
+                        "xl": "20px",
+                        "lg": "16px",
+                        "4xl": "40px",
+                        "md": "12px",
+                        "xs": "4px",
+                        "2xl": "24px"
+                    },
+                    "fontFamily": {
+                        "micro": ["Rubik"],
+                        "caption": ["Rubik"],
+                        "hero": ["Rubik"],
+                        "heading": ["Rubik"],
+                        "body": ["Rubik"],
+                        "display": ["Rubik"],
+                        "subhead": ["Rubik"],
+                        "label": ["Rubik"],
+                        "hero-mobile": ["Rubik"],
+                        "title": ["Rubik"]
+                    },
+                    "fontSize": {
+                        "micro": ["10px", {"lineHeight": "12px", "fontWeight": "500"}],
+                        "caption": ["12px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "hero": ["28px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "heading": ["20px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "body": ["16px", {"lineHeight": "26px", "fontWeight": "400"}],
+                        "display": ["40px", {"lineHeight": "48px", "fontWeight": "800"}],
+                        "subhead": ["16px", {"lineHeight": "22px", "fontWeight": "600"}],
+                        "label": ["14px", {"lineHeight": "16px", "fontWeight": "500"}],
+                        "hero-mobile": ["24px", {"lineHeight": "28px", "fontWeight": "700"}],
+                        "title": ["22px", {"lineHeight": "26px", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body select-none overflow-hidden h-screen w-full flex flex-col">
+<!-- Top Action Bar -->
+<header class="w-full flex justify-between items-center px-lg py-md z-50">
+<button class="text-on-surface-variant font-label text-label hover:text-primary transition-colors duration-200">
+            דלג
+        </button>
+<div class="flex items-center gap-xs">
+<span class="text-primary font-display text-heading font-extrabold tracking-tighter">DirApp</span>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow relative flex flex-col items-center justify-center overflow-hidden">
+<!-- Carousel Container -->
+<div class="flex transition-transform duration-500 ease-out h-full w-[300%]" id="carousel-track">
+<!-- Slide 1 -->
+<section class="w-screen h-full flex flex-col items-center justify-center px-5xl text-center">
+<div class="relative w-full aspect-square mb-5xl flex items-center justify-center">
+<div class="absolute inset-0 bg-secondary-container rounded-full opacity-20 scale-110 blur-3xl"></div>
+<img alt="Property Search Illustration" class="w-full h-full object-contain relative z-10 drop-shadow-2xl" data-alt="A clean, minimalist 3D isometric illustration of a modern luxury apartment building in Tel Aviv, featuring sleek balconies and green plants. The architecture is stylized with soft, rounded corners and a vibrant teal and white color palette. Sunlight filters through the scene with soft ambient occlusion, creating a bright, professional, and trustworthy atmosphere on a pristine white background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvgnGTEUtOtum-vZb_weic6s5LNnclcGgCdA7tb32SleNlOGBidHwVobc8A1XNUcCnGnZLIgZez8uNo71IZ8pGdnqAStFyeo0D9F1ZqzYosrUz0i8tMIT5_TdlemGMXxadNKp0IMD0YvAaGPBOjKQPI1GtuHZxNZVkOa0w5ueJWFJz3FlF3DL29ME3vlkIj4hcFhEmEBWYsLN7Xsq50EHN1BYML5N258Ibl-eMlttsqBZZ4-3gUAgrXG5ytIRzuHLuS6y4UtlqlS-Y"/>
+</div>
+<h1 class="font-hero-mobile text-hero-mobile text-primary mb-lg max-w-[280px]">החלק ימינה לדירת חלומותיך</h1>
+<p class="font-body text-body text-on-surface-variant max-w-[320px]">הדרך הקלה והבטוחה ביותר למצוא את הבית הבא שלכם, עם מערכת התאמה אישית מתקדמת.</p>
+</section>
+<!-- Slide 2 -->
+<section class="w-screen h-full flex flex-col items-center justify-center px-5xl text-center">
+<div class="relative w-full aspect-square mb-5xl flex items-center justify-center">
+<div class="absolute inset-0 bg-surface-container-high rounded-full opacity-30 scale-110 blur-3xl"></div>
+<img alt="Smart Filtering Illustration" class="w-full h-full object-contain relative z-10 drop-shadow-2xl" data-alt="A premium 3D digital artwork representing smart technology and data visualization. Glowing teal interface elements like toggles, search bars, and icons float around a stylized smartphone screen. The lighting is high-key and modern, with a sophisticated palette of deep navy and bright aqua. The overall aesthetic is clean, corporate, and high-tech, emphasizing efficiency and clarity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDzClsM6w7tasAw1LVSs39R5kcrm29Ci8xKydIsjq4bxWEYDL_4pkooMPEFIO-V8V30nKlHWvP7RyDLYBuzrZg7mNWgW6fLdoQzMnYLWZbHSHzcMBgmTua05lAU3lWUQSc92XJiQWZ9VV7TPI86QEi2xbKGtKKpuikTUXrMGPYpf3w2ODQuOh7xDrY7iyz1duXcnuuO21zmru0JghuizctTfFxyvByJ2lJcFVpYd34ytzLCele7W8R1y0AG4hGajv1hxRHchEpzFIAt"/>
+</div>
+<h2 class="font-hero-mobile text-hero-mobile text-primary mb-lg max-w-[280px]">סינון חכם ומדויק</h2>
+<p class="font-body text-body text-on-surface-variant max-w-[320px]">אנחנו נדאג להציג לכם רק את מה שבאמת רלוונטי עבורכם, בלי בזבוז זמן מיותר.</p>
+</section>
+<!-- Slide 3 -->
+<section class="w-screen h-full flex flex-col items-center justify-center px-5xl text-center">
+<div class="relative w-full aspect-square mb-5xl flex items-center justify-center">
+<div class="absolute inset-0 bg-secondary-container rounded-full opacity-20 scale-110 blur-3xl"></div>
+<img alt="Agreement Illustration" class="w-full h-full object-contain relative z-10 drop-shadow-2xl" data-alt="A professional 3D graphic of two hands coming together for a handshake, symbolizing trust and successful agreements. The hands are stylized with a soft, clean aesthetic. In the background, a translucent digital contract document glows with teal accents. The scene is brightly lit with a soft studio glow, maintaining a high-trust fintech and real-estate brand identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBCXsXssy7NQZFTKlNXK_Mywel1F-7IEqD1Q60v__8qGsZmtterPeEedvdtwjcy25CKwR8YFZl_9f0Ja4bYy1sfGpnNl3DIzRgwqeTMGDSy3Vfm57wu3RCYGVmfBDY_j6szAAS6UXVr87SkR20Ue7-QGgnRt2BhosKe8xo4B4YwxZ_ukbvTJMvw4sxVPsysp3HeQWkpGn_P-cT6pCCQQyRVXV6rUHgmh7slEmvv8KmLqgh_SfCBnPRZOPXhfapa9YP8hcYEvUVUiisH"/>
+</div>
+<h2 class="font-hero-mobile text-hero-mobile text-primary mb-lg max-w-[280px]">סוגרים חוזה בקליק</h2>
+<p class="font-body text-body text-on-surface-variant max-w-[320px]">ניהול חוזים ותשלומים דיגיטלי מלא, הכל במקום אחד - פשוט, שקוף ובטוח.</p>
+</section>
+</div>
+</main>
+<!-- Bottom Actions & Navigation -->
+<footer class="w-full px-5xl pb-5xl flex flex-col items-center gap-4xl">
+<!-- Progress Indicators -->
+<div class="flex flex-row-reverse gap-sm">
+<div class="h-2 w-8 rounded-full bg-secondary transition-all duration-300" id="dot-0"></div>
+<div class="h-2 w-2 rounded-full bg-outline-variant transition-all duration-300" id="dot-1"></div>
+<div class="h-2 w-2 rounded-full bg-outline-variant transition-all duration-300" id="dot-2"></div>
+</div>
+<!-- CTA Button -->
+<button class="w-full bg-[#00cba9] text-white py-lg rounded-full font-subhead text-subhead shadow-lg hover:brightness-110 active:scale-95 transition-all duration-200" id="next-btn">
+            המשך
+        </button>
+</footer>
+<script>
+        let currentSlide = 0;
+        const track = document.getElementById('carousel-track');
+        const nextBtn = document.getElementById('next-btn');
+        const totalSlides = 3;
+
+        function updateCarousel() {
+            // Apply translation based on current slide
+            // Slides are arranged horizontally, in RTL we move positive %
+            const offset = currentSlide * (100 / totalSlides);
+            track.style.transform = `translateX(${offset}%)`;
+
+            // Update indicators
+            for (let i = 0; i < totalSlides; i++) {
+                const dot = document.getElementById(`dot-${i}`);
+                if (i === currentSlide) {
+                    dot.classList.remove('w-2', 'bg-outline-variant');
+                    dot.classList.add('w-8', 'bg-secondary');
+                } else {
+                    dot.classList.remove('w-8', 'bg-secondary');
+                    dot.classList.add('w-2', 'bg-outline-variant');
+                }
+            }
+
+            // Change button text on last slide
+            if (currentSlide === totalSlides - 1) {
+                nextBtn.innerText = 'בואו נתחיל';
+            } else {
+                nextBtn.innerText = 'המשך';
+            }
+        }
+
+        nextBtn.addEventListener('click', () => {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                updateCarousel();
+            } else {
+                // Final action
+                nextBtn.classList.add('opacity-50');
+                console.log('Onboarding complete');
+            }
+        });
+
+        // Swipe Support
+        let startX = 0;
+        let endX = 0;
+
+        document.addEventListener('touchstart', e => {
+            startX = e.touches[0].clientX;
+        });
+
+        document.addEventListener('touchend', e => {
+            endX = e.changedTouches[0].clientX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            const threshold = 50;
+            if (startX - endX > threshold) {
+                // Swiped Left
+                if (currentSlide > 0) {
+                    currentSlide--;
+                    updateCarousel();
+                }
+            } else if (endX - startX > threshold) {
+                // Swiped Right
+                if (currentSlide < totalSlides - 1) {
+                    currentSlide++;
+                    updateCarousel();
+                }
+            }
+        }
+    </script>
+</body></html>

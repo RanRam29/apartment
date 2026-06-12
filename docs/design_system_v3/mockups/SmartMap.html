@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="he"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .map-mesh {
+            background-color: #e5eeff;
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        @keyframes pulse-soft {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.9; }
+        }
+        .animate-pulse-soft { animation: pulse-soft 3s infinite ease-in-out; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "outline": "#74777f",
+                      "on-tertiary": "#ffffff",
+                      "tertiary-container": "#00261e",
+                      "surface-variant": "#e1e2e8",
+                      "secondary": "#006b5f",
+                      "on-primary-fixed": "#001b3c",
+                      "surface-container-low": "#f2f3f9",
+                      "surface-bright": "#f8f9ff",
+                      "surface-container-high": "#e7e8ee",
+                      "secondary-fixed": "#9ff2e2",
+                      "surface-container-lowest": "#ffffff",
+                      "tertiary": "#000c08",
+                      "on-surface-variant": "#44474e",
+                      "background": "#f8f9ff",
+                      "on-background": "#191c20",
+                      "surface-container": "#eceef3",
+                      "on-tertiary-fixed-variant": "#005142",
+                      "primary-container": "#002045",
+                      "surface-tint": "#465f87",
+                      "on-error": "#ffffff",
+                      "error-container": "#ffdad6",
+                      "inverse-surface": "#2e3135",
+                      "outline-variant": "#c4c6cf",
+                      "primary": "#00091b",
+                      "surface": "#f8f9ff",
+                      "surface-dim": "#d8dae0",
+                      "on-tertiary-container": "#009a7f",
+                      "on-secondary-fixed": "#00201c",
+                      "on-secondary": "#ffffff",
+                      "inverse-on-surface": "#eff0f6",
+                      "primary-fixed": "#d6e3ff",
+                      "on-surface": "#191c20",
+                      "on-primary-container": "#7089b3",
+                      "on-primary": "#ffffff",
+                      "on-secondary-container": "#0b6f63",
+                      "tertiary-fixed": "#5dfbd7",
+                      "error": "#ba1a1a",
+                      "on-tertiary-fixed": "#002019",
+                      "secondary-container": "#9cefdf",
+                      "tertiary-fixed-dim": "#36debb",
+                      "on-primary-fixed-variant": "#2e476e",
+                      "surface-container-highest": "#e1e2e8",
+                      "primary-fixed-dim": "#aec7f5",
+                      "on-secondary-fixed-variant": "#005047",
+                      "on-error-container": "#93000a",
+                      "secondary-fixed-dim": "#83d5c6",
+                      "inverse-primary": "#aec7f5"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "sm": "8px",
+                      "2xl": "24px",
+                      "3xl": "32px",
+                      "4xl": "40px",
+                      "md": "12px",
+                      "xs": "4px",
+                      "xl": "20px",
+                      "5xl": "48px",
+                      "lg": "16px"
+              },
+              "fontFamily": {
+                      "title": ["Rubik"],
+                      "body": ["Rubik"],
+                      "caption": ["Rubik"],
+                      "micro": ["Rubik"],
+                      "subhead": ["Rubik"],
+                      "heading": ["Rubik"],
+                      "hero-mobile": ["Rubik"],
+                      "hero": ["Rubik"],
+                      "display": ["Rubik"],
+                      "label": ["Rubik"]
+              },
+              "fontSize": {
+                      "title": ["22px", {"lineHeight": "26px", "fontWeight": "700"}],
+                      "body": ["16px", {"lineHeight": "26px", "fontWeight": "400"}],
+                      "caption": ["12px", {"lineHeight": "14px", "fontWeight": "400"}],
+                      "micro": ["10px", {"lineHeight": "12px", "fontWeight": "500"}],
+                      "subhead": ["16px", {"lineHeight": "22px", "fontWeight": "600"}],
+                      "heading": ["20px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "hero-mobile": ["24px", {"lineHeight": "28px", "fontWeight": "700"}],
+                      "hero": ["28px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "display": ["40px", {"lineHeight": "48px", "fontWeight": "800"}],
+                      "label": ["14px", {"lineHeight": "16px", "fontWeight": "500"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body overflow-hidden">
+<!-- Top Navigation Anchor (Shared Component Logic) -->
+<header class="fixed top-0 left-0 right-0 z-50 flex flex-row-reverse justify-between items-center w-full px-lg py-md bg-surface/80 backdrop-blur-md">
+<div class="flex items-center gap-md">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-primary">notifications</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-primary">menu</span>
+</button>
+</div>
+<h1 class="font-display text-display font-extrabold text-primary leading-none">DirApp</h1>
+</header>
+<!-- Map Canvas -->
+<main class="relative w-full h-screen overflow-hidden">
+<!-- Mock Map Background -->
+<div class="absolute inset-0 map-mesh flex items-center justify-center">
+<img class="w-full h-full object-cover opacity-40 grayscale-[20%]" data-alt="A highly detailed aerial map view of a modern coastal city like Tel Aviv, featuring organized urban blocks, green spaces, and Mediterranean architecture. The map uses a sophisticated color palette of soft blues, teals, and light grays to create a professional and clean fintech-inspired aesthetic. Soft sunlight filters over the city, suggesting a bright and trustworthy environment for property search." data-location="Tel Aviv, Israel" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBOoZ5ZinvhEt35EjMPRHh_Kva-dzG8UPopIQlFU1holfxb339JPQOZmi8kVtbrnLd4KI5siPvxjmtlDT3nDsZS3JfouA58RKD1Jy-gHKunI9Gq02M1Ac47t5vAPEDXvi4oO8UrnX6-BKHllHtpCwud7hrWeFmwu0Tb6bHVZLEGjqzDNSSoNqs_ETiKA_D0Chf4Xuzv6BrrkT41h49oXWDIZrNd-vl0lVWArOvXcmcktHyLAIcI8tt_rWYYU-6FvnUzKLR0Awpe8cfr"/>
+<!-- Map Pins (Price Labels) -->
+<div class="absolute top-[35%] right-[25%] scale-95 md:scale-100">
+<button class="bg-primary-container text-white px-md py-xs rounded-full shadow-lg font-bold flex items-center gap-xs hover:scale-110 transition-transform">
+<span class="text-caption">₪</span>4.5k
+                </button>
+</div>
+<div class="absolute top-[50%] left-[30%] animate-pulse-soft">
+<button class="bg-secondary text-white px-md py-xs rounded-full shadow-lg font-bold flex items-center gap-xs hover:scale-110 transition-transform border-2 border-white">
+<span class="text-caption">₪</span>5.2k
+                </button>
+</div>
+<div class="absolute top-[20%] left-[45%]">
+<button class="bg-primary-container text-white px-md py-xs rounded-full shadow-lg font-bold flex items-center gap-xs hover:scale-110 transition-transform">
+<span class="text-caption">₪</span>3.8k
+                </button>
+</div>
+<div class="absolute bottom-[45%] right-[40%]">
+<button class="bg-primary-container text-white px-md py-xs rounded-full shadow-lg font-bold flex items-center gap-xs hover:scale-110 transition-transform">
+<span class="text-caption">₪</span>6.1k
+                </button>
+</div>
+<!-- TAMA 38 Layer Effect (Conceptual Overlay) -->
+<div class="absolute inset-0 pointer-events-none transition-opacity duration-500 opacity-0 bg-secondary/5" id="tamaLayer">
+<!-- Highlighted zones for TAMA 38 -->
+<div class="absolute top-[40%] left-[20%] w-32 h-32 bg-secondary/20 rounded-full blur-xl border-2 border-secondary/30"></div>
+<div class="absolute bottom-[30%] right-[15%] w-40 h-40 bg-secondary/20 rounded-full blur-xl border-2 border-secondary/30"></div>
+</div>
+</div>
+<!-- Filter Overlay (Top Area) -->
+<div class="absolute top-[80px] left-0 right-0 px-lg flex flex-col gap-md">
+<div class="flex flex-row-reverse gap-sm overflow-x-auto hide-scrollbar py-sm">
+<button class="flex items-center gap-xs bg-surface-container-lowest text-primary border border-outline-variant px-lg py-sm rounded-full shadow-sm whitespace-nowrap font-label text-label hover:border-primary transition-all">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+<span>סינון</span>
+</button>
+<button class="flex items-center gap-xs bg-surface-container-lowest text-primary border border-outline-variant px-lg py-sm rounded-full shadow-sm whitespace-nowrap font-label text-label">
+<span>מחיר</span>
+<span class="material-symbols-outlined text-[18px]">expand_more</span>
+</button>
+<button class="flex items-center gap-xs bg-surface-container-lowest text-primary border border-outline-variant px-lg py-sm rounded-full shadow-sm whitespace-nowrap font-label text-label">
+<span>חדרים</span>
+<span class="material-symbols-outlined text-[18px]">expand_more</span>
+</button>
+<button class="flex items-center gap-xs bg-surface-container-lowest text-primary border border-outline-variant px-lg py-sm rounded-full shadow-sm whitespace-nowrap font-label text-label">
+<span>שכונה</span>
+<span class="material-symbols-outlined text-[18px]">expand_more</span>
+</button>
+</div>
+<!-- Floating TAMA 38 Toggle -->
+<div class="flex justify-start">
+<button class="flex items-center gap-md glass-panel px-lg py-sm rounded-full shadow-md border border-white transition-all active:scale-95 group" id="tamaBtn" onclick="toggleTama()">
+<div class="w-10 h-5 bg-outline-variant rounded-full relative transition-colors group-[.active]:bg-secondary">
+<div class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform group-[.active]:translate-x-5"></div>
+</div>
+<span class="font-label text-label text-on-surface-variant group-[.active]:text-secondary font-bold">שכבת תמ"א 38</span>
+</button>
+</div>
+</div>
+<!-- Property Horizontal Scroll (Bottom Area) -->
+<div class="absolute bottom-[90px] left-0 right-0 z-40">
+<div class="flex flex-row-reverse gap-md px-lg overflow-x-auto hide-scrollbar pb-md snap-x">
+<!-- Card 1 -->
+<div class="min-w-[280px] bg-surface-container-lowest rounded-xl shadow-xl overflow-hidden snap-center group cursor-pointer border border-outline-variant/30">
+<div class="h-32 relative overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="A modern apartment interior with floor-to-ceiling windows overlooking a Mediterranean city landscape. The living room is decorated in a minimalist style with light wood floors, a soft grey sofa, and accents of deep navy blue and teal. The lighting is warm and inviting, emphasizing a luxurious and secure urban living experience." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBp95EmFGPIMdHJPkGADhyqcVPU344cuiG15JOjoxVkTq8KM4YsidNuMpoohK41RPrRgIyM0T_TOt8UFjfnreXC2rpdyZ9BSpdk45vv5yvi6xvJzNuJunR0hBIGQQAnV9MAZ5svIJr5INsRkNkbgw7MBeCDOQUVA4ZVOgJ4Oojl-UhPcEZaptT4HlqbMZdtoD_1_QcqYJgLWtSjTC6xfCLjpb79LulQoNDzktECB5AbopIaDtVEX7nJofyDY_sh6hAKgOqmRx7HO-w4"/>
+<div class="absolute top-sm right-sm bg-secondary-container text-on-secondary-container px-sm py-xs rounded-full text-micro font-bold">חדש בלוח</div>
+</div>
+<div class="p-md text-right">
+<div class="flex justify-between items-start flex-row-reverse">
+<span class="font-title text-title text-secondary">₪4,500</span>
+<span class="material-symbols-outlined text-outline-variant">favorite</span>
+</div>
+<p class="font-subhead text-subhead text-on-surface mt-xs">דיזנגוף 124, תל אביב</p>
+<div class="flex flex-row-reverse gap-sm mt-sm">
+<div class="flex items-center gap-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">bed</span>
+<span class="text-caption">3 חדרים</span>
+</div>
+<div class="flex items-center gap-xs text-on-surface-variant border-r pr-sm border-outline-variant">
+<span class="material-symbols-outlined text-[16px]">straighten</span>
+<span class="text-caption">75 מ"ר</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="min-w-[280px] bg-surface-container-lowest rounded-xl shadow-xl overflow-hidden snap-center group cursor-pointer border border-outline-variant/30">
+<div class="h-32 relative overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="A high-end contemporary studio apartment featuring an open-plan layout. The kitchen boasts sleek black cabinetry and marble countertops, while the sleeping area is cozy with high-quality linens. Large windows allow bright daylight to flood the room, reflecting the vibrant energy of a professional urban center." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6aLjoFahI0cExOcZdaVG8QR88WnLXVBV3baFku-sl56Ka_7z-QWZH_j8n0DmuaS3DzDth4QvFgbmAwS_xEtT-gleEIgtpDGQm0hsi8JECV_ccaYKNfODE6QlNr54d6ld7GDZqxL40UzmLOCCVpTyRyXa5uxW8UhPFpd7zjP3WaG5F64mBAeIDY0E0NgWhlYI4I15hWfJiKjXuA7UyUyczikNbpcqiMAVLXecHL23igGSkW0rU0EsNlADhHlK2BW0diHLAVMy1uSxE"/>
+<div class="absolute top-sm right-sm bg-primary-container text-on-primary-fixed px-sm py-xs rounded-full text-micro font-bold">ללא תיווך</div>
+</div>
+<div class="p-md text-right">
+<div class="flex justify-between items-start flex-row-reverse">
+<span class="font-title text-title text-secondary">₪5,200</span>
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</div>
+<p class="font-subhead text-subhead text-on-surface mt-xs">בן יהודה 88, תל אביב</p>
+<div class="flex flex-row-reverse gap-sm mt-sm">
+<div class="flex items-center gap-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">bed</span>
+<span class="text-caption">2 חדרים</span>
+</div>
+<div class="flex items-center gap-xs text-on-surface-variant border-r pr-sm border-outline-variant">
+<span class="material-symbols-outlined text-[16px]">straighten</span>
+<span class="text-caption">55 מ"ר</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="min-w-[280px] bg-surface-container-lowest rounded-xl shadow-xl overflow-hidden snap-center group cursor-pointer border border-outline-variant/30">
+<div class="h-32 relative overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="A brightly lit, airy balcony of a luxury apartment overlooking a city park. Lush green plants in ceramic pots line the railing. The scene is captured during golden hour, with soft, warm light emphasizing a peaceful and premium lifestyle. The overall tone is sophisticated, using shades of white, beige, and the brand's signature teal." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9l2ST7rE4xecSzToP-A0Lj09DsS3wRvw_bECpK6EqorJ3jKebPg2n_uAaOebho8LNIbOIFXB7Z2ChkGLeay81mCRQvLr2mYMS0akQBJZOU_m_QalzlKtDLBqNpWHVFVZBIN1vjw1tOA-ejXQGS21H7dCcq6x22ytgCHjg2hemO2STlWYrfWGfyVAagLIuJ2QBLS7r4cfvqWDHCU-T6pIHmPzrkhgqUQLEUB9GPLUSf2dyNwoqVCoJoPkBPEhF0mTJIHk0XJ7d118K"/>
+</div>
+<div class="p-md text-right">
+<div class="flex justify-between items-start flex-row-reverse">
+<span class="font-title text-title text-secondary">₪6,100</span>
+<span class="material-symbols-outlined text-outline-variant">favorite</span>
+</div>
+<p class="font-subhead text-subhead text-on-surface mt-xs">רוטשילד 42, תל אביב</p>
+<div class="flex flex-row-reverse gap-sm mt-sm">
+<div class="flex items-center gap-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">bed</span>
+<span class="text-caption">3.5 חדרים</span>
+</div>
+<div class="flex items-center gap-xs text-on-surface-variant border-r pr-sm border-outline-variant">
+<span class="material-symbols-outlined text-[16px]">straighten</span>
+<span class="text-caption">90 מ"ר</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Shell (Shared Component) -->
+<nav class="fixed bottom-0 left-0 right-0 w-full z-50 flex flex-row-reverse justify-around items-center px-4 pb-safe bg-surface shadow-sm h-[72px] border-t border-outline-variant">
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-all tap-highlight-transparent active:scale-95">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label text-[10px] mt-1">בית</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 transition-all tap-highlight-transparent active:scale-95">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">search</span>
+<span class="font-label text-[10px] mt-1">חיפוש</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-all tap-highlight-transparent active:scale-95">
+<span class="material-symbols-outlined">favorite</span>
+<span class="font-label text-[10px] mt-1">התאמות</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-all tap-highlight-transparent active:scale-95">
+<span class="material-symbols-outlined">chat</span>
+<span class="font-label text-[10px] mt-1">צ'אט</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-all tap-highlight-transparent active:scale-95">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label text-[10px] mt-1">פרופיל</span>
+</button>
+</nav>
+<script>
+        function toggleTama() {
+            const btn = document.getElementById('tamaBtn');
+            const layer = document.getElementById('tamaLayer');
+            btn.classList.toggle('active');
+            
+            if (btn.classList.contains('active')) {
+                layer.style.opacity = '1';
+            } else {
+                layer.style.opacity = '0';
+            }
+        }
+
+        // Add some subtle parallax motion to map on mouse move (desktop)
+        document.addEventListener('mousemove', (e) => {
+            const map = document.querySelector('.map-mesh img');
+            if (window.innerWidth > 768) {
+                const x = (e.clientX / window.innerWidth - 0.5) * 20;
+                const y = (e.clientY / window.innerHeight - 0.5) * 20;
+                map.style.transform = `scale(1.1) translate(${x}px, ${y}px)`;
+            }
+        });
+    </script>
+</body></html>

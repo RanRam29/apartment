@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="he"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DirApp - ברוכים הבאים</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-tint": "#465f87",
+                    "surface-container-high": "#e7e8ee",
+                    "on-tertiary-fixed": "#002019",
+                    "on-primary": "#ffffff",
+                    "tertiary-fixed-dim": "#36debb",
+                    "secondary-container": "#9cefdf",
+                    "on-secondary-fixed-variant": "#005047",
+                    "surface-container": "#eceef3",
+                    "primary": "#00091b",
+                    "error-container": "#ffdad6",
+                    "surface-container-low": "#f2f3f9",
+                    "on-secondary-container": "#0b6f63",
+                    "primary-fixed": "#d6e3ff",
+                    "on-tertiary-fixed-variant": "#005142",
+                    "on-error-container": "#93000a",
+                    "on-tertiary-container": "#009a7f",
+                    "secondary-fixed": "#9ff2e2",
+                    "outline-variant": "#c4c6cf",
+                    "on-secondary-fixed": "#00201c",
+                    "tertiary-fixed": "#5dfbd7",
+                    "secondary-fixed-dim": "#83d5c6",
+                    "tertiary-container": "#00261e",
+                    "on-secondary": "#ffffff",
+                    "surface-dim": "#d8dae0",
+                    "on-surface-variant": "#44474e",
+                    "surface-variant": "#e1e2e8",
+                    "on-error": "#ffffff",
+                    "surface-container-highest": "#e1e2e8",
+                    "on-primary-container": "#7089b3",
+                    "error": "#ba1a1a",
+                    "on-primary-fixed-variant": "#2e476e",
+                    "background": "#f8f9ff",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "outline": "#74777f",
+                    "surface": "#f8f9ff",
+                    "inverse-surface": "#2e3135",
+                    "on-background": "#191c20",
+                    "primary-container": "#002045",
+                    "secondary": "#006b5f",
+                    "on-surface": "#191c20",
+                    "surface-bright": "#f8f9ff",
+                    "inverse-on-surface": "#eff0f6",
+                    "tertiary": "#000c08",
+                    "on-primary-fixed": "#001b3c",
+                    "inverse-primary": "#aec7f5",
+                    "primary-fixed-dim": "#aec7f5"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "3xl": "32px",
+                    "sm": "8px",
+                    "5xl": "48px",
+                    "xl": "20px",
+                    "lg": "16px",
+                    "4xl": "40px",
+                    "md": "12px",
+                    "xs": "4px",
+                    "2xl": "24px"
+            },
+            "fontFamily": {
+                    "micro": ["Rubik"],
+                    "caption": ["Rubik"],
+                    "hero": ["Rubik"],
+                    "heading": ["Rubik"],
+                    "body": ["Rubik"],
+                    "display": ["Rubik"],
+                    "subhead": ["Rubik"],
+                    "label": ["Rubik"],
+                    "hero-mobile": ["Rubik"],
+                    "title": ["Rubik"]
+            },
+            "fontSize": {
+                    "micro": ["10px", {"lineHeight": "12px", "fontWeight": "500"}],
+                    "caption": ["12px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "hero": ["28px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "heading": ["20px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "body": ["16px", {"lineHeight": "26px", "fontWeight": "400"}],
+                    "display": ["40px", {"lineHeight": "48px", "fontWeight": "800"}],
+                    "subhead": ["16px", {"lineHeight": "22px", "fontWeight": "600"}],
+                    "label": ["14px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "hero-mobile": ["24px", {"lineHeight": "28px", "fontWeight": "700"}],
+                    "title": ["22px", {"lineHeight": "26px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            font-family: 'Rubik', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #002045;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+        .splash-bg {
+            background: linear-gradient(135deg, #002045 0%, #1a365d 100%);
+        }
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        .glass-glow {
+            background: radial-gradient(circle at center, rgba(0, 203, 169, 0.15) 0%, transparent 70%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="splash-bg min-h-screen flex flex-col items-center justify-between p-lg relative">
+<!-- Atmospheric Background Elements -->
+<div class="absolute inset-0 overflow-hidden pointer-events-none">
+<div class="glass-glow absolute top-1/4 -right-1/4 w-[600px] h-[600px] rounded-full blur-3xl opacity-30"></div>
+<div class="glass-glow absolute bottom-1/4 -left-1/4 w-[500px] h-[500px] rounded-full blur-3xl opacity-20"></div>
+<!-- Abstract Architectural Lines -->
+<svg class="absolute inset-0 w-full h-full opacity-10" preserveaspectratio="none" viewbox="0 0 100 100">
+<path d="M0 100 L20 80 L40 90 L60 70 L80 85 L100 65" fill="none" stroke="white" stroke-width="0.1"></path>
+<path d="M0 90 L30 60 L50 75 L70 45 L90 60 L100 40" fill="none" stroke="white" stroke-width="0.1"></path>
+</svg>
+</div>
+<!-- Top Spacer for alignment -->
+<div class="h-10"></div>
+<!-- Hero Content: Logo & Tagline -->
+<main class="flex-1 flex flex-col items-center justify-center z-10 w-full max-w-md px-lg">
+<div class="relative mb-3xl animate-float">
+<!-- Icon Container -->
+<div class="bg-surface-container-lowest/10 backdrop-blur-md p-2xl rounded-[32px] shadow-2xl border border-white/10 flex items-center justify-center">
+<div class="flex flex-col items-center">
+<span class="material-symbols-outlined text-[84px] text-secondary-fixed" data-icon="house" style="font-variation-settings: 'FILL' 1;">house</span>
+<h1 class="font-display text-display text-white mt-sm tracking-tighter">
+                        דיר<span class="text-secondary-fixed">App</span>
+</h1>
+</div>
+</div>
+<!-- Floating Elements around logo -->
+<div class="absolute -top-4 -right-4 bg-secondary p-sm rounded-full shadow-lg border-2 border-primary-container">
+<span class="material-symbols-outlined text-white text-[20px]" data-icon="search">search</span>
+</div>
+<div class="absolute -bottom-2 -left-6 bg-white/10 backdrop-blur-md px-md py-xs rounded-full border border-white/20 text-white font-label text-label">
+                בטוח. חכם.
+            </div>
+</div>
+<div class="text-center space-y-md">
+<p class="font-hero-mobile text-hero-mobile text-white leading-tight">
+                הדרך החכמה למצוא דירה
+            </p>
+<p class="font-body text-body text-white/70 max-w-[280px] mx-auto">
+                הצטרפו לאלפי שוכרים ומשכירים שכבר מצאו את ההתאמה המושלמת.
+            </p>
+</div>
+</main>
+<!-- Bottom Action Area -->
+<footer class="w-full max-w-md pb-5xl px-lg z-10">
+<div class="space-y-2xl">
+<!-- Feature Indicators (Bento Style hints) -->
+<div class="grid grid-cols-3 gap-md opacity-0 translate-y-4 transition-all duration-1000 ease-out" id="feature-grid">
+<div class="bg-white/5 backdrop-blur-sm p-md rounded-xl border border-white/10 text-center">
+<span class="material-symbols-outlined text-secondary-fixed block mb-xs" data-icon="verified">verified</span>
+<span class="text-white/60 font-micro text-micro">אימות נכסים</span>
+</div>
+<div class="bg-white/5 backdrop-blur-sm p-md rounded-xl border border-white/10 text-center">
+<span class="material-symbols-outlined text-secondary-fixed block mb-xs" data-icon="speed">speed</span>
+<span class="text-white/60 font-micro text-micro">חיפוש מהיר</span>
+</div>
+<div class="bg-white/5 backdrop-blur-sm p-md rounded-xl border border-white/10 text-center">
+<span class="material-symbols-outlined text-secondary-fixed block mb-xs" data-icon="lock">lock</span>
+<span class="text-white/60 font-micro text-micro">חוזים מאובטחים</span>
+</div>
+</div>
+<!-- Main CTA -->
+<button class="w-full bg-[#00cba9] hover:bg-[#00b598] active:scale-[0.98] transition-all py-lg rounded-full shadow-[0px_8px_24px_rgba(0,203,169,0.3)] flex items-center justify-center gap-md group">
+<span class="font-title text-title text-primary">התחל</span>
+<span class="material-symbols-outlined text-primary group-hover:translate-x-[-4px] transition-transform" data-icon="arrow_back">arrow_back</span>
+</button>
+<p class="text-center font-caption text-caption text-white/40">
+                © 2024 DirApp Israel. כל הזכויות שמורות.
+            </p>
+</div>
+</footer>
+<script>
+        // Micro-interaction: Reveal features after a short delay
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const grid = document.getElementById('feature-grid');
+                grid.classList.remove('opacity-0', 'translate-y-4');
+                grid.classList.add('opacity-100', 'translate-y-0');
+            }, 600);
+        });
+
+        // Interactive Button Ripple / Visual Feedback
+        const button = document.querySelector('button');
+        button.addEventListener('mousedown', function(e) {
+            this.style.transform = 'scale(0.97)';
+        });
+        button.addEventListener('mouseup', function(e) {
+            this.style.transform = 'scale(1)';
+        });
+    </script>
+</body></html>

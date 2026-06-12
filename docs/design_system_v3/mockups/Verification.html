@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="he"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-tint": "#465f87",
+                        "surface-container-high": "#e7e8ee",
+                        "on-tertiary-fixed": "#002019",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#36debb",
+                        "secondary-container": "#9cefdf",
+                        "on-secondary-fixed-variant": "#005047",
+                        "surface-container": "#eceef3",
+                        "primary": "#00091b",
+                        "error-container": "#ffdad6",
+                        "surface-container-low": "#f2f3f9",
+                        "on-secondary-container": "#0b6f63",
+                        "primary-fixed": "#d6e3ff",
+                        "on-tertiary-fixed-variant": "#005142",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed": "#00201c",
+                        "tertiary-fixed": "#5dfbd7",
+                        "secondary-fixed-dim": "#83d5c6",
+                        "tertiary-container": "#00261e",
+                        "on-secondary": "#ffffff",
+                        "surface-dim": "#d8dae0",
+                        "on-surface-variant": "#44474e",
+                        "surface-variant": "#e1e2e8",
+                        "on-error": "#ffffff",
+                        "surface-container-highest": "#e1e2e8",
+                        "on-primary-container": "#7089b3",
+                        "error": "#ba1a1a",
+                        "on-primary-fixed-variant": "#2e476e",
+                        "background": "#f8f9ff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "outline": "#74777f",
+                        "surface": "#f8f9ff",
+                        "inverse-surface": "#2e3135",
+                        "on-surface": "#191c20",
+                        "surface-bright": "#f8f9ff",
+                        "inverse-on-surface": "#eff0f6",
+                        "tertiary": "#000c08",
+                        "on-primary-fixed": "#001b3c",
+                        "inverse-primary": "#aec7f5",
+                        "primary-fixed-dim": "#aec7f5"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "3xl": "32px",
+                        "sm": "8px",
+                        "5xl": "48px",
+                        "xl": "20px",
+                        "lg": "16px",
+                        "4xl": "40px",
+                        "md": "12px",
+                        "xs": "4px",
+                        "2xl": "24px"
+                    },
+                    "fontFamily": {
+                        "micro": ["Rubik"],
+                        "caption": ["Rubik"],
+                        "hero": ["Rubik"],
+                        "heading": ["Rubik"],
+                        "body": ["Rubik"],
+                        "display": ["Rubik"],
+                        "subhead": ["Rubik"],
+                        "label": ["Rubik"],
+                        "hero-mobile": ["Rubik"],
+                        "title": ["Rubik"]
+                    },
+                    "fontSize": {
+                        "micro": ["10px", {"lineHeight": "12px", "fontWeight": "500"}],
+                        "caption": ["12px", {"lineHeight": "14px", "fontWeight": "400"}],
+                        "hero": ["28px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "heading": ["20px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "body": ["16px", {"lineHeight": "26px", "fontWeight": "400"}],
+                        "display": ["40px", {"lineHeight": "48px", "fontWeight": "800"}],
+                        "subhead": ["16px", {"lineHeight": "22px", "fontWeight": "600"}],
+                        "label": ["14px", {"lineHeight": "16px", "fontWeight": "500"}],
+                        "hero-mobile": ["24px", {"lineHeight": "28px", "fontWeight": "700"}],
+                        "title": ["22px", {"lineHeight": "26px", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Rubik', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .otp-input:focus {
+            border-color: #465f87;
+            box-shadow: 0 0 0 2px rgba(70, 95, 135, 0.1);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .countdown-active {
+            color: #74777f;
+            pointer-events: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen flex flex-col">
+<!-- Screen Content: Verification Canvas -->
+<main class="flex-grow flex flex-col items-center justify-center px-lg py-5xl">
+<!-- Decorative Background Elements -->
+<div class="fixed inset-0 overflow-hidden -z-10 opacity-30 pointer-events-none">
+<div class="absolute top-[-10%] left-[-10%] w-[400px] h-[400px] bg-secondary-container rounded-full blur-[100px]"></div>
+<div class="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-primary-fixed rounded-full blur-[100px]"></div>
+</div>
+<!-- Verification Card Container -->
+<div class="w-full max-w-[440px] bg-surface-container-lowest p-3xl rounded-xl shadow-[0px_4px_12px_rgba(0,32,69,0.08)] flex flex-col items-center text-center">
+<!-- Mail Icon Illustration -->
+<div class="w-24 h-24 bg-surface-container rounded-full flex items-center justify-center mb-2xl relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-tr from-secondary/10 to-transparent"></div>
+<span class="material-symbols-outlined text-[48px] text-secondary" style="font-variation-settings: 'FILL' 1;">mark_email_unread</span>
+</div>
+<!-- Typography Header -->
+<h1 class="font-hero-mobile text-hero-mobile text-primary mb-sm">בדוק את המייל שלך</h1>
+<p class="font-body text-body text-on-surface-variant max-w-[320px] mb-3xl">
+                שלחנו קוד אימות ל-<span class="font-subhead text-primary">email@example.com</span>
+</p>
+<!-- OTP Input Section -->
+<div class="flex flex-row-reverse gap-md mb-3xl" id="otp-container">
+<input class="otp-input w-12 h-14 bg-surface border border-outline-variant rounded-lg text-center font-title text-title focus:outline-none transition-all" data-index="0" maxlength="1" type="text"/>
+<input class="otp-input w-12 h-14 bg-surface border border-outline-variant rounded-lg text-center font-title text-title focus:outline-none transition-all" data-index="1" maxlength="1" type="text"/>
+<input class="otp-input w-12 h-14 bg-surface border border-outline-variant rounded-lg text-center font-title text-title focus:outline-none transition-all" data-index="2" maxlength="1" type="text"/>
+<input class="otp-input w-12 h-14 bg-surface border border-outline-variant rounded-lg text-center font-title text-title focus:outline-none transition-all" data-index="3" maxlength="1" type="text"/>
+<input class="otp-input w-12 h-14 bg-surface border border-outline-variant rounded-lg text-center font-title text-title focus:outline-none transition-all" data-index="4" maxlength="1" type="text"/>
+<input class="otp-input w-12 h-14 bg-surface border border-outline-variant rounded-lg text-center font-title text-title focus:outline-none transition-all" data-index="5" maxlength="1" type="text"/>
+</div>
+<!-- Resend Section -->
+<div class="mb-3xl flex flex-col items-center gap-xs">
+<p class="font-caption text-caption text-on-surface-variant">לא קיבלת את הקוד?</p>
+<button class="font-label text-label text-secondary hover:underline transition-all" id="resend-btn">
+                    שלח שוב <span id="timer">(00:59)</span>
+</button>
+</div>
+<!-- Action Button -->
+<button class="w-full h-12 bg-secondary text-on-secondary rounded-full font-subhead text-subhead shadow-sm hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center">
+                אמת
+            </button>
+<!-- Support Link -->
+<a class="mt-2xl font-caption text-caption text-outline hover:text-on-surface-variant transition-colors" href="#">נתקלת בבעיה? צור קשר עם התמיכה</a>
+</div>
+<!-- Visual Credibility Badge (Optional but professional) -->
+<div class="mt-3xl flex items-center gap-sm opacity-60">
+<span class="material-symbols-outlined text-[16px]">verified_user</span>
+<span class="font-micro text-micro">התחברות מאובטחת באמצעות DirApp Secure</span>
+</div>
+</main>
+<script>
+        // OTP Auto-focus Logic
+        const inputs = document.querySelectorAll('.otp-input');
+        inputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                if (e.target.value.length === 1 && index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                }
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                    inputs[index - 1].focus();
+                }
+            });
+        });
+
+        // Countdown Timer Logic
+        let timeLeft = 59;
+        const timerDisplay = document.getElementById('timer');
+        const resendBtn = document.getElementById('resend-btn');
+
+        const startTimer = () => {
+            resendBtn.classList.add('countdown-active');
+            const interval = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    timerDisplay.textContent = "";
+                    resendBtn.classList.remove('countdown-active');
+                    resendBtn.style.textDecoration = "underline";
+                } else {
+                    const seconds = timeLeft < 10 ? `0${timeLeft}` : timeLeft;
+                    timerDisplay.textContent = `(00:${seconds})`;
+                    timeLeft--;
+                }
+            }, 1000);
+        };
+
+        startTimer();
+
+        resendBtn.addEventListener('click', () => {
+            if (timeLeft <= 0) {
+                timeLeft = 59;
+                startTimer();
+                // Add actual resend API logic here
+                console.log("Resending code...");
+            }
+        });
+    </script>
+</body></html>

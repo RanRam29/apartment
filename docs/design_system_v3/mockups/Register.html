@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="he"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Rubik', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .custom-shadow {
+            box-shadow: 0px 4px 12px rgba(0, 32, 69, 0.08);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-tint": "#465f87",
+                      "surface-container-high": "#e7e8ee",
+                      "on-tertiary-fixed": "#002019",
+                      "on-primary": "#ffffff",
+                      "tertiary-fixed-dim": "#36debb",
+                      "secondary-container": "#9cefdf",
+                      "on-secondary-fixed-variant": "#005047",
+                      "surface-container": "#eceef3",
+                      "primary": "#00091b",
+                      "error-container": "#ffdad6",
+                      "surface-container-low": "#f2f3f9",
+                      "on-secondary-container": "#0b6f63",
+                      "primary-fixed": "#d6e3ff",
+                      "on-tertiary-fixed-variant": "#005142",
+                      "on-error-container": "#93000a",
+                      "on-secondary-fixed": "#00201c",
+                      "tertiary-fixed": "#5dfbd7",
+                      "secondary-fixed-dim": "#83d5c6",
+                      "tertiary-container": "#00261e",
+                      "on-secondary": "#ffffff",
+                      "surface-dim": "#d8dae0",
+                      "on-surface-variant": "#44474e",
+                      "surface-variant": "#e1e2e8",
+                      "on-error": "#ffffff",
+                      "surface-container-highest": "#e1e2e8",
+                      "on-primary-container": "#7089b3",
+                      "error": "#ba1a1a",
+                      "on-primary-fixed-variant": "#2e476e",
+                      "background": "#f8f9ff",
+                      "surface-container-lowest": "#ffffff",
+                      "on-tertiary": "#ffffff",
+                      "outline": "#74777f",
+                      "surface": "#f8f9ff",
+                      "inverse-surface": "#2e3135",
+                      "on-surface": "#191c20",
+                      "surface-bright": "#f8f9ff",
+                      "inverse-on-surface": "#eff0f6",
+                      "tertiary": "#000c08",
+                      "on-primary-fixed": "#001b3c",
+                      "inverse-primary": "#aec7f5",
+                      "primary-fixed-dim": "#aec7f5"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "3xl": "32px",
+                      "sm": "8px",
+                      "5xl": "48px",
+                      "xl": "20px",
+                      "lg": "16px",
+                      "4xl": "40px",
+                      "md": "12px",
+                      "xs": "4px",
+                      "2xl": "24px"
+              },
+              "fontFamily": {
+                      "micro": ["Rubik"],
+                      "caption": ["Rubik"],
+                      "hero": ["Rubik"],
+                      "heading": ["Rubik"],
+                      "body": ["Rubik"],
+                      "display": ["Rubik"],
+                      "subhead": ["Rubik"],
+                      "label": ["Rubik"],
+                      "hero-mobile": ["Rubik"],
+                      "title": ["Rubik"]
+              },
+              "fontSize": {
+                      "micro": ["10px", {"lineHeight": "12px", "fontWeight": "500"}],
+                      "caption": ["12px", {"lineHeight": "14px", "fontWeight": "400"}],
+                      "hero": ["28px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "heading": ["20px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "body": ["16px", {"lineHeight": "26px", "fontWeight": "400"}],
+                      "display": ["40px", {"lineHeight": "48px", "fontWeight": "800"}],
+                      "subhead": ["16px", {"lineHeight": "22px", "fontWeight": "600"}],
+                      "label": ["14px", {"lineHeight": "16px", "fontWeight": "500"}],
+                      "hero-mobile": ["24px", {"lineHeight": "28px", "fontWeight": "700"}],
+                      "title": ["22px", {"lineHeight": "26px", "fontWeight": "700"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen flex flex-col">
+<!-- Header Suppression: Auth screens do not use the Navigation Shell -->
+<header class="flex items-center justify-between px-lg py-md w-full">
+<div class="font-display text-display font-extrabold text-primary">DirApp</div>
+<button class="p-2 rounded-full hover:bg-surface-container transition-colors" onclick="window.history.back()">
+<span class="material-symbols-outlined text-primary">arrow_forward</span>
+</button>
+</header>
+<main class="flex-grow flex flex-col items-center justify-center px-lg py-3xl relative overflow-hidden">
+<!-- Abstract Atmospheric Background Element -->
+<div class="absolute top-[-10%] left-[-10%] w-64 h-64 bg-secondary-container opacity-20 blur-[100px] rounded-full"></div>
+<div class="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-primary-fixed opacity-10 blur-[120px] rounded-full"></div>
+<div class="w-full max-w-md z-10">
+<!-- Hero Text -->
+<div class="mb-4xl text-right">
+<h1 class="font-hero-mobile text-hero-mobile text-primary mb-sm md:font-hero md:text-hero">הצטרף לדיראפ</h1>
+<p class="font-body text-body text-on-surface-variant">התחל את המסע שלך למציאת הבית המושלם עוד היום.</p>
+</div>
+<form class="space-y-xl" onsubmit="event.preventDefault();">
+<!-- Registration Type Selector -->
+<div class="space-y-sm">
+<label class="font-label text-label text-on-surface-variant block px-xs">אני רוצה להיות...</label>
+<div class="flex gap-md bg-surface-container-low p-xs rounded-full">
+<button class="flex-1 py-md rounded-full font-subhead text-subhead transition-all bg-secondary-container text-on-secondary-container shadow-sm" id="role-tenant" onclick="toggleRole('tenant')" type="button">
+                            שוכר
+                        </button>
+<button class="flex-1 py-md rounded-full font-subhead text-subhead transition-all text-on-surface-variant hover:bg-surface-container" id="role-landlord" onclick="toggleRole('landlord')" type="button">
+                            משכיר
+                        </button>
+</div>
+</div>
+<!-- Fields -->
+<div class="space-y-lg">
+<div class="relative">
+<input class="w-full h-14 px-lg pt-2 bg-surface border-outline border rounded-lg font-body text-body focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all outline-none" placeholder="שם מלא" type="text"/>
+<span class="material-symbols-outlined absolute left-4 top-4 text-outline">person</span>
+</div>
+<div class="relative">
+<input class="w-full h-14 px-lg pt-2 bg-surface border-outline border rounded-lg font-body text-body focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all outline-none" placeholder="אימייל" type="email"/>
+<span class="material-symbols-outlined absolute left-4 top-4 text-outline">mail</span>
+</div>
+<div class="relative">
+<input class="w-full h-14 px-lg pt-2 bg-surface border-outline border rounded-lg font-body text-body focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all outline-none text-right" dir="ltr" placeholder="מספר טלפון" type="tel"/>
+<span class="material-symbols-outlined absolute left-4 top-4 text-outline">phone</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-lg">
+<div class="relative">
+<input class="w-full h-14 px-lg pt-2 bg-surface border-outline border rounded-lg font-body text-body focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all outline-none" placeholder="סיסמה" type="password"/>
+<span class="material-symbols-outlined absolute left-4 top-4 text-outline">lock</span>
+</div>
+<div class="relative">
+<input class="w-full h-14 px-lg pt-2 bg-surface border-outline border rounded-lg font-body text-body focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all outline-none" placeholder="אימות סיסמה" type="password"/>
+<span class="material-symbols-outlined absolute left-4 top-4 text-outline">lock_reset</span>
+</div>
+</div>
+</div>
+<!-- Terms -->
+<div class="flex items-center gap-md px-xs">
+<div class="relative flex items-center">
+<input class="w-6 h-6 border-outline rounded-md text-secondary focus:ring-secondary-container cursor-pointer" id="terms" type="checkbox"/>
+</div>
+<label class="font-label text-label text-on-surface-variant cursor-pointer" for="terms">
+                        אני מסכים ל<span class="text-secondary font-bold underline decoration-secondary/30">תנאי השימוש</span> ולמדיניות הפרטיות
+                    </label>
+</div>
+<!-- Primary Button -->
+<button class="w-full h-14 bg-[#00cba9] text-white rounded-full font-title text-title custom-shadow active:scale-95 transition-transform hover:opacity-90 flex items-center justify-center gap-md mt-2xl">
+<span>הרשם</span>
+<span class="material-symbols-outlined">person_add</span>
+</button>
+<div class="pt-xl text-center">
+<p class="font-label text-label text-on-surface-variant">
+                        כבר יש לך חשבון? 
+                        <a class="text-primary font-bold hover:underline" href="#">התחבר כאן</a>
+</p>
+</div>
+</form>
+</div>
+<!-- Decorative Listing Preview Card (Bento Style) -->
+<div class="hidden lg:block absolute left-10 top-1/2 -translate-y-1/2 w-80 space-y-lg opacity-40 hover:opacity-100 transition-opacity duration-500">
+<div class="glass-card rounded-xl p-md custom-shadow transform -rotate-3 scale-90">
+<div class="w-full h-32 rounded-lg bg-surface-container-high mb-md overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A luxurious modern apartment interior in Tel Aviv with floor-to-ceiling windows overlooking the Mediterranean sea at sunset. The lighting is warm and cinematic, highlighting minimalist white furniture and polished concrete floors. The aesthetic is clean, high-end, and professional, reflecting a premium real estate brand identity with soft shadows and deep navy accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXNgseDMWqxAvYBBmBgUVLTd0mirs_DvczwSPJUdCZYFPtc4I5aBxcEvj8IHZ1720A1zK0I6YmDQDWrhJi1vsCdL9yLX6zZHetYxeXdSfCVJK6r2jHEq6wi9MFLTqQI8YmitLg1L7jFieLvOqlSsq9tGm0jKvXWYLgBmfDwDC4mr1T-bILO64EmNKsHt0JnyLdF0pdYjEq2Gzr9wRQwL5xresL0FxrYsjSxl7B6TZJ0PgpMjHlHqK8JELmZWhzTEYmvxXCxB9WQizG"/>
+</div>
+<div class="space-y-xs">
+<div class="h-4 w-3/4 bg-primary/20 rounded"></div>
+<div class="h-4 w-1/2 bg-on-surface-variant/10 rounded"></div>
+</div>
+</div>
+<div class="glass-card rounded-xl p-md custom-shadow transform rotate-6 translate-x-12">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-secondary-container">verified_user</span>
+</div>
+<div>
+<div class="font-subhead text-subhead text-primary">פרופיל מאומת</div>
+<div class="font-caption text-caption text-on-surface-variant">אמינות היא מעל הכל</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<script>
+        function toggleRole(role) {
+            const tenantBtn = document.getElementById('role-tenant');
+            const landlordBtn = document.getElementById('role-landlord');
+            
+            if (role === 'tenant') {
+                tenantBtn.classList.remove('text-on-surface-variant', 'hover:bg-surface-container');
+                tenantBtn.classList.add('bg-secondary-container', 'text-on-secondary-container', 'shadow-sm');
+                
+                landlordBtn.classList.add('text-on-surface-variant', 'hover:bg-surface-container');
+                landlordBtn.classList.remove('bg-secondary-container', 'text-on-secondary-container', 'shadow-sm');
+            } else {
+                landlordBtn.classList.remove('text-on-surface-variant', 'hover:bg-surface-container');
+                landlordBtn.classList.add('bg-secondary-container', 'text-on-secondary-container', 'shadow-sm');
+                
+                tenantBtn.classList.add('text-on-surface-variant', 'hover:bg-surface-container');
+                tenantBtn.classList.remove('bg-secondary-container', 'text-on-secondary-container', 'shadow-sm');
+            }
+        }
+    </script>
+</body></html>

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="he"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "outline": "#74777f",
+                    "on-tertiary": "#ffffff",
+                    "tertiary-container": "#00261e",
+                    "surface-variant": "#e1e2e8",
+                    "secondary": "#006b5f",
+                    "on-primary-fixed": "#001b3c",
+                    "surface-container-low": "#f2f3f9",
+                    "surface-bright": "#f8f9ff",
+                    "surface-container-high": "#e7e8ee",
+                    "secondary-fixed": "#9ff2e2",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary": "#000c08",
+                    "on-surface-variant": "#44474e",
+                    "background": "#f8f9ff",
+                    "on-background": "#191c20",
+                    "surface-container": "#eceef3",
+                    "on-tertiary-fixed-variant": "#005142",
+                    "primary-container": "#002045",
+                    "surface-tint": "#465f87",
+                    "on-error": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "inverse-surface": "#2e3135",
+                    "outline-variant": "#c4c6cf",
+                    "primary": "#00091b",
+                    "surface": "#f8f9ff",
+                    "surface-dim": "#d8dae0",
+                    "on-tertiary-container": "#009a7f",
+                    "on-secondary-fixed": "#00201c",
+                    "on-secondary": "#ffffff",
+                    "inverse-on-surface": "#eff0f6",
+                    "primary-fixed": "#d6e3ff",
+                    "on-surface": "#191c20",
+                    "on-primary-container": "#7089b3",
+                    "on-primary": "#ffffff",
+                    "on-secondary-container": "#0b6f63",
+                    "tertiary-fixed": "#5dfbd7",
+                    "error": "#ba1a1a",
+                    "on-tertiary-fixed": "#002019",
+                    "secondary-container": "#9cefdf",
+                    "tertiary-fixed-dim": "#36debb",
+                    "on-primary-fixed-variant": "#2e476e",
+                    "surface-container-highest": "#e1e2e8",
+                    "primary-fixed-dim": "#aec7f5",
+                    "on-secondary-fixed-variant": "#005047",
+                    "on-error-container": "#93000a",
+                    "secondary-fixed-dim": "#83d5c6",
+                    "inverse-primary": "#aec7f5",
+                    "action-teal": "#00cba9"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "sm": "8px",
+                    "2xl": "24px",
+                    "3xl": "32px",
+                    "4xl": "40px",
+                    "md": "12px",
+                    "xs": "4px",
+                    "xl": "20px",
+                    "5xl": "48px",
+                    "lg": "16px"
+            },
+            "fontFamily": {
+                    "title": ["Rubik"],
+                    "body": ["Rubik"],
+                    "caption": ["Rubik"],
+                    "micro": ["Rubik"],
+                    "subhead": ["Rubik"],
+                    "heading": ["Rubik"],
+                    "hero-mobile": ["Rubik"],
+                    "hero": ["Rubik"],
+                    "display": ["Rubik"],
+                    "label": ["Rubik"]
+            },
+            "fontSize": {
+                    "title": ["22px", {"lineHeight": "26px", "fontWeight": "700"}],
+                    "body": ["16px", {"lineHeight": "26px", "fontWeight": "400"}],
+                    "caption": ["12px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "micro": ["10px", {"lineHeight": "12px", "fontWeight": "500"}],
+                    "subhead": ["16px", {"lineHeight": "22px", "fontWeight": "600"}],
+                    "heading": ["20px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "hero-mobile": ["24px", {"lineHeight": "28px", "fontWeight": "700"}],
+                    "hero": ["28px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "display": ["40px", {"lineHeight": "48px", "fontWeight": "800"}],
+                    "label": ["14px", {"lineHeight": "16px", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Rubik', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .filled-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .property-shadow { box-shadow: 0px 4px 12px rgba(0, 32, 69, 0.08); }
+        .progress-ring__circle {
+            transition: stroke-dashoffset 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background selection:bg-secondary-container">
+<!-- Top Navigation Overlay -->
+<nav class="fixed top-0 left-0 right-0 z-50 flex flex-row-reverse justify-between items-center p-lg pointer-events-none">
+<button class="w-10 h-10 rounded-full bg-surface/80 backdrop-blur-md flex items-center justify-center text-on-surface shadow-sm pointer-events-auto active:scale-95 transition-transform">
+<span class="material-symbols-outlined">arrow_forward</span>
+</button>
+<div class="flex gap-sm pointer-events-auto">
+<button class="w-10 h-10 rounded-full bg-surface/80 backdrop-blur-md flex items-center justify-center text-on-surface shadow-sm active:scale-95 transition-transform">
+<span class="material-symbols-outlined">share</span>
+</button>
+<button class="w-10 h-10 rounded-full bg-surface/80 backdrop-blur-md flex items-center justify-center text-on-surface shadow-sm active:scale-95 transition-transform">
+<span class="material-symbols-outlined">favorite</span>
+</button>
+</div>
+</nav>
+<main class="pb-32 max-w-2xl mx-auto">
+<!-- Hero Carousel Section -->
+<section class="relative w-full aspect-[4/3] overflow-hidden bg-surface-variant">
+<img alt="Luxury Living Room" class="w-full h-full object-cover" data-alt="A modern and bright luxury apartment interior featuring a spacious living room with high ceilings and floor-to-ceiling windows. The decor follows a professional light-mode aesthetic with neutral tones, elegant furniture, and pops of teal accents. Soft morning sunlight streams through the windows, creating a serene and high-end residential atmosphere in a contemporary urban setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4bPtVDBls8f53A5p2rZIMkfhZiCGtFTNzpKWycaak_qsGCYNFBQDyM0DIxzQfCExeh9YUKClt1xU5ah2eNxn49pYVZO6_fdzgK7ipgk7xU6dU6iq7otKBl0dfHN0rHqXnPN-yq7NMkewdPW1NMeFENHb5WElJlrZD9M274-KLBtXN7hgOHVkoBhNJZUfeGdrR_Z6wyfCP3vGW1tyd6Oj-Sl7n8_F2061TVUpvqPVWDJD-ESbXGGzGN4jr-FHdEZQMDaGAtxF22XYm"/>
+<!-- Premium Badge -->
+<div class="absolute top-20 right-lg bg-gradient-to-l from-[#D4AF37] to-[#F9E076] text-primary font-bold px-md py-xs rounded-full flex items-center gap-xs shadow-lg animate-pulse">
+<span class="material-symbols-outlined text-[18px] filled-icon">workspace_premium</span>
+<span class="font-label text-label">Premium</span>
+</div>
+<!-- Carousel Indicators -->
+<div class="absolute bottom-md left-1/2 -translate-x-1/2 flex gap-xs">
+<div class="w-8 h-1.5 rounded-full bg-white"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-white/50"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-white/50"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-white/50"></div>
+</div>
+</section>
+<!-- Content Body -->
+<div class="px-lg -mt-8 relative z-10">
+<!-- Title & Basic Info -->
+<div class="bg-surface p-xl rounded-xl property-shadow mb-lg">
+<div class="flex justify-between items-start mb-xs">
+<h1 class="font-hero-mobile text-hero-mobile text-primary">רחוב רוטשילד 42, תל אביב</h1>
+<div class="flex flex-col items-center">
+<div class="relative w-16 h-16">
+<svg class="w-full h-full" viewbox="0 0 100 100">
+<circle class="text-surface-container-high stroke-current" cx="50" cy="50" fill="transparent" r="40" stroke-width="8"></circle>
+<circle class="text-action-teal stroke-current progress-ring__circle" cx="50" cy="50" fill="transparent" r="40" stroke-linecap="round" stroke-width="8" style="stroke-dasharray: 251.2; stroke-dashoffset: 37.68;"></circle>
+</svg>
+<span class="absolute inset-0 flex items-center justify-center font-bold text-primary text-body">85%</span>
+</div>
+<span class="font-micro text-micro text-on-surface-variant mt-1">התאמה</span>
+</div>
+</div>
+<p class="font-body text-body text-on-surface-variant mb-md">לב העיר, נווה צדק</p>
+<div class="flex gap-sm">
+<span class="bg-secondary-container text-on-secondary-container px-md py-1 rounded-full font-label text-label">להשכרה</span>
+<span class="bg-surface-container-high text-on-surface-variant px-md py-1 rounded-full font-label text-label">כניסה מיידית</span>
+</div>
+</div>
+<!-- True Cost Card -->
+<section class="mb-2xl">
+<h3 class="font-heading text-heading text-primary mb-md">עלות חודשית אמיתית</h3>
+<div class="bg-primary-container text-white p-xl rounded-xl property-shadow border border-white/10">
+<div class="space-y-sm mb-lg">
+<div class="flex justify-between items-center opacity-80">
+<span class="font-body text-body">שכר דירה</span>
+<span class="font-subhead text-subhead">₪4,500</span>
+</div>
+<div class="flex justify-between items-center opacity-80">
+<span class="font-body text-body">ארנונה (משוער)</span>
+<span class="font-subhead text-subhead">₪350</span>
+</div>
+<div class="flex justify-between items-center opacity-80">
+<span class="font-body text-body">ועד בית</span>
+<span class="font-subhead text-subhead">₪200</span>
+</div>
+</div>
+<div class="h-[1px] bg-white/20 w-full mb-lg"></div>
+<div class="flex justify-between items-center">
+<span class="font-heading text-heading">סה"כ לתשלום</span>
+<span class="font-hero text-hero text-action-teal">₪5,050</span>
+</div>
+</div>
+</section>
+<!-- Features Grid -->
+<section class="mb-2xl">
+<h3 class="font-heading text-heading text-primary mb-md">מפרט הדירה</h3>
+<div class="grid grid-cols-4 gap-sm">
+<div class="bg-surface-container-low p-md rounded-lg flex flex-col items-center justify-center text-center">
+<span class="material-symbols-outlined text-secondary mb-xs">meeting_room</span>
+<span class="font-label text-label text-primary">3 חדרים</span>
+</div>
+<div class="bg-surface-container-low p-md rounded-lg flex flex-col items-center justify-center text-center">
+<span class="material-symbols-outlined text-secondary mb-xs">straighten</span>
+<span class="font-label text-label text-primary">75 מ"ר</span>
+</div>
+<div class="bg-surface-container-low p-md rounded-lg flex flex-col items-center justify-center text-center">
+<span class="material-symbols-outlined text-secondary mb-xs">layers</span>
+<span class="font-label text-label text-primary">קומה 4</span>
+</div>
+<div class="bg-surface-container-low p-md rounded-lg flex flex-col items-center justify-center text-center">
+<span class="material-symbols-outlined text-secondary mb-xs">local_parking</span>
+<span class="font-label text-label text-primary">חניה</span>
+</div>
+<div class="bg-surface-container-low p-md rounded-lg flex flex-col items-center justify-center text-center">
+<span class="material-symbols-outlined text-secondary mb-xs">elevator</span>
+<span class="font-label text-label text-primary">מעלית</span>
+</div>
+<div class="bg-surface-container-low p-md rounded-lg flex flex-col items-center justify-center text-center">
+<span class="material-symbols-outlined text-secondary mb-xs">pets</span>
+<span class="font-label text-label text-primary">חיות מחמד</span>
+</div>
+<div class="bg-surface-container-low p-md rounded-lg flex flex-col items-center justify-center text-center">
+<span class="material-symbols-outlined text-secondary mb-xs">ac_unit</span>
+<span class="font-label text-label text-primary">מיזוג</span>
+</div>
+<div class="bg-surface-container-low p-md rounded-lg flex flex-col items-center justify-center text-center">
+<span class="material-symbols-outlined text-secondary mb-xs">balcony</span>
+<span class="font-label text-label text-primary">מרפסת</span>
+</div>
+</div>
+</section>
+<!-- Description -->
+<section class="mb-2xl">
+<h3 class="font-heading text-heading text-primary mb-md">על הדירה</h3>
+<p class="font-body text-body text-on-surface-variant leading-relaxed">
+                    דירה מעוצבת אדריכלית בלב תל אביב. מוארת מאוד, שקטה ופונה לעורף הירוק. מטבח מאובזר, פרקט בכל הבית ותקרה גבוהה. קרובה מאוד לקווי תחבורה ציבורית, בתי קפה ומוקדי עניין. מתאימה מאוד לזוגות או ליחידים שמחפשים איכות חיים.
+                </p>
+</section>
+<!-- Landlord Card -->
+<section class="mb-2xl">
+<h3 class="font-heading text-heading text-primary mb-md">בעל הנכס</h3>
+<div class="bg-surface p-lg rounded-xl property-shadow flex items-center gap-lg border border-outline-variant/30">
+<div class="relative">
+<img alt="דניאל כהן" class="w-16 h-16 rounded-full object-cover" data-alt="A professional portrait of a friendly middle-aged man with a warm smile, wearing a casual business shirt. The background is a blurred office environment with soft lighting, reflecting a trustworthy and reliable professional persona. High-quality photography with a clean, modern aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGriMHzaLI6hCxiM6_64IT_yQsqW8U_xO6tpW6JhC_SRTcT6ymhPs2aGovSDTcdB5H3tV0cnhX10Ermp395RmFlK0D1YtpdFMH1uKhCmZGfTe1gd6cAleNhgwMCZlan1r5yVFx6zllB8xrh8ZUmixjzTKBwZBpPstEYpzlCBJ2xVFOHCAXibmlxsBWT09pkczPAU8tXOZEeURkN6vgk31RLVUCuArWcAy6Ff3x398W_Rfq9Ahs-6zhv6v18bta1Z3266hD8V4xTbjn"/>
+<div class="absolute -bottom-1 -left-1 bg-action-teal text-white rounded-full p-0.5 border-2 border-surface">
+<span class="material-symbols-outlined text-[14px] filled-icon">verified</span>
+</div>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center">
+<h4 class="font-subhead text-subhead text-primary">דניאל כהן</h4>
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-[18px] text-[#FFD700] filled-icon">star</span>
+<span class="font-label text-label font-bold text-primary">4.9</span>
+</div>
+</div>
+<p class="font-caption text-caption text-on-surface-variant mb-sm">משכיר ב-DirApp מעל שנתיים</p>
+<div class="flex items-center gap-xs text-secondary">
+<span class="material-symbols-outlined text-[16px]">shield</span>
+<span class="font-micro text-micro font-bold">ציון אמון גבוה מאוד</span>
+</div>
+</div>
+<button class="bg-surface-container-high text-primary w-12 h-12 rounded-full flex items-center justify-center hover:bg-secondary-container transition-colors active:scale-95">
+<span class="material-symbols-outlined">chat</span>
+</button>
+</div>
+</section>
+<!-- Map Placeholder -->
+<section class="mb-2xl">
+<div class="flex justify-between items-center mb-md">
+<h3 class="font-heading text-heading text-primary">מיקום וסביבה</h3>
+<button class="text-secondary font-label text-label">הצג מפה מלאה</button>
+</div>
+<div class="rounded-xl overflow-hidden h-40 bg-surface-container relative group">
+<img alt="Map location" class="w-full h-full object-cover opacity-60 grayscale-[0.5] group-hover:grayscale-0 transition-all duration-500" data-alt="A stylized urban map view of Tel Aviv streets with clean typography and minimalist markers. The map uses a professional color palette of soft greys and blues, with a prominent teal marker indicating a property location near Rothschild Boulevard. The lighting is bright and even, consistent with a modern light-mode interface." data-location="Tel Aviv, Israel" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCiA7fI-Orhr2BMwtj5GCGmimPK2F6GhwztE9LL8uHNjFMQSlaeNABBy1ZGSrzSmdNpJbl5UiUIcw1jrE40hGbMAR-gAnOXJZI-549cKmZGndIxO0DjK2nX60OlXY5XzoekhqfApgd3TU6cnVJF02PjNLDdSzqTZOZ2MFS4hEvP3_ceL_7bf5UK2fO__xq6W74XwoEmyRBkcAndQUT3HSmnY96ANG4T-Fm8nz2MXVdiJ4AE3hipFeMoulvstTyYuiekmA-02xQdVvWa"/>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="w-12 h-12 bg-action-teal/20 rounded-full flex items-center justify-center animate-ping"></div>
+<div class="absolute w-6 h-6 bg-action-teal rounded-full border-4 border-white shadow-lg"></div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Sticky Bottom CTA -->
+<div class="fixed bottom-0 left-0 right-0 p-lg bg-surface/90 backdrop-blur-xl border-t border-outline-variant/30 flex items-center gap-lg z-50">
+<div class="flex-1">
+<div class="flex items-baseline gap-xs">
+<span class="font-hero-mobile text-hero-mobile text-primary">₪4,500</span>
+<span class="font-caption text-caption text-on-surface-variant">/ לחודש</span>
+</div>
+<p class="font-micro text-micro text-secondary font-bold">₪5,050 כולל הכל</p>
+</div>
+<button class="flex-[2] bg-action-teal text-white h-[56px] rounded-full font-subhead text-subhead shadow-lg shadow-action-teal/30 flex items-center justify-center gap-sm hover:brightness-105 active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined">send</span>
+            אני מעוניין בדירה
+        </button>
+</div>
+<script>
+        // Micro-interaction for back button
+        document.querySelector('button').addEventListener('click', () => {
+            window.history.back();
+        });
+
+        // Simple scroll effect for top bar
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 200) {
+                nav.classList.add('bg-surface/90', 'backdrop-blur-xl', 'shadow-md');
+                nav.classList.remove('pointer-events-none');
+            } else {
+                nav.classList.remove('bg-surface/90', 'backdrop-blur-xl', 'shadow-md');
+                // nav.classList.add('pointer-events-none');
+            }
+        });
+    </script>
+</body></html>

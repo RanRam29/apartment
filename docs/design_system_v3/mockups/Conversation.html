@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="he"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Rubik', sans-serif;
+            overscroll-behavior: none;
+        }
+        .chat-container {
+            height: calc(100vh - 64px - 80px); /* Adjust for header and input bar */
+        }
+        .message-shadow {
+            box-shadow: 0px 2px 4px rgba(0, 32, 69, 0.05);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-container": "#0b6f63",
+                        "on-error": "#ffffff",
+                        "secondary-fixed-dim": "#83d5c6",
+                        "inverse-primary": "#aec7f5",
+                        "inverse-surface": "#2e3135",
+                        "surface-variant": "#e1e2e8",
+                        "surface-container-low": "#f2f3f9",
+                        "tertiary-fixed": "#5dfbd7",
+                        "surface-dim": "#d8dae0",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-fixed-dim": "#36debb",
+                        "surface": "#f8f9ff",
+                        "primary": "#00091b",
+                        "primary-fixed": "#d6e3ff",
+                        "surface-container-highest": "#e1e2e8",
+                        "outline-variant": "#c4c6cf",
+                        "secondary": "#006b5f",
+                        "surface-container-high": "#e7e8ee",
+                        "tertiary-container": "#00261e",
+                        "error-container": "#ffdad6",
+                        "on-tertiary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "on-tertiary-fixed-variant": "#005142",
+                        "secondary-container": "#9cefdf",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed": "#001b3c",
+                        "on-secondary-fixed-variant": "#005047",
+                        "secondary-fixed": "#9ff2e2",
+                        "primary-container": "#002045",
+                        "on-surface-variant": "#44474e",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-fixed": "#002019",
+                        "tertiary": "#000c08",
+                        "surface-container": "#eceef3",
+                        "on-tertiary-container": "#009a7f",
+                        "on-primary-container": "#7089b3",
+                        "outline": "#74777f",
+                        "on-surface": "#191c20",
+                        "on-error-container": "#93000a",
+                        "inverse-on-surface": "#eff0f6",
+                        "surface-tint": "#465f87",
+                        "on-background": "#191c20",
+                        "primary-fixed-dim": "#aec7f5",
+                        "background": "#f8f9ff",
+                        "on-secondary-fixed": "#00201c",
+                        "surface-bright": "#f8f9ff",
+                        "on-primary-fixed-variant": "#2e476e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lg": "16px",
+                        "md": "12px",
+                        "5xl": "48px",
+                        "2xl": "24px",
+                        "4xl": "40px",
+                        "sm": "8px",
+                        "xs": "4px",
+                        "xl": "20px",
+                        "3xl": "32px"
+                    },
+                    "fontFamily": {
+                        "title": ["Rubik"],
+                        "body": ["Rubik"],
+                        "micro": ["Rubik"],
+                        "hero-mobile": ["Rubik"],
+                        "hero": ["Rubik"],
+                        "heading": ["Rubik"],
+                        "subhead": ["Rubik"],
+                        "label": ["Rubik"],
+                        "display": ["Rubik"],
+                        "caption": ["Rubik"]
+                    },
+                    "fontSize": {
+                        "title": ["22px", {"lineHeight": "26px", "fontWeight": "700"}],
+                        "body": ["16px", {"lineHeight": "26px", "fontWeight": "400"}],
+                        "micro": ["10px", {"lineHeight": "12px", "fontWeight": "500"}],
+                        "hero-mobile": ["24px", {"lineHeight": "28px", "fontWeight": "700"}],
+                        "hero": ["28px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "heading": ["20px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "subhead": ["16px", {"lineHeight": "22px", "fontWeight": "600"}],
+                        "label": ["14px", {"lineHeight": "16px", "fontWeight": "500"}],
+                        "display": ["40px", {"lineHeight": "48px", "fontWeight": "800"}],
+                        "caption": ["12px", {"lineHeight": "14px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface">
+<!-- Top App Bar (Modified for Chat Context) -->
+<header class="sticky top-0 z-50 bg-surface flex items-center justify-between px-lg h-16 w-full">
+<div class="flex items-center gap-sm">
+<button class="p-xs hover:bg-surface-container-high transition-colors rounded-full active:scale-95 duration-150">
+<span class="material-symbols-outlined text-on-surface">arrow_forward</span>
+</button>
+<div class="relative">
+<img alt="Daniel Cohen" class="w-10 h-10 rounded-full object-cover border-2 border-secondary-container" data-alt="A professional headshot portrait of a friendly Israeli man with a slight beard, dressed in a modern business-casual style. The lighting is soft and natural, emphasizing a trustworthy and approachable personality. The background is a clean, minimalist studio setting with a light blue-grey tone that matches the professional DirApp brand aesthetic. High-quality digital photography with sharp focus and cinematic depth." src=""/>
+<span class="absolute bottom-0 right-0 w-3 h-3 bg-secondary border-2 border-surface rounded-full"></span>
+</div>
+<div class="flex flex-col">
+<span class="font-title text-label leading-none">דניאל כהן</span>
+<span class="font-caption text-caption text-secondary">אונליין</span>
+</div>
+</div>
+<div class="flex items-center gap-sm">
+<button class="p-xs hover:bg-surface-container-high transition-colors rounded-full active:scale-95 duration-150">
+<span class="material-symbols-outlined text-on-surface">call</span>
+</button>
+<button class="p-xs hover:bg-surface-container-high transition-colors rounded-full active:scale-95 duration-150">
+<span class="material-symbols-outlined text-on-surface">more_vert</span>
+</button>
+</div>
+</header>
+<main class="max-w-2xl mx-auto flex flex-col h-screen">
+<!-- Property Context Mini-Card -->
+<section class="px-lg pt-sm pb-2xl">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-sm flex items-center gap-md shadow-sm">
+<img alt="Property" class="w-16 h-16 rounded-lg object-cover" data-alt="A luxurious modern apartment interior in Tel Aviv, showing a sun-drenched living room with clean lines and high-end furniture. Large floor-to-ceiling windows reveal a glimpse of the city skyline. The aesthetic is bright, airy, and professional, reflecting the high-quality standards of the DirApp real estate market. Modern lighting and light oak floors contribute to a premium living experience." src="https://lh3.googleusercontent.com/aida-public/AB6AXuArfDpTa8MWx-7PZijujjlWwrEVCbqcIEFcGRtWWexVq9w-_YQYNZ8cnHqyvpC-Ob6HMZX3yMC2Hy94UaS9VUXQBwraZ0Cnwipn8A_g0mlA9aaef1K_-u3U9Z5YChfkVpJel09bGObLbVRFK3BJnHyFhAIEEXY4UtOCmJhP4D0-1Zc7jkCh7kuUTP3tnTSjqrih8jxdFamkJO9Sbg70PzzWO-IjdB09yPyruWW-ow2z_eQW4S6cpg1DyN0wHU0azcYS148lQbsD1GhY"/>
+<div class="flex-1">
+<h3 class="font-subhead text-subhead text-primary truncate">דירת 4 חדרים, נווה צדק</h3>
+<p class="font-caption text-caption text-on-surface-variant">רחוב שבזי 24, תל אביב</p>
+</div>
+<div class="text-start">
+<span class="font-title text-label text-secondary">₪8,500</span>
+</div>
+</div>
+</section>
+<!-- Chat Area -->
+<section class="flex-1 overflow-y-auto px-lg flex flex-col gap-2xl pb-4xl">
+<!-- Date Separator -->
+<div class="flex justify-center my-md">
+<span class="bg-surface-container px-lg py-xs rounded-full font-label text-caption text-on-surface-variant">היום</span>
+</div>
+<!-- Message: Received -->
+<div class="flex flex-col items-start max-w-[85%] self-start">
+<div class="bg-surface-container-high text-on-surface px-lg py-md rounded-2xl rounded-tr-xs message-shadow">
+<p class="font-body text-body">שלום, האם הדירה עדיין רלוונטית? ראיתי את המודעה ב-DirApp.</p>
+</div>
+<span class="font-caption text-caption text-outline mt-xs mr-sm">14:02</span>
+</div>
+<!-- Message: Sent -->
+<div class="flex flex-col items-end max-w-[85%] self-end">
+<div class="bg-secondary text-white px-lg py-md rounded-2xl rounded-tl-xs message-shadow">
+<p class="font-body text-body">היי דניאל! כן, הדירה פנויה לכניסה מיידית. תרצה לתאם סיור?</p>
+</div>
+<div class="flex items-center gap-xs mt-xs ml-sm">
+<span class="font-caption text-caption text-outline">14:05</span>
+<span class="material-symbols-outlined text-secondary text-[16px]" style="font-variation-settings: 'FILL' 1;">done_all</span>
+</div>
+</div>
+<!-- Message: Received -->
+<div class="flex flex-col items-start max-w-[85%] self-start">
+<div class="bg-surface-container-high text-on-surface px-lg py-md rounded-2xl rounded-tr-xs message-shadow">
+<p class="font-body text-body">מעולה. יש חניה בבניין? זה מאוד קריטי לי בגלל העבודה.</p>
+</div>
+<span class="font-caption text-caption text-outline mt-xs mr-sm">14:06</span>
+</div>
+<!-- Message: Sent -->
+<div class="flex flex-col items-end max-w-[85%] self-end">
+<div class="bg-secondary text-white px-lg py-md rounded-2xl rounded-tl-xs message-shadow">
+<p class="font-body text-body">יש חניה תת-קרקעית בטאבו. הנה כמה תמונות נוספות של האזור.</p>
+</div>
+<div class="flex items-center gap-xs mt-xs ml-sm">
+<span class="font-caption text-caption text-outline">14:08</span>
+<span class="material-symbols-outlined text-secondary text-[16px]" style="font-variation-settings: 'FILL' 1;">done_all</span>
+</div>
+</div>
+<!-- Image Content Message (Sent) -->
+<div class="flex flex-col items-end max-w-[85%] self-end">
+<div class="bg-secondary p-xs rounded-2xl rounded-tl-xs message-shadow">
+<img alt="Parking Area" class="rounded-xl w-full max-w-[280px] object-cover" data-alt="A clean, well-lit underground parking garage in a modern residential complex. The floors are polished concrete with clearly marked lines in Action Teal. The lighting is bright and industrial-chic, matching the modern DirApp aesthetic. The scene conveys security and high-end infrastructure, providing clear visual confirmation of the property's premium amenities. Professional architectural photography style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAXneoZ4Kks9hEP2HGBZoshcjCSDImS_fU01Cu-JwGXigKHeub9jsa0qR_QxDQ0A6GUcgYOm5vpf79NJaL_G7ZrB9UiU6A8z1hQyssP_Q1u9CyUyqaAmT_zKPMBFjt3D0lummPAlksHbN6Y3Rt-jtgyaVcd7N3onb_4oXueTAjB4NSHd4kOe3M_iBa12fygRUEtJBFRePzGh3nPx5Eg6qa1eVOHu2O1rHMvCdqnLji8NRVpYFgXBqEEJeIBnLKkYccAnmpRI6Zz-0Qp"/>
+</div>
+<div class="flex items-center gap-xs mt-xs ml-sm">
+<span class="font-caption text-caption text-outline">14:08</span>
+<span class="material-symbols-outlined text-secondary text-[16px]" style="font-variation-settings: 'FILL' 1;">done_all</span>
+</div>
+</div>
+</section>
+<!-- Input Bar -->
+<footer class="sticky bottom-0 bg-surface border-t border-outline-variant p-md flex items-center gap-sm">
+<button class="p-sm text-outline hover:text-secondary transition-colors active:scale-90">
+<span class="material-symbols-outlined">attach_file</span>
+</button>
+<button class="p-sm text-outline hover:text-secondary transition-colors active:scale-90">
+<span class="material-symbols-outlined">photo_camera</span>
+</button>
+<div class="flex-1 relative">
+<input class="w-full bg-surface-container-low border-none rounded-full px-xl py-md text-on-surface placeholder:text-outline focus:ring-2 focus:ring-secondary focus:bg-surface-container transition-all outline-none font-body text-body" placeholder="הקלד הודעה..." type="text"/>
+</div>
+<button class="bg-secondary text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg active:scale-95 hover:brightness-110 transition-all">
+<span class="material-symbols-outlined rotate-180">send</span>
+</button>
+</footer>
+</main>
+<script>
+        // Simple script to handle input focus and scroll to bottom
+        const input = document.querySelector('input');
+        const chatArea = document.querySelector('section.flex-1');
+
+        input.addEventListener('focus', () => {
+            setTimeout(() => {
+                chatArea.scrollTo({
+                    top: chatArea.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }, 300);
+        });
+
+        // Initialize scroll position
+        window.onload = () => {
+            chatArea.scrollTop = chatArea.scrollHeight;
+        };
+
+        // Micro-interaction for buttons
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const icon = this.querySelector('.material-symbols-outlined');
+                if (icon) {
+                    icon.style.transform = 'scale(0.8)';
+                    setTimeout(() => icon.style.transform = 'scale(1)', 150);
+                }
+            });
+        });
+    </script>
+</body></html>

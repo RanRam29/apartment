@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+
+<html class="light" dir="rtl" lang="he"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .card-stack {
+            perspective: 1000px;
+            position: relative;
+            height: calc(100vh - 220px);
+            width: 100%;
+        }
+        .property-card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.4s ease, opacity 0.4s ease;
+            cursor: grab;
+            touch-action: none;
+        }
+        .property-card:active {
+            cursor: grabbing;
+        }
+        .trust-score-glow {
+            box-shadow: 0 0 15px rgba(0, 203, 169, 0.4);
+        }
+        .tap-highlight-transparent {
+            -webkit-tap-highlight-color: transparent;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "outline": "#74777f",
+                    "on-tertiary": "#ffffff",
+                    "tertiary-container": "#00261e",
+                    "surface-variant": "#e1e2e8",
+                    "secondary": "#006b5f",
+                    "on-primary-fixed": "#001b3c",
+                    "surface-container-low": "#f2f3f9",
+                    "surface-bright": "#f8f9ff",
+                    "surface-container-high": "#e7e8ee",
+                    "secondary-fixed": "#9ff2e2",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary": "#000c08",
+                    "on-surface-variant": "#44474e",
+                    "background": "#f8f9ff",
+                    "on-background": "#191c20",
+                    "surface-container": "#eceef3",
+                    "on-tertiary-fixed-variant": "#005142",
+                    "primary-container": "#002045",
+                    "surface-tint": "#465f87",
+                    "on-error": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "inverse-surface": "#2e3135",
+                    "outline-variant": "#c4c6cf",
+                    "primary": "#00091b",
+                    "surface": "#f8f9ff",
+                    "surface-dim": "#d8dae0",
+                    "on-tertiary-container": "#009a7f",
+                    "on-secondary-fixed": "#00201c",
+                    "on-secondary": "#ffffff",
+                    "inverse-on-surface": "#eff0f6",
+                    "primary-fixed": "#d6e3ff",
+                    "on-surface": "#191c20",
+                    "on-primary-container": "#7089b3",
+                    "on-primary": "#ffffff",
+                    "on-secondary-container": "#0b6f63",
+                    "tertiary-fixed": "#5dfbd7",
+                    "error": "#ba1a1a",
+                    "on-tertiary-fixed": "#002019",
+                    "secondary-container": "#9cefdf",
+                    "tertiary-fixed-dim": "#36debb",
+                    "on-primary-fixed-variant": "#2e476e",
+                    "surface-container-highest": "#e1e2e8",
+                    "primary-fixed-dim": "#aec7f5",
+                    "on-secondary-fixed-variant": "#005047",
+                    "on-error-container": "#93000a",
+                    "secondary-fixed-dim": "#83d5c6",
+                    "inverse-primary": "#aec7f5"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "sm": "8px",
+                    "2xl": "24px",
+                    "3xl": "32px",
+                    "4xl": "40px",
+                    "md": "12px",
+                    "xs": "4px",
+                    "xl": "20px",
+                    "5xl": "48px",
+                    "lg": "16px"
+            },
+            "fontFamily": {
+                    "title": ["Rubik"],
+                    "body": ["Rubik"],
+                    "caption": ["Rubik"],
+                    "micro": ["Rubik"],
+                    "subhead": ["Rubik"],
+                    "heading": ["Rubik"],
+                    "hero-mobile": ["Rubik"],
+                    "hero": ["Rubik"],
+                    "display": ["Rubik"],
+                    "label": ["Rubik"]
+            },
+            "fontSize": {
+                    "title": ["22px", {"lineHeight": "26px", "fontWeight": "700"}],
+                    "body": ["16px", {"lineHeight": "26px", "fontWeight": "400"}],
+                    "caption": ["12px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "micro": ["10px", {"lineHeight": "12px", "fontWeight": "500"}],
+                    "subhead": ["16px", {"lineHeight": "22px", "fontWeight": "600"}],
+                    "heading": ["20px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "hero-mobile": ["24px", {"lineHeight": "28px", "fontWeight": "700"}],
+                    "hero": ["28px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "display": ["40px", {"lineHeight": "48px", "fontWeight": "800"}],
+                    "label": ["14px", {"lineHeight": "16px", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body selection:bg-secondary-container">
+<!-- Top Navigation Bar -->
+<header class="bg-surface dark:bg-surface-dim flex flex-row-reverse justify-between items-center w-full px-lg py-md z-50 fixed top-0 docked full-width">
+<div class="flex items-center gap-md">
+<button class="hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors scale-95 active:opacity-80 p-2 rounded-full">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed" data-icon="notifications">notifications</span>
+</button>
+<button class="hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors scale-95 active:opacity-80 p-2 rounded-full">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed" data-icon="tune">tune</span>
+</button>
+</div>
+<h1 class="font-display text-hero-mobile font-extrabold text-primary dark:text-primary-fixed tracking-tight">DirApp</h1>
+<button class="hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors scale-95 active:opacity-80 p-2 rounded-full">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed" data-icon="menu">menu</span>
+</button>
+</header>
+<main class="pt-24 pb-20 px-lg min-h-screen flex flex-col items-center">
+<!-- Card Stack Area -->
+<div class="card-stack mt-4" id="cardStack">
+<!-- Apartment Card 1 (Top) -->
+<div class="property-card z-30" id="card1">
+<div class="relative h-full w-full bg-white rounded-xl shadow-xl overflow-hidden border border-outline-variant/30">
+<img class="w-full h-full object-cover" data-alt="A modern and bright interior of a Tel Aviv apartment featuring high ceilings, light wood flooring, and large windows that allow natural sunlight to illuminate the space. The room is decorated in a contemporary minimalist style with sleek furniture in shades of navy blue and teal. The atmosphere is professional yet welcoming, showcasing the urban Mediterranean aesthetic of Florentin neighborhood." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHHtaCBJycbXKkg-4ujNHKqVhsDolwPu3Z-aH4d660aEqMjTIE4mmh_R_hAAkRKDZk9sn1OCnYFyV-JutpvSnaLxMxm2TyAf8j-w1Z7SPQbwKszjaAQrFyKxX0it1lEivfX4ZjFrELgikDC9r69ufxxPphZx37cyV1TkwINQomiNRe6tIRLUbXvFRJPhbt63PoajFMct7CxojnZ2xL5ufb1EMx0LIy3cUqMoo-Y0Z5IWUBhqwbi4oiOq7R1WQjDhcjrjtU_-aK77Ta"/>
+<!-- Gradient Overlay -->
+<div class="absolute inset-0 bg-gradient-to-t from-primary-container/90 via-transparent to-transparent"></div>
+<!-- Trust Score Badge -->
+<div class="absolute top-md right-md bg-on-tertiary-container text-white w-12 h-12 rounded-full flex items-center justify-center font-title trust-score-glow border-2 border-white/20">
+                        87
+                    </div>
+<!-- Card Info -->
+<div class="absolute bottom-0 right-0 left-0 p-2xl text-white">
+<div class="flex items-center gap-sm mb-xs">
+<span class="bg-on-secondary-container/90 text-white font-label text-label px-md py-xs rounded-full">₪4,500/חודש</span>
+</div>
+<h2 class="font-title text-title mb-xs">תל אביב, פלורנטין</h2>
+<p class="font-body text-white/80">3 חדרים · 75 מ²</p>
+</div>
+</div>
+</div>
+<!-- Apartment Card 2 (Below) -->
+<div class="property-card z-20 translate-y-4 scale-95 opacity-80" id="card2">
+<div class="relative h-full w-full bg-white rounded-xl shadow-lg overflow-hidden border border-outline-variant/30">
+<img class="w-full h-full object-cover" data-alt="A luxurious urban studio apartment with industrial chic elements located in central Israel. The design incorporates exposed brick walls, polished concrete floors, and elegant teal accents in the textiles. Soft ambient lighting creates a cozy and secure atmosphere, perfect for a high-end rental market application. The view from the window shows a vibrant city street at dusk." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC897J7zq6aoyzNw2cZxcBdfP6BCJ9HgU_ZLOGKOXwV9TdTknVLkbW2UugtaU7McDXOTDQfttBbjiDwaAvVFtuUTsfSI8HngVy1svz567Q_f4JVri4WZyYe9fTJizxLfwa5pD3eMfh2p1MUjPsh7iWUS4xlIRU4tjlXJKWEzKijdN3wwOIv2gdKRMC1lbjiv7yzzmENF4PbO23CLiv6X0zpIeJhCuP9hxWSGgYjkcnsEyT0fifD8WQu1zPhCRTIwGijUS2E7VDCDM0p"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary-container/90 via-transparent to-transparent"></div>
+<div class="absolute bottom-0 right-0 left-0 p-2xl text-white">
+<div class="flex items-center gap-sm mb-xs">
+<span class="bg-on-secondary-container/90 text-white font-label text-label px-md py-xs rounded-full">₪5,200/חודש</span>
+</div>
+<h2 class="font-title text-title mb-xs">גבעתיים, מרכז</h2>
+<p class="font-body text-white/80">2.5 חדרים · 68 מ²</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center justify-center gap-3xl mt-2xl w-full z-40">
+<!-- Pass Button -->
+<button class="w-16 h-16 rounded-full bg-white shadow-lg flex items-center justify-center text-error hover:scale-110 active:scale-95 transition-all border border-outline-variant/20 tap-highlight-transparent" onclick="swipe('left')">
+<span class="material-symbols-outlined text-4xl" data-icon="close">close</span>
+</button>
+<!-- Superlike Button -->
+<button class="w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-secondary hover:scale-110 active:scale-95 transition-all border border-outline-variant/20 tap-highlight-transparent">
+<span class="material-symbols-outlined text-2xl" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1; color: #FFD700;">star</span>
+</button>
+<!-- Like Button -->
+<button class="w-16 h-16 rounded-full bg-white shadow-lg flex items-center justify-center text-on-secondary-container hover:scale-110 active:scale-95 transition-all border border-outline-variant/20 tap-highlight-transparent" onclick="swipe('right')">
+<span class="material-symbols-outlined text-4xl" data-icon="favorite" data-weight="fill" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</button>
+</div>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 right-0 w-full z-50 flex flex-row-reverse justify-around items-center px-4 pb-safe bg-surface dark:bg-surface-container-lowest h-[72px] border-t border-outline-variant dark:border-outline shadow-sm">
+<!-- Home (Active) -->
+<a class="tap-highlight-transparent flex flex-col items-center justify-center bg-secondary-container dark:bg-on-secondary-container text-on-secondary-container dark:text-secondary-fixed-dim rounded-full px-4 py-1 active:scale-95 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="home" data-weight="fill" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-label text-label">בית</span>
+</a>
+<!-- Search -->
+<a class="tap-highlight-transparent flex flex-col items-center justify-center text-on-surface-variant dark:text-outline hover:bg-surface-container-low dark:hover:bg-surface-container-highest rounded-full px-4 py-1 active:scale-95 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+<span class="font-label text-label">חיפוש</span>
+</a>
+<!-- Matches -->
+<a class="tap-highlight-transparent flex flex-col items-center justify-center text-on-surface-variant dark:text-outline hover:bg-surface-container-low dark:hover:bg-surface-container-highest rounded-full px-4 py-1 active:scale-95 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="favorite">favorite</span>
+<span class="font-label text-label">התאמות</span>
+</a>
+<!-- Chat -->
+<a class="tap-highlight-transparent flex flex-col items-center justify-center text-on-surface-variant dark:text-outline hover:bg-surface-container-low dark:hover:bg-surface-container-highest rounded-full px-4 py-1 active:scale-95 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="chat">chat</span>
+<span class="font-label text-label">צ'אט</span>
+</a>
+<!-- Profile -->
+<a class="tap-highlight-transparent flex flex-col items-center justify-center text-on-surface-variant dark:text-outline hover:bg-surface-container-low dark:hover:bg-surface-container-highest rounded-full px-4 py-1 active:scale-95 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label text-label">פרופיל</span>
+</a>
+</nav>
+<script>
+        function swipe(direction) {
+            const card = document.getElementById('card1');
+            const nextCard = document.getElementById('card2');
+            
+            if (!card) return;
+
+            const rotate = direction === 'right' ? 20 : -20;
+            const xMove = direction === 'right' ? 1000 : -1000;
+
+            card.style.transform = `translate(${xMove}px, -100px) rotate(${rotate}deg)`;
+            card.style.opacity = '0';
+
+            setTimeout(() => {
+                card.remove();
+                if (nextCard) {
+                    nextCard.style.transform = 'translateY(0) scale(1)';
+                    nextCard.style.opacity = '1';
+                    nextCard.classList.remove('z-20');
+                    nextCard.classList.add('z-30');
+                    nextCard.id = 'card1';
+                }
+            }, 400);
+        }
+
+        // Simple touch dragging for Tinder feel
+        let startX = 0;
+        const currentCard = document.getElementById('card1');
+
+        if(currentCard) {
+            currentCard.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+            });
+
+            currentCard.addEventListener('touchmove', (e) => {
+                const x = e.touches[0].clientX;
+                const diff = x - startX;
+                const rotate = diff / 20;
+                currentCard.style.transform = `translateX(${diff}px) rotate(${rotate}deg)`;
+            });
+
+            currentCard.addEventListener('touchend', (e) => {
+                const diff = e.changedTouches[0].clientX - startX;
+                if (Math.abs(diff) > 100) {
+                    swipe(diff > 0 ? 'right' : 'left');
+                } else {
+                    currentCard.style.transform = 'translateX(0) rotate(0deg)';
+                }
+            });
+        }
+    </script>
+</body></html>
