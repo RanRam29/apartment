@@ -1,19 +1,41 @@
-/**
- * Trust Score and Onboarding integration and unit tests.
- */
 process.env.POSTGRES_SSL = 'false';
 process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED = 'false';
+process.env.JWT_SECRET = 'test_jwt_secret_for_verification_tests';
+
+jest.mock('../src/config/redis', () => {
+  const store = new Map();
+  const mockClient = { disconnect: jest.fn() };
+  return {
+    initRedis: jest.fn().mockResolvedValue(undefined),
+    getRedisClient: jest.fn(() => mockClient),
+    cacheGet: jest.fn(async (key) => {
+      const value = store.get(key);
+      return value === undefined ? null : value;
+    }),
+    cacheSet: jest.fn(async (key, value) => {
+      store.set(key, value);
+    }),
+    cacheDel: jest.fn(async (key) => {
+      store.delete(key);
+    }),
+  };
+});
 
 const { sequelize, ensureUserVerificationColumns } = require('../src/config/database');
+const { initRedis, getRedisClient } = require('../src/config/redis');
 const { User, TrustScoreEvent } = require('../src/models');
 
 beforeAll(async () => {
-  await sequelize.sync({ force: false });
-  await ensureUserVerificationColumns();
+  await Promise.all([
+    sequelize.sync({ force: false }),
+    ensureUserVerificationColumns(),
+    initRedis(),
+  ]);
 });
 
 afterAll(async () => {
   await sequelize.close();
+  getRedisClient().disconnect();
 });
 
 describe('Trust Score Step 1 - Models and Schema', () => {
@@ -188,6 +210,112 @@ describe('Trust Score Step 2 - Service Logic', () => {
     // Retrieve user and check trustScore remains 50
     updatedUser = await User.findByPk(testUser.id);
     expect(updatedUser.trustScore).toBe(50);
+  });
+});
+
+describe('Trust Score Step 4 - Routes and Endpoints', () => {
+  const request = require('supertest');
+  const app = require('../src/app');
+  const { generateStrongTestPassword } = require('./helpers/testCredentials');
+
+  let tenantToken, landlordToken, tenantUser, landlordUser;
+
+  beforeAll(async () => {
+    // Register test tenant (use landlord role to bypass MongoDB insert on register, then update in PG)
+    const password = generateStrongTestPassword();
+    const tenantEmail = `tenant_route_${Date.now()}@test.com`;
+    const resTenant = await request(app)
+      .post('/api/auth/register')
+      .send({
+        email: tenantEmail,
+        password,
+        firstName: 'Tenant',
+        lastName: 'Route',
+        role: 'landlord',
+      });
+    tenantToken = resTenant.body.token;
+    tenantUser = await User.findOne({ where: { email: tenantEmail } });
+    await tenantUser.update({ role: 'tenant', activeRole: 'tenant', isVerified: true });
+
+    // Register test landlord
+    const landlordEmail = `landlord_route_${Date.now()}@test.com`;
+    const resLandlord = await request(app)
+      .post('/api/auth/register')
+      .send({
+        email: landlordEmail,
+        password,
+        firstName: 'Landlord',
+        lastName: 'Route',
+        role: 'landlord',
+      });
+    landlordToken = resLandlord.body.token;
+    // Set activeRole explicitly to landlord
+    landlordUser = await User.findOne({ where: { email: landlordEmail } });
+    await landlordUser.update({ activeRole: 'landlord', isVerified: true });
+  });
+
+  it('GET /api/v3/trust/me should return trust status', async () => {
+    const res = await request(app)
+      .get('/api/v3/trust/me')
+      .set('Authorization', `Bearer ${tenantToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.score).toBe(50);
+    expect(res.body.history).toBeDefined();
+    expect(res.body.activeTasks).toBeDefined();
+    // Verify it contains tenant active tasks
+    const hasKyc = res.body.activeTasks.some(t => t.eventKey === 'kyc_approved');
+    expect(hasKyc).toBe(true);
+  });
+
+  it('GET /api/v3/trust/simulate should return hypothetical score', async () => {
+    const res = await request(app)
+      .get('/api/v3/trust/simulate?event=kyc_approved')
+      .set('Authorization', `Bearer ${tenantToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.currentScore).toBe(50);
+    expect(res.body.hypotheticalScore).toBe(70);
+    expect(res.body.delta).toBe(20);
+  });
+
+  it('GET /api/v3/onboarding/checklist for tenant', async () => {
+    const res = await request(app)
+      .get('/api/v3/onboarding/checklist')
+      .set('Authorization', `Bearer ${tenantToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.role).toBe('tenant');
+    expect(res.body.checklist.length).toBe(3); // kyc, preferences, whatsapp
+    expect(res.body.completionPct).toBe(0);
+  });
+
+  it('POST /api/v3/onboarding/step/:key/dismiss and checklist update', async () => {
+    // Dismiss preferences
+    const resDismiss = await request(app)
+      .post('/api/v3/onboarding/step/preferences/dismiss')
+      .set('Authorization', `Bearer ${tenantToken}`);
+
+    expect(resDismiss.status).toBe(200);
+    expect(resDismiss.body.ok).toBe(true);
+
+    // Get checklist again
+    const resChecklist = await request(app)
+      .get('/api/v3/onboarding/checklist')
+      .set('Authorization', `Bearer ${tenantToken}`);
+
+    const preferencesStep = resChecklist.body.checklist.find(t => t.key === 'preferences');
+    expect(preferencesStep.dismissed).toBe(true);
+  });
+
+  it('GET /api/v3/onboarding/checklist for landlord', async () => {
+    const res = await request(app)
+      .get('/api/v3/onboarding/checklist')
+      .set('Authorization', `Bearer ${landlordToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.role).toBe('landlord');
+    expect(res.body.checklist.length).toBe(3); // first_property, contract_uploaded, whatsapp
   });
 });
 
