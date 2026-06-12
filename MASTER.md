@@ -74,6 +74,7 @@
 | **אישור ליד** (`POST /api/matches/:id/accept`) | ✅ | 2026-05-30 | **BUG-003 CLOSED** — showAlert + tosAcceptedAt fixed (`43c43c3`) |
 | Chat Real-Time (backend) | ✅ | 2026-05-27 | backend עובד |
 | Chat navigation (frontend) | ✅ | 2026-05-30 | **BUG-008 CLOSED** — placeholder avatar + web navigation fixed (`43c43c3`) |
+| Maps — OSM/Leaflet (web) | 🟡 | 2026-06-12 | מפת מיקום בעמוד דירה (עיגול פרטיות ~200m) + מבט מפה בחיפוש. אפס עלות — ללא Google. ממתין לאימות E2E בפרודקשן |
 
 ---
 
@@ -281,6 +282,7 @@
 
 | תאריך | גרסה | שינוי | מי |
 |--------|------|--------|-----|
+| 2026-06-12 | 3.6 | Maps (OSM/Leaflet, zero-cost) — `components/map/` ב-web-next: מפת מיקום בעמוד דירה (Circle ~200m לפרטיות), מבט מפה בעמוד חיפוש (markers עם מחיר), `latitude/longitude` ב-types. Backend geocoding (Nominatim) כבר היה קיים. אומת DOM מקומית (tiles+markers+circle); E2E פרודקשן ממתין | Claude Code |
 | 2026-06-12 | 3.5 | Scheduled Notifications — `scheduled_notifications` table (UUID, JSONB payload, dedupeKey, retry≤3), `scheduleReminder`/`cancelReminder` ב-notificationService, cron delivery כל 5 דקות, 7/7 tests | Claude Code |
 | 2026-06-12 | 3.4 | Dead-End Audit — 9 logic gaps closed: change-password endpoint + UI (היה שדה מת), notification prefs per-category keys persisted (נזרקו בשקט), fake WhatsApp OTP הוחלף ב-opt-in אמיתי, fake 2FA toggle הושבת, stub route נמחק, JSON 404 ל-API, error boundaries ל-web-next, cron safety wrapper, tx swallow ב-admin delete. Tests: change-password 6/6, build web-next ✅ | Claude Code |
 | 2026-06-12 | 3.3 | Security Hardening Sprint — 7 vulnerabilities found in code review, all fixed: Contracts V3 IDOR (P0), Ledger IDOR (P0), trust proxy + per-IP rate limit, GDPR deletion cron, verification token hashing+expiry, chat imageUrl XSS, frontend JWT base64url decode. Branch `fix/security-idor-hardening`, 44/44 security tests pass | Claude Code + Cursor + Antigravity |

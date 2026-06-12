@@ -8,6 +8,7 @@ import type { Apartment } from "@/lib/types";
 import { ApartmentCard } from "./ApartmentCard";
 import { SearchFilters, type FilterState } from "./SearchFilters";
 import { NlpSearchBar } from "./NlpSearchBar";
+import { SearchResultsMap } from "@/components/map";
 
 interface FeedResponse {
   apartments: Apartment[];
@@ -24,7 +25,7 @@ interface NlpResponse {
   relaxed: boolean;
 }
 
-type ViewMode = "grid" | "list";
+type ViewMode = "grid" | "list" | "map";
 
 const CITIES = [
   "תל אביב", "ירושלים", "חיפה", "רמת גן", "גבעתיים",
@@ -198,6 +199,12 @@ export function SearchPage() {
               >
                 <span className="material-symbols-outlined text-[20px]">view_list</span>
               </button>
+              <button
+                onClick={() => setViewMode("map")}
+                className={`p-1.5 rounded-md transition-all ${viewMode === "map" ? "bg-white soft-shadow text-tenant-blue" : "text-on-surface-variant hover:text-on-surface"}`}
+              >
+                <span className="material-symbols-outlined text-[20px]">map</span>
+              </button>
             </div>
           </div>
 
@@ -231,8 +238,15 @@ export function SearchPage() {
             </div>
           )}
 
+          {/* Results Map */}
+          {!isLoading && sortedApartments.length > 0 && viewMode === "map" && (
+            <div className="rounded-xl overflow-hidden soft-shadow border border-outline-variant h-[600px]">
+              <SearchResultsMap apartments={sortedApartments} />
+            </div>
+          )}
+
           {/* Results Grid / List */}
-          {!isLoading && sortedApartments.length > 0 && (
+          {!isLoading && sortedApartments.length > 0 && viewMode !== "map" && (
             <div className={viewMode === "grid"
               ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"
               : "space-y-4"
