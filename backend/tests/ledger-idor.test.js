@@ -33,7 +33,7 @@ jest.mock('../src/services/r2Service', () => ({
 }));
 
 const request = require('supertest');
-const { sequelize } = require('../src/config/database');
+const { sequelize, ensureUserVerificationColumns } = require('../src/config/database');
 const { initRedis, getRedisClient } = require('../src/config/redis');
 const app = require('../src/app');
 const {
@@ -70,7 +70,11 @@ async function registerUser({ email, role, firstName, lastName }) {
 }
 
 beforeAll(async () => {
-  await Promise.all([sequelize.sync({ force: false }), initRedis()]);
+  await Promise.all([
+    sequelize.sync({ force: false }),
+    ensureUserVerificationColumns(),
+    initRedis(),
+  ]);
 
   const ts = Date.now();
 

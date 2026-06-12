@@ -98,8 +98,10 @@ async function startServer() {
     const { runR2Cleanup } = require('./cron/r2Cleanup');
     const { runCpiAdjustment } = require('./cron/cpiAdjustment');
     const { runCheckinUnlock } = require('./cron/checkinUnlock');
+    const { runAccountDeletion } = require('./cron/accountDeletion');
 
     if (process.env.NODE_ENV !== 'test') {
+      cron.schedule('0 2 * * *', runAccountDeletion);
       cron.schedule('0 8 * * *', runLedgerDueAlerts);     // Daily 08:00
       cron.schedule('0 9 * * *', runExpiringAlerts);       // Daily 09:00
       cron.schedule('0 9 * * *', runCheckinUnlock);        // Daily 09:00 — unlock check-in 48h before start

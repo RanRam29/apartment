@@ -244,8 +244,17 @@ app.post('/api/users/me/export-data', userAuth, async (req, res, next) => {
   }
 });
 
-app.post('/api/users/me/request-deletion', userAuth, (req, res) => {
-  res.json({ ok: true, message: 'בקשת מחיקת החשבון התקבלה בהצלחה ותטופל תוך 30 יום.' });
+app.post('/api/users/me/request-deletion', userAuth, async (req, res, next) => {
+  try {
+    const user = await User.findByPk(req.user.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (!user.deletionRequestedAt) {
+      await user.update({ deletionRequestedAt: new Date() });
+    }
+    res.json({ ok: true, message: 'בקשת מחיקת החשבון התקבלה בהצלחה ותטופל תוך 30 יום.' });
+  } catch (err) {
+    next(err);
+  }
 });
 
 app.use(errorHandler);

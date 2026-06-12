@@ -620,6 +620,10 @@ router.post('/request-deletion', require('../middleware/auth').authenticate, asy
     const user = await User.findByPk(req.user.id);
     if (!user) return res.status(404).json({ error: 'User not found' });
 
+    if (!user.deletionRequestedAt) {
+      await user.update({ deletionRequestedAt: new Date() });
+    }
+
     // Schedule deletion for 30 days from now (grace period)
     const scheduledFor = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 

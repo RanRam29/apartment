@@ -44,6 +44,7 @@ const USER_V3_COLUMNS = {
   whatsapp_opt_in: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
   notification_preferences: { type: DataTypes.JSONB, allowNull: true, defaultValue: { push: true, email: true, paymentReminders: true, maintenance: true, whatsapp: false } },
   bio: { type: DataTypes.TEXT, allowNull: true },
+  deletion_requested_at: { type: DataTypes.DATE, allowNull: true },
 };
 const APARTMENT_STREET_COLUMN = {
   street: { type: DataTypes.STRING(100), allowNull: true },
