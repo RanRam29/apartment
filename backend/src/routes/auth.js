@@ -785,8 +785,12 @@ router.post('/google', async (req, res, next) => {
     if (!user) {
       user = await User.findOne({ where: { email } });
       if (user) {
-        // Link existing account
-        await user.update({ googleId });
+        // Link existing account. Legacy users (pre role_selected_at column) chose a
+        // role at registration — treat them as selected so set-role can't override it.
+        await user.update({
+          googleId,
+          roleSelectedAt: user.roleSelectedAt || user.createdAt || new Date(),
+        });
         logger.info(`Linked existing user email ${email} to Google ID ${googleId}`);
       } else {
         // Create new user
