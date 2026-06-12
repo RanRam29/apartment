@@ -85,6 +85,10 @@ const ScheduledNotification = require('./pg/ScheduledNotification');
 ScheduledNotification.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 User.hasMany(ScheduledNotification, { foreignKey: 'userId', as: 'scheduledNotifications' });
 
+const TrustScoreEvent = require('./pg/TrustScoreEvent');
+TrustScoreEvent.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+User.hasMany(TrustScoreEvent, { foreignKey: 'userId', as: 'trustScoreEvents' });
+
 // Protocol Evidence
 const ProtocolEvidence = require('./pg/ProtocolEvidence');
 
@@ -118,5 +122,6 @@ module.exports = {
   WhatsAppConversationState,
   ProtocolEvidence,
   ScheduledNotification,
+  TrustScoreEvent,
 };
 
