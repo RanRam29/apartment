@@ -225,6 +225,12 @@ app.put('/api/users/me', userAuth, async (req, res, next) => {
     }
 
     await user.update(updates);
+    if (updates.whatsappOptIn === true) {
+      try {
+        const { applyTrustEvent } = require('./services/trustScoreService');
+        await applyTrustEvent(user.id, 'whatsapp_opt_in');
+      } catch (_) {}
+    }
     const { passwordHash: _, ...safeUser } = user.toJSON();
     res.json({ user: safeUser });
   } catch (err) {

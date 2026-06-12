@@ -319,3 +319,152 @@ describe('Trust Score Step 4 - Routes and Endpoints', () => {
   });
 });
 
+describe('Trust Score Step 5 - Event Hooks Integration', () => {
+  const request = require('supertest');
+  const app = require('../src/app');
+  const { generateStrongTestPassword } = require('./helpers/testCredentials');
+
+  let tenantToken, tenantUser, landlordUser, agreement;
+
+  beforeAll(async () => {
+    // Register tenant
+    const password = generateStrongTestPassword();
+    const tenantEmail = `tenant_hook_${Date.now()}@test.com`;
+    const resTenant = await request(app)
+      .post('/api/auth/register')
+      .send({
+        email: tenantEmail,
+        password,
+        firstName: 'Tenant',
+        lastName: 'Hook',
+        role: 'landlord', // registration bypass
+      });
+    tenantToken = resTenant.body.token;
+    tenantUser = await User.findOne({ where: { email: tenantEmail } });
+    await tenantUser.update({ role: 'tenant', activeRole: 'tenant', isVerified: true });
+
+    // Register landlord
+    const landlordEmail = `landlord_hook_${Date.now()}@test.com`;
+    await request(app)
+      .post('/api/auth/register')
+      .send({
+        email: landlordEmail,
+        password,
+        firstName: 'Landlord',
+        lastName: 'Hook',
+        role: 'landlord',
+      });
+    landlordUser = await User.findOne({ where: { email: landlordEmail } });
+    await landlordUser.update({ activeRole: 'landlord', isVerified: true });
+
+    // Create a property
+    const { Apartment } = require('../src/models');
+    const property = await Apartment.create({
+      landlordId: landlordUser.id,
+      title: 'Hook test property',
+      city: 'Tel Aviv',
+      address: 'Hook St 1',
+      price: 5000,
+      rooms: 2,
+    });
+
+    // Create agreement
+    const { RentalAgreement } = require('../src/models');
+    agreement = await RentalAgreement.create({
+      landlordId: landlordUser.id,
+      tenantId: tenantUser.id,
+      propertyId: property.id,
+      status: 'READY_SIGN',
+      startDate: '2026-07-01',
+      endDate: '2027-07-01',
+      monthlyRentIls: 5000,
+    });
+
+    // Create approved KYC profiles for both so the transition is allowed
+    const { UserKycProfile } = require('../src/models');
+    await UserKycProfile.create({
+      userId: tenantUser.id,
+      status: 'APPROVED',
+      personaInquiryId: `inq_tenant_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+    });
+    await UserKycProfile.create({
+      userId: landlordUser.id,
+      status: 'APPROVED',
+      personaInquiryId: `inq_landlord_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+    });
+  });
+
+  beforeEach(async () => {
+    await TrustScoreEvent.destroy({ where: {} });
+    tenantUser = await User.findByPk(tenantUser.id);
+    landlordUser = await User.findByPk(landlordUser.id);
+    await tenantUser.update({ trustScore: 50 });
+    await landlordUser.update({ trustScore: 50 });
+  });
+
+  it('KYC APPROVED webhook should award kyc_approved event (+20)', async () => {
+    const { handleWebhook } = require('../src/services/kycServiceV3');
+    const { UserKycProfile } = require('../src/models');
+
+    // Clean existing KYC profile for tenant so we can recreate it as PENDING
+    await UserKycProfile.destroy({ where: { userId: tenantUser.id } });
+
+    const kyc = await UserKycProfile.create({
+      userId: tenantUser.id,
+      status: 'PENDING',
+      personaInquiryId: `test_persona_inquiry_id_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+    });
+
+    // Mock webhook payload
+    const payload = JSON.stringify({
+      data: {
+        id: kyc.personaInquiryId,
+        attributes: { status: 'completed' },
+      },
+    });
+    // Calculate valid hmac signature
+    const crypto = require('crypto');
+    const signature = crypto
+      .createHmac('sha256', 'test-webhook-secret')
+      .update(payload)
+      .digest('hex');
+
+    await handleWebhook(payload, signature);
+
+    const updatedUser = await User.findByPk(tenantUser.id);
+    expect(updatedUser.trustScore).toBe(70); // 50 + 20
+  });
+
+  it('Agreement transition to SIGNED should award digital_signing to both (+15)', async () => {
+    // Mock AppConfig index
+    const { AppConfig } = require('../src/models');
+    await AppConfig.upsert({ key: 'cpi_index_current', value: '100.0' });
+
+    // Transition agreement
+    const res = await request(app)
+      .post(`/api/v1/agreements/${agreement.id}/transition`)
+      .set('Authorization', `Bearer ${tenantToken}`) // We can use tenantToken, authGuard accepts either party
+      .send({ targetStatus: 'SIGNED' });
+
+    expect(res.status).toBe(200);
+
+    const updatedTenant = await User.findByPk(tenantUser.id);
+    const updatedLandlord = await User.findByPk(landlordUser.id);
+
+    expect(updatedTenant.trustScore).toBe(65); // 50 + 15
+    expect(updatedLandlord.trustScore).toBe(65); // 50 + 15
+  });
+
+  it('Updating whatsappOptIn via PUT /api/users/me should award whatsapp_opt_in (+5)', async () => {
+    const res = await request(app)
+      .put('/api/users/me')
+      .set('Authorization', `Bearer ${tenantToken}`)
+      .send({ whatsappOptIn: true });
+
+    expect(res.status).toBe(200);
+
+    const updatedUser = await User.findByPk(tenantUser.id);
+    expect(updatedUser.trustScore).toBe(55); // 50 + 5
+  });
+});
+

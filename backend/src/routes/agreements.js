@@ -199,6 +199,22 @@ router.post('/:id/transition',
         });
 
         const ledgerRows = await seedLedgerRows(agreement);
+
+        // Trigger Trust Score for both parties
+        try {
+          const { applyTrustEvent } = require('../services/trustScoreService');
+          if (agreement.tenantId) {
+            await applyTrustEvent(agreement.tenantId, 'digital_signing', {
+              meta: { agreementId: agreement.id }
+            });
+          }
+          if (agreement.landlordId) {
+            await applyTrustEvent(agreement.landlordId, 'digital_signing', {
+              meta: { agreementId: agreement.id }
+            });
+          }
+        } catch (_) {}
+
         return res.json({
           status: agreement.status,
           baseCpiIndex: agreement.baseCpiIndex,
