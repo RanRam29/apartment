@@ -109,6 +109,8 @@ router.post('/register', registerValidator, async (req, res, next) => {
       role,
       phone: phone || null,
       roleSelectedAt: new Date(),
+      tosAcceptedAt: new Date(),
+      tosVersion: '3.0',
     });
 
     // Create empty preferences doc in MongoDB for tenants (fire-and-forget)
@@ -808,6 +810,8 @@ router.post('/google', async (req, res, next) => {
           verifiedAt: new Date(),
           role: 'tenant',
           roleSelectedAt: null,
+          tosAcceptedAt: new Date(),
+          tosVersion: '3.0',
         });
         logger.info(`Created new user ${user.id} via Google Sign-In`);
       }
@@ -887,6 +891,8 @@ router.post('/set-role', require('../middleware/auth').authenticate, async (req,
       role,
       activeRole: role,
       roleSelectedAt: new Date(),
+      tosAcceptedAt: new Date(),
+      tosVersion: '3.0',
     });
 
     if (role === 'tenant') {
