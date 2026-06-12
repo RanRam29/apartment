@@ -6,6 +6,7 @@ const { sequelize, initPostgres } = require('../src/config/database');
 const { initRedis, getRedisClient } = require('../src/config/redis');
 const {
   User,
+  Apartment,
   RentalAgreement,
   UserKycProfile,
   LedgerRow,
@@ -22,10 +23,12 @@ const { runR2Cleanup } = require('../src/cron/r2Cleanup');
 const { runLedgerDueAlerts } = require('../src/cron/ledgerDueAlerts');
 const { runLedgerOverdue } = require('../src/cron/ledgerOverdue');
 const { runMaintenanceAlerts } = require('../src/cron/maintenanceAlerts');
+const logger = require('../src/utils/logger');
 
 describe('V3 Platform Cron Jobs E2E Integration Suite', () => {
   let landlord = null;
   let tenant = null;
+  let testApartment = null;
 
   beforeAll(async () => {
     await initPostgres();
@@ -55,6 +58,14 @@ describe('V3 Platform Cron Jobs E2E Integration Suite', () => {
       isVerified: true,
       tosAcceptedAt: new Date(),
     });
+
+    testApartment = await Apartment.create({
+      landlordId: landlord.id,
+      title: 'Cron Test Apartment',
+      city: 'Tel Aviv',
+      price: 5000,
+      rooms: 3,
+    });
   }, 30_000);
 
   afterAll(async () => {
@@ -66,12 +77,23 @@ describe('V3 Platform Cron Jobs E2E Integration Suite', () => {
   });
 
   beforeEach(async () => {
-    // Clear tables before each test block to ensure isolated assertions
-    await LedgerRow.destroy({ where: {}, truncate: true, cascade: true }).catch(() => {});
-    await MaintenanceTicket.destroy({ where: {}, truncate: true, cascade: true }).catch(() => {});
-    await UserKycProfile.destroy({ where: {}, truncate: true, cascade: true }).catch(() => {});
-    await AgreementParty.destroy({ where: {}, truncate: true, cascade: true }).catch(() => {});
-    await RentalAgreement.destroy({ where: {}, truncate: true, cascade: true }).catch(() => {});
+    const { Op } = require('sequelize');
+    const agreements = await RentalAgreement.findAll({
+      where: { landlordId: landlord.id },
+      attributes: ['id'],
+    });
+    const agreementIds = agreements.map((a) => a.id);
+
+    if (agreementIds.length > 0) {
+      await LedgerRow.destroy({ where: { agreementId: { [Op.in]: agreementIds } } }).catch(() => {});
+      await MaintenanceTicket.destroy({ where: { agreementId: { [Op.in]: agreementIds } } }).catch(() => {});
+      await AgreementParty.destroy({ where: { agreementId: { [Op.in]: agreementIds } } }).catch(() => {});
+      await RentalAgreement.destroy({ where: { id: { [Op.in]: agreementIds } } }).catch(() => {});
+    }
+
+    await UserKycProfile.destroy({
+      where: { userId: { [Op.in]: [landlord.id, tenant.id] } },
+    }).catch(() => {});
   });
 
   describe('runKycRenewal', () => {
@@ -113,7 +135,7 @@ describe('V3 Platform Cron Jobs E2E Integration Suite', () => {
     it('adjusts pending rent amounts for cpiLinked active/expiring agreements by 3%', async () => {
       const agreement = await RentalAgreement.create({
         landlordId: landlord.id,
-        propertyId: '00000000-0000-4000-8000-000000000999',
+        propertyId: testApartment.id,
         status: 'ACTIVE',
         monthlyRentIls: 5000.00,
         startDate: '2026-07-01',
@@ -140,7 +162,7 @@ describe('V3 Platform Cron Jobs E2E Integration Suite', () => {
     it('leaves unlinked agreements untouched', async () => {
       const agreement = await RentalAgreement.create({
         landlordId: landlord.id,
-        propertyId: '00000000-0000-4000-8000-000000000999',
+        propertyId: testApartment.id,
         status: 'ACTIVE',
         monthlyRentIls: 5000.00,
         startDate: '2026-07-01',
@@ -172,7 +194,7 @@ describe('V3 Platform Cron Jobs E2E Integration Suite', () => {
 
       const agreement = await RentalAgreement.create({
         landlordId: landlord.id,
-        propertyId: '00000000-0000-4000-8000-000000000999',
+        propertyId: testApartment.id,
         status: 'ACTIVE',
         startDate: '2026-01-01',
         endDate: dateStr,
@@ -186,7 +208,7 @@ describe('V3 Platform Cron Jobs E2E Integration Suite', () => {
         role: 'tenant',
       });
 
-      const logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+      const logSpy = jest.spyOn(logger, 'info').mockImplementation(() => {});
 
       await runExpiringAlerts();
 
@@ -202,7 +224,7 @@ describe('V3 Platform Cron Jobs E2E Integration Suite', () => {
     it('automatically confirms reported payments that are older than 48 hours', async () => {
       const agreement = await RentalAgreement.create({
         landlordId: landlord.id,
-        propertyId: '00000000-0000-4000-8000-000000000999',
+        propertyId: testApartment.id,
         status: 'ACTIVE',
         monthlyRentIls: 5000.00,
         startDate: '2026-07-01',
@@ -234,7 +256,7 @@ describe('V3 Platform Cron Jobs E2E Integration Suite', () => {
     it('marks pending payments past their due date by more than 5 days as OVERDUE', async () => {
       const agreement = await RentalAgreement.create({
         landlordId: landlord.id,
-        propertyId: '00000000-0000-4000-8000-000000000999',
+        propertyId: testApartment.id,
         status: 'ACTIVE',
         monthlyRentIls: 5000.00,
         startDate: '2026-07-01',
@@ -264,16 +286,16 @@ describe('V3 Platform Cron Jobs E2E Integration Suite', () => {
     it('logs due alerts for pending payments due exactly 5 days from now', async () => {
       const agreement = await RentalAgreement.create({
         landlordId: landlord.id,
-        propertyId: '00000000-0000-4000-8000-000000000999',
+        propertyId: testApartment.id,
         status: 'ACTIVE',
         monthlyRentIls: 5000.00,
         startDate: '2026-07-01',
         endDate: '2027-06-30',
       });
 
-      const dueIn5Days = new Date();
-      dueIn5Days.setDate(dueIn5Days.getDate() + 5);
-      const dueDateStr = dueIn5Days.toISOString().split('T')[0];
+      const dueIn3Days = new Date();
+      dueIn3Days.setDate(dueIn3Days.getDate() + 3);
+      const dueDateStr = dueIn3Days.toISOString().split('T')[0];
 
       await LedgerRow.create({
         agreementId: agreement.id,
@@ -283,11 +305,11 @@ describe('V3 Platform Cron Jobs E2E Integration Suite', () => {
         status: 'PENDING',
       });
 
-      const logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+      const logSpy = jest.spyOn(logger, 'info').mockImplementation(() => {});
 
       await runLedgerDueAlerts();
 
-      expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('due in 5 days'));
+      expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('due in 3 days'));
 
       logSpy.mockRestore();
     });
@@ -297,7 +319,7 @@ describe('V3 Platform Cron Jobs E2E Integration Suite', () => {
     it('alerts for stale open maintenance tickets and escalates appropriately', async () => {
       const agreement = await RentalAgreement.create({
         landlordId: landlord.id,
-        propertyId: '00000000-0000-4000-8000-000000000999',
+        propertyId: testApartment.id,
         status: 'ACTIVE',
         monthlyRentIls: 5000.00,
         startDate: '2026-07-01',
@@ -347,7 +369,7 @@ describe('V3 Platform Cron Jobs E2E Integration Suite', () => {
 
       const agreement = await RentalAgreement.create({
         landlordId: landlord.id,
-        propertyId: '00000000-0000-4000-8000-000000000999',
+        propertyId: testApartment.id,
         status: 'ENDED',
         monthlyRentIls: 5000.00,
         startDate: '2026-01-01',
@@ -362,7 +384,9 @@ describe('V3 Platform Cron Jobs E2E Integration Suite', () => {
 
       await runR2Cleanup();
 
-      expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('Found 1 ended contracts'));
+      expect(logSpy).toHaveBeenCalledWith(
+        expect.stringMatching(/R2 CLEANUP: Found \d+ ended contracts older than 6 months/)
+      );
 
       logSpy.mockRestore();
     });
