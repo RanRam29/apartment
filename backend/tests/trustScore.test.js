@@ -268,7 +268,9 @@ describe('Trust Score Step 4 - Routes and Endpoints', () => {
     expect(hasKyc).toBe(true);
   });
 
-  it('GET /api/v3/trust/simulate should return hypothetical score', async () => {
+  it('GET /api/v3/trust/simulate should return hypothetical score and NOT write to the database', async () => {
+    const countBefore = await TrustScoreEvent.count({ where: { userId: tenantUser.id } });
+
     const res = await request(app)
       .get('/api/v3/trust/simulate?event=kyc_approved')
       .set('Authorization', `Bearer ${tenantToken}`);
@@ -277,6 +279,9 @@ describe('Trust Score Step 4 - Routes and Endpoints', () => {
     expect(res.body.currentScore).toBe(50);
     expect(res.body.hypotheticalScore).toBe(70);
     expect(res.body.delta).toBe(20);
+
+    const countAfter = await TrustScoreEvent.count({ where: { userId: tenantUser.id } });
+    expect(countAfter).toBe(countBefore);
   });
 
   it('GET /api/v3/onboarding/checklist for tenant', async () => {
