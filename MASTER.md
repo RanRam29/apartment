@@ -1,6 +1,6 @@
 # DirApp — MASTER STATUS DOCUMENT
 > **מנהל: Claude Code (Orchestrator)**  
-> **עדכון אחרון:** 2026-06-09  
+> **עדכון אחרון:** 2026-06-12  
 > **כלל ברזל:** זה המסמך היחיד שסומך עליו. כל שינוי קוד → עדכון כאן.
 
 ---
@@ -18,9 +18,9 @@
 | Git repo | `github.com/RanRam29/apartment` (branch: `main`) | ✅ פועל |
 
 **Worktrees:**
-- `C:\apartmentapp` → branch `cursor/lease-lifecycle-fixes` (Cursor — lease lifecycle sprint, WIP)
+- `C:\apartmentapp` → branch `main` (Claude Code — Orchestrator)
 - `C:\apartmentapp-cursor` → branch `cursor/financial-admin` (Cursor)
-- `C:\apartmentapp-windsurf` → branch `main` / `wind/identity-platform` (Antigravity)
+- `C:\apartmentapp-windsurf` → branch `wind/web-refactor-ui` (Antigravity)
 
 ---
 
@@ -192,6 +192,20 @@
 
 ---
 
+### 🔐 Security Hardening (2026-06-12)
+| פיצ'ר | סטטוס | בדיקה אחרונה | הערות |
+|--------|--------|--------------|-------|
+| Contracts V3 IDOR protection | ✅ | 2026-06-12 | `agreementAccess.js` middleware on all 13 routes, 18/18 tests |
+| Ledger IDOR protection | ✅ | 2026-06-12 | Actor auth on report/confirm/reject/generate, 9/9 tests |
+| Trust proxy + per-IP rate limit | ✅ | 2026-06-12 | `trust proxy = 1`, authIpLimiter 30/min |
+| GDPR deletion cron | ✅ | 2026-06-12 | `deletionRequestedAt` column + daily anonymization at 02:00, 4/4 tests |
+| Verification token hashing | ✅ | 2026-06-12 | SHA-256 hash + 24h expiry, legacy fallback |
+| Chat imageUrl XSS prevention | ✅ | 2026-06-12 | https-only validation on REST + socket |
+| Frontend JWT base64url decode | ✅ | 2026-06-12 | `base64UrlDecode` helper, frontend error handling |
+| Duplicate route mounts removed | ✅ | 2026-06-12 | `/api/v3/ledger` and `/api/v3/admin` were mounted twice |
+
+---
+
 ### 📱 WhatsApp Integration (Phase 2)
 | פיצ'ר | סטטוס | בדיקה אחרונה | הערות |
 |--------|--------|--------------|-------|
@@ -230,17 +244,17 @@
 
 > 📋 פירוט מלא: [`BUGS.md`](BUGS.md)
 
+**אין באגים פתוחים.** כל 19 הבאגים (כולל 7 ממצאי אבטחה) נסגרו.
+
 | # | תיאור | מטפל | מצב |
 |---|--------|------|-----|
-| BUG-005 | כל כפתורי המודעות לא עובדים | Antigravity + Claude Code | 🏁 CLOSED |
-| BUG-006 | ToS "אשר והמשך" לא עובד + אין חזרה | Antigravity | 🏁 CLOSED |
-| BUG-007 | דשבורד פיקטיבי | Antigravity | 🏁 CLOSED |
-| BUG-008 | לא ניתן להיכנס לצ'אטים | Antigravity | 🏁 CLOSED |
-| BUG-003 | אישור ליד לא עובד מה-UI | Antigravity | 🏁 CLOSED |
-| BUG-012 | NLP search: amenities filter too strict + role gate | Claude Code | ✅ FIXED |
-| BUG-002 | admin@dirapp.com 401 | Claude Code | 🏁 CLOSED |
-| BUG-009 | Trust Score מתחיל ב-0 | Antigravity | 🏁 CLOSED |
-| BUG-004 | Admin panel לא נבדק E2E | Antigravity | 🏁 CLOSED |
+| SEC-001 | Contracts V3 IDOR | Claude Code | 🏁 CLOSED |
+| SEC-002 | Ledger IDOR | Cursor | 🏁 CLOSED |
+| SEC-003 | Rate limit behind proxy | Claude Code | 🏁 CLOSED |
+| SEC-004 | GDPR deletion never executes | Claude Code + Cursor | 🏁 CLOSED |
+| SEC-005 | Verification token plaintext | Claude Code | 🏁 CLOSED |
+| SEC-006 | Chat imageUrl XSS | Claude Code | 🏁 CLOSED |
+| SEC-007 | JWT base64url decode | Antigravity | 🏁 CLOSED |
 
 ---
 
@@ -265,6 +279,7 @@
 
 | תאריך | גרסה | שינוי | מי |
 |--------|------|--------|-----|
+| 2026-06-12 | 3.3 | Security Hardening Sprint — 7 vulnerabilities found in code review, all fixed: Contracts V3 IDOR (P0), Ledger IDOR (P0), trust proxy + per-IP rate limit, GDPR deletion cron, verification token hashing+expiry, chat imageUrl XSS, frontend JWT base64url decode. Branch `fix/security-idor-hardening`, 44/44 security tests pass | Claude Code + Cursor + Antigravity |
 | 2026-06-11 | 3.2 | Repo public-ready: README תדמיתי, docs/internal, untrack tooling; seeder לא מאפס סיסמאות אדמין (ADMIN_SEED_PASSWORD); רוטציית סיסמאות אדמין בפרודקשן (ב-`.env.local`); הריפו הפך PUBLIC | Claude Code |
 | 2026-06-10 | 3.1 | Lease Lifecycle Engine — ENUM fix, SIGNED transition, ledger seed (12 rows), checkinUnlock cron, PaymentLedger removed, 21/21 tests | Cursor + Claude Code |
 | 2026-06-09 | 3.0 | Web Refactor complete — 26 pages deployed. Sprint A (Search/Matches/Chat/Verify), Sprint B (Admin/Gamification/Journal/Guarantor/DarkMode), Sprint C (Contracts/Payments/Maintenance/CheckIn). URL: `apartment-olive.vercel.app` | All |

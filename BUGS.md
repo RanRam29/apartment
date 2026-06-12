@@ -14,8 +14,8 @@
 | 🔴 OPEN | 0 |
 | 🔵 IN_PROGRESS | 0 |
 | ✅ FIXED (ממתין אימות) | 2 |
-| 🏁 CLOSED (RCA הושלם) | 10 |
-| **סה"כ** | **12** |
+| 🏁 CLOSED (RCA הושלם) | 17 |
+| **סה"כ** | **19** |
 
 ---
 
@@ -35,6 +35,13 @@
 | [BUG-009](#bug-009) | Trust Score מתחיל ב-0 במקום 50 | P2 | 🏁 CLOSED | ראן | Antigravity | 2026-05-28 |
 | [BUG-011](#bug-011) | Login fails on Render cold start (timeout) | P2 | ✅ FIXED | ראן | Claude Code | 2026-06-01 |
 | [BUG-012](#bug-012) | NLP search returns 0 results — amenities filter too strict + role gate | P1 | ✅ FIXED | ראן | Claude Code | 2026-06-04 |
+| [SEC-001](#sec-001) | Contracts V3 IDOR — any user can read any contract | P0 | 🏁 CLOSED | Security Review | Claude Code | 2026-06-11 |
+| [SEC-002](#sec-002) | Ledger IDOR — any user can confirm/reject payments | P0 | 🏁 CLOSED | Security Review | Cursor | 2026-06-11 |
+| [SEC-003](#sec-003) | Rate limit behind proxy — all users share one bucket | P1 | 🏁 CLOSED | Security Review | Claude Code | 2026-06-12 |
+| [SEC-004](#sec-004) | GDPR deletion never executes — Redis TTL expires unprocessed | P1 | 🏁 CLOSED | Security Review | Claude Code + Cursor | 2026-06-12 |
+| [SEC-005](#sec-005) | Verification token plaintext + no expiry | P1 | 🏁 CLOSED | Security Review | Claude Code | 2026-06-12 |
+| [SEC-006](#sec-006) | Chat imageUrl stored XSS vector | P1 | 🏁 CLOSED | Security Review | Claude Code | 2026-06-12 |
+| [SEC-007](#sec-007) | Frontend JWT base64url decode → random logouts | P1 | 🏁 CLOSED | Security Review | Antigravity | 2026-06-12 |
 
 ---
 
@@ -481,6 +488,66 @@ if (!created) {
 - [ ] כל שינוי schema → חייב להוסיף עמודה גם ב-`database.js:ensureUserVerificationColumns`
 - [ ] הוסף טסט שמריץ boot sequence ובודק שכל עמודות המודל קיימות ב-DB
 - [ ] `AGENT_PROTOCOL.md` עודכן: "שינוי מודל Sequelize → חובה לעדכן migration columns"
+
+---
+
+## 🔐 Security Review — 2026-06-11/12
+
+### SEC-001
+**כותרת:** Contracts V3 IDOR — any authenticated user can read/modify any contract
+**עדיפות:** P0 | **סטטוס:** 🏁 CLOSED | **תאריך:** 2026-06-11
+**מטפל:** Claude Code | **Commits:** `4aedec3`
+
+**RCA:** No ownership check on any `/:id` route in `contractsV3.js`. Any authenticated user could `GET /api/v3/contracts/:id` with any agreement UUID and receive the full contract including presigned document URL.
+**Fix:** Created `agreementAccess.js` middleware (`loadAgreement` + `requireAgreementLandlord`), applied to all 13 `/:id` routes. Outsiders get 404 (not 403). 18/18 IDOR tests pass.
+
+### SEC-002
+**כותרת:** Ledger IDOR — any user can report/confirm/reject payments on any agreement
+**עדיפות:** P0 | **סטטוס:** 🏁 CLOSED | **תאריך:** 2026-06-11
+**מטפל:** Cursor | **Commits:** `5569dbe`
+
+**RCA:** `reportPayment`/`confirmPayment`/`rejectPayment` in `ledgerService.js` accepted any caller. `GET /agreement/:id` had no ownership check. `generateLedger` could be called by any landlord for any agreement and was not idempotent.
+**Fix:** Actor authorization in service layer (party check for report, landlord check for confirm/reject). `loadAgreement` on GET/generate routes. Idempotency guard on generate. 9/9 tests pass.
+
+### SEC-003
+**כותרת:** Rate limit behind Render proxy — all users share one IP bucket
+**עדיפות:** P1 | **סטטוס:** 🏁 CLOSED | **תאריך:** 2026-06-12
+**מטפל:** Claude Code | **Commits:** `bd9128d`
+
+**RCA:** No `trust proxy` set — `req.ip` was always the Render proxy address. All users shared one rate-limit bucket; one hostile client could lock out production. The auth limiter keyed on `ip:path:email` gave each email its own budget, enabling credential spraying.
+**Fix:** `app.set('trust proxy', 1)` + new `authIpLimiter` (30/min per IP) layered before the existing per-email limiter.
+
+### SEC-004
+**כותרת:** GDPR deletion never executes — request stored in Redis only, expires at 30d
+**עדיפות:** P1 | **סטטוס:** 🏁 CLOSED | **תאריך:** 2026-06-12
+**מטפל:** Claude Code + Cursor | **Commits:** `bd9128d`, `61382bf`
+
+**RCA:** Deletion request stored only in Redis with 30-day TTL. No cron processed it — the entry expired exactly when it was due to execute.
+**Fix:** `deletionRequestedAt` column in Postgres. Daily cron at 02:00 anonymizes accounts past 30-day grace (email→`deleted-{id}@...`, random password, lock, null PII). UUID preserved for FK integrity.
+
+### SEC-005
+**כותרת:** Email verification tokens stored plaintext with no expiry
+**עדיפות:** P1 | **סטטוס:** 🏁 CLOSED | **תאריך:** 2026-06-12
+**מטפל:** Claude Code | **Commits:** `bd9128d`
+
+**RCA:** `User.verificationToken` stored raw hex. No expiry — Redis copy had 24h TTL but DB fallback matched forever.
+**Fix:** Store SHA-256 hash + `verificationTokenExpiresAt`. Legacy plaintext fallback for in-flight tokens. Expired tokens rejected at verify time. Token + expiry cleared on successful verification.
+
+### SEC-006
+**כותרת:** Chat imageUrl stored XSS — javascript:/data: URLs persisted and broadcast
+**עדיפות:** P1 | **סטטוס:** 🏁 CLOSED | **תאריך:** 2026-06-12
+**מטפל:** Claude Code | **Commits:** `bd9128d`
+
+**RCA:** `imageUrl` field in chat messages persisted and broadcast verbatim via REST and Socket.io. A `javascript:` URL would be stored XSS in any client rendering it as `<img>` or `<a>`. Socket path also skipped the 2000-char content limit.
+**Fix:** `isSafeImageUrl()` validator (https-only, max 2048 chars) applied on both REST `POST /:matchId` and socket `send_message`. Content length check added to socket path.
+
+### SEC-007
+**כותרת:** Frontend JWT base64url decode failure causes random logouts
+**עדיפות:** P1 | **סטטוס:** 🏁 CLOSED | **תאריך:** 2026-06-12
+**מטפל:** Antigravity | **Commits:** `83afaf3`
+
+**RCA:** `decodeToken` in `web-next/lib/auth.ts` used `atob(payload)` directly. JWT uses base64url encoding (`-`/`_`, no padding). Tokens with these characters threw `InvalidCharacterError` → treated as expired → user logged out.
+**Fix:** `base64UrlDecode` helper (replace `-`→`+`, `_`→`/`, pad with `=`) before `atob`. Frontend error handling added for 403/404/422 responses (`28d27e7`).
 
 ---
 
