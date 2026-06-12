@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useApi } from "@/hooks/useApi";
 import { api } from "@/lib/api";
 import type { Apartment, User } from "@/lib/types";
+import { ApartmentLocationMap } from "@/components/map";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 
@@ -289,31 +290,16 @@ export function ApartmentDetail({ apartmentId }: { apartmentId: string }) {
             </div>
           </div>
 
-          {/* Map Embed Simulation */}
-          <div className="rounded-xl overflow-hidden h-[350px] shadow-soft border border-outline-variant relative">
-            <div className="w-full h-full bg-surface-variant relative">
-              <img
-                src="https://lh3.googleusercontent.com/aida/AP1WRLuSXF1lj3CwL0vvLN4gsm6d_bCQeJsx7ysSr5m08kr529HFjAOjV7ZBaQSq6nAzWS0GyoWHFKJPeVqVc43Z3W1W7JkZPJA2hAlm5NV39rbbiffV0RSuV5sM1rmV72aC3EY_6L-CkAAcg4MTimWvl-Nbz0KgHnYAO9HMlCfUInUF064_czNK4QfPQG8mfYrjo6fCJ03es0cz_kclDk0iT0v5nToPTeYIf9KGyGS-CLVCx1iK3MHf0-0KOQ"
-                alt="מפה"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-tenant-blue/10" />
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                <span className="material-symbols-outlined text-admin-red text-[48px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                  location_on
-                </span>
-              </div>
-              <div className="absolute bottom-4 right-4 bg-white p-3 rounded-lg shadow-lg">
-                <p className="text-label font-bold text-tenant-blue">{apartment.address}, {apartment.city}</p>
-                <button
-                  onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(apartment.address + ", " + apartment.city)}`, "_blank")}
-                  className="text-on-secondary-container text-caption font-bold mt-1 hover:underline"
-                >
-                  פתח ב-Google Maps
-                </button>
+          {/* Location Map (OpenStreetMap) */}
+          {typeof apartment.latitude === "number" && typeof apartment.longitude === "number" && (
+            <div className="rounded-xl overflow-hidden h-[350px] shadow-soft border border-outline-variant relative">
+              <ApartmentLocationMap latitude={apartment.latitude} longitude={apartment.longitude} />
+              <div className="absolute bottom-4 right-4 bg-white p-3 rounded-lg shadow-lg z-[1000]">
+                <p className="text-label font-bold text-tenant-blue">{apartment.address ? `${apartment.address}, ` : ""}{apartment.city}</p>
+                <p className="text-caption text-on-surface-variant mt-1">המיקום המדויק יוצג לאחר התאמה</p>
               </div>
             </div>
-          </div>
+          )}
 
         </div>
 
