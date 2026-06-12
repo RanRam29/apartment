@@ -17,8 +17,10 @@ const {
   AgreementRoom,
   OwnershipVerification,
   Match,
-  Swipe
+  Swipe,
+  ScheduledNotification,
 } = require('../models');
+const { cancelReminder } = require('../services/notificationService');
 
 router.use(authenticate);
 router.use(requireRole('admin'));
@@ -300,6 +302,49 @@ router.patch('/config', async (req, res, next) => {
     if (!key) return res.status(400).json({ error: 'Key is required' });
     const [config] = await AppConfig.upsert({ key, value });
     res.json(config);
+  } catch (err) { next(err); }
+});
+
+// GET /api/v3/admin/scheduled-notifications?status=&page=&limit=
+router.get('/scheduled-notifications', async (req, res, next) => {
+  try {
+    const { status, page = 1, limit = 50 } = req.query;
+    const where = {};
+    if (status) where.status = status;
+
+    const result = await ScheduledNotification.findAndCountAll({
+      where,
+      include: [{ model: User, as: 'user', attributes: ['id', 'email', 'firstName', 'lastName'] }],
+      order: [['fireAt', 'DESC']],
+      limit: Math.min(parseInt(limit, 10) || 50, 100),
+      offset: (Math.max(parseInt(page, 10) || 1, 1) - 1) * (parseInt(limit, 10) || 50),
+    });
+
+    res.json({
+      rows: result.rows,
+      total: result.count,
+      page: parseInt(page, 10) || 1,
+      totalPages: Math.ceil(result.count / (parseInt(limit, 10) || 50)),
+    });
+  } catch (err) { next(err); }
+});
+
+// POST /api/v3/admin/scheduled-notifications/:id/cancel
+router.post('/scheduled-notifications/:id/cancel', async (req, res, next) => {
+  try {
+    const row = await ScheduledNotification.findByPk(req.params.id);
+    if (!row) return res.status(404).json({ error: 'Scheduled notification not found' });
+    if (row.status !== 'SCHEDULED') {
+      return res.status(422).json({ error: 'Only SCHEDULED notifications can be cancelled' });
+    }
+
+    const cancelled = await cancelReminder({ id: row.id });
+    if (!cancelled) {
+      return res.status(422).json({ error: 'Notification could not be cancelled' });
+    }
+
+    await row.reload();
+    res.json(row);
   } catch (err) { next(err); }
 });
 
