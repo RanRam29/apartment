@@ -262,6 +262,31 @@ async function ensureLedgerRowPeriodUniqueIndex() {
   }
 }
 
+// Existing trust_score_events tables won't get the capped_delta column from
+// sync({alter:false}); add it and backfill legacy rows (cap accounting used to
+// rely on `delta`) so caps aren't under-counted near the score ceiling (BUG-015).
+async function ensureTrustScoreEventCappedDeltaColumn(queryInterface = sequelize.getQueryInterface()) {
+  let table;
+  try {
+    table = await queryInterface.describeTable('trust_score_events');
+  } catch (err) {
+    return; // table not created yet — sync() will build it with the column
+  }
+  if (!table.capped_delta) {
+    try {
+      await queryInterface.addColumn('trust_score_events', 'capped_delta', {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+      });
+      await sequelize.query('UPDATE trust_score_events SET capped_delta = delta');
+      logger.info('Added trust_score_events.capped_delta column + backfilled from delta');
+    } catch (err) {
+      if (!isDuplicateColumnError(err)) throw err;
+    }
+  }
+}
+
 async function initPostgres() {
   await sequelize.authenticate();
   await ensureUserVerificationColumns();
@@ -270,6 +295,7 @@ async function initPostgres() {
   await ensureRentalAgreementLifecycleColumns();
   await ensureUserKycRoleTypeColumn();
   await ensureLedgerRowPeriodUniqueIndex();
+  await ensureTrustScoreEventCappedDeltaColumn();
   const syncAlter =
     process.env.NODE_ENV === 'development' ||
     process.env.POSTGRES_SYNC_ALTER === 'true';
@@ -290,5 +316,6 @@ module.exports = {
   ensureRentalAgreementLifecycleColumns,
   ensureUserKycRoleTypeColumn,
   ensureLedgerRowPeriodUniqueIndex,
+  ensureTrustScoreEventCappedDeltaColumn,
 };
 

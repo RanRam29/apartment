@@ -21,6 +21,13 @@ const TrustScoreEvent = sequelize.define('TrustScoreEvent', {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
+  // Intended delta before the 0–100 score ceiling clamps it — used for cap
+  // accounting so caps aren't under-counted near the ceiling (BUG-015).
+  cappedDelta: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+  },
   meta: {
     type: DataTypes.JSONB,
     allowNull: true,

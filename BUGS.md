@@ -11,9 +11,9 @@
 
 | סטטוס | כמות |
 |--------|------|
-| 🔴 OPEN | 5 |
+| 🔴 OPEN | 0 |
 | 🔵 IN_PROGRESS | 0 |
-| ✅ FIXED (ממתין אימות) | 3 |
+| ✅ FIXED (ממתין אימות) | 8 |
 | 🏁 CLOSED (RCA הושלם) | 17 |
 | **סה"כ** | **25** |
 
@@ -45,11 +45,11 @@
 | [SEC-006](#sec-006) | Chat imageUrl stored XSS vector | P1 | 🏁 CLOSED | Security Review | Claude Code | 2026-06-12 |
 | [SEC-007](#sec-007) | Frontend JWT base64url decode → random logouts | P1 | 🏁 CLOSED | Security Review | Antigravity | 2026-06-12 |
 | [BUG-013](#bug-013) | SIGNED transition — TOCTOU race seeds duplicate ledger rows | P1 | ✅ FIXED | Debug session | Claude Code | 2026-06-13 |
-| [BUG-014](#bug-014) | Revoked `isOnce` trust event can never be re-granted | P2 | 🔴 OPEN | Debug session | TBD | 2026-06-13 |
-| [BUG-018](#bug-018) | accountDeletion cron — no per-user error isolation | P2 | 🔴 OPEN | Debug session | TBD | 2026-06-13 |
-| [BUG-015](#bug-015) | Trust `cap` accounting uses score-clamped delta | P3 | 🔴 OPEN | Debug session | TBD | 2026-06-13 |
-| [BUG-016](#bug-016) | Admin user-edit writes unvalidated `parseInt` (NaN / no clamp) | P3 | 🔴 OPEN | Debug session | TBD | 2026-06-13 |
-| [BUG-017](#bug-017) | Onboarding `dismiss` accepts arbitrary keys → JSONB growth | P3 | 🔴 OPEN | Debug session | TBD | 2026-06-13 |
+| [BUG-014](#bug-014) | Revoked `isOnce` trust event can never be re-granted | P2 | ✅ FIXED | Debug session | Claude Code | 2026-06-13 |
+| [BUG-018](#bug-018) | accountDeletion cron — no per-user error isolation | P2 | ✅ FIXED | Debug session | Claude Code | 2026-06-13 |
+| [BUG-015](#bug-015) | Trust `cap` accounting uses score-clamped delta | P3 | ✅ FIXED | Debug session | Claude Code | 2026-06-13 |
+| [BUG-016](#bug-016) | Admin user-edit writes unvalidated `parseInt` (NaN / no clamp) | P3 | ✅ FIXED | Debug session | Claude Code | 2026-06-13 |
+| [BUG-017](#bug-017) | Onboarding `dismiss` accepts arbitrary keys → JSONB growth | P3 | ✅ FIXED | Debug session | Claude Code | 2026-06-13 |
 
 ---
 
@@ -180,9 +180,11 @@
 ### BUG-014
 **כותרת:** Revoked `isOnce` trust event can never be re-granted
 **עדיפות:** P2 — מלכודת רדומה (אין קוראים ל-`revokeTrustEvent` כרגע)
-**סטטוס:** 🔴 OPEN
+**סטטוס:** ✅ FIXED (TDD)
 **מדווח על ידי:** Debug session (Claude Code) | **תאריך:** 2026-06-13
-**מטפל:** TBD
+**מטפל:** Claude Code
+
+**Fix שיושם:** ב-`revokeTrustEvent` ([trustScoreService.js](backend/src/services/trustScoreService.js)) — `UPDATE ... SET dedupeKey = NULL` לכל אירועי ה-(userId, eventKey) שבוטלו, כדי לשחרר את האינדקס הייחודי ולאפשר הענקה מחדש. בדיקת RED: apply→revoke→apply של `kyc_approved` מצפה לשחזור הניקוד (`trustScoreService.test.js`). 8/8 + 17/17 ב-trustScore.test.js.
 
 **תיאור:**
 ב-`backend/src/services/trustScoreService.js`, `applyTrustEvent` קובע `dedupeKey = ${eventKey}:${userId}` לאירועי `isOnce` (שורות 24-26) ונשען על האינדקס הייחודי כדי למנוע כפילות (catch שורה 63). `revokeTrustEvent` (שורות 70-108) יוצר אירוע מקזז שלילי אבל **משאיר את שורת ה-dedupeKey המקורית**. הענקה חוזרת תיתקל באינדקס הייחודי → `null` בשקט → המשתמש לא מקבל בחזרה את הנקודות.
@@ -201,9 +203,11 @@
 ### BUG-018
 **כותרת:** accountDeletion (GDPR) cron — no per-user error isolation
 **עדיפות:** P2 — כשל אחד מפיל את כל ה-batch
-**סטטוס:** 🔴 OPEN
+**סטטוס:** ✅ FIXED (TDD)
 **מדווח על ידי:** Debug session (Claude Code) | **תאריך:** 2026-06-13
-**מטפל:** TBD
+**מטפל:** Claude Code
+
+**Fix שיושם:** כל איטרציה ב-[accountDeletion.js](backend/src/cron/accountDeletion.js) עטופה ב-try/catch — כשל מתועד כ-error וממשיך לבא בתור; ה-return משקף כעת מספר הצלחות בפועל. בדיקת RED: `accountDeletionIsolation.test.js` מזריק throw ב-`logAudit` ומוודא שהמשתמש השני עדיין מאונונם. 5/5. **נותר פתוח להחלטת מוצר:** היקף האנונימיזציה (כרגע שורת User בלבד; PII בטבלאות קשורות לא נוגעות).
 
 **תיאור:**
 ב-`backend/src/cron/accountDeletion.js:19-42`, הלולאה על המשתמשים למחיקה אינה עטופה ב-try/catch per-user. אם `user.update` או `logAudit` זורקים לאחד המשתמשים (collision, DB error), כל הריצה קורסת והמשתמשים הנותרים לא מעובדים — חשבונות שעברו את תקופת החסד נשארים לא-אנונימיים.
@@ -219,9 +223,11 @@
 ### BUG-015
 **כותרת:** Trust `cap` accounting uses score-clamped delta
 **עדיפות:** P3 — אי-דיוק שמתקן את עצמו
-**סטטוס:** 🔴 OPEN
+**סטטוס:** ✅ FIXED (TDD)
 **מדווח על ידי:** Debug session (Claude Code) | **תאריך:** 2026-06-13
-**מטפל:** TBD
+**מטפל:** Claude Code
+
+**Fix שיושם:** שדה חדש `cappedDelta` ב-`TrustScoreEvent` שמאחסן את ה-delta המכוון (לפני clamp ל-100). `applyTrustEvent`/`getTrustStatus`/`revokeTrustEvent` סופרים caps ו-tasks לפי `cappedDelta`, בעוד `delta` נשאר התרומה המיושמת לניקוד. `ensureTrustScoreEventCappedDeltaColumn` ב-boot מוסיף עמודה + backfill מ-`delta`. בדיקת RED: אירוע מוגבל ליד תקרת 98 — task points מצפה ל-25 (cap 30 − intended 5), לא 28. 9/9.
 
 **תיאור:**
 ב-`backend/src/services/trustScoreService.js:46-55`, האירוע נשמר עם `actualDelta` (אחרי clamp ל-0–100), אבל בדיקת ה-`cap` (שורות 35-43) סוכמת את ה-delta השמור. ליד תקרת 100 נרשם פחות מ-`config.delta`, ה-cap נספר בחסר והאירוע יכול לירות שוב. הניקוד הסופי נכון, אך ה-cap אינו נאכף לפי הכוונה.
@@ -234,9 +240,11 @@
 ### BUG-016
 **כותרת:** Admin user-edit writes unvalidated `parseInt` (NaN / no clamp)
 **עדיפות:** P3 — admin-only
-**סטטוס:** 🔴 OPEN
+**סטטוס:** ✅ FIXED (TDD)
 **מדווח על ידי:** Debug session (Claude Code) | **תאריך:** 2026-06-13
-**מטפל:** TBD
+**מטפל:** Claude Code
+
+**Fix שיושם:** ב-[admin.js](backend/src/routes/admin.js) — `trustScore` מוודא `Number.isInteger` + clamp 0–100, `blockedCount` מוודא integer ≥0; קלט לא תקין → 422. בדיקת RED: `trustScore: 5000` ו-`'abc'` מצפים ל-422 + ערך ב-DB ללא שינוי. 4/4 ב-adminUsersV3.test.js.
 
 **תיאור:**
 ב-`backend/src/routes/admin.js:116,120`, `trustScore`/`blockedCount` נכתבים עם `parseInt(...)` ללא בדיקת NaN וללא clamp. `trustScore: 5000` עוקף את תקרת 0–100; `"abc"` → `NaN` → Postgres דוחה ל-INTEGER → 500.
@@ -249,9 +257,11 @@
 ### BUG-017
 **כותרת:** Onboarding `dismiss` accepts arbitrary keys → unbounded JSONB growth
 **עדיפות:** P3 — abuse vector קל
-**סטטוס:** 🔴 OPEN
+**סטטוס:** ✅ FIXED (TDD)
 **מדווח על ידי:** Debug session (Claude Code) | **תאריך:** 2026-06-13
-**מטפל:** TBD
+**מטפל:** Claude Code
+
+**Fix שיושם:** `VALID_STEP_KEYS` (איחוד שתי ה-checklists) ב-[onboarding.js](backend/src/routes/onboarding.js); `dismiss` מחזיר 400 על מפתח לא מוכר. בדיקת RED: dismiss של `not-a-real-key` מצפה ל-400. 18/18 ב-trustScore.test.js.
 
 **תיאור:**
 ב-`backend/src/routes/onboarding.js:91-105`, `POST /step/:key/dismiss` כותב כל `:key` שרירותי ל-`onboardingState.dismissed` (JSONB) בלי לוודא מול ה-checklist. לקוח זדוני יכול לנפח את ה-JSONB.

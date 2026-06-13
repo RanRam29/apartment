@@ -115,11 +115,23 @@ router.put('/users/:id', async (req, res, next) => {
     if (phone !== undefined) updateData.phone = phone;
     if (role !== undefined) updateData.role = role;
     if (activeRole !== undefined) updateData.activeRole = activeRole;
-    if (trustScore !== undefined) updateData.trustScore = parseInt(trustScore);
+    if (trustScore !== undefined) {
+      const ts = Number(trustScore);
+      if (!Number.isInteger(ts) || ts < 0 || ts > 100) {
+        return res.status(422).json({ error: 'trustScore must be an integer between 0 and 100' });
+      }
+      updateData.trustScore = ts;
+    }
     if (isPremium !== undefined) updateData.isPremium = !!isPremium;
     if (isVerified !== undefined) updateData.isVerified = !!isVerified;
     if (isLocked !== undefined) updateData.isLocked = !!isLocked;
-    if (blockedCount !== undefined) updateData.blockedCount = parseInt(blockedCount);
+    if (blockedCount !== undefined) {
+      const bc = Number(blockedCount);
+      if (!Number.isInteger(bc) || bc < 0) {
+        return res.status(422).json({ error: 'blockedCount must be a non-negative integer' });
+      }
+      updateData.blockedCount = bc;
+    }
 
     await user.update(updateData);
     

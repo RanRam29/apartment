@@ -31,6 +31,8 @@ beforeAll(async () => {
     ensureUserVerificationColumns(),
     initRedis(),
   ]);
+  const { ensureTrustScoreEventCappedDeltaColumn } = require('../src/config/database');
+  await ensureTrustScoreEventCappedDeltaColumn();
 });
 
 afterAll(async () => {
@@ -311,6 +313,13 @@ describe('Trust Score Step 4 - Routes and Endpoints', () => {
 
     const preferencesStep = resChecklist.body.checklist.find(t => t.key === 'preferences');
     expect(preferencesStep.dismissed).toBe(true);
+  });
+
+  it('POST /api/v3/onboarding/step/:key/dismiss rejects an unknown key (BUG-017)', async () => {
+    const res = await request(app)
+      .post('/api/v3/onboarding/step/not-a-real-key/dismiss')
+      .set('Authorization', `Bearer ${tenantToken}`);
+    expect(res.status).toBe(400);
   });
 
   it('GET /api/v3/onboarding/checklist for landlord', async () => {

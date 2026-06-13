@@ -34,7 +34,8 @@ async function applyTrustEvent(userId, eventKey, { meta, dedupeKey } = {}) {
 
       let deltaToApply = eventConfig.delta;
       if (eventConfig.cap !== undefined) {
-        const existingSum = await TrustScoreEvent.sum('delta', {
+        // Cap accounting uses intended (cappedDelta), not score-clamped, deltas.
+        const existingSum = await TrustScoreEvent.sum('cappedDelta', {
           where: { userId, eventKey },
           transaction
         }) || 0;
@@ -52,6 +53,7 @@ async function applyTrustEvent(userId, eventKey, { meta, dedupeKey } = {}) {
         userId,
         eventKey,
         delta: actualDelta,
+        cappedDelta: deltaToApply,
         meta,
         dedupeKey
       }, { transaction });
@@ -89,6 +91,11 @@ async function revokeTrustEvent(userId, eventKey) {
         return null;
       }
 
+      const existingCappedSum = await TrustScoreEvent.sum('cappedDelta', {
+        where: { userId, eventKey },
+        transaction
+      }) || 0;
+
       const deltaToApply = -existingSum;
       const newScore = Math.min(100, Math.max(0, user.trustScore + deltaToApply));
       const actualDelta = newScore - user.trustScore;
@@ -105,6 +112,7 @@ async function revokeTrustEvent(userId, eventKey) {
         userId,
         eventKey,
         delta: actualDelta,
+        cappedDelta: -existingCappedSum,
         meta: { revoked: true }
       }, { transaction });
 
@@ -139,7 +147,8 @@ async function getTrustStatus(userId, role) {
       eventGroups[ev.eventKey] = { count: 0, sum: 0 };
     }
     eventGroups[ev.eventKey].count += 1;
-    eventGroups[ev.eventKey].sum += ev.delta;
+    // Task/cap progress is measured in intended (cappedDelta) points (BUG-015).
+    eventGroups[ev.eventKey].sum += ev.cappedDelta;
   }
 
   const activeTasks = [];

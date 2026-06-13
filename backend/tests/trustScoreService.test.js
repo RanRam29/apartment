@@ -19,6 +19,7 @@ const {
   isPaidOnTime,
   applyTrustEvent,
   revokeTrustEvent,
+  getTrustStatus,
 } = require('../src/services/trustScoreService');
 const { confirmPayment } = require('../src/services/ledgerService');
 
@@ -32,6 +33,8 @@ describe('trustScoreService — behaviour auto-triggers (V2-5 → NF3)', () => {
 
   beforeAll(async () => {
     await sequelize.sync({ force: false });
+    const { ensureTrustScoreEventCappedDeltaColumn } = require('../src/config/database');
+    await ensureTrustScoreEventCappedDeltaColumn();
     const unique = Date.now();
 
     landlord = await User.create({
@@ -184,6 +187,17 @@ describe('trustScoreService — behaviour auto-triggers (V2-5 → NF3)', () => {
     await applyTrustEvent(tenant.id, 'kyc_approved');
     u = await User.findByPk(tenant.id);
     expect(u.trustScore).toBe(50 + TRUST_EVENTS.kyc_approved.delta);
+  });
+
+  it('counts the full intended delta toward a cap even when the score clamps at 100 (BUG-015)', async () => {
+    await User.update({ trustScore: 98 }, { where: { id: tenant.id } });
+    await applyTrustEvent(tenant.id, 'rent_paid_on_time', { dedupeKey: `cap-clamp:${tenant.id}` });
+
+    const status = await getTrustStatus(tenant.id, 'tenant');
+    const task = status.activeTasks.find((t) => t.eventKey === 'rent_paid_on_time');
+    // cap 30, intended 5 consumed → 25 remaining (the bug would show 28 because
+    // only +2 was actually applied before the 100 ceiling clamped it).
+    expect(task.points).toBe(TRUST_EVENTS.rent_paid_on_time.cap - TRUST_EVENTS.rent_paid_on_time.delta);
   });
 
   it('confirmPayment hook raises tenant trust score on time', async () => {
