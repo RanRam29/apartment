@@ -64,6 +64,13 @@ AgreementRoom.belongsTo(RentalAgreement, { foreignKey: 'agreementId', as: 'agree
 RentalAgreement.hasMany(AgreementGuarantor, { foreignKey: 'agreementId', as: 'guarantors' });
 AgreementGuarantor.belongsTo(RentalAgreement, { foreignKey: 'agreementId', as: 'agreement' });
 
+const WarrantyClaim = require('./pg/WarrantyClaim');
+RentalAgreement.hasMany(WarrantyClaim, { foreignKey: 'agreementId', as: 'warrantyClaims' });
+WarrantyClaim.belongsTo(RentalAgreement, { foreignKey: 'agreementId', as: 'agreement' });
+AgreementGuarantor.hasMany(WarrantyClaim, { foreignKey: 'guarantorId', as: 'claims' });
+WarrantyClaim.belongsTo(AgreementGuarantor, { foreignKey: 'guarantorId', as: 'guarantor' });
+WarrantyClaim.belongsTo(User, { foreignKey: 'filedByUserId', as: 'filedBy' });
+
 RentalAgreement.hasMany(OwnershipVerification, { foreignKey: 'agreementId', as: 'ownershipVerifications' });
 OwnershipVerification.belongsTo(RentalAgreement, { foreignKey: 'agreementId', as: 'agreement' });
 
@@ -123,5 +130,6 @@ module.exports = {
   ProtocolEvidence,
   ScheduledNotification,
   TrustScoreEvent,
+  WarrantyClaim,
 };
 
