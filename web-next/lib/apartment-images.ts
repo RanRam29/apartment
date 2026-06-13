@@ -9,6 +9,22 @@ export type ApartmentImageRef =
 
 const PLACEHOLDER_HOSTS = ["via.placeholder.com", "placehold.co", "placeholder.com"];
 
+/** Known dead Unsplash IDs from early seed data — swap at read time for existing DB rows */
+const DEAD_UNSPLASH_REPLACEMENTS: Record<string, string> = {
+  "1502672023488-203a3bb6e526": "1600585154340-be6161a56a0c",
+  "1555041469-db819a8be170": "1484154218962-a197022b5858",
+};
+
+function repairUnsplashUrl(url: string): string {
+  let repaired = url;
+  for (const [deadId, replacementId] of Object.entries(DEAD_UNSPLASH_REPLACEMENTS)) {
+    if (repaired.includes(deadId)) {
+      repaired = repaired.replace(deadId, replacementId);
+    }
+  }
+  return repaired;
+}
+
 function isPlaceholderUrl(url: string): boolean {
   try {
     const host = new URL(url).hostname.toLowerCase();
@@ -27,7 +43,7 @@ export function resolveApartmentImageUrl(image: ApartmentImageRef | null | undef
       : (image.url || image.secure_url || "").trim();
 
   if (!url || isPlaceholderUrl(url)) return null;
-  return url;
+  return repairUnsplashUrl(url);
 }
 
 export function getApartmentImageUrls(images: ApartmentImageRef[] | null | undefined): string[] {

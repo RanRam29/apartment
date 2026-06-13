@@ -9,6 +9,7 @@ const { parseSearchQuery } = require('../services/geminiService');
 const { scoreApartmentsForUser } = require('../services/aiServiceClient');
 const { cacheGet, cacheSet } = require('../config/redis');
 const logger = require('../utils/logger');
+const { normalizeApartmentPayload } = require('../utils/apartmentImages');
 
 const router = express.Router();
 
@@ -92,7 +93,12 @@ router.post(
         relaxed = apartments.length > 0;
       }
 
-      res.json({ apartments, filters: mergedFilters, total: apartments.length, relaxed });
+      res.json({
+        apartments: apartments.map(normalizeApartmentPayload),
+        filters: mergedFilters,
+        total: apartments.length,
+        relaxed,
+      });
     } catch (err) {
       next(err);
     }

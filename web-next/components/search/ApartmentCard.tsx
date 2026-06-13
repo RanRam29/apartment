@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import type { Apartment } from "@/lib/types";
-import { getApartmentImageUrls, getFirstApartmentImageUrl } from "@/lib/apartment-images";
+import { getApartmentImageUrls } from "@/lib/apartment-images";
+import { ApartmentImage, ApartmentImageFallback } from "@/components/ui/ApartmentImage";
 
 interface ApartmentCardProps {
   apartment: Apartment;
@@ -20,35 +21,22 @@ const amenityIcons: Record<string, { icon: string; label: string }> = {
   sun_boiler: { icon: "solar_power", label: "דוד שמש" },
 };
 
-function FallbackImage() {
-  return (
-    <div className="w-full h-full bg-gradient-to-br from-[#e8f5f0] via-surface-container to-[#dce8f4] flex flex-col items-center justify-center">
-      <div className="w-16 h-16 rounded-2xl bg-white/70 flex items-center justify-center shadow-sm mb-2">
-        <span className="material-symbols-outlined text-[36px] text-landlord-green/60">apartment</span>
-      </div>
-      <span className="text-[12px] text-on-surface-variant/70 font-medium">תמונה בקרוב</span>
-    </div>
-  );
-}
-
 export function ApartmentCard({ apartment, viewMode }: ApartmentCardProps) {
   const apt = apartment;
   const imageUrls = getApartmentImageUrls(apt.images);
-  const primaryImage = getFirstApartmentImageUrl(apt.images);
-  const hasImage = Boolean(primaryImage);
   const topAmenities = (apt.amenities || []).slice(0, 4);
 
   if (viewMode === "list") {
     return (
       <Link href={`/apartment/${apt.id}`} className="block">
         <div className="bg-surface-container-lowest rounded-xl overflow-hidden soft-shadow border border-outline-variant/50 hover:border-landlord-green/40 transition-all hover:-translate-y-0.5 flex">
-          {/* Image */}
           <div className="w-[240px] h-[160px] shrink-0 relative overflow-hidden">
-            {hasImage ? (
-              <img src={primaryImage!} alt={apt.address || apt.title} className="w-full h-full object-cover" />
-            ) : (
-              <FallbackImage />
-            )}
+            <ApartmentImage
+              images={apt.images}
+              alt={apt.address || apt.title}
+              className="w-full h-full object-cover"
+              fallback={<ApartmentImageFallback />}
+            />
             {imageUrls.length > 1 && (
               <div className="absolute bottom-2 left-2 bg-black/60 text-white text-[11px] px-2 py-0.5 rounded-full">
                 {imageUrls.length} תמונות
@@ -56,7 +44,6 @@ export function ApartmentCard({ apartment, viewMode }: ApartmentCardProps) {
             )}
           </div>
 
-          {/* Content */}
           <div className="flex-grow p-4 flex flex-col justify-between min-w-0">
             <div>
               <div className="flex items-start justify-between mb-1">
@@ -73,7 +60,6 @@ export function ApartmentCard({ apartment, viewMode }: ApartmentCardProps) {
             </div>
 
             <div className="flex items-center justify-between">
-              {/* Stats */}
               <div className="flex items-center gap-4 text-[13px] text-on-surface-variant">
                 <span className="flex items-center gap-1">
                   <span className="material-symbols-outlined text-[16px]">bed</span>
@@ -93,7 +79,6 @@ export function ApartmentCard({ apartment, viewMode }: ApartmentCardProps) {
                 )}
               </div>
 
-              {/* Amenities pills */}
               <div className="flex gap-1.5">
                 {topAmenities.map((a) => {
                   const info = amenityIcons[a];
@@ -112,29 +97,22 @@ export function ApartmentCard({ apartment, viewMode }: ApartmentCardProps) {
     );
   }
 
-  // Grid view (default)
   return (
     <Link href={`/apartment/${apt.id}`} className="block group">
       <div className="bg-surface-container-lowest rounded-xl overflow-hidden soft-shadow border border-outline-variant/50 hover:border-landlord-green/40 transition-all hover:-translate-y-1 hover:shadow-lg">
-        {/* Image */}
         <div className="relative h-[200px] overflow-hidden">
-          {hasImage ? (
-            <img
-              src={primaryImage!}
-              alt={apt.address || apt.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            />
-          ) : (
-            <FallbackImage />
-          )}
+          <ApartmentImage
+            images={apt.images}
+            alt={apt.address || apt.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            fallback={<ApartmentImageFallback />}
+          />
 
-          {/* Price badge */}
           <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-sm">
             <span className="text-[18px] font-bold text-landlord-green">₪ {apt.price?.toLocaleString()}</span>
             <span className="text-[11px] text-on-surface-variant">/חודש</span>
           </div>
 
-          {/* Photo count */}
           {imageUrls.length > 1 && (
             <div className="absolute bottom-3 right-3 bg-black/60 text-white text-[11px] px-2.5 py-1 rounded-full flex items-center gap-1">
               <span className="material-symbols-outlined text-[13px]">photo_library</span>
@@ -142,7 +120,6 @@ export function ApartmentCard({ apartment, viewMode }: ApartmentCardProps) {
             </div>
           )}
 
-          {/* Landlord verified badge */}
           {apt.landlord?.isVerified && (
             <div className="absolute top-3 right-3 bg-tenant-blue/90 text-white text-[11px] px-2.5 py-1 rounded-full flex items-center gap-1">
               <span className="material-symbols-outlined text-[13px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
@@ -151,7 +128,6 @@ export function ApartmentCard({ apartment, viewMode }: ApartmentCardProps) {
           )}
         </div>
 
-        {/* Content */}
         <div className="p-4">
           <h3 className="text-[16px] font-bold text-tenant-blue mb-1 truncate">{apt.address}</h3>
           <p className="text-[13px] text-on-surface-variant flex items-center gap-1 mb-3">
@@ -159,7 +135,6 @@ export function ApartmentCard({ apartment, viewMode }: ApartmentCardProps) {
             {apt.city}{apt.neighborhood ? ` • ${apt.neighborhood}` : ""}
           </p>
 
-          {/* Stats row */}
           <div className="flex items-center gap-3 text-[13px] text-on-surface-variant mb-3 pb-3 border-b border-outline-variant/30">
             <span className="flex items-center gap-1">
               <span className="material-symbols-outlined text-[16px]">bed</span>
@@ -179,7 +154,6 @@ export function ApartmentCard({ apartment, viewMode }: ApartmentCardProps) {
             )}
           </div>
 
-          {/* Amenities */}
           <div className="flex flex-wrap gap-1.5">
             {topAmenities.map((a) => {
               const info = amenityIcons[a];
