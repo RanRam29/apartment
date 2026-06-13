@@ -108,28 +108,36 @@ cd backend && npx jest tests/warrantyClaims.test.js --runInBand --forceExit
 
 ---
 
-## 6. עבודה שלא מוזגה (Stash)
+## 6. Backlog — הושלם (`cursor/backlog-jun12`)
 
+**ענף:** `cursor/backlog-jun12` @ `64fff5a` — **pushed**
+
+| Commit | תוכן |
+|--------|------|
+| `aa96c77` | schema-drift test + database-schema/socket mock fixes (16 user cols) |
+| `5a5fc49` | `npm run smoke` + `backend/scripts/smoke.js` |
+| `8a8a8d2` | scheduleReminder ב-ledgerDueAlerts (T-3), guarantor 24h, cancel on PAID |
+| `64fff5a` | RFC Stripe Connect + MASTER v3.8 |
+
+**Tests:** 15/15 (`schema-drift`, `database-schema`, `socket`, `financialScheduledReminders`)  
+**npm audit:** High/Critical — נקי (exit 0)
+
+**Merge אחרי K6–K8** (או במקביל — אין conflict צפוי עם K6/K7/K8):
+```bash
+git merge cursor/backlog-jun12
 ```
-stash@{0}: On cursor/backlog-jun12: backlog-jun12 wip
-```
-
-**תוכן (tracked):** תיקוני `database-schema.test.js`, `socket.test.js`, אימוץ `scheduleReminder` ב-`ledgerDueAlerts`/`guarantor`/`ledgerService`, `npm run smoke`.
-
-**Untracked ב-stash:** `schema-drift.test.js`, `scripts/smoke.js`, `financialScheduledReminders.test.js`, `RFC-stripe-connect.md`
-
-**המלעה:** אחרי merge K6–K8, pop stash על ענף `cursor/backlog-jun12` (או ענף backlog חדש) — **לא** חובה למיזוג מיידי; P1 backlog נפרד מהסprint הזה.
 
 ---
 
 ## 7. סדר merge מומלץ
 
 ```
-main (225bf29)
+main (e7f8f5c)
   ├── merge cursor/trust-score-auto-calc      # K6 — אין conflict צפוי
   ├── merge cursor/admin-scheduled-notifications  # K7
   ├── merge cursor/guarantor-claims           # K8 — מודל + route חדש
-  └── merge cursor/branch-cleanup             # K9 — MASTER v3.6 + docs בלבד
+  ├── merge cursor/backlog-jun12              # P1/P2 backlog — tests, smoke, cron adoption
+  └── merge cursor/branch-cleanup             # K9 — MASTER v3.6 + docs (reconcile MASTER with v3.8)
 ```
 
 **Push branches לפני PR (אם לא על remote):**
@@ -173,8 +181,8 @@ npx jest tests/trustScoreService.test.js \
 | נושא | מי | הערה |
 |------|-----|------|
 | Trust Score UI | Antigravity | Backend מוכן; הצג `trustScore` מעודכן |
-| Stripe Connect | TBD | RFC ב-stash: `docs/internal/RFC-stripe-connect.md` — לא מימוש (רישיון) |
-| Backlog P1 tests/smoke | Cursor stash | schema-drift + smoke + test fixes |
+| Stripe Connect | TBD | RFC: `docs/internal/RFC-stripe-connect.md` על backlog-jun12 — לא מימוש (רישיון) |
+| Backlog P1/P2 tests/smoke/cron | Cursor | ✅ `cursor/backlog-jun12` @ `64fff5a` |
 | Branch <15 | Claude Code | מחק 44 stale unmerged (רשימה §5) |
 
 ---
