@@ -21,6 +21,24 @@ function hashVerificationToken(raw) {
   return crypto.createHash('sha256').update(raw).digest('hex');
 }
 
+// Resolve the public web base URL for links inside emails (e.g. verification).
+// Honours APP_BASE_URL, then CLIENT_ORIGIN, then the first entry of the
+// comma-separated CLIENT_ORIGINS (used by CORS on Render), then a localhost
+// fallback for local dev. Prevents verification links pointing at localhost in
+// production when only CLIENT_ORIGINS is configured.
+function resolveWebBaseUrl() {
+  const fromOrigins = String(process.env.CLIENT_ORIGINS || '')
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean)[0];
+  const base =
+    process.env.APP_BASE_URL ||
+    process.env.CLIENT_ORIGIN ||
+    fromOrigins ||
+    'http://localhost:3000';
+  return String(base).replace(/\/$/, '');
+}
+
 function sanitizeIsraeliPhone(value) {
   if (!value) return null;
   let cleaned = String(value).replace(/[-\s]/g, '');
@@ -48,11 +66,7 @@ async function issueVerificationTokenForUser(user) {
     logger.warn(`Failed to persist verification token for user ${user.id}: ${err.message}`);
   }
 
-  const appBaseUrl =
-    process.env.APP_BASE_URL ||
-    process.env.CLIENT_ORIGIN ||
-    'http://localhost:3000';
-  const cleanBase = String(appBaseUrl).replace(/\/$/, '');
+  const cleanBase = resolveWebBaseUrl();
   const verificationUrl = `${cleanBase}/verify-email?token=${verificationToken}`;
 
   try {
