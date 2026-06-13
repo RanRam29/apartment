@@ -208,6 +208,18 @@ app.use('/webhooks/whatsapp', require('./routes/whatsapp'));
 const { authenticate: userAuth } = require('./middleware/auth');
 const { User } = require('./models');
 
+function sanitizeIsraeliPhone(value) {
+  if (!value) return null;
+  let cleaned = String(value).replace(/[-\s]/g, '');
+  if (cleaned.startsWith('972')) {
+    cleaned = '+' + cleaned;
+  }
+  if (/^[2-9][0-9]{8}$/.test(cleaned)) {
+    cleaned = '0' + cleaned;
+  }
+  return cleaned;
+}
+
 app.put('/api/users/me', userAuth, async (req, res, next) => {
   try {
     const { whatsappOptIn, phone } = req.body;
@@ -217,11 +229,11 @@ app.put('/api/users/me', userAuth, async (req, res, next) => {
     const updates = {};
     if (whatsappOptIn !== undefined) updates.whatsappOptIn = Boolean(whatsappOptIn);
     if (phone !== undefined) {
-      const trimmedPhone = String(phone).trim();
-      if (trimmedPhone && !/^(\+972|0)[0-9]{8,9}$/.test(trimmedPhone)) {
+      const sanitized = sanitizeIsraeliPhone(phone);
+      if (sanitized && !/^(\+972|0)[0-9]{8,9}$/.test(sanitized)) {
         return res.status(422).json({ error: 'Invalid Israeli phone number format' });
       }
-      updates.phone = trimmedPhone || null;
+      updates.phone = sanitized;
     }
 
     await user.update(updates);

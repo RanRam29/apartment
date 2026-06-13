@@ -21,6 +21,18 @@ function hashVerificationToken(raw) {
   return crypto.createHash('sha256').update(raw).digest('hex');
 }
 
+function sanitizeIsraeliPhone(value) {
+  if (!value) return null;
+  let cleaned = String(value).replace(/[-\s]/g, '');
+  if (cleaned.startsWith('972')) {
+    cleaned = '+' + cleaned;
+  }
+  if (/^[2-9][0-9]{8}$/.test(cleaned)) {
+    cleaned = '0' + cleaned;
+  }
+  return cleaned;
+}
+
 async function issueVerificationTokenForUser(user) {
   const verificationToken = crypto.randomBytes(32).toString('hex');
   const verificationCacheKey = `email:verify:${verificationToken}`;
@@ -424,7 +436,7 @@ router.patch('/profile', require('../middleware/auth').authenticate, async (req,
     const updates = {};
     if (firstName && typeof firstName === 'string') updates.firstName = firstName.trim();
     if (lastName && typeof lastName === 'string') updates.lastName = lastName.trim();
-    if (phone !== undefined) updates.phone = phone ? String(phone).trim() : null;
+    if (phone !== undefined) updates.phone = sanitizeIsraeliPhone(phone);
     if (whatsappOptIn !== undefined) updates.whatsappOptIn = !!whatsappOptIn;
 
     if (Object.keys(updates).length === 0) {
