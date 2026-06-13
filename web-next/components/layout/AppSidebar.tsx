@@ -21,6 +21,7 @@ const tenantNav: NavItem[] = [
   { icon: "build", label: "תחזוקה", href: "/maintenance" },
   { icon: "calendar_today", label: "יומן", href: "/journal" },
   { icon: "trending_up", label: "דירוג", href: "/gamification" },
+  { icon: "verified", label: "ציון אמינות", href: "/trust" },
 ];
 
 const landlordNav: NavItem[] = [
@@ -33,6 +34,7 @@ const landlordNav: NavItem[] = [
   { icon: "payments", label: "תשלומים", href: "/payments" },
   { icon: "build", label: "תקלות", href: "/maintenance" },
   { icon: "camera_alt", label: "צ'ק-אין/אאוט", href: "/checkin" },
+  { icon: "verified", label: "ציון אמינות", href: "/trust" },
 ];
 
 const adminNav: NavItem[] = [
