@@ -11,11 +11,13 @@
 
 | סטטוס | כמות |
 |--------|------|
-| 🔴 OPEN | 0 |
+| 🔴 OPEN | 1 |
 | 🔵 IN_PROGRESS | 0 |
 | ✅ FIXED (ממתין אימות) | 8 |
 | 🏁 CLOSED (RCA הושלם) | 17 |
-| **סה"כ** | **25** |
+| **סה"כ** | **26** |
+
+> 🆕 **2026-06-13 — BUG-019:** מייל אימות לא מגיע בפרודקשן. שורש הבעיה = קונפיג Resend ב-Render (לא קוד). תיקוני קוד נלווים נדחפו; ממתין לפעולת קונפיג של ראן.
 
 > 🆕 **2026-06-13 — Debug session (NF3 Trust Score + cron code review):** 6 באגים לוגיים חדשים נמצאו (BUG-013..018). ראה למטה.
 
@@ -25,6 +27,7 @@
 
 | ID | כותרת | עדיפות | סטטוס | מדווח | מטפל | תאריך פתיחה |
 |----|--------|---------|--------|--------|------|-------------|
+| [BUG-019](#bug-019) | מייל אימות לא מגיע בפרודקשן (Resend config) | P1 | 🔴 OPEN | ראן | ראן (config) + Claude Code (code) | 2026-06-13 |
 | [BUG-001](#bug-001) | Admin login 503 — DB columns missing | P0 | 🏁 CLOSED | ראן | Claude Code | 2026-05-27 |
 | [BUG-002](#bug-002) | Admin login 401 — password hash out of sync | P1 | 🏁 CLOSED | ראן | Claude Code | 2026-05-28 |
 | [BUG-010](#bug-010) | פרסום מודעה חדשה — 500 Internal Server Error | P1 | 🏁 CLOSED | ראן | Claude Code | 2026-05-28 |
@@ -217,6 +220,31 @@
 **Fix מוצע:**
 - [ ] לעטוף כל איטרציה ב-try/catch; להמשיך לבא בתור ולספור כשלים
 - [ ] לשקול הרחבת היקף האנונימיזציה לטבלאות PII קשורות
+
+---
+
+### BUG-019
+**כותרת:** מייל אימות לא מגיע בפרודקשן (verification email never arrives)
+**עדיפות:** P1 — חוסם הרשמת משתמשים אמיתיים
+**סטטוס:** 🔴 OPEN — קוד תוקן, ממתין לפעולת קונפיג
+**מדווח על ידי:** ראן (screenshot, `randram@gmail.com`) | **תאריך:** 2026-06-13
+**מטפל:** ראן (Render/Resend config) + Claude Code (code)
+
+**שורש הבעיה (לא קוד):** נתיב השליחה תקין — `register` → `issueVerificationTokenForUser` → `sendVerificationEmail` (Resend). השליחה **נכשלת בשקט בפרודקשן**: `resend.emails.send` זורק, השגיאה נתפסת ב-`logger.warn` ([auth.js](backend/src/routes/auth.js)) + `logger.error` ([emailService.js](backend/src/services/emailService.js)) — ההרשמה מצליחה אבל המייל לא יוצא. שני חשודים:
+1. `RESEND_API_KEY` לא מוגדר ב-Render → `new Resend(undefined)` → "Missing API key" (ראינו בדיוק את ההודעה בלוגי הטסטים). לא היה מתועד ב-`render.yaml`.
+2. דומיין `dirapp.co.il` לא מאומת ב-Resend → Resend מאפשר לשלוח רק לכתובת בעל החשבון, דוחה נמענים אחרים.
+
+**ראיה מכריעה:** השורה `Error sending verification email via Resend` כבר בלוגי Render — ההודעה שם מבדילה בין החשודים.
+
+**תיקוני קוד שיושמו ונדחפו:**
+- `65a8d2a` — `resolveWebBaseUrl()` קורא גם `CLIENT_ORIGINS` (היה `APP_BASE_URL || CLIENT_ORIGIN` בלבד → קישור האימות נפל ל-`http://localhost:3000` בפרודקשן). 23/23.
+- `68a5aa7` — תיעוד `RESEND_API_KEY`/`RESEND_FROM_EMAIL`/`APP_BASE_URL` ב-`render.yaml` (`sync:false`).
+
+**פעולה פתוחה (ראן):**
+- [ ] להזין `RESEND_API_KEY` אמיתי ב-Render Dashboard
+- [ ] להזין `RESEND_FROM_EMAIL` מדומיין מאומת (זמני: `onboarding@resend.dev`)
+- [ ] לאמת את דומיין `dirapp.co.il` ב-Resend (DNS) להפקת מייל מהמותג
+- [ ] לאחר deploy — לנסות הרשמה ולוודא הגעת מייל; לסגור באג
 
 ---
 

@@ -54,7 +54,7 @@
 | Register / Login / JWT | ✅ | 2026-05-28 | עובד |
 | Google Sign-In web | ✅ | 2026-06-12 | כפתור Google Sign-In וקביעת תפקיד ראשונית |
 | Google Sign-In mobile ❌ | ❌ | 2026-06-12 | דרוש Redirect URIs וקלאיינט נפרד (TODO) |
-| Email verification (Resend) | ✅ | 2026-05-28 | עובד |
+| Email verification (Resend) | 🔴 | 2026-06-13 | **BUG-019** — מייל לא מגיע בפרודקשן. קוד תקין; כשל שקט בשליחת Resend (`RESEND_API_KEY` חסר ב-Render ו/או דומיין `dirapp.co.il` לא מאומת). תיקון = קונפיג ב-Render Dashboard. קישור האימות תוקן (`65a8d2a`) + תיעוד env (`68a5aa7`) |
 | `admin@dirapp.com` login | ✅ | 2026-05-28 | **BUG-002 CLOSED** — תוקן `ed0e874`, אומת בייצור |
 | `admin1@dirapp.com` login | ✅ | 2026-05-28 | תוקן יחד עם admin@ |
 | `admin2@dirapp.com` login | ✅ | 2026-05-28 | עובד (tenant) |
@@ -286,6 +286,7 @@
 
 | תאריך | גרסה | שינוי | מי |
 |--------|------|--------|-----|
+| 2026-06-13 | 4.2 | **BUG-019 — מייל אימות לא מגיע בפרודקשן (root cause = קונפיג Resend, לא קוד).** כשל שקט: שליחת Resend זורקת (`RESEND_API_KEY` חסר ב-Render ו/או דומיין `dirapp.co.il` לא מאומת), השגיאה נתפסת ב-`logger.warn` → ההרשמה מצליחה בלי מייל. תיקון קוד: קישור האימות עבר ל-`resolveWebBaseUrl()` שקורא גם `CLIENT_ORIGINS` (היה נופל ל-localhost) `65a8d2a`; תיעוד env ב-render.yaml `68a5aa7`. **פעולה פתוחה (ראן): הזנת `RESEND_API_KEY`+`RESEND_FROM_EMAIL` ב-Render Dashboard / אימות דומיין.** auth 23/23 | Claude Code |
 | 2026-06-13 | 4.1 | **Debug session — 6 NF3 באגים תוקנו (TDD, כולם FIXED).** BUG-013 TOCTOU ledger race (unique index `ledger_rows(agreement_id,period)` + catch), BUG-014 revoke re-grant (שחרור dedupeKey), BUG-015 cap clamp (שדה `cappedDelta`), BUG-016 admin trustScore/blockedCount validation (422), BUG-017 onboarding dismiss whitelist (400), BUG-018 GDPR cron per-user isolation (try/catch). 2 ensure helpers חדשים ב-boot (`ensureLedgerRowPeriodUniqueIndex`, `ensureTrustScoreEventCappedDeltaColumn`). רגרסיה: 75/75 ב-10 חבילות. פירוט ב-BUGS.md | Claude Code |
 | 2026-06-13 | 4.0 | **Orchestrator merge — Cursor K6–K9 integrated to main.** K7 admin scheduled-notifications (4/4), K8 V2-2 guarantor warranty claims `warranty_claims`+`/api/v3/claims` (7/7), backlog (schema-drift guard, `npm run smoke`, cron `scheduleReminder` adoption). **K6 Trust Score auto-calc reconciled onto the live NF3 event system** (not a parallel recalc): `recalcTrustScoreForAgreement` fires `rent_paid_on_time`/`checkin_checkout_clean` idempotently from PAID + checkout hooks (7/7). Web `/trust`+`/onboarding` pages + sidebar link. Regression 59/59 across 8 suites | Claude Code |
 | 2026-06-13 | 3.9 | Debug session (NF3 code review) — 6 באגים תועדו (BUG-013..018). **BUG-013 תוקן (TDD):** TOCTOU race ב-SIGNED transition שזרע שורות לדגר כפולות. unique index על `ledger_rows(agreement_id, period)` + catch ל-unique violation ב-`seedLedgerRows` + `ensureLedgerRowPeriodUniqueIndex` ב-boot. 3/3 + 31/31 tests pass. שאר 5 הבאגים OPEN ב-BUGS.md | Claude Code |
