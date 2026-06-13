@@ -1,11 +1,13 @@
 # Agent Progress Status: CASCADE / Windsurf / Antigravity
 
 ## Current Task
-- Antigravity UI Sprint (onboarding wizard, profile completion widget, trust hub page) - Ready to start after backend core merge
+- None - UI Sprint and follow-up Onboarding bug fixes completed.
 
 ## Completed Tasks
 | Task | Description | Completed At | Commit Hash |
 |------|-------------|--------------|-------------|
+| T-UI | Antigravity UI Sprint: Onboarding wizard, Profile completion widget, Trust hub page, and Persona/WhatsApp integrations | 2026-06-13 | pending |
+| T-UI-Fix | Fix onboarding wizard status rendering for skipped/dismissed steps | 2026-06-13 | pending |
 | T-OAuth | Google Sign-In web button, backend token verification, auto-registration, and RTL role selection | 2026-06-12 | pending |
 | Step 1 | Implement TrustScoreEvent model and User onboardingState schema | 2026-06-12 | `aeeb927` |
 | Step 2 | Implement trustScoreService with event apply, revoke, and get status | 2026-06-12 | `d9093d1` |

@@ -432,12 +432,13 @@ router.get('/me', require('../middleware/auth').authenticate, async (req, res, n
 // PATCH /api/auth/profile — update name and/or phone
 router.patch('/profile', require('../middleware/auth').authenticate, async (req, res, next) => {
   try {
-    const { firstName, lastName, phone, whatsappOptIn } = req.body;
+    const { firstName, lastName, phone, whatsappOptIn, bio } = req.body;
     const updates = {};
     if (firstName && typeof firstName === 'string') updates.firstName = firstName.trim();
     if (lastName && typeof lastName === 'string') updates.lastName = lastName.trim();
     if (phone !== undefined) updates.phone = sanitizeIsraeliPhone(phone);
     if (whatsappOptIn !== undefined) updates.whatsappOptIn = !!whatsappOptIn;
+    if (bio !== undefined) updates.bio = typeof bio === 'string' ? bio.trim() : bio;
 
     if (Object.keys(updates).length === 0) {
       return res.status(422).json({ error: 'No valid fields to update' });
@@ -446,11 +447,23 @@ router.patch('/profile', require('../middleware/auth').authenticate, async (req,
     const user = await User.findByPk(req.user.id);
     if (!user) return res.status(404).json({ error: 'User not found' });
 
+    const wasOptedIn = user.whatsappOptIn;
     await user.update(updates);
-    if (updates.whatsappOptIn === true) {
+    if (updates.whatsappOptIn === true && !wasOptedIn) {
       try {
         const { applyTrustEvent } = require('../services/trustScoreService');
         await applyTrustEvent(user.id, 'whatsapp_opt_in');
+      } catch (_) {}
+
+      // Send a welcome message via WhatsApp!
+      try {
+        const { sendText } = require('../services/whatsappApiClient');
+        if (user.phone) {
+          await sendText({
+            phoneNumber: user.phone,
+            body: `היי ${user.firstName}, ברוך הבא ל-DirApp! חשבון ה-WhatsApp שלך מחובר כעת לקבלת עדכונים על תשלומים, חוזים ותחזוקה. 🛡️`
+          }).catch(() => {});
+        }
       } catch (_) {}
     }
     const { passwordHash: _, ...safeUser } = user.toJSON();
@@ -631,12 +644,24 @@ router.put('/notification-preferences', require('../middleware/auth').authentica
     const user = await User.findByPk(req.user.id);
     if (!user) return res.status(404).json({ error: 'User not found' });
 
+    const wasOptedIn = user.whatsappOptIn;
     const merged = { ...(user.notificationPreferences || {}), ...prefs };
     await user.update({ notificationPreferences: merged, whatsappOptIn: merged.whatsapp });
-    if (merged.whatsapp === true) {
+    if (merged.whatsapp === true && !wasOptedIn) {
       try {
         const { applyTrustEvent } = require('../services/trustScoreService');
         await applyTrustEvent(user.id, 'whatsapp_opt_in');
+      } catch (_) {}
+
+      // Send a welcome message via WhatsApp!
+      try {
+        const { sendText } = require('../services/whatsappApiClient');
+        if (user.phone) {
+          await sendText({
+            phoneNumber: user.phone,
+            body: `היי ${user.firstName}, ברוך הבא ל-DirApp! חשבון ה-WhatsApp שלך מחובר כעת לקבלת עדכונים על תשלומים, חוזים ותחזוקה. 🛡️`
+          }).catch(() => {});
+        }
       } catch (_) {}
     }
 
