@@ -11,11 +11,13 @@
 
 | סטטוס | כמות |
 |--------|------|
-| 🔴 OPEN | 0 |
+| 🔴 OPEN | 5 |
 | 🔵 IN_PROGRESS | 0 |
-| ✅ FIXED (ממתין אימות) | 2 |
+| ✅ FIXED (ממתין אימות) | 3 |
 | 🏁 CLOSED (RCA הושלם) | 17 |
-| **סה"כ** | **19** |
+| **סה"כ** | **25** |
+
+> 🆕 **2026-06-13 — Debug session (NF3 Trust Score + cron code review):** 6 באגים לוגיים חדשים נמצאו (BUG-013..018). ראה למטה.
 
 ---
 
@@ -42,6 +44,12 @@
 | [SEC-005](#sec-005) | Verification token plaintext + no expiry | P1 | 🏁 CLOSED | Security Review | Claude Code | 2026-06-12 |
 | [SEC-006](#sec-006) | Chat imageUrl stored XSS vector | P1 | 🏁 CLOSED | Security Review | Claude Code | 2026-06-12 |
 | [SEC-007](#sec-007) | Frontend JWT base64url decode → random logouts | P1 | 🏁 CLOSED | Security Review | Antigravity | 2026-06-12 |
+| [BUG-013](#bug-013) | SIGNED transition — TOCTOU race seeds duplicate ledger rows | P1 | ✅ FIXED | Debug session | Claude Code | 2026-06-13 |
+| [BUG-014](#bug-014) | Revoked `isOnce` trust event can never be re-granted | P2 | 🔴 OPEN | Debug session | TBD | 2026-06-13 |
+| [BUG-018](#bug-018) | accountDeletion cron — no per-user error isolation | P2 | 🔴 OPEN | Debug session | TBD | 2026-06-13 |
+| [BUG-015](#bug-015) | Trust `cap` accounting uses score-clamped delta | P3 | 🔴 OPEN | Debug session | TBD | 2026-06-13 |
+| [BUG-016](#bug-016) | Admin user-edit writes unvalidated `parseInt` (NaN / no clamp) | P3 | 🔴 OPEN | Debug session | TBD | 2026-06-13 |
+| [BUG-017](#bug-017) | Onboarding `dismiss` accepts arbitrary keys → JSONB growth | P3 | 🔴 OPEN | Debug session | TBD | 2026-06-13 |
 
 ---
 
@@ -123,6 +131,135 @@
 ---
 
 ## 🔴 OPEN
+
+---
+
+### BUG-013
+**כותרת:** SIGNED transition — TOCTOU race seeds duplicate ledger rows
+**עדיפות:** P1 — data corruption בפרודקשן תחת מקביליות
+**סטטוס:** ✅ FIXED (ממתין deploy + אימות פרודקשן)
+**מדווח על ידי:** Debug session (Claude Code) | **תאריך:** 2026-06-13
+**מטפל:** Claude Code
+
+**🔬 RCA — Root Cause:**
+`seedLedgerRows` היה אידמפוטנטי *סדרתית* בלבד (בדיקת `findOne`+skip per period) — TOCTOU שלא מחזיק תחת מקביליות. שני seeds מקבילים מריצים את כל בדיקות ה-`findOne` לפני ה-`create`, שניהם רואים "ריק", שניהם יוצרים → עד 24 שורות. לא היה אכיפת ייחודיות ברמת ה-DB על `(agreementId, period)`.
+
+**Fix שיושם (TDD — RED→GREEN):**
+| קובץ | שינוי |
+|------|--------|
+| `backend/tests/ledgerSeedService.test.js` | RED: בדיקת מקביליות — שני `seedLedgerRows` ב-`Promise.all` → ציפייה ל-12 שורות (נכשל ב-22 לפני התיקון) |
+| `backend/src/models/pg/LedgerRow.js` | unique index מורכב `ledger_rows_agreement_period_unique` על `(agreement_id, period)` |
+| `backend/src/services/ledgerSeedService.js` | `create` עטוף ב-try/catch — `SequelizeUniqueConstraintError` → `continue` (המפסיד ב-race מדלג בשקט) |
+| `backend/src/config/database.js` | `ensureLedgerRowPeriodUniqueIndex()` — dedup הגנתי של נתונים קיימים (keep earliest by ctid) + `CREATE UNIQUE INDEX IF NOT EXISTS`, מחווט ל-`initPostgres` (טבלה קיימת לא מקבלת index מ-`sync({alter:false})`) |
+
+**אימות:** 3/3 ב-`ledgerSeedService.test.js`, 31/31 ב-`ledger`+`agreements`+`ledger-idor`. הלוג מאשר split 11+1=12 ב-seed מקבילי.
+
+**מניעה עתידית:**
+- [ ] לשקול הוספת row lock (`SELECT … FOR UPDATE`) על ה-agreement במעבר ה-SIGNED ב-`agreements.js` כהגנה נוספת (defense-in-depth)
+- [x] DB unique constraint הוא מקור האמת לייחודיות שורות לדגר
+
+**תיאור:**
+מעבר `READY_SIGN → SIGNED` ב-`backend/src/routes/agreements.js:120-201` קורא את ה-agreement, מוודא את המעבר (שורה 136), ואז מריץ `seedLedgerRows` (שורה 201) — הכל **ללא טרנזקציה ו/או נעילת שורה**. שתי בקשות POST במקביל קוראות שתיהן `status='READY_SIGN'`, עוברות את השומר, וזורעות 12 שורות לדגר כל אחת.
+
+**שלבים לשחזור:**
+1. agreement במצב `READY_SIGN` שעבר את כל ולידציות ה-KYC/habitability
+2. שלח שתי בקשות `POST /api/v1/agreements/:id/transition` במקביל עם `targetStatus: SIGNED`
+3. שתיהן מצליחות
+
+**צפוי:** 12 שורות לדגר, מעבר אחד ל-SIGNED
+**קיבלנו:** 24 שורות לדגר כפולות (+ פעמיים אירוע `digital_signing`; ה-cap מגן על ה-trust score אך לא על הלדגר)
+
+**השפעה על משתמשים:** לדגר תשלומים משובש — חיובים כפולים לשוכר.
+
+**Fix מוצע:**
+- [ ] לעטוף את המעבר ב-`sequelize.transaction` עם `RentalAgreement.findByPk(id, { lock: true, transaction })` (SELECT … FOR UPDATE)
+- [ ] בנוסף/חלופי: להפוך את `seedLedgerRows` לאידמפוטנטי — לדלג אם כבר קיימות שורות ל-agreement
+
+---
+
+### BUG-014
+**כותרת:** Revoked `isOnce` trust event can never be re-granted
+**עדיפות:** P2 — מלכודת רדומה (אין קוראים ל-`revokeTrustEvent` כרגע)
+**סטטוס:** 🔴 OPEN
+**מדווח על ידי:** Debug session (Claude Code) | **תאריך:** 2026-06-13
+**מטפל:** TBD
+
+**תיאור:**
+ב-`backend/src/services/trustScoreService.js`, `applyTrustEvent` קובע `dedupeKey = ${eventKey}:${userId}` לאירועי `isOnce` (שורות 24-26) ונשען על האינדקס הייחודי כדי למנוע כפילות (catch שורה 63). `revokeTrustEvent` (שורות 70-108) יוצר אירוע מקזז שלילי אבל **משאיר את שורת ה-dedupeKey המקורית**. הענקה חוזרת תיתקל באינדקס הייחודי → `null` בשקט → המשתמש לא מקבל בחזרה את הנקודות.
+
+**שלבים לשחזור (תיאורטי — revoke עוד לא מחובר):**
+1. KYC אושר → +20, נוצרת שורת dedupeKey
+2. KYC נדחה → `revokeTrustEvent` → -20 (שורת dedupeKey נשארת)
+3. KYC אושר שוב → unique violation → null → אין +20
+
+**Fix מוצע:**
+- [ ] ב-`revokeTrustEvent` למחוק/לנטרל את שורת ה-dedupeKey, או
+- [ ] בהענקה חוזרת לזהות מצב נטו-אפס (sum ≤ 0) ולאפשר הענקה מחדש
+
+---
+
+### BUG-018
+**כותרת:** accountDeletion (GDPR) cron — no per-user error isolation
+**עדיפות:** P2 — כשל אחד מפיל את כל ה-batch
+**סטטוס:** 🔴 OPEN
+**מדווח על ידי:** Debug session (Claude Code) | **תאריך:** 2026-06-13
+**מטפל:** TBD
+
+**תיאור:**
+ב-`backend/src/cron/accountDeletion.js:19-42`, הלולאה על המשתמשים למחיקה אינה עטופה ב-try/catch per-user. אם `user.update` או `logAudit` זורקים לאחד המשתמשים (collision, DB error), כל הריצה קורסת והמשתמשים הנותרים לא מעובדים — חשבונות שעברו את תקופת החסד נשארים לא-אנונימיים.
+
+**הערה נלווית (GDPR scope):** האנונימיזציה מנקה את שורת ה-`User` בלבד. PII בטבלאות קשורות (`UserKycProfile`, הודעות chat, `RentalAgreement`, `WhatsAppMessage`) עלול להישאר. להחלטת מוצר/משפט אם נדרש לטיפול במחיקה אמיתית.
+
+**Fix מוצע:**
+- [ ] לעטוף כל איטרציה ב-try/catch; להמשיך לבא בתור ולספור כשלים
+- [ ] לשקול הרחבת היקף האנונימיזציה לטבלאות PII קשורות
+
+---
+
+### BUG-015
+**כותרת:** Trust `cap` accounting uses score-clamped delta
+**עדיפות:** P3 — אי-דיוק שמתקן את עצמו
+**סטטוס:** 🔴 OPEN
+**מדווח על ידי:** Debug session (Claude Code) | **תאריך:** 2026-06-13
+**מטפל:** TBD
+
+**תיאור:**
+ב-`backend/src/services/trustScoreService.js:46-55`, האירוע נשמר עם `actualDelta` (אחרי clamp ל-0–100), אבל בדיקת ה-`cap` (שורות 35-43) סוכמת את ה-delta השמור. ליד תקרת 100 נרשם פחות מ-`config.delta`, ה-cap נספר בחסר והאירוע יכול לירות שוב. הניקוד הסופי נכון, אך ה-cap אינו נאכף לפי הכוונה.
+
+**Fix מוצע:**
+- [ ] לסכום cap מול `deltaToApply` המבוקש (לפני clamp), או לאחסן `intendedDelta` נפרד
+
+---
+
+### BUG-016
+**כותרת:** Admin user-edit writes unvalidated `parseInt` (NaN / no clamp)
+**עדיפות:** P3 — admin-only
+**סטטוס:** 🔴 OPEN
+**מדווח על ידי:** Debug session (Claude Code) | **תאריך:** 2026-06-13
+**מטפל:** TBD
+
+**תיאור:**
+ב-`backend/src/routes/admin.js:116,120`, `trustScore`/`blockedCount` נכתבים עם `parseInt(...)` ללא בדיקת NaN וללא clamp. `trustScore: 5000` עוקף את תקרת 0–100; `"abc"` → `NaN` → Postgres דוחה ל-INTEGER → 500.
+
+**Fix מוצע:**
+- [ ] `Number.isInteger` + clamp 0–100 ל-trustScore; להחזיר 422 על קלט לא תקין
+
+---
+
+### BUG-017
+**כותרת:** Onboarding `dismiss` accepts arbitrary keys → unbounded JSONB growth
+**עדיפות:** P3 — abuse vector קל
+**סטטוס:** 🔴 OPEN
+**מדווח על ידי:** Debug session (Claude Code) | **תאריך:** 2026-06-13
+**מטפל:** TBD
+
+**תיאור:**
+ב-`backend/src/routes/onboarding.js:91-105`, `POST /step/:key/dismiss` כותב כל `:key` שרירותי ל-`onboardingState.dismissed` (JSONB) בלי לוודא מול ה-checklist. לקוח זדוני יכול לנפח את ה-JSONB.
+
+**Fix מוצע:**
+- [ ] whitelist של מפתחות חוקיים; להחזיר 400 על מפתח לא מוכר
+
+> **הערה (לא BUG פורמלי):** `whatsapp_opt_in` מעניק +5 קבוע (isOnce) על toggle בוליאני ללא דרישת טלפון/אימות — וקטור gaming קל. ייתכן שזה בכוונת התכנון; להחלטת מוצר.
 
 ---
 

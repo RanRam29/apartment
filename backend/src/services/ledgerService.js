@@ -1,5 +1,6 @@
 const { LedgerRow, RentalAgreement, AgreementParty } = require('../models');
 const { cancelReminder } = require('./notificationService');
+const { recalcTrustScoreForAgreement } = require('./trustScoreService');
 
 async function cancelLedgerDue3dReminder(ledgerRowId) {
   await cancelReminder({ dedupeKey: `ledger:${ledgerRowId}:due3d` }).catch(() => {});
@@ -75,6 +76,7 @@ async function confirmPayment(ledgerRowId, actor) {
     confirmedByLandlord: new Date(),
   });
   await cancelLedgerDue3dReminder(ledgerRowId);
+  await recalcTrustScoreForAgreement(row.agreementId);
   return row;
 }
 
@@ -105,6 +107,7 @@ async function autoConfirmStalePayments() {
   for (const row of stale) {
     await row.update({ status: 'PAID', confirmedByLandlord: new Date(), notes: 'Auto-confirmed after 48h' });
     await cancelLedgerDue3dReminder(row.id);
+    await recalcTrustScoreForAgreement(row.agreementId);
   }
   return stale.length;
 }

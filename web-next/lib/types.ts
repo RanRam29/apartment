@@ -21,6 +21,7 @@ export interface User {
   whatsappOptIn: boolean;
   avatarUrl?: string;
   isVerified?: boolean;
+  bio?: string;
   createdAt: string;
 }
 

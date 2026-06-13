@@ -26,43 +26,100 @@ function QuickActionCard({
   );
 }
 
+type ChecklistItem = {
+  key: string;
+  title: string;
+  completed: boolean;
+  dismissed: boolean;
+};
+
+type ChecklistResponse = {
+  role: "tenant" | "landlord";
+  checklist: ChecklistItem[];
+  completionPct: number;
+};
+
+function ProfileCompletionWidget({
+  checklist,
+  completionPct,
+}: {
+  checklist: ChecklistItem[];
+  completionPct: number;
+}) {
+  const nextStep = checklist.find((item) => !item.completed && !item.dismissed);
+
+  return (
+    <div className="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant soft-shadow mb-[24px] text-right" dir="rtl">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+        <div>
+          <h4 className="text-[18px] font-bold text-tenant-blue mb-1">השלמת הפרופיל שלך: {completionPct}%</h4>
+          {nextStep ? (
+            <p className="text-[14px] text-on-surface-variant">
+              השלם את הצעד הבא:{" "}
+              <Link href="/onboarding" className="text-landlord-green font-bold hover:underline">
+                {nextStep.title} ➔
+              </Link>
+            </p>
+          ) : (
+            <p className="text-[14px] text-on-surface-variant">כל השלבים הושלמו או דולגו!</p>
+          )}
+        </div>
+        <Link
+          href="/onboarding"
+          className="px-6 h-10 bg-tenant-blue text-white rounded-full font-bold text-[14px] flex items-center justify-center hover:scale-[1.02] transition-all"
+        >
+          המשך באונבורדינג
+        </Link>
+      </div>
+      <div className="w-full bg-surface-container-highest h-2.5 rounded-full overflow-hidden">
+        <div
+          className="bg-landlord-green h-full transition-all duration-500 ease-out"
+          style={{ width: `${completionPct}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
 function TrustScoreCard({ score }: { score: number }) {
   const circumference = 2 * Math.PI * 58;
   const offset = circumference - (score / 100) * circumference;
 
   return (
-    <div className="bg-tenant-blue rounded-2xl p-8 text-white soft-shadow relative overflow-hidden">
-      <h3 className="text-[22px] leading-[30px] font-semibold mb-6">דירוג האמינות שלך</h3>
-      <div className="flex items-center gap-6 mb-6">
-        <div className="relative">
-          <svg className="w-32 h-32 -rotate-90" viewBox="0 0 128 128">
-            <circle cx="64" cy="64" r="58" fill="none" stroke="#1a365d" strokeWidth="8" />
-            <circle cx="64" cy="64" r="58" fill="none" stroke="#00cba9" strokeWidth="8"
-              strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round" />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-3xl font-extrabold">{score}</span>
-            <span className="text-[10px] opacity-60">מתוך 100</span>
-          </div>
-        </div>
-        <div className="flex-grow">
-          <p className="text-[14px] font-medium text-landlord-green mb-4">
-            {score >= 80 ? "דירוג מעולה!" : score >= 60 ? "דירוג טוב" : "דירוג בסיסי"}
-          </p>
-          <div className="space-y-3">
-            <div>
-              <div className="flex justify-between text-[12px] mb-1"><span>98%</span><span>תשלומים בזמן</span></div>
-              <div className="w-full bg-[#1a365d] h-1 rounded-full overflow-hidden"><div className="bg-landlord-green h-full w-[98%]" /></div>
-            </div>
-            <div>
-              <div className="flex justify-between text-[12px] mb-1"><span>4.9/5</span><span>חוות דעת משכירים</span></div>
-              <div className="w-full bg-[#1a365d] h-1 rounded-full overflow-hidden"><div className="bg-landlord-green h-full w-[92%]" /></div>
+    <Link href="/trust" className="block hover:scale-[1.01] transition-transform">
+      <div className="bg-tenant-blue rounded-2xl p-8 text-white soft-shadow relative overflow-hidden text-right" dir="rtl">
+        <h3 className="text-[22px] leading-[30px] font-semibold mb-6">דירוג האמינות שלך</h3>
+        <div className="flex items-center gap-6 mb-6">
+          <div className="relative">
+            <svg className="w-32 h-32 -rotate-90" viewBox="0 0 128 128">
+              <circle cx="64" cy="64" r="58" fill="none" stroke="#1a365d" strokeWidth="8" />
+              <circle cx="64" cy="64" r="58" fill="none" stroke="#00cba9" strokeWidth="8"
+                strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round" />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className="text-3xl font-extrabold">{score}</span>
+              <span className="text-[10px] opacity-60">מתוך 100</span>
             </div>
           </div>
+          <div className="flex-grow">
+            <p className="text-[14px] font-medium text-landlord-green mb-4">
+              {score >= 80 ? "דירוג מעולה!" : score >= 60 ? "דירוג טוב" : "דירוג בסיסי"}
+            </p>
+            <div className="space-y-3">
+              <div>
+                <div className="flex justify-between text-[12px] mb-1"><span>98%</span><span>תשלומים בזמן</span></div>
+                <div className="w-full bg-[#1a365d] h-1 rounded-full overflow-hidden"><div className="bg-landlord-green h-full w-[98%]" /></div>
+              </div>
+              <div>
+                <div className="flex justify-between text-[12px] mb-1"><span>4.9/5</span><span>חוות דעת משכירים</span></div>
+                <div className="w-full bg-[#1a365d] h-1 rounded-full overflow-hidden"><div className="bg-landlord-green h-full w-[92%]" /></div>
+              </div>
+            </div>
+          </div>
         </div>
+        <div className="absolute -left-10 -top-10 w-40 h-40 bg-[#1a365d]/20 rounded-full blur-3xl" />
       </div>
-      <div className="absolute -left-10 -top-10 w-40 h-40 bg-[#1a365d]/20 rounded-full blur-3xl" />
-    </div>
+    </Link>
   );
 }
 
@@ -74,6 +131,7 @@ export default function DashboardPage() {
   const { data: contracts } = useSWR<{ contracts: Contract[] }>("/api/contracts", fetcher);
   const { data: gamification } = useSWR<GamificationProfile>("/api/gamification/me", fetcher);
   const { data: notifications } = useSWR<{ notifications: Notification[] }>("/api/notifications?limit=3", fetcher);
+  const { data: onboarding } = useSWR<ChecklistResponse>("/api/v3/onboarding/checklist", fetcher);
 
   if (role === "landlord") {
     return <LandlordDashboard />;
@@ -90,6 +148,13 @@ export default function DashboardPage() {
         <h2 className="text-[28px] leading-[36px] font-bold text-tenant-blue mb-1">שלום, {user?.firstName} 👋</h2>
         <p className="text-[18px] leading-[26px] font-semibold text-on-surface-variant opacity-80">מה תרצה לעשות היום?</p>
       </header>
+
+      {onboarding && onboarding.completionPct < 100 && (
+        <ProfileCompletionWidget
+          checklist={onboarding.checklist}
+          completionPct={onboarding.completionPct}
+        />
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-[24px] mb-[24px]">
         <QuickActionCard href="/search" icon="search" ghostIcon="apartment" label="חפש דירה" gradient="bg-gradient-to-br from-landlord-green to-[#006b5f]" />

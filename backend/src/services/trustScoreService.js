@@ -1,5 +1,6 @@
 const { sequelize } = require('../config/database');
 const { User, TrustScoreEvent } = require('../models');
+const logger = require('../utils/logger');
 
 const TRUST_EVENTS = {
   kyc_approved: { delta: 20, isOnce: true, roles: ['tenant'] },
@@ -175,9 +176,82 @@ async function getTrustStatus(userId, role) {
   };
 }
 
+/**
+ * Returns true when a ledger row was confirmed paid on or before its due date.
+ */
+function isPaidOnTime(row) {
+  if (row.status !== 'PAID' || !row.confirmedByLandlord) return false;
+  const paidAt = new Date(row.confirmedByLandlord);
+  const dueEnd = new Date(`${row.dueDate}T23:59:59.999`);
+  return paidAt <= dueEnd;
+}
+
+/**
+ * Auto-fires behaviour-based NF3 trust events for the tenant(s) of an agreement.
+ *
+ * Bridges the auto-trigger intent of the original recalc design (V2-5) onto the
+ * live event-sourced trust system: instead of recomputing the score from scratch,
+ * it emits the matching NF3 trust events idempotently (stable dedupeKey per ledger
+ * row / per agreement) and lets `applyTrustEvent` handle caps and ceilings.
+ *
+ * Invoked from ledgerService.confirmPayment / autoConfirmStalePayments (on-time
+ * rent) and contractsV3 checkout/complete (clean checkout). Non-fatal by design —
+ * trust scoring must never break a payment confirmation or checkout.
+ *
+ * @param {string} agreementId
+ * @returns {Promise<string[]>} tenant userIds processed
+ */
+async function recalcTrustScoreForAgreement(agreementId) {
+  const { LedgerRow, RentalAgreement, AgreementParty, AgreementRoom } = require('../models');
+
+  try {
+    const tenants = await AgreementParty.findAll({
+      where: { agreementId, role: 'tenant' },
+      attributes: ['userId'],
+    });
+    if (tenants.length === 0) return [];
+
+    const paidRows = await LedgerRow.findAll({ where: { agreementId, status: 'PAID' } });
+    const onTimeRows = paidRows.filter(isPaidOnTime);
+
+    const agreement = await RentalAgreement.findByPk(agreementId);
+    let cleanCheckout = false;
+    if (agreement && agreement.checkoutCompletedAt) {
+      const rooms = await AgreementRoom.findAll({
+        where: { agreementId },
+        attributes: ['checkoutNotes'],
+      });
+      cleanCheckout = !rooms.some((r) => String(r.checkoutNotes || '').trim());
+    }
+
+    const processed = [];
+    for (const { userId } of tenants) {
+      for (const row of onTimeRows) {
+        await applyTrustEvent(userId, 'rent_paid_on_time', {
+          dedupeKey: `rent_paid_on_time:${userId}:${row.id}`,
+          meta: { agreementId, ledgerRowId: row.id },
+        });
+      }
+      if (cleanCheckout) {
+        await applyTrustEvent(userId, 'checkin_checkout_clean', {
+          dedupeKey: `checkin_checkout_clean:${userId}:${agreementId}`,
+          meta: { agreementId },
+        });
+      }
+      processed.push(userId);
+    }
+    return processed;
+  } catch (err) {
+    logger.warn(`recalcTrustScoreForAgreement failed agreementId=${agreementId}: ${err.message}`);
+    return [];
+  }
+}
+
 module.exports = {
   TRUST_EVENTS,
   applyTrustEvent,
   revokeTrustEvent,
   getTrustStatus,
+  recalcTrustScoreForAgreement,
+  isPaidOnTime,
 };

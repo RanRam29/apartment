@@ -236,6 +236,32 @@ async function ensureUserKycRoleTypeColumn(queryInterface = sequelize.getQueryIn
   }
 }
 
+// Existing ledger_rows tables won't get the unique index from sync({alter:false}),
+// so create it explicitly. Dedups any legacy duplicate periods first so the
+// index can be built on pre-existing data (BUG-013 — keeps the earliest row).
+async function ensureLedgerRowPeriodUniqueIndex() {
+  try {
+    await sequelize.getQueryInterface().describeTable('ledger_rows');
+  } catch (err) {
+    return; // table not created yet — sync() will build it with the index
+  }
+  try {
+    await sequelize.query(`
+      DELETE FROM ledger_rows a
+      USING ledger_rows b
+      WHERE a.agreement_id = b.agreement_id
+        AND a.period = b.period
+        AND a.ctid > b.ctid
+    `);
+    await sequelize.query(
+      'CREATE UNIQUE INDEX IF NOT EXISTS ledger_rows_agreement_period_unique ON ledger_rows (agreement_id, period)'
+    );
+    logger.info('Ensured ledger_rows (agreement_id, period) unique index');
+  } catch (err) {
+    logger.warn(`ledger_rows unique index ensure skipped: ${err.message}`);
+  }
+}
+
 async function initPostgres() {
   await sequelize.authenticate();
   await ensureUserVerificationColumns();
@@ -243,6 +269,7 @@ async function initPostgres() {
   await ensureContractAmendmentsTable();
   await ensureRentalAgreementLifecycleColumns();
   await ensureUserKycRoleTypeColumn();
+  await ensureLedgerRowPeriodUniqueIndex();
   const syncAlter =
     process.env.NODE_ENV === 'development' ||
     process.env.POSTGRES_SYNC_ALTER === 'true';
@@ -262,5 +289,6 @@ module.exports = {
   ensureContractAmendmentsTable,
   ensureRentalAgreementLifecycleColumns,
   ensureUserKycRoleTypeColumn,
+  ensureLedgerRowPeriodUniqueIndex,
 };
 

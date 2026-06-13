@@ -283,6 +283,7 @@
 
 | תאריך | גרסה | שינוי | מי |
 |--------|------|--------|-----|
+| 2026-06-13 | 3.9 | Debug session (NF3 code review) — 6 באגים תועדו (BUG-013..018). **BUG-013 תוקן (TDD):** TOCTOU race ב-SIGNED transition שזרע שורות לדגר כפולות. unique index על `ledger_rows(agreement_id, period)` + catch ל-unique violation ב-`seedLedgerRows` + `ensureLedgerRowPeriodUniqueIndex` ב-boot. 3/3 + 31/31 tests pass. שאר 5 הבאגים OPEN ב-BUGS.md | Claude Code |
 | 2026-06-12 | 3.8 | Backlog P1/P2 — schema-drift test (models vs ensure*), post-deploy `npm run smoke`, financial cron adoption of `scheduleReminder` (ledger T-3 dedupe + cancel on PAID, guarantor 24h expiry), test fixes (database-schema 16 cols, socket User mock), RFC V2-1 Stripe Connect (design only), 15/15 backlog tests | Cursor |
 | 2026-06-12 | 3.6 | Maps (OSM/Leaflet, zero-cost) — `components/map/` ב-web-next: מפת מיקום בעמוד דירה (Circle ~200m לפרטיות), מבט מפה בעמוד חיפוש (markers עם מחיר), `latitude/longitude` ב-types. Backend geocoding (Nominatim) כבר היה קיים. אומת DOM מקומית (tiles+markers+circle); E2E פרודקשן ממתין | Claude Code |
 | 2026-06-12 | 3.5 | Scheduled Notifications — `scheduled_notifications` table (UUID, JSONB payload, dedupeKey, retry≤3), `scheduleReminder`/`cancelReminder` ב-notificationService, cron delivery כל 5 דקות, 7/7 tests | Claude Code |

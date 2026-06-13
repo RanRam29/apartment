@@ -56,6 +56,9 @@ const LedgerRow = sequelize.define('LedgerRow', {
     { fields: ['agreement_id'] },
     { fields: ['due_date'] },
     { fields: ['status'] },
+    // Prevents duplicate ledger rows for the same billing period under
+    // concurrent SIGNED transitions (BUG-013 TOCTOU race).
+    { fields: ['agreement_id', 'period'], unique: true, name: 'ledger_rows_agreement_period_unique' },
   ],
 });
 

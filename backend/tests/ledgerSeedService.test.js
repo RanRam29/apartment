@@ -14,9 +14,10 @@ describe('ledgerSeedService', () => {
   let apartment;
 
   beforeAll(async () => {
-    const { ensureRentalAgreementLifecycleColumns } = require('../src/config/database');
+    const { ensureRentalAgreementLifecycleColumns, ensureLedgerRowPeriodUniqueIndex } = require('../src/config/database');
     await sequelize.sync({ alter: false });
     await ensureRentalAgreementLifecycleColumns();
+    await ensureLedgerRowPeriodUniqueIndex();
 
     const hash = await bcrypt.hash('Test1234!', 12);
     const ts = Date.now();
@@ -86,4 +87,29 @@ describe('ledgerSeedService', () => {
     const count = await LedgerRow.count({ where: { agreementId: agreement.id } });
     expect(count).toBe(12);
   });
+
+  it('is concurrency-safe — two parallel seeds do not create duplicate rows', async () => {
+    const concurrentAgreement = await RentalAgreement.create({
+      landlordId: landlord.id,
+      propertyId: apartment.id,
+      status: 'READY_SIGN',
+      startDate: '2026-08-01',
+      endDate: '2027-07-31',
+      monthlyRentIls: 6500,
+      paymentDueDay: 5,
+    });
+
+    try {
+      await Promise.all([
+        seedLedgerRows(concurrentAgreement),
+        seedLedgerRows(concurrentAgreement),
+      ]);
+
+      const count = await LedgerRow.count({ where: { agreementId: concurrentAgreement.id } });
+      expect(count).toBe(12);
+    } finally {
+      await LedgerRow.destroy({ where: { agreementId: concurrentAgreement.id } });
+      await concurrentAgreement.destroy();
+    }
+  }, 30_000);
 });
