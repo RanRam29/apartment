@@ -1,3 +1,4 @@
+const { Op } = require('sequelize');
 const { sequelize } = require('../config/database');
 const { User, TrustScoreEvent } = require('../models');
 const logger = require('../utils/logger');
@@ -91,6 +92,14 @@ async function revokeTrustEvent(userId, eventKey) {
       const deltaToApply = -existingSum;
       const newScore = Math.min(100, Math.max(0, user.trustScore + deltaToApply));
       const actualDelta = newScore - user.trustScore;
+
+      // Release the dedupeKeys of the revoked events so a once-only event can be
+      // earned again after revocation (BUG-014). Without this the unique index
+      // on dedupeKey silently blocks any re-grant.
+      await TrustScoreEvent.update(
+        { dedupeKey: null },
+        { where: { userId, eventKey, dedupeKey: { [Op.ne]: null } }, transaction }
+      );
 
       const newEvent = await TrustScoreEvent.create({
         userId,

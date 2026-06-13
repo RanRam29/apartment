@@ -17,6 +17,8 @@ const {
   TRUST_EVENTS,
   recalcTrustScoreForAgreement,
   isPaidOnTime,
+  applyTrustEvent,
+  revokeTrustEvent,
 } = require('../src/services/trustScoreService');
 const { confirmPayment } = require('../src/services/ledgerService');
 
@@ -167,6 +169,21 @@ describe('trustScoreService — behaviour auto-triggers (V2-5 → NF3)', () => {
 
     const updated = await User.findByPk(tenant.id);
     expect(updated.trustScore).toBe(50);
+  });
+
+  it('re-grants an isOnce event after it was revoked (BUG-014)', async () => {
+    await applyTrustEvent(tenant.id, 'kyc_approved');
+    let u = await User.findByPk(tenant.id);
+    expect(u.trustScore).toBe(50 + TRUST_EVENTS.kyc_approved.delta);
+
+    await revokeTrustEvent(tenant.id, 'kyc_approved');
+    u = await User.findByPk(tenant.id);
+    expect(u.trustScore).toBe(50);
+
+    // After a revoke the same once-only event must be earnable again.
+    await applyTrustEvent(tenant.id, 'kyc_approved');
+    u = await User.findByPk(tenant.id);
+    expect(u.trustScore).toBe(50 + TRUST_EVENTS.kyc_approved.delta);
   });
 
   it('confirmPayment hook raises tenant trust score on time', async () => {
