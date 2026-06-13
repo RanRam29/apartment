@@ -29,13 +29,11 @@ async function main() {
     const before = apt.images || [];
     const after = normalizeApartmentImages(before);
 
-    const repairCount = before.reduce((count, entry, idx) => {
-      const beforeUrl = typeof entry === 'string' ? entry : entry?.url;
-      const afterUrl = after[idx]?.url;
-      if (beforeUrl && afterUrl && beforeUrl !== afterUrl) return count + 1;
-      if (beforeUrl && repairUnsplashUrl(beforeUrl) !== beforeUrl) return count + 1;
-      return count;
-    }, 0);
+    const repairCount = before.filter((entry, idx) => {
+      const b = typeof entry === 'string' ? entry : entry?.url;
+      const a = after[idx]?.url;
+      return b && a && b !== a;
+    }).length;
 
     if (!imagesChanged(before, after)) continue;
 

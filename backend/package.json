@@ -12,6 +12,7 @@
     "test": "jest --runInBand --testTimeout=30000",
     "test:ci": "jest --runInBand --coverage --testTimeout=30000 --forceExit",
     "smoke": "node scripts/smoke.js",
+    "repair:images": "node scripts/repair-apartment-images.js",
     "smoke:ai": "node scripts/ai-smoke.js"
   },
   "jest": {
