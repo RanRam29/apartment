@@ -23,6 +23,7 @@ const servicesRoutes   = require('./routes/services');
 const iotRoutes        = require('./routes/iot');
 const adminLogsRoutes = require('./routes/adminLogs');
 const logsRoutes = require('./routes/logs');
+const notificationsRoutes = require('./routes/notifications');
 const { requestContext } = require('./middleware/requestContext');
 const { auditCapture } = require('./middleware/auditCapture');
 const { errorHandler } = require('./middleware/errorHandler');
@@ -181,6 +182,7 @@ app.use('/api/services', servicesRoutes);
 app.use('/api/iot', iotRoutes);
 app.use('/api/admin/logs', adminLogsRoutes);
 app.use('/api/logs', logsRoutes);
+app.use('/api/notifications', notificationsRoutes);
 app.use('/api/tenant', require('./routes/journal'));
 // v1 lease lifecycle (Fair Rental Law state machine)
 app.use('/api/v1/agreements', require('./routes/agreements'));

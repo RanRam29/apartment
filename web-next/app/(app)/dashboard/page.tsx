@@ -26,7 +26,7 @@ function QuickActionCard({
   );
 }
 
-function TrustScoreCard({ score }: { score: number }) {
+function TrustScoreCard({ score, onTimePercentage, kycStatus }: { score: number; onTimePercentage: number; kycStatus: string }) {
   const circumference = 2 * Math.PI * 58;
   const offset = circumference - (score / 100) * circumference;
 
@@ -51,12 +51,19 @@ function TrustScoreCard({ score }: { score: number }) {
           </p>
           <div className="space-y-3">
             <div>
-              <div className="flex justify-between text-[12px] mb-1"><span>98%</span><span>תשלומים בזמן</span></div>
-              <div className="w-full bg-[#1a365d] h-1 rounded-full overflow-hidden"><div className="bg-landlord-green h-full w-[98%]" /></div>
+              <div className="flex justify-between text-[12px] mb-1"><span>{onTimePercentage}%</span><span>תשלומים בזמן</span></div>
+              <div className="w-full bg-[#1a365d] h-1 rounded-full overflow-hidden">
+                <div className="bg-landlord-green h-full transition-all duration-500" style={{ width: `${onTimePercentage}%` }} />
+              </div>
             </div>
             <div>
-              <div className="flex justify-between text-[12px] mb-1"><span>4.9/5</span><span>חוות דעת משכירים</span></div>
-              <div className="w-full bg-[#1a365d] h-1 rounded-full overflow-hidden"><div className="bg-landlord-green h-full w-[92%]" /></div>
+              <div className="flex justify-between text-[12px] mb-1">
+                <span>{kycStatus === "APPROVED" ? "מאומת" : kycStatus === "PENDING" ? "באימות" : "טרם אומת"}</span>
+                <span>אימות זהות (KYC)</span>
+              </div>
+              <div className="w-full bg-[#1a365d] h-1 rounded-full overflow-hidden">
+                <div className="bg-landlord-green h-full transition-all duration-500" style={{ width: kycStatus === "APPROVED" ? "100%" : kycStatus === "PENDING" ? "50%" : "0%" }} />
+              </div>
             </div>
           </div>
         </div>
@@ -74,6 +81,8 @@ export default function DashboardPage() {
   const { data: contracts } = useSWR<{ contracts: Contract[] }>("/api/contracts", fetcher);
   const { data: gamification } = useSWR<GamificationProfile>("/api/gamification/me", fetcher);
   const { data: notifications } = useSWR<{ notifications: Notification[] }>("/api/notifications?limit=3", fetcher);
+  const { data: renterJournal } = useSWR<any>(user ? `/api/v3/renter-journal/${user.id}` : null, fetcher);
+  const { data: journalData } = useSWR<any>("/api/tenant/journal", fetcher);
 
   if (role === "landlord") {
     return <LandlordDashboard />;
@@ -83,6 +92,59 @@ export default function DashboardPage() {
   const trustScore = gamification?.trustScore ?? user?.trustScore ?? 50;
   const recentNotifs = notifications?.notifications?.slice(0, 3) || [];
   const recommendedApts = apartments?.apartments?.slice(0, 3) || [];
+
+  const totalRentRows = renterJournal?.paymentsSummary?.totalRentRows || 0;
+  const paidRows = renterJournal?.paymentsSummary?.paid || 0;
+  const onTimePercentage = totalRentRows > 0 ? Math.round((paidRows / totalRentRows) * 100) : 100;
+
+  const upcomingEvents: { id: string; title: string; date: string; icon: string; color: string }[] = [];
+
+  // 1. Next payment
+  if (journalData?.ledgerEntries) {
+    const nextPayment = journalData.ledgerEntries
+      .filter((e: any) => e.status === "PENDING" || e.status === "OVERDUE")
+      .sort((a: any, b: any) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())[0];
+    if (nextPayment) {
+      upcomingEvents.push({
+        id: `payment-${nextPayment.id}`,
+        title: `פירעון שכירות - חודש ${nextPayment.month}`,
+        date: `לתשלום עד: ${new Date(nextPayment.dueDate).toLocaleDateString("he-IL")}`,
+        icon: "payments",
+        color: "border-landlord-green"
+      });
+    }
+  }
+
+  // 2. Open maintenance ticket
+  if (journalData?.maintenance) {
+    const activeTickets = journalData.maintenance.filter((t: any) => t.status !== "CLOSED");
+    if (activeTickets.length > 0) {
+      const ticket = activeTickets[0];
+      upcomingEvents.push({
+        id: `ticket-${ticket.id}`,
+        title: `קריאת שירות: ${ticket.title || ticket.description || 'תקלה'}`,
+        date: `סטטוס נוכחי: ${ticket.status === "OPEN" ? "פתוח" : ticket.status === "IN_PROGRESS" ? "בטיפול" : "ממתין לחשבונית"}`,
+        icon: "build",
+        color: "border-secondary"
+      });
+    }
+  }
+
+  // 3. Contract expiration
+  if (journalData?.contract) {
+    const endDate = new Date(journalData.contract.endDate);
+    const diffTime = endDate.getTime() - new Date().getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    if (diffDays > 0 && diffDays <= 120) {
+      upcomingEvents.push({
+        id: `contract-exp-${journalData.contract.id}`,
+        title: `מועד סיום חוזה שכירות`,
+        date: `בעוד ${diffDays} ימים (${endDate.toLocaleDateString("he-IL")})`,
+        icon: "description",
+        color: "border-outline"
+      });
+    }
+  }
 
   return (
     <div>
@@ -168,7 +230,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="lg:col-span-4 space-y-[24px]">
-          <TrustScoreCard score={trustScore} />
+          <TrustScoreCard score={trustScore} onTimePercentage={onTimePercentage} kycStatus={user?.kycStatus || "NONE"} />
           <div className="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant soft-shadow">
             <h4 className="text-[18px] leading-[26px] font-semibold text-tenant-blue mb-4">התראות אחרונות</h4>
             {recentNotifs.length > 0 ? (
@@ -178,7 +240,7 @@ export default function DashboardPage() {
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${n.type?.includes("payment") ? "bg-[#9cefdf] text-[#0b6f63]" : "bg-[#d6e3ff] text-[#001b3c]"}`}>
                       <span className="material-symbols-outlined text-[16px]">{n.type?.includes("payment") ? "check_circle" : "notifications"}</span>
                     </div>
-                    <div className="mr-3">
+                    <div className="mr-3 text-right">
                       <p className="text-[14px] font-bold text-tenant-blue leading-tight">{n.title}</p>
                       <p className="text-[12px] text-on-surface-variant">{n.body}</p>
                     </div>
@@ -191,22 +253,23 @@ export default function DashboardPage() {
           </div>
           <div className="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant soft-shadow">
             <h4 className="text-[18px] leading-[26px] font-semibold text-tenant-blue mb-4">אירועים קרובים</h4>
-            <div className="space-y-4 relative before:absolute before:right-[15px] before:top-2 before:bottom-2 before:w-[2px] before:bg-outline-variant">
-              <div className="relative flex items-center">
-                <div className="w-8 h-8 rounded-full bg-surface-container-lowest border-2 border-landlord-green z-10 shrink-0" />
-                <div className="mr-4 flex-grow bg-surface-container-low p-3 rounded-lg">
-                  <p className="text-[14px] font-bold text-tenant-blue">ביקור טכנאי מזגנים</p>
-                  <p className="text-[12px] text-on-surface-variant">מחר, 10:00</p>
-                </div>
+            {upcomingEvents.length > 0 ? (
+              <div className="space-y-4 relative before:absolute before:right-[15px] before:top-2 before:bottom-2 before:w-[2px] before:bg-outline-variant">
+                {upcomingEvents.map((evt) => (
+                  <div key={evt.id} className="relative flex items-center">
+                    <div className={`w-8 h-8 rounded-full bg-surface-container-lowest border-2 ${evt.color} z-10 shrink-0 flex items-center justify-center`}>
+                      <span className="material-symbols-outlined text-[16px] text-tenant-blue">{evt.icon}</span>
+                    </div>
+                    <div className="mr-4 flex-grow bg-surface-container-low p-3 rounded-lg text-right">
+                      <p className="text-[14px] font-bold text-tenant-blue">{evt.title}</p>
+                      <p className="text-[12px] text-on-surface-variant">{evt.date}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
-              <div className="relative flex items-center">
-                <div className="w-8 h-8 rounded-full bg-surface-container-lowest border-2 border-outline z-10 shrink-0" />
-                <div className="mr-4 flex-grow p-3">
-                  <p className="text-[14px] font-bold text-on-surface-variant">פגישת חידוש חוזה</p>
-                  <p className="text-[12px] text-outline">24 ינואר, 17:00</p>
-                </div>
-              </div>
-            </div>
+            ) : (
+              <p className="text-on-surface-variant text-[14px] text-center py-4">אין אירועים קרובים</p>
+            )}
           </div>
         </div>
       </div>

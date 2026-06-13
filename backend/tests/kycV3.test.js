@@ -77,6 +77,15 @@ describe('KYC Service & Webhooks Integration Suite (M6)', () => {
     landlord = await User.findOne({ where: { email: `landlord-kyc-${unique}@test.com` } });
     await landlord.update({ isVerified: true });
 
+    // Clean up any old test records to make the test idempotent
+    const oldAgreements = await RentalAgreement.findAll({ where: { propertyId: '00000000-0000-4000-8000-000000000777' } });
+    const oldAgreementIds = oldAgreements.map(a => a.id);
+    if (oldAgreementIds.length > 0) {
+      await AgreementParty.destroy({ where: { agreementId: oldAgreementIds } }).catch(() => {});
+      await RentalAgreement.destroy({ where: { id: oldAgreementIds } }).catch(() => {});
+    }
+    await Apartment.destroy({ where: { id: '00000000-0000-4000-8000-000000000777' } }).catch(() => {});
+
     // Seed mock apartment
     await Apartment.create({
       id: '00000000-0000-4000-8000-000000000777',

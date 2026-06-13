@@ -1,8 +1,9 @@
 "use client";
 
 import { useAuth } from "@/hooks/useAuth";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useApi } from "@/hooks/useApi";
 
 interface NotificationItem {
   id: string;
@@ -100,9 +101,16 @@ const mockNotificationsData: NotificationItem[] = [
 
 export function NotificationCenter() {
   const { user } = useAuth();
-  const [notifications, setNotifications] = useState<NotificationItem[]>(mockNotificationsData);
+  const { data: apiData, isLoading } = useApi<{ notifications: NotificationItem[] }>("/api/notifications");
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [activeTab, setActiveTab] = useState<"all" | "payment" | "contract" | "maintenance" | "match" | "system">("all");
   const [visibleCount, setVisibleCount] = useState(6);
+
+  useEffect(() => {
+    if (apiData?.notifications) {
+      setNotifications(apiData.notifications);
+    }
+  }, [apiData]);
 
   // Filter logic
   const filteredNotifs = notifications.filter((n) => {
@@ -182,7 +190,12 @@ export function NotificationCenter() {
 
       {/* Notification items list */}
       <div className="space-y-4">
-        {filteredNotifs.length > 0 ? (
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center p-12 bg-white rounded-xl border border-outline-variant/30 soft-shadow">
+            <div className="w-10 h-10 border-4 border-landlord-green border-t-transparent rounded-full animate-spin mb-4" />
+            <p className="text-on-surface-variant font-medium text-[14px]">טוען התראות...</p>
+          </div>
+        ) : filteredNotifs.length > 0 ? (
           filteredNotifs.slice(0, visibleCount).map((n) => (
             <div
               key={n.id}

@@ -46,6 +46,11 @@ export function LandlordDashboard() {
     contracts: Contract[];
   }>("/api/contracts");
 
+  // 4. Fetch notifications for system alerts
+  const { data: notificationsData } = useApi<{ notifications: any[] }>(
+    "/api/notifications?limit=3"
+  );
+
   // Mock fallbacks for beautiful high-fidelity presentation if the account is new or database is empty
   const mockProperties = [
     {
@@ -121,16 +126,16 @@ export function LandlordDashboard() {
   ];
 
   // Helper calculations for active listings count
-  const propertiesCount = dashboardData?.summary?.totalListings ?? mockProperties.length;
-  const activePropertiesCount = dashboardData?.summary?.activeListings ?? mockProperties.filter(p => p.isActive).length;
-  const pendingLeadsCount = dashboardData?.summary?.matches?.pending ?? 3;
-  const leadsCountText = dashboardData?.recentPendingMatches?.length ?? mockLeads.length;
+  const propertiesCount = dashboardData ? (dashboardData.summary?.totalListings ?? 0) : 0;
+  const activePropertiesCount = dashboardData ? (dashboardData.summary?.activeListings ?? 0) : 0;
+  const pendingLeadsCount = dashboardData ? (dashboardData.summary?.matches?.pending ?? 0) : 0;
+  const leadsCountText = dashboardData ? (dashboardData.recentPendingMatches?.length ?? 0) : 0;
 
   // Compute cash flow statistics
-  let collectedThisMonth = 72000; // default high-fidelity mock
-  let expectedBalance = 12500;    // default high-fidelity mock
-  let totalCashFlow = collectedThisMonth + expectedBalance;
-  let cashFlowPercentage = 85;
+  let collectedThisMonth = 0;
+  let expectedBalance = 0;
+  let totalCashFlow = 0;
+  let cashFlowPercentage = 0;
 
   if (rentData?.payments && rentData.payments.length > 0) {
     const currentMonthStr = new Date().toISOString().substring(0, 7); // YYYY-MM
@@ -144,20 +149,15 @@ export function LandlordDashboard() {
         .filter((p) => p.status !== "paid")
         .reduce((sum, p) => sum + p.amount, 0);
       
-      if (paid > 0 || pending > 0) {
-        collectedThisMonth = paid;
-        expectedBalance = pending;
-        totalCashFlow = paid + pending;
-        cashFlowPercentage = totalCashFlow > 0 ? Math.round((paid / totalCashFlow) * 100) : 0;
-      }
+      collectedThisMonth = paid;
+      expectedBalance = pending;
+      totalCashFlow = paid + pending;
+      cashFlowPercentage = totalCashFlow > 0 ? Math.round((paid / totalCashFlow) * 100) : 0;
     }
   }
 
   // Compute expiring contracts
-  let expiringContracts = [
-    { name: "משפחת שלום", days: 45 },
-    { name: "יוסי לוין", days: 58 },
-  ];
+  let expiringContracts: { name: string; days: number }[] = [];
 
   if (contractsData?.contracts) {
     const activeContracts = contractsData.contracts.filter(
@@ -185,7 +185,7 @@ export function LandlordDashboard() {
   }
 
   // Count contracts awaiting landlord signature
-  let contractsToSignCount = 4; // default high-fidelity mock
+  let contractsToSignCount = 0;
   if (contractsData?.contracts) {
     contractsToSignCount = contractsData.contracts.filter(
       (c) => c.status === "PENDING_SIGN" && !c.landlordSigned
@@ -193,45 +193,45 @@ export function LandlordDashboard() {
   }
 
   // Calculate monthly income
-  let monthlyIncome = "₪84,500";
+  let monthlyIncome = "₪0";
   if (dashboardData?.listings && dashboardData.listings.length > 0) {
     const totalRent = dashboardData.listings
       .filter((a) => a.isActive)
       .reduce((sum, a) => sum + a.price, 0);
-    if (totalRent > 0) {
-      monthlyIncome = `₪${totalRent.toLocaleString()}`;
-    }
+    monthlyIncome = `₪${totalRent.toLocaleString()}`;
   }
 
   // Determine property list
-  const propertiesList = dashboardData?.listings?.length
+  const propertiesList = dashboardData?.listings
     ? dashboardData.listings.map((a) => ({
         id: a.id,
         title: a.title,
         city: a.city,
         price: a.price,
         rooms: a.rooms,
-        images: a.images && a.images.length > 0 ? a.images : mockProperties[0].images,
+        images: a.images && a.images.length > 0 ? a.images : [mockProperties[0].images[0]],
         isActive: a.isActive,
         status: a.isActive ? "מושכר" : "פנוי",
         occupancy: a.isActive ? "תפוסה 100%" : "דרוש שיווק",
       }))
-    : mockProperties;
+    : [];
 
   // Determine leads list
-  const leadsList = dashboardData?.recentPendingMatches?.length
+  const leadsList = dashboardData?.recentPendingMatches
     ? dashboardData.recentPendingMatches.map((m) => ({
         id: m.id,
         tenant: {
-          id: m.tenant.id,
-          firstName: m.tenant.firstName,
-          lastName: m.tenant.lastName,
-          avatarUrl: m.tenant.avatarUrl || mockLeads[0].tenant.avatarUrl,
+          id: m.tenant?.id || "",
+          firstName: m.tenant?.firstName || "שוכר",
+          lastName: m.tenant?.lastName || "פוטנציאלי",
+          avatarUrl: m.tenant?.avatarUrl,
         },
-        apartment: { title: m.apartment.title },
+        apartment: { title: m.apartment?.title || "נכס" },
         status: m.status === "pending" ? "חדש" : "נוצר קשר",
       }))
-    : mockLeads;
+    : [];
+
+  const notificationsList = notificationsData?.notifications || [];
 
   const handleDownloadReport = () => {
     alert("הורדת דוח ריכוז תשלומים חודשי התחילה בהצלחה.");
@@ -276,7 +276,7 @@ export function LandlordDashboard() {
               )}
             </div>
             <h3 className="font-h2-web text-tenant-blue text-[28px] font-bold">
-              {pendingLeadsCount + 5}
+              {pendingLeadsCount}
             </h3>
           </div>
           <div className="h-12 w-12 bg-[#62fae3]/20 rounded-full flex items-center justify-center text-secondary">
@@ -329,51 +329,61 @@ export function LandlordDashboard() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {propertiesList.map((property) => (
-                <div
-                  key={property.id}
-                  className="bg-white rounded-xl overflow-hidden soft-shadow group transition-all duration-300 hover:-translate-y-1"
-                >
-                  <div className="h-40 overflow-hidden relative">
-                    <img
-                      alt={property.title}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      src={property.images[0]}
-                    />
-                    <div
-                      className={`absolute top-3 right-3 text-white text-[10px] font-bold px-2.5 py-1 rounded-full ${
-                        property.status === "מושכר"
-                          ? "bg-tenant-blue"
-                          : "bg-landlord-green text-tenant-blue"
-                      }`}
-                    >
-                      {property.status}
-                    </div>
-                  </div>
-                  <div className="p-4 flex flex-col items-start">
-                    <h4 className="text-[18px] font-semibold text-tenant-blue mb-1">
-                      {property.title}
-                    </h4>
-                    <div className="flex justify-between items-center w-full mt-3">
-                      <span className="text-[14px] text-on-surface-variant font-bold">
-                        ₪{property.price.toLocaleString()} / חודש
-                      </span>
+            {propertiesList.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {propertiesList.map((property) => (
+                  <div
+                    key={property.id}
+                    className="bg-white rounded-xl overflow-hidden soft-shadow group transition-all duration-300 hover:-translate-y-1"
+                  >
+                    <div className="h-40 overflow-hidden relative">
+                      <img
+                        alt={property.title}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        src={property.images[0]}
+                      />
                       <div
-                        className={`flex items-center gap-1 text-[12px] font-semibold ${
-                          property.status === "מושכר" ? "text-secondary" : "text-admin-red"
+                        className={`absolute top-3 right-3 text-white text-[10px] font-bold px-2.5 py-1 rounded-full ${
+                          property.status === "מושכר"
+                            ? "bg-tenant-blue"
+                            : "bg-landlord-green text-tenant-blue"
                         }`}
                       >
-                        <span className="material-symbols-outlined text-[16px]">
-                          {property.status === "מושכר" ? "trending_up" : "error_outline"}
+                        {property.status}
+                      </div>
+                    </div>
+                    <div className="p-4 flex flex-col items-start">
+                      <h4 className="text-[18px] font-semibold text-tenant-blue mb-1">
+                        {property.title}
+                      </h4>
+                      <div className="flex justify-between items-center w-full mt-3">
+                        <span className="text-[14px] text-on-surface-variant font-bold">
+                          ₪{property.price.toLocaleString()} / חודש
                         </span>
-                        <span>{property.occupancy}</span>
+                        <div
+                          className={`flex items-center gap-1 text-[12px] font-semibold ${
+                            property.status === "מושכר" ? "text-secondary" : "text-admin-red"
+                          }`}
+                        >
+                          <span className="material-symbols-outlined text-[16px]">
+                            {property.status === "מושכר" ? "trending_up" : "error_outline"}
+                          </span>
+                          <span>{property.occupancy}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-white rounded-xl p-8 text-center soft-shadow flex flex-col items-center justify-center">
+                <span className="material-symbols-outlined text-[48px] text-on-surface-variant/40 mb-2">apartment</span>
+                <p className="text-on-surface-variant font-medium">אין נכסים רשומים במערכת</p>
+                <Link href="/properties" className="mt-3 text-landlord-green font-bold hover:underline">
+                  הוסף נכס חדש
+                </Link>
+              </div>
+            )}
           </section>
 
           {/* Tenant Leads */}
@@ -400,52 +410,60 @@ export function LandlordDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-outline-variant">
-                  {leadsList.map((lead) => (
-                    <tr
-                      key={lead.id}
-                      className="hover:bg-surface-variant/5 transition-colors"
-                    >
-                      <td className="p-4 flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full overflow-hidden bg-surface-container flex items-center justify-center">
-                          {lead.tenant.avatarUrl ? (
-                            <img
-                              alt=""
-                              className="w-full h-full object-cover"
-                              src={lead.tenant.avatarUrl}
-                            />
-                          ) : (
-                            <span className="text-[12px] font-bold text-tenant-blue">
-                              {lead.tenant.firstName?.[0]}
-                            </span>
-                          )}
-                        </div>
-                        <span className="text-[16px] font-medium text-on-surface">
-                          {lead.tenant.firstName} {lead.tenant.lastName}
-                        </span>
-                      </td>
-                      <td className="p-4 text-[16px] text-on-surface-variant">
-                        {lead.apartment.title}
-                      </td>
-                      <td className="p-4">
-                        <span
-                          className={`text-[12px] font-bold px-3 py-1 rounded-full ${
-                            lead.status === "חדש"
-                              ? "bg-secondary-container/30 text-secondary"
-                              : "bg-surface-container-highest text-on-surface-variant"
-                          }`}
-                        >
-                          {lead.status}
-                        </span>
-                      </td>
-                      <td className="p-4 text-center">
-                        <Link href="/chat">
-                          <button className="bg-landlord-green text-tenant-blue px-4 py-1.5 rounded-full text-[14px] font-bold hover:opacity-90 transition-opacity">
-                            צ'אט
-                          </button>
-                        </Link>
+                  {leadsList.length > 0 ? (
+                    leadsList.map((lead) => (
+                      <tr
+                        key={lead.id}
+                        className="hover:bg-surface-variant/5 transition-colors"
+                      >
+                        <td className="p-4 flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full overflow-hidden bg-surface-container flex items-center justify-center">
+                            {lead.tenant.avatarUrl ? (
+                              <img
+                                alt=""
+                                className="w-full h-full object-cover"
+                                src={lead.tenant.avatarUrl}
+                              />
+                            ) : (
+                              <span className="text-[12px] font-bold text-tenant-blue">
+                                {lead.tenant.firstName?.[0]}
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-[16px] font-medium text-on-surface">
+                            {lead.tenant.firstName} {lead.tenant.lastName}
+                          </span>
+                        </td>
+                        <td className="p-4 text-[16px] text-on-surface-variant">
+                          {lead.apartment.title}
+                        </td>
+                        <td className="p-4">
+                          <span
+                            className={`text-[12px] font-bold px-3 py-1 rounded-full ${
+                              lead.status === "חדש"
+                                ? "bg-secondary-container/30 text-secondary"
+                                : "bg-surface-container-highest text-on-surface-variant"
+                            }`}
+                          >
+                            {lead.status}
+                          </span>
+                        </td>
+                        <td className="p-4 text-center">
+                          <Link href="/chat">
+                            <button className="bg-landlord-green text-tenant-blue px-4 py-1.5 rounded-full text-[14px] font-bold hover:opacity-90 transition-opacity">
+                              צ'אט
+                            </button>
+                          </Link>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={4} className="p-8 text-center text-on-surface-variant">
+                        אין פניות חדשות משוכרים
                       </td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             </div>
@@ -493,26 +511,30 @@ export function LandlordDashboard() {
               חוזים קרובים לסיום
             </h3>
             <div className="space-y-4 w-full">
-              {expiringContracts.map((contract, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-3 rounded-lg hover:bg-surface-variant/10 transition-colors w-full"
-                >
-                  <div className="flex flex-col items-start">
-                    <span className="font-medium text-[16px] text-on-surface">
-                      {contract.name}
-                    </span>
-                    <span className="text-[12px] text-on-surface-variant">
-                      בעוד {contract.days} ימים
-                    </span>
+              {expiringContracts.length > 0 ? (
+                expiringContracts.map((contract, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-3 rounded-lg hover:bg-surface-variant/10 transition-colors w-full"
+                  >
+                    <div className="flex flex-col items-start">
+                      <span className="font-medium text-[16px] text-on-surface">
+                        {contract.name}
+                      </span>
+                      <span className="text-[12px] text-on-surface-variant">
+                        בעוד {contract.days} ימים
+                      </span>
+                    </div>
+                    <Link href="/contracts">
+                      <button className="bg-tenant-blue text-white px-3 py-1 rounded-full text-[12px] font-bold hover:opacity-95">
+                        חדש
+                      </button>
+                    </Link>
                   </div>
-                  <Link href="/contracts">
-                    <button className="bg-tenant-blue text-white px-3 py-1 rounded-full text-[12px] font-bold hover:opacity-95">
-                      חדש
-                    </button>
-                  </Link>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-on-surface-variant text-[14px] py-4 text-center">אין חוזים המסתיימים בקרוב</p>
+              )}
             </div>
           </section>
 
@@ -522,25 +544,39 @@ export function LandlordDashboard() {
               <h3 className="font-h3-web text-tenant-blue text-[22px] font-semibold">
                 התראות מערכת
               </h3>
-              <span className="bg-admin-red text-white text-[12px] font-bold h-5 w-5 flex items-center justify-center rounded-full">
-                {mockAlerts.length}
-              </span>
+              {notificationsList.length > 0 && (
+                <span className="bg-admin-red text-white text-[12px] font-bold h-5 w-5 flex items-center justify-center rounded-full">
+                  {notificationsList.length}
+                </span>
+              )}
             </div>
             <div className="space-y-4 w-full">
-              {mockAlerts.map((alert) => (
-                <div
-                  key={alert.id}
-                  className="flex gap-3 items-start border-b border-outline-variant pb-4 last:border-0 last:pb-0 w-full text-right"
-                >
-                  <span className={`material-symbols-outlined ${alert.iconColor} text-[24px]`}>
-                    {alert.icon}
-                  </span>
-                  <div className="flex flex-col items-start">
-                    <p className="text-[14px] font-bold text-tenant-blue">{alert.title}</p>
-                    <p className="text-[12px] text-on-surface-variant">{alert.body}</p>
+              {notificationsList.length > 0 ? (
+                notificationsList.map((alert) => (
+                  <div
+                    key={alert.id}
+                    className="flex gap-3 items-start border-b border-outline-variant pb-4 last:border-0 last:pb-0 w-full text-right"
+                  >
+                    <span className={`material-symbols-outlined text-secondary text-[24px]`}>
+                      {alert.type === "maintenance"
+                        ? "build"
+                        : alert.type === "payment"
+                        ? "payments"
+                        : alert.type === "contract"
+                        ? "description"
+                        : alert.type === "match"
+                        ? "handshake"
+                        : "notifications"}
+                    </span>
+                    <div className="flex flex-col items-start">
+                      <p className="text-[14px] font-bold text-tenant-blue">{alert.title}</p>
+                      <p className="text-[12px] text-on-surface-variant">{alert.body}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-on-surface-variant text-[14px] py-4 text-center">אין התראות חדשות</p>
+              )}
             </div>
           </section>
         </div>
