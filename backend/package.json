@@ -11,6 +11,7 @@
     "seed:demo": "node src/seeders/demo.js",
     "test": "jest --runInBand --testTimeout=30000",
     "test:ci": "jest --runInBand --coverage --testTimeout=30000 --forceExit",
+    "smoke": "node scripts/smoke.js",
     "smoke:ai": "node scripts/ai-smoke.js"
   },
   "jest": {
