@@ -40,6 +40,18 @@ services:
         generateValue: true
       - key: AI_SERVICE_URL
         sync: false
+      # Resend (transactional email — verification, reminders) — set manually in Render dashboard.
+      # RESEND_API_KEY is required or every send throws "Missing API key" and emails fail silently.
+      # RESEND_FROM_EMAIL must use a domain verified in Resend (e.g. noreply@dirapp.co.il);
+      # until the domain is verified, use onboarding@resend.dev (Resend's pre-verified sender).
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM_EMAIL
+        sync: false
+      # Public web base URL used for links inside emails (verification, etc.).
+      # Falls back to CLIENT_ORIGINS if unset; set explicitly to be safe.
+      - key: APP_BASE_URL
+        sync: false
       # Browsers may send Origin from the Vercel web build; merge with any CLIENT_ORIGIN in the dashboard
       - key: CLIENT_ORIGINS
         value: https://apartment-olive.vercel.app
