@@ -114,11 +114,11 @@ export function AppSidebar() {
         })}
       </nav>
 
-      {/* Settings link for landlord/admin */}
-      {role !== "tenant" && (
+      {/* Settings link for landlord/tenant */}
+      {role !== "admin" && (
         <div className="border-t border-[#1a365d] pt-4 px-6">
           <Link
-            href={role === "admin" ? "/admin/config" : "/profile"}
+            href="/profile"
             className="flex items-center py-3 text-[#aec7f5] opacity-80 hover:text-landlord-green transition-colors"
           >
             <span className="material-symbols-outlined ml-3">settings</span>

@@ -63,7 +63,10 @@ export function TopBar() {
         </Link>
 
         {/* Avatar */}
-        <div className="w-10 h-10 rounded-full bg-surface-container overflow-hidden cursor-pointer flex items-center justify-center">
+        <Link
+          href="/profile"
+          className="w-10 h-10 rounded-full bg-surface-container overflow-hidden cursor-pointer flex items-center justify-center"
+        >
           {user?.avatarUrl ? (
             <img className="w-full h-full object-cover" src={user.avatarUrl} alt="" />
           ) : (
@@ -71,7 +74,7 @@ export function TopBar() {
               {user?.firstName?.[0] || "?"}{user?.lastName?.[0] || ""}
             </span>
           )}
-        </div>
+        </Link>
       </div>
     </header>
   );
