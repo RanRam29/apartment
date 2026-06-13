@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { Apartment } from "@/lib/types";
+import { getApartmentImageUrls, getFirstApartmentImageUrl } from "@/lib/apartment-images";
 
 interface ApartmentCardProps {
   apartment: Apartment;
@@ -21,16 +22,20 @@ const amenityIcons: Record<string, { icon: string; label: string }> = {
 
 function FallbackImage() {
   return (
-    <div className="w-full h-full bg-gradient-to-br from-surface-container to-surface-container-high flex flex-col items-center justify-center">
-      <span className="material-symbols-outlined text-[48px] text-outline/30">apartment</span>
-      <span className="text-[11px] text-outline/40 mt-1">אין תמונה</span>
+    <div className="w-full h-full bg-gradient-to-br from-[#e8f5f0] via-surface-container to-[#dce8f4] flex flex-col items-center justify-center">
+      <div className="w-16 h-16 rounded-2xl bg-white/70 flex items-center justify-center shadow-sm mb-2">
+        <span className="material-symbols-outlined text-[36px] text-landlord-green/60">apartment</span>
+      </div>
+      <span className="text-[12px] text-on-surface-variant/70 font-medium">תמונה בקרוב</span>
     </div>
   );
 }
 
 export function ApartmentCard({ apartment, viewMode }: ApartmentCardProps) {
   const apt = apartment;
-  const hasImage = apt.images && apt.images.length > 0;
+  const imageUrls = getApartmentImageUrls(apt.images);
+  const primaryImage = getFirstApartmentImageUrl(apt.images);
+  const hasImage = Boolean(primaryImage);
   const topAmenities = (apt.amenities || []).slice(0, 4);
 
   if (viewMode === "list") {
@@ -40,13 +45,13 @@ export function ApartmentCard({ apartment, viewMode }: ApartmentCardProps) {
           {/* Image */}
           <div className="w-[240px] h-[160px] shrink-0 relative overflow-hidden">
             {hasImage ? (
-              <img src={apt.images[0]} alt={apt.address} className="w-full h-full object-cover" />
+              <img src={primaryImage!} alt={apt.address || apt.title} className="w-full h-full object-cover" />
             ) : (
               <FallbackImage />
             )}
-            {apt.images && apt.images.length > 1 && (
+            {imageUrls.length > 1 && (
               <div className="absolute bottom-2 left-2 bg-black/60 text-white text-[11px] px-2 py-0.5 rounded-full">
-                {apt.images.length} תמונות
+                {imageUrls.length} תמונות
               </div>
             )}
           </div>
@@ -115,8 +120,8 @@ export function ApartmentCard({ apartment, viewMode }: ApartmentCardProps) {
         <div className="relative h-[200px] overflow-hidden">
           {hasImage ? (
             <img
-              src={apt.images[0]}
-              alt={apt.address}
+              src={primaryImage!}
+              alt={apt.address || apt.title}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
           ) : (
@@ -130,10 +135,10 @@ export function ApartmentCard({ apartment, viewMode }: ApartmentCardProps) {
           </div>
 
           {/* Photo count */}
-          {apt.images && apt.images.length > 1 && (
+          {imageUrls.length > 1 && (
             <div className="absolute bottom-3 right-3 bg-black/60 text-white text-[11px] px-2.5 py-1 rounded-full flex items-center gap-1">
               <span className="material-symbols-outlined text-[13px]">photo_library</span>
-              {apt.images.length}
+              {imageUrls.length}
             </div>
           )}
 

@@ -25,6 +25,13 @@ export interface User {
   createdAt: string;
 }
 
+export interface ApartmentImage {
+  url: string;
+  publicId?: string;
+  width?: number;
+  height?: number;
+}
+
 export interface Apartment {
   id: string;
   title: string;
@@ -42,7 +49,7 @@ export interface Apartment {
   arnona?: number;
   vaadBayit?: number;
   amenities: string[];
-  images: string[];
+  images: (string | ApartmentImage)[];
   availableFrom?: string;
   minLeaseDuration?: number;
   petsAllowed?: boolean;

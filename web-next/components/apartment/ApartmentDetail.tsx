@@ -6,6 +6,7 @@ import { api } from "@/lib/api";
 import type { Apartment, User } from "@/lib/types";
 import { ApartmentLocationMap } from "@/components/map";
 import Link from "next/link";
+import { getApartmentImageUrls } from "@/lib/apartment-images";
 import { useState, useEffect } from "react";
 
 interface SearchPreferences {
@@ -82,7 +83,8 @@ export function ApartmentDetail({ apartmentId }: { apartmentId: string }) {
     "https://lh3.googleusercontent.com/aida/AP1WRLt7kdWVmymiKX0TE-juyXchfCEt3uPVWorFgmeN0onuizxlBeUtZvpT6z9IHvxLl0Pzj4QeqcMzOiPKUg1CEqrZ5HKoAQ7eUyiFZinZs5sdjMSYP73MO51YpSzxF9Qnii6fRB0OToXBfOP1Da5ryk1EWRqNRFlAmbiLbMZ1xyEKQ77ZaEshR_yPptPlOVfMyOGoF3X0-JfBS-QawerUDQyTS6pTKixXVHxI5CmnBNlXxuu-u8uWSZNRbg",
   ];
 
-  const images: string[] = (apartment.images && apartment.images.length > 0) ? apartment.images : defaultImages;
+  const resolvedImages = getApartmentImageUrls(apartment.images);
+  const images: string[] = resolvedImages.length > 0 ? resolvedImages : defaultImages;
 
   // Calculate compatibility client-side for presentation
   const budgetMatch = tenantPrefs?.budget ? apartment.price <= tenantPrefs.budget.max : true;

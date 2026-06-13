@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { Match, UserRole } from "@/lib/types";
+import { getFirstApartmentImageUrl } from "@/lib/apartment-images";
 
 interface MatchCardProps {
   match: Match & { unreadCount?: number };
@@ -21,7 +22,8 @@ export function MatchCard({ match, role, onAccept, onReject, isActionLoading }: 
   const apt = match.apartment;
   const otherUser = role === "tenant" ? match.landlord : match.tenant;
   const statusInfo = STATUS_CONFIG[match.status] || STATUS_CONFIG.pending;
-  const hasImage = apt?.images && apt.images.length > 0;
+  const primaryImage = getFirstApartmentImageUrl(apt?.images);
+  const hasImage = Boolean(primaryImage);
 
   return (
     <div className="bg-surface-container-lowest rounded-xl overflow-hidden soft-shadow border border-outline-variant/50 hover:border-landlord-green/30 transition-all group">
@@ -29,7 +31,7 @@ export function MatchCard({ match, role, onAccept, onReject, isActionLoading }: 
       <div className="relative h-[160px] overflow-hidden">
         {hasImage ? (
           <img
-            src={apt!.images[0]}
+            src={primaryImage!}
             alt={apt?.address || apt?.title || "דירה"}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />

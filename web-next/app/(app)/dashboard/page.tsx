@@ -5,6 +5,7 @@ import Link from "next/link";
 import useSWR from "swr";
 import { api } from "@/lib/api";
 import type { Apartment, Contract, Notification, GamificationProfile } from "@/lib/types";
+import { getFirstApartmentImageUrl } from "@/lib/apartment-images";
 import { LandlordDashboard } from "@/components/dashboard/LandlordDashboard";
 
 const fetcher = <T,>(url: string) => api<T>(url);
@@ -170,11 +171,13 @@ export default function DashboardPage() {
               <Link href="/search" className="text-[#006b5f] text-[14px] font-medium hover:underline">צפה בכל הדירות</Link>
             </div>
             <div className="space-y-4">
-              {recommendedApts.length > 0 ? recommendedApts.map((apt) => (
+              {recommendedApts.length > 0 ? recommendedApts.map((apt) => {
+                const thumb = getFirstApartmentImageUrl(apt.images);
+                return (
                 <Link key={apt.id} href={`/apartment/${apt.id}`}
                   className="bg-surface-container-lowest rounded-xl p-4 flex items-center soft-shadow hover:bg-surface-container-low transition-colors border border-transparent hover:border-outline-variant block">
                   <div className="w-32 h-24 rounded-lg overflow-hidden shrink-0 bg-surface-container flex items-center justify-center">
-                    {apt.images?.[0] ? <img src={apt.images[0]} alt="" className="w-full h-full object-cover" /> : <span className="material-symbols-outlined text-[40px] text-outline/30">apartment</span>}
+                    {thumb ? <img src={thumb} alt="" className="w-full h-full object-cover" /> : <span className="material-symbols-outlined text-[40px] text-outline/30">apartment</span>}
                   </div>
                   <div className="mr-4 flex-grow">
                     <div className="flex justify-between items-start">
@@ -192,7 +195,8 @@ export default function DashboardPage() {
                     </div>
                   </div>
                 </Link>
-              )) : (
+              );
+              }) : (
                 <div className="bg-surface-container-lowest rounded-xl p-8 text-center soft-shadow">
                   <span className="material-symbols-outlined text-[48px] text-outline/30 mb-2">search</span>
                   <p className="text-on-surface-variant">אין דירות מומלצות עדיין</p>
