@@ -8,6 +8,9 @@ const mockMatch = {
   findAll: jest.fn(),
   findOne: jest.fn(),
 };
+const mockUser = {
+  findByPk: jest.fn(),
+};
 
 jest.mock('socket.io', () => ({
   Server: jest.fn().mockImplementation(() => {
@@ -28,6 +31,7 @@ jest.mock('socket.io', () => ({
 
 jest.mock('../src/models', () => ({
   Match: mockMatch,
+  User: mockUser,
 }));
 
 jest.mock('../src/utils/logger', () => ({
@@ -83,6 +87,15 @@ describe('Socket chat room authorization', () => {
     jest.clearAllMocks();
     mockMatch.findAll.mockResolvedValue([]);
     mockMatch.findOne.mockResolvedValue(null);
+    mockUser.findByPk.mockImplementation((id) =>
+      Promise.resolve({
+        id,
+        role: 'tenant',
+        email: `${id}@test.com`,
+        isPremium: false,
+        isVerified: true,
+      })
+    );
   });
 
   it('joins a chat room when the user is an accepted match participant', async () => {
