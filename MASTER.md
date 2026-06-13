@@ -1,6 +1,6 @@
 # DirApp — MASTER STATUS DOCUMENT
 > **מנהל: Claude Code (Orchestrator)**  
-> **עדכון אחרון:** 2026-06-12  
+> **עדכון אחרון:** 2026-06-13 (v4.0)  
 > **כלל ברזל:** זה המסמך היחיד שסומך עליו. כל שינוי קוד → עדכון כאן.
 
 ---
@@ -232,7 +232,7 @@
 
 | פיצ'ר | תלויות | אחריות | סטטוס |
 |--------|---------|---------|--------|
-| **NF1 — Trust Score** | M5 ✅ + M6 ✅ | Antigravity | ✅ אומת E2E 2026-06-01 |
+| **NF1 — Trust Score** | M5 ✅ + M6 ✅ | Antigravity + Cursor + Claude Code | ✅ UI + event-sourced backend; auto-calc wired to NF3 events (K6 reconciled) |
 | **NF2 — Renter Journal** | M1+M3+M4+M8+M9 | Antigravity | ✅ אומת E2E 2026-06-01 |
 | **V2-3 — Contract Amendment** | M2 | Antigravity | ✅ אומת E2E 2026-06-01 |
 | **V2-4 — NLP Search** | — | Claude Code + Antigravity | ✅ Backend + Web UI deployed (search page with NLP) |
@@ -240,7 +240,10 @@
 | **WhatsApp opt-in** | Phase 2 | Claude Code + Antigravity | ✅ Backend field + Web profile toggle |
 | **Web Refactor** | — | כל הצוות | ✅ 26 pages deployed — see `docs/internal/WEB_REFACTOR_STATUS.md` |
 | V2-1 — Stripe Connect | M5 | TBD | 🟡 RFC only — `docs/internal/RFC-stripe-connect.md` (blocked by license) |
-| **NF3 — Smart Onboarding + Trust Score v2** | M5 ✅ M11 ✅ Phase 2 ✅ | Cursor + Antigravity + Claude Code | 🟡 Core Backend Completed (17/17 tests passing; pending frontend UI & Cursor cron hooks) |
+| **NF3 — Smart Onboarding + Trust Score v2** | M5 ✅ M11 ✅ Phase 2 ✅ | Cursor + Antigravity + Claude Code | ✅ Core backend (17/17); web `/trust` + `/onboarding` pages + sidebar link |
+| **V2-2 — Guarantor Claims** | M7 ✅ | Cursor | ✅ Backend K8 — `warranty_claims`, `/api/v3/claims`, 7/7 tests |
+| **V2-5 — Trust Score auto-calc** | M5 ✅ | Cursor + Claude Code | ✅ K6 reconciled onto NF3 events — `recalcTrustScoreForAgreement` fires `rent_paid_on_time`/`checkin_checkout_clean` idempotently from PAID + checkout hooks, 7/7 tests |
+| **Admin scheduled notifications** | 225bf29 | Cursor | ✅ K7 — list + cancel endpoints, 4/4 tests |
 
 ---
 
@@ -283,6 +286,7 @@
 
 | תאריך | גרסה | שינוי | מי |
 |--------|------|--------|-----|
+| 2026-06-13 | 4.0 | **Orchestrator merge — Cursor K6–K9 integrated to main.** K7 admin scheduled-notifications (4/4), K8 V2-2 guarantor warranty claims `warranty_claims`+`/api/v3/claims` (7/7), backlog (schema-drift guard, `npm run smoke`, cron `scheduleReminder` adoption). **K6 Trust Score auto-calc reconciled onto the live NF3 event system** (not a parallel recalc): `recalcTrustScoreForAgreement` fires `rent_paid_on_time`/`checkin_checkout_clean` idempotently from PAID + checkout hooks (7/7). Web `/trust`+`/onboarding` pages + sidebar link. Regression 59/59 across 8 suites | Claude Code |
 | 2026-06-13 | 3.9 | Debug session (NF3 code review) — 6 באגים תועדו (BUG-013..018). **BUG-013 תוקן (TDD):** TOCTOU race ב-SIGNED transition שזרע שורות לדגר כפולות. unique index על `ledger_rows(agreement_id, period)` + catch ל-unique violation ב-`seedLedgerRows` + `ensureLedgerRowPeriodUniqueIndex` ב-boot. 3/3 + 31/31 tests pass. שאר 5 הבאגים OPEN ב-BUGS.md | Claude Code |
 | 2026-06-12 | 3.8 | Backlog P1/P2 — schema-drift test (models vs ensure*), post-deploy `npm run smoke`, financial cron adoption of `scheduleReminder` (ledger T-3 dedupe + cancel on PAID, guarantor 24h expiry), test fixes (database-schema 16 cols, socket User mock), RFC V2-1 Stripe Connect (design only), 15/15 backlog tests | Cursor |
 | 2026-06-12 | 3.6 | Maps (OSM/Leaflet, zero-cost) — `components/map/` ב-web-next: מפת מיקום בעמוד דירה (Circle ~200m לפרטיות), מבט מפה בעמוד חיפוש (markers עם מחיר), `latitude/longitude` ב-types. Backend geocoding (Nominatim) כבר היה קיים. אומת DOM מקומית (tiles+markers+circle); E2E פרודקשן ממתין | Claude Code |
