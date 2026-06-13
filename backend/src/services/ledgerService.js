@@ -1,4 +1,9 @@
 const { LedgerRow, RentalAgreement, AgreementParty } = require('../models');
+const { cancelReminder } = require('./notificationService');
+
+async function cancelLedgerDue3dReminder(ledgerRowId) {
+  await cancelReminder({ dedupeKey: `ledger:${ledgerRowId}:due3d` }).catch(() => {});
+}
 
 const HEBREW_MONTHS = ['ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני', 'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'];
 
@@ -69,6 +74,7 @@ async function confirmPayment(ledgerRowId, actor) {
     status: 'PAID',
     confirmedByLandlord: new Date(),
   });
+  await cancelLedgerDue3dReminder(ledgerRowId);
   return row;
 }
 
@@ -98,6 +104,7 @@ async function autoConfirmStalePayments() {
 
   for (const row of stale) {
     await row.update({ status: 'PAID', confirmedByLandlord: new Date(), notes: 'Auto-confirmed after 48h' });
+    await cancelLedgerDue3dReminder(row.id);
   }
   return stale.length;
 }

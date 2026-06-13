@@ -19,7 +19,7 @@
 
 **Worktrees:**
 - `C:\apartmentapp` → branch `main` (Claude Code — Orchestrator)
-- `C:\apartmentapp-cursor` → branch `cursor/financial-admin` (Cursor)
+- `C:\apartmentapp-cursor` → branch `cursor/backlog-jun12` (Cursor)
 - `C:\apartmentapp-windsurf` → branch `wind/web-refactor-ui` (Antigravity)
 
 ---
@@ -217,7 +217,7 @@
 | 8 Hebrew templates | ✅ | 2026-06-01 | `whatsappTemplates.js` — payment (3), maintenance (3), invite, renewal |
 | Conversational state machine | ✅ | 2026-06-01 | `whatsappRouter.js` — idle→payment_confirm / maintenance_description→image flows |
 | Notification service (public API) | ✅ | 2026-06-01 | `whatsappNotificationService.js` — 8 methods, auto-logs to `whatsapp_messages` |
-| Cron → WA: payment 3d/today/overdue | ✅ | 2026-06-01 | `ledgerDueAlerts.js` + `ledgerOverdue.js` upgraded |
+| Cron → WA: payment 3d/today/overdue | ✅ | 2026-06-12 | `ledgerDueAlerts.js` — also schedules in-app T-3 via `scheduleReminder` (dedupeKey `ledger:{id}:due3d`); cancel on PAID |
 | Cron → WA: contract renewal 60d | ✅ | 2026-06-01 | `expiringAlerts.js` upgraded |
 | Payment confirm via WhatsApp | ✅ | 2026-06-01 | Tenant confirms payment from WA → updates LedgerRow to REPORTED |
 | Maintenance ticket via WhatsApp | ✅ | 2026-06-01 | Description + optional photo → creates MaintenanceTicket + uploads to R2 |
@@ -239,7 +239,7 @@
 | **V2-7 — GDPR Privacy** | — | Claude Code + Antigravity | ✅ Backend routes + Web profile page (3 buttons) |
 | **WhatsApp opt-in** | Phase 2 | Claude Code + Antigravity | ✅ Backend field + Web profile toggle |
 | **Web Refactor** | — | כל הצוות | ✅ 26 pages deployed — see `docs/internal/WEB_REFACTOR_STATUS.md` |
-| V2-1 — Stripe Connect | M5 | TBD | ❌ לא התחיל |
+| V2-1 — Stripe Connect | M5 | TBD | 🟡 RFC only — `docs/internal/RFC-stripe-connect.md` (blocked by license) |
 | **NF3 — Smart Onboarding + Trust Score v2** | M5 ✅ M11 ✅ Phase 2 ✅ | Cursor + Antigravity + Claude Code | 🟡 Core Backend Completed (17/17 tests passing; pending frontend UI & Cursor cron hooks) |
 
 ---
@@ -283,7 +283,7 @@
 
 | תאריך | גרסה | שינוי | מי |
 |--------|------|--------|-----|
-| 2026-06-12 | 3.7 | Trust Score Core & Onboarding APIs (NF3) — `TrustScoreEvent` model, `trustScoreService` (apply event, revoke rolling, get trust status), gamification points system decoupled from `trustScore`, GET `/api/v3/trust/me`, GET `/api/v3/trust/simulate`, GET `/api/v3/onboarding/checklist`, POST `/api/v3/onboarding/step/:key/dismiss`, hooks for KYC approved, agreements SIGNED transition, and WhatsApp opt-in profile settings, 17/17 tests passing. | Antigravity |
+| 2026-06-12 | 3.8 | Backlog P1/P2 — schema-drift test (models vs ensure*), post-deploy `npm run smoke`, financial cron adoption of `scheduleReminder` (ledger T-3 dedupe + cancel on PAID, guarantor 24h expiry), test fixes (database-schema 16 cols, socket User mock), RFC V2-1 Stripe Connect (design only), 15/15 backlog tests | Cursor |
 | 2026-06-12 | 3.6 | Maps (OSM/Leaflet, zero-cost) — `components/map/` ב-web-next: מפת מיקום בעמוד דירה (Circle ~200m לפרטיות), מבט מפה בעמוד חיפוש (markers עם מחיר), `latitude/longitude` ב-types. Backend geocoding (Nominatim) כבר היה קיים. אומת DOM מקומית (tiles+markers+circle); E2E פרודקשן ממתין | Claude Code |
 | 2026-06-12 | 3.5 | Scheduled Notifications — `scheduled_notifications` table (UUID, JSONB payload, dedupeKey, retry≤3), `scheduleReminder`/`cancelReminder` ב-notificationService, cron delivery כל 5 דקות, 7/7 tests | Claude Code |
 | 2026-06-12 | 3.4 | Dead-End Audit — 9 logic gaps closed: change-password endpoint + UI (היה שדה מת), notification prefs per-category keys persisted (נזרקו בשקט), fake WhatsApp OTP הוחלף ב-opt-in אמיתי, fake 2FA toggle הושבת, stub route נמחק, JSON 404 ל-API, error boundaries ל-web-next, cron safety wrapper, tx swallow ב-admin delete. Tests: change-password 6/6, build web-next ✅ | Claude Code |

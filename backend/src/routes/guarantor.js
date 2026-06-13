@@ -3,7 +3,16 @@ const crypto = require('crypto');
 const router = express.Router();
 const { AgreementGuarantor } = require('../models');
 const { sendGuarantorInvite } = require('../services/resendService');
+const { scheduleReminder, cancelReminder } = require('../services/notificationService');
 const { authenticate, requireRole } = require('../middleware/auth');
+
+function guarantorExpiry24hDedupeKey(guarantorId) {
+  return `guarantor:${guarantorId}:expiry24h`;
+}
+
+async function cancelGuarantorExpiryReminder(guarantorId) {
+  await cancelReminder({ dedupeKey: guarantorExpiry24hDedupeKey(guarantorId) }).catch(() => {});
+}
 
 // Load RentalAgreement dynamically
 let RentalAgreement;
@@ -49,6 +58,24 @@ router.post('/invite', authenticate, requireRole('landlord'), async (req, res, n
       period: agreementPeriod,
       link,
     }).catch(() => {});
+
+    const reminderAt = new Date(expiresAt.getTime() - 24 * 60 * 60 * 1000);
+    if (reminderAt.getTime() > Date.now()) {
+      await scheduleReminder(
+        req.user.id,
+        reminderAt,
+        {
+          title: 'תזכורת: הזמנת ערבות עומדת לפוג',
+          body: `הקישור לערב ${name} יפוג בעוד 24 שעות.`,
+          data: {
+            type: 'guarantor_expiry_24h',
+            guarantorId: guarantor.id,
+            agreementId,
+          },
+        },
+        { dedupeKey: guarantorExpiry24hDedupeKey(guarantor.id) }
+      ).catch(() => {});
+    }
 
     res.status(201).json({ guarantor, link });
   } catch (err) {
@@ -103,6 +130,7 @@ router.post('/flow/:token/decline', async (req, res, next) => {
     if (!guarantor) return res.status(404).json({ error: 'Invalid link' });
 
     await guarantor.update({ invitationStatus: 'DECLINED' });
+    await cancelGuarantorExpiryReminder(guarantor.id);
 
     if (RentalAgreement) {
       const agreement = await RentalAgreement.findByPk(guarantor.agreementId);
@@ -133,6 +161,7 @@ router.post('/flow/:token/complete', async (req, res, next) => {
       invitationStatus: 'APPROVED',
       signedAt: new Date(),
     });
+    await cancelGuarantorExpiryReminder(guarantor.id);
 
     res.json({ status: 'completed' });
   } catch (err) {
