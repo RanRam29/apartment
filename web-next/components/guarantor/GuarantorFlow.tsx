@@ -5,12 +5,22 @@ import { api } from "@/lib/api";
 import { toast } from "sonner";
 import Link from "next/link";
 
+interface PendingClaim {
+  id: string;
+  amount: number;
+  reason: string;
+  status: string;
+  createdAt: string;
+}
+
 interface GuarantorDetails {
   guarantorName: string;
+  invitationStatus?: string;
   propertyAddress: string;
   rentAmount: number;
   startDate: string;
   endDate: string;
+  pendingClaims?: PendingClaim[];
 }
 
 export function GuarantorFlow({ token }: { token: string }) {
@@ -28,6 +38,7 @@ export function GuarantorFlow({ token }: { token: string }) {
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState("");
   const [consentAccepted, setConsentAccepted] = useState(false);
+  const [claimActionId, setClaimActionId] = useState<string | null>(null);
 
   // Canvas ref for signature
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -41,6 +52,9 @@ export function GuarantorFlow({ token }: { token: string }) {
         setIsLoading(true);
         const res = await api<GuarantorDetails>(`/api/v3/guarantor/flow/${token}`);
         setDetails(res);
+        if (res.invitationStatus === "APPROVED") {
+          setStep(6);
+        }
       } catch (err: any) {
         console.error(err);
         // Map common error codes
@@ -99,7 +113,7 @@ export function GuarantorFlow({ token }: { token: string }) {
       const canvas = canvasRef.current;
       const ctx = canvas.getContext("2d");
       if (ctx) {
-        ctx.strokeStyle = "#1a365d"; // tenant-blue
+        ctx.strokeStyle = "#2e3b6b"; // tenant-blue
         ctx.lineWidth = 3;
         ctx.lineCap = "round";
       }
@@ -223,6 +237,23 @@ export function GuarantorFlow({ token }: { token: string }) {
   const formatDate = (dateStr: string) => {
     if (!dateStr) return "";
     return new Date(dateStr).toLocaleDateString("he-IL");
+  };
+
+  const handleClaimResponse = async (claimId: string, action: "accept" | "dispute") => {
+    setClaimActionId(claimId);
+    try {
+      await api(`/api/v3/claims/${claimId}/guarantor/${action}`, {
+        method: "POST",
+        body: { invitationToken: token },
+      });
+      toast.success(action === "accept" ? "התביעה אושרה" : "התביעה נדחתה — נשלחה התראה למשכיר");
+      const res = await api<GuarantorDetails>(`/api/v3/guarantor/flow/${token}`);
+      setDetails(res);
+    } catch {
+      toast.error("פעולה על התביעה נכשלה");
+    } finally {
+      setClaimActionId(null);
+    }
   };
 
   // Loading indicator
@@ -519,6 +550,70 @@ export function GuarantorFlow({ token }: { token: string }) {
                   אישור וחתימה סופית
                 </button>
               </div>
+            </div>
+          )}
+
+          {/* APPROVED GUARANTOR — pending warranty claims */}
+          {step === 6 && details && (
+            <div className="space-y-6">
+              <div className="text-center">
+                <span className="inline-block bg-green-50 text-landlord-green px-3 py-1 rounded-full text-caption font-bold border border-green-200/50 mb-3">
+                  פורטל ערב מאושר
+                </span>
+                <h2 className="text-h3-web font-extrabold text-tenant-blue">שלום {details.guarantorName},</h2>
+                <p className="text-caption text-on-surface-variant max-w-md mx-auto">
+                  הערבות שלך לנכס {details.propertyAddress} פעילה. להלן תביעות ערבות שהוגשו על ידי המשכיר:
+                </p>
+              </div>
+
+              {!details.pendingClaims?.length ? (
+                <div className="bg-slate-50 border border-outline-variant/30 rounded-2xl p-8 text-center">
+                  <span className="material-symbols-outlined text-[40px] text-landlord-green mb-2">check_circle</span>
+                  <p className="text-caption text-on-surface-variant">אין תביעות ערבות ממתינות לתגובתך</p>
+                </div>
+              ) : (
+                <ul className="space-y-4">
+                  {details.pendingClaims.map((claim) => (
+                    <li
+                      key={claim.id}
+                      className="bg-slate-50 border border-outline-variant/30 rounded-2xl p-5 space-y-3"
+                    >
+                      <div className="flex justify-between items-start gap-3">
+                        <div>
+                          <p className="font-bold text-tenant-blue text-label">
+                            {formatILS(Number(claim.amount))}
+                          </p>
+                          <p className="text-caption text-on-surface-variant mt-1">{claim.reason}</p>
+                          <p className="text-[11px] text-outline mt-2">
+                            הוגש: {formatDate(claim.createdAt)}
+                          </p>
+                        </div>
+                        <span className="text-[11px] font-bold px-2 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+                          ממתין לתגובה
+                        </span>
+                      </div>
+                      <div className="flex gap-3 pt-2">
+                        <button
+                          type="button"
+                          disabled={claimActionId === claim.id}
+                          onClick={() => handleClaimResponse(claim.id, "dispute")}
+                          className="flex-1 py-2.5 border border-red-200 text-red-600 rounded-full font-bold text-caption hover:bg-red-50 transition-colors disabled:opacity-50"
+                        >
+                          אני חולק
+                        </button>
+                        <button
+                          type="button"
+                          disabled={claimActionId === claim.id}
+                          onClick={() => handleClaimResponse(claim.id, "accept")}
+                          className="flex-1 py-2.5 bg-landlord-green text-white rounded-full font-bold text-caption hover:bg-landlord-green/90 transition-colors disabled:opacity-50"
+                        >
+                          {claimActionId === claim.id ? "שולח..." : "מאשר/ת את התביעה"}
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           )}
 

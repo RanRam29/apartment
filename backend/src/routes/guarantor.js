@@ -1,7 +1,7 @@
 const express = require('express');
 const crypto = require('crypto');
 const router = express.Router();
-const { AgreementGuarantor } = require('../models');
+const { AgreementGuarantor, RentalAgreement, WarrantyClaim, Apartment } = require('../models');
 const { sendGuarantorInvite } = require('../services/resendService');
 const { scheduleReminder, cancelReminder } = require('../services/notificationService');
 const { authenticate, requireRole } = require('../middleware/auth');
@@ -111,11 +111,56 @@ router.get('/flow/:token', async (req, res, next) => {
 
     res.json({
       guarantorName: guarantor.name,
+      guarantorId: guarantor.id,
+      invitationStatus: guarantor.invitationStatus,
       propertyAddress: agreementAddress,
       rentAmount: agreementRent,
       startDate: agreementStartDate,
       endDate: agreementEndDate,
+      pendingClaims: guarantor.invitationStatus === 'APPROVED'
+        ? await WarrantyClaim.findAll({
+            where: { guarantorId: guarantor.id, status: 'FILED' },
+            attributes: ['id', 'amount', 'reason', 'status', 'createdAt'],
+            order: [['createdAt', 'DESC']],
+          })
+        : [],
     });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Landlord: approved guarantors for filing warranty claims
+router.get('/approved', authenticate, requireRole('landlord'), async (req, res, next) => {
+  try {
+    const agreements = await RentalAgreement.findAll({
+      where: { landlordId: req.user.id },
+      attributes: ['id', 'propertyId', 'status'],
+    });
+    const agreementIds = agreements.map((a) => a.id);
+    if (!agreementIds.length) return res.json([]);
+
+    const guarantors = await AgreementGuarantor.findAll({
+      where: { agreementId: agreementIds, invitationStatus: 'APPROVED' },
+      attributes: ['id', 'agreementId', 'name', 'email', 'invitationStatus'],
+      order: [['createdAt', 'DESC']],
+    });
+
+    const aptByAgreement = new Map();
+    for (const ag of agreements) {
+      const apt = await Apartment.findByPk(ag.propertyId, {
+        attributes: ['id', 'title', 'address', 'city'],
+      });
+      aptByAgreement.set(ag.id, apt);
+    }
+
+    res.json(
+      guarantors.map((g) => ({
+        ...g.toJSON(),
+        agreementStatus: agreements.find((a) => a.id === g.agreementId)?.status,
+        apartment: aptByAgreement.get(g.agreementId) || null,
+      }))
+    );
   } catch (err) {
     next(err);
   }

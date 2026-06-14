@@ -262,7 +262,7 @@ export function SearchPage() {
           )}
 
           {/* Pagination (feed mode only) */}
-          {!nlpResults && totalPages > 1 && !isLoading && (
+          {!nlpResults && totalPages > 1 && !isLoading && viewMode !== "map" && (
             <div className="flex items-center justify-center gap-2 mt-8">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}

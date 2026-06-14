@@ -11,11 +11,13 @@
 
 | סטטוס | כמות |
 |--------|------|
-| 🔴 OPEN | 1 |
+| 🔴 OPEN | 2 |
 | 🔵 IN_PROGRESS | 0 |
 | ✅ FIXED (ממתין אימות) | 8 |
 | 🏁 CLOSED (RCA הושלם) | 17 |
-| **סה"כ** | **26** |
+| **סה"כ** | **27** |
+
+> 🆕 **2026-06-14 — BUG-020:** לא ניתן ליצור נכסים חדשים ב-web. עמוד `/properties` הוא `PlaceholderPage` ("בפיתוח"). הבאקאנד מוכן (`POST /api/apartments`). פער frontend בלבד → Antigravity.
 
 > 🆕 **2026-06-13 — BUG-019:** מייל אימות לא מגיע בפרודקשן. שורש הבעיה = קונפיג Resend ב-Render (לא קוד). תיקוני קוד נלווים נדחפו; ממתין לפעולת קונפיג של ראן.
 
@@ -27,6 +29,7 @@
 
 | ID | כותרת | עדיפות | סטטוס | מדווח | מטפל | תאריך פתיחה |
 |----|--------|---------|--------|--------|------|-------------|
+| [BUG-020](#bug-020) | לא ניתן ליצור נכסים חדשים ב-web (עמוד `/properties` = placeholder) | P1 | 🔴 OPEN | ראן | Antigravity | 2026-06-14 |
 | [BUG-019](#bug-019) | מייל אימות לא מגיע בפרודקשן (Resend config) | P1 | 🔴 OPEN | ראן | ראן (config) + Claude Code (code) | 2026-06-13 |
 | [BUG-001](#bug-001) | Admin login 503 — DB columns missing | P0 | 🏁 CLOSED | ראן | Claude Code | 2026-05-27 |
 | [BUG-002](#bug-002) | Admin login 401 — password hash out of sync | P1 | 🏁 CLOSED | ראן | Claude Code | 2026-05-28 |
@@ -57,6 +60,23 @@
 ---
 
 ## 🔵 IN_PROGRESS
+
+---
+
+### BUG-020
+**כותרת:** לא ניתן ליצור נכסים חדשים ב-web (עמוד `/properties` = placeholder)
+**עדיפות:** P1 — פיצ'ר מרכזי למשכיר חסום לחלוטין
+**סטטוס:** 🔴 OPEN
+**מדווח על ידי:** ראן | **תאריך:** 2026-06-14
+**מטפל:** Antigravity (frontend)
+
+**תיאור:**
+משכיר נכנס ל"ניהול נכסים" ומקבל מסך "עמוד זה נמצא כעת בפיתוח כחלק מגרסה MVP v3.0". אין דרך ליצור/לערוך מודעה ב-web. גם ה-FAB (+) וגם "צפה בכל הנכסים" בדשבורד מצביעים ל-`/properties`.
+
+**Root Cause:**
+`web-next/app/(app)/properties/page.tsx` מרנדר `<PlaceholderPage>` במקום מסך אמיתי. **באקאנד מוכן לחלוטין** — `POST /api/apartments` (`apartments.js:106`, multipart + images + geocoding), `PATCH /:id`, `DELETE /:id`. פער frontend בלבד.
+
+**Fix נדרש (Antigravity):** ראה briefing מלא בצ'אט — בנה מסך ניהול נכסים אמיתי (רשימה + מודאל יצירה) מחובר ל-`apiUpload`.
 
 ---
 

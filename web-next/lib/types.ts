@@ -309,6 +309,36 @@ export interface ContractListItem {
   monthlyRent: number;
 }
 
+export type WarrantyClaimStatus = "FILED" | "ACCEPTED" | "DISPUTED" | "RESOLVED";
+
+export interface WarrantyClaim {
+  id: string;
+  agreementId: string;
+  guarantorId: string;
+  amount: number | string;
+  reason: string;
+  status: WarrantyClaimStatus;
+  filedByUserId?: string;
+  resolutionNote?: string | null;
+  createdAt: string;
+  updatedAt?: string;
+  guarantor?: {
+    id: string;
+    name: string;
+    email: string;
+  };
+}
+
+export interface ApprovedGuarantorOption {
+  id: string;
+  agreementId: string;
+  name: string;
+  email: string;
+  invitationStatus: string;
+  agreementStatus?: string;
+  apartment?: { id: string; title: string; address?: string; city?: string } | null;
+}
+
 /* API Response wrappers */
 export interface LoginResponse {
   token: string;

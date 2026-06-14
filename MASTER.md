@@ -1,6 +1,6 @@
 # DirApp — MASTER STATUS DOCUMENT
 > **מנהל: Claude Code (Orchestrator)**  
-> **עדכון אחרון:** 2026-06-13 (v4.0)  
+> **עדכון אחרון:** 2026-06-14 (v4.4)  
 > **כלל ברזל:** זה המסמך היחיד שסומך עליו. כל שינוי קוד → עדכון כאן.
 
 ---
@@ -74,7 +74,7 @@
 | **אישור ליד** (`POST /api/matches/:id/accept`) | ✅ | 2026-05-30 | **BUG-003 CLOSED** — showAlert + tosAcceptedAt fixed (`43c43c3`) |
 | Chat Real-Time (backend) | ✅ | 2026-05-27 | backend עובד |
 | Chat navigation (frontend) | ✅ | 2026-05-30 | **BUG-008 CLOSED** — placeholder avatar + web navigation fixed (`43c43c3`) |
-| Maps — OSM/Leaflet (web) | 🟡 | 2026-06-12 | מפת מיקום בעמוד דירה (עיגול פרטיות ~200m) + מבט מפה בחיפוש. אפס עלות — ללא Google. ממתין לאימות E2E בפרודקשן |
+| Maps — OSM/Leaflet (web) | 🟡 | 2026-06-14 | מפת מיקום + מבט מפה בחיפוש. empty state + באנר "X מתוך Y עם מיקום"; pagination מוסתר במצב מפה. E2E פרודקשן ממתין |
 
 ---
 
@@ -241,7 +241,7 @@
 | **Web Refactor** | — | כל הצוות | ✅ 26 pages deployed — see `docs/internal/WEB_REFACTOR_STATUS.md` |
 | V2-1 — Stripe Connect | M5 | TBD | 🟡 RFC only — `docs/internal/RFC-stripe-connect.md` (blocked by license) |
 | **NF3 — Smart Onboarding + Trust Score v2** | M5 ✅ M11 ✅ Phase 2 ✅ | Cursor + Antigravity + Claude Code | ✅ Core backend (17/17); web `/trust` + `/onboarding` pages + sidebar link |
-| **V2-2 — Guarantor Claims** | M7 ✅ | Cursor | ✅ Backend K8 — `warranty_claims`, `/api/v3/claims`, 7/7 tests |
+| **V2-2 — Guarantor Claims** | M7 ✅ | Cursor | ✅ Backend K8 + **Web UI** — `/claims`, guarantor accept/dispute ב-flow, `GET /guarantor/approved` |
 | **V2-5 — Trust Score auto-calc** | M5 ✅ | Cursor + Claude Code | ✅ K6 reconciled onto NF3 events — `recalcTrustScoreForAgreement` fires `rent_paid_on_time`/`checkin_checkout_clean` idempotently from PAID + checkout hooks, 7/7 tests |
 | **Admin scheduled notifications** | 225bf29 | Cursor | ✅ K7 — list + cancel endpoints, 4/4 tests |
 
@@ -251,10 +251,12 @@
 
 > 📋 פירוט מלא: [`BUGS.md`](BUGS.md)
 
-**אין באגים פתוחים.** כל 19 הבאגים (כולל 7 ממצאי אבטחה) נסגרו.
+**2 באגים פתוחים (P1).**
 
 | # | תיאור | מטפל | מצב |
 |---|--------|------|-----|
+| BUG-020 | לא ניתן ליצור נכסים חדשים ב-web (`/properties` = placeholder; backend מוכן) | Antigravity | 🔴 OPEN |
+| BUG-019 | מייל אימות לא מגיע בפרודקשן (Resend config ב-Render) | ראן (config) + Claude Code (code) | 🔴 OPEN |
 | SEC-001 | Contracts V3 IDOR | Claude Code | 🏁 CLOSED |
 | SEC-002 | Ledger IDOR | Cursor | 🏁 CLOSED |
 | SEC-003 | Rate limit behind proxy | Claude Code | 🏁 CLOSED |
@@ -286,6 +288,8 @@
 
 | תאריך | גרסה | שינוי | מי |
 |--------|------|--------|-----|
+| 2026-06-14 | 4.4 | **Maps polish + V2-2 Guarantor Claims UI merged.** חיפוש: empty state במפה, באנר מיקומים חלקיים, הסתרת pagination במצב map. **תביעות ערבות:** `/claims` (landlord file + admin resolve), sidebar links, קישור מדף חוזה. **Guarantor flow:** pending claims accept/dispute via invitation token; `GET /api/v3/guarantor/approved` + `pendingClaims` ב-flow response | Cursor |
+| 2026-06-14 | 4.3 | **BUG-020 triage — לא ניתן ליצור נכסים חדשים ב-web.** עמוד `/properties` (`web-next`) הוא `PlaceholderPage` ("בפיתוח MVP v3.0"); FAB+"צפה בכל הנכסים" בדשבורד מצביעים לשם. **Root cause = פער frontend בלבד — הבאקאנד מוכן** (`POST/PATCH/DELETE /api/apartments`, multipart+images+geocoding). תועד ב-BUGS.md (P1) + briefing מלא ל-Antigravity. ממתין למימוש frontend | Claude Code |
 | 2026-06-13 | 4.2 | **BUG-019 — מייל אימות לא מגיע בפרודקשן (root cause = קונפיג Resend, לא קוד).** כשל שקט: שליחת Resend זורקת (`RESEND_API_KEY` חסר ב-Render ו/או דומיין `dirapp.co.il` לא מאומת), השגיאה נתפסת ב-`logger.warn` → ההרשמה מצליחה בלי מייל. תיקון קוד: קישור האימות עבר ל-`resolveWebBaseUrl()` שקורא גם `CLIENT_ORIGINS` (היה נופל ל-localhost) `65a8d2a`; תיעוד env ב-render.yaml `68a5aa7`. **פעולה פתוחה (ראן): הזנת `RESEND_API_KEY`+`RESEND_FROM_EMAIL` ב-Render Dashboard / אימות דומיין.** auth 23/23 | Claude Code |
 | 2026-06-13 | 4.1 | **Debug session — 6 NF3 באגים תוקנו (TDD, כולם FIXED).** BUG-013 TOCTOU ledger race (unique index `ledger_rows(agreement_id,period)` + catch), BUG-014 revoke re-grant (שחרור dedupeKey), BUG-015 cap clamp (שדה `cappedDelta`), BUG-016 admin trustScore/blockedCount validation (422), BUG-017 onboarding dismiss whitelist (400), BUG-018 GDPR cron per-user isolation (try/catch). 2 ensure helpers חדשים ב-boot (`ensureLedgerRowPeriodUniqueIndex`, `ensureTrustScoreEventCappedDeltaColumn`). רגרסיה: 75/75 ב-10 חבילות. פירוט ב-BUGS.md | Claude Code |
 | 2026-06-13 | 4.0 | **Orchestrator merge — Cursor K6–K9 integrated to main.** K7 admin scheduled-notifications (4/4), K8 V2-2 guarantor warranty claims `warranty_claims`+`/api/v3/claims` (7/7), backlog (schema-drift guard, `npm run smoke`, cron `scheduleReminder` adoption). **K6 Trust Score auto-calc reconciled onto the live NF3 event system** (not a parallel recalc): `recalcTrustScoreForAgreement` fires `rent_paid_on_time`/`checkin_checkout_clean` idempotently from PAID + checkout hooks (7/7). Web `/trust`+`/onboarding` pages + sidebar link. Regression 59/59 across 8 suites | Claude Code |

@@ -210,11 +210,22 @@ export default function ContractDetailPage({ params }: { params: Promise<{ id: s
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Link href="/contracts" className="text-on-surface-variant hover:text-tenant-blue">
-          <span className="material-symbols-outlined">arrow_forward</span>
-        </Link>
-        <h1 className="text-[28px] font-bold text-tenant-blue">פרטי חוזה</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <Link href="/contracts" className="text-on-surface-variant hover:text-tenant-blue">
+            <span className="material-symbols-outlined">arrow_forward</span>
+          </Link>
+          <h1 className="text-[28px] font-bold text-tenant-blue">פרטי חוזה</h1>
+        </div>
+        {isLandlord && status === "ACTIVE" && (
+          <Link
+            href="/claims"
+            className="inline-flex items-center gap-2 h-[40px] px-4 bg-surface-container-low border border-outline-variant rounded-full text-[14px] font-medium text-tenant-blue hover:bg-surface-container"
+          >
+            <span className="material-symbols-outlined text-[18px]">gavel</span>
+            תביעות ערבות
+          </Link>
+        )}
       </div>
 
       <div className={`rounded-xl p-6 border border-outline-variant soft-shadow ${statusMeta.className}`}>
