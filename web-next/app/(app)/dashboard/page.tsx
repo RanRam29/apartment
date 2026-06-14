@@ -5,6 +5,7 @@ import Link from "next/link";
 import useSWR from "swr";
 import { api } from "@/lib/api";
 import type { Apartment, Contract, Notification, GamificationProfile } from "@/lib/types";
+import { getFirstApartmentImageUrl } from "@/lib/apartment-images";
 import { LandlordDashboard } from "@/components/dashboard/LandlordDashboard";
 
 const fetcher = <T,>(url: string) => api<T>(url);
@@ -26,50 +27,107 @@ function QuickActionCard({
   );
 }
 
+type ChecklistItem = {
+  key: string;
+  title: string;
+  completed: boolean;
+  dismissed: boolean;
+};
+
+type ChecklistResponse = {
+  role: "tenant" | "landlord";
+  checklist: ChecklistItem[];
+  completionPct: number;
+};
+
+function ProfileCompletionWidget({
+  checklist,
+  completionPct,
+}: {
+  checklist: ChecklistItem[];
+  completionPct: number;
+}) {
+  const nextStep = checklist.find((item) => !item.completed && !item.dismissed);
+
+  return (
+    <div className="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant soft-shadow mb-[24px] text-right" dir="rtl">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+        <div>
+          <h4 className="text-[18px] font-bold text-tenant-blue mb-1">השלמת הפרופיל שלך: {completionPct}%</h4>
+          {nextStep ? (
+            <p className="text-[14px] text-on-surface-variant">
+              השלם את הצעד הבא:{" "}
+              <Link href="/onboarding" className="text-landlord-green font-bold hover:underline">
+                {nextStep.title} ➔
+              </Link>
+            </p>
+          ) : (
+            <p className="text-[14px] text-on-surface-variant">כל השלבים הושלמו או דולגו!</p>
+          )}
+        </div>
+        <Link
+          href="/onboarding"
+          className="px-6 h-10 bg-tenant-blue text-white rounded-full font-bold text-[14px] flex items-center justify-center hover:scale-[1.02] transition-all"
+        >
+          המשך באונבורדינג
+        </Link>
+      </div>
+      <div className="w-full bg-surface-container-highest h-2.5 rounded-full overflow-hidden">
+        <div
+          className="bg-landlord-green h-full transition-all duration-500 ease-out"
+          style={{ width: `${completionPct}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
 function TrustScoreCard({ score, onTimePercentage, kycStatus }: { score: number; onTimePercentage: number; kycStatus: string }) {
   const circumference = 2 * Math.PI * 58;
   const offset = circumference - (score / 100) * circumference;
 
   return (
-    <div className="bg-tenant-blue rounded-2xl p-8 text-white soft-shadow relative overflow-hidden">
-      <h3 className="text-[22px] leading-[30px] font-semibold mb-6">דירוג האמינות שלך</h3>
-      <div className="flex items-center gap-6 mb-6">
-        <div className="relative">
-          <svg className="w-32 h-32 -rotate-90" viewBox="0 0 128 128">
-            <circle cx="64" cy="64" r="58" fill="none" stroke="#1a365d" strokeWidth="8" />
-            <circle cx="64" cy="64" r="58" fill="none" stroke="#00cba9" strokeWidth="8"
-              strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round" />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-3xl font-extrabold">{score}</span>
-            <span className="text-[10px] opacity-60">מתוך 100</span>
-          </div>
-        </div>
-        <div className="flex-grow">
-          <p className="text-[14px] font-medium text-landlord-green mb-4">
-            {score >= 80 ? "דירוג מעולה!" : score >= 60 ? "דירוג טוב" : "דירוג בסיסי"}
-          </p>
-          <div className="space-y-3">
-            <div>
-              <div className="flex justify-between text-[12px] mb-1"><span>{onTimePercentage}%</span><span>תשלומים בזמן</span></div>
-              <div className="w-full bg-[#1a365d] h-1 rounded-full overflow-hidden">
-                <div className="bg-landlord-green h-full transition-all duration-500" style={{ width: `${onTimePercentage}%` }} />
-              </div>
-            </div>
-            <div>
-              <div className="flex justify-between text-[12px] mb-1">
-                <span>{kycStatus === "APPROVED" ? "מאומת" : kycStatus === "PENDING" ? "באימות" : "טרם אומת"}</span>
-                <span>אימות זהות (KYC)</span>
-              </div>
-              <div className="w-full bg-[#1a365d] h-1 rounded-full overflow-hidden">
-                <div className="bg-landlord-green h-full transition-all duration-500" style={{ width: kycStatus === "APPROVED" ? "100%" : kycStatus === "PENDING" ? "50%" : "0%" }} />
-              </div>
+    <Link href="/trust" className="block hover:scale-[1.01] transition-transform">
+      <div className="bg-tenant-blue rounded-2xl p-8 text-white soft-shadow relative overflow-hidden text-right" dir="rtl">
+        <h3 className="text-[22px] leading-[30px] font-semibold mb-6">דירוג האמינות שלך</h3>
+        <div className="flex items-center gap-6 mb-6">
+          <div className="relative">
+            <svg className="w-32 h-32 -rotate-90" viewBox="0 0 128 128">
+              <circle cx="64" cy="64" r="58" fill="none" stroke="#1a365d" strokeWidth="8" />
+              <circle cx="64" cy="64" r="58" fill="none" stroke="#00cba9" strokeWidth="8"
+                strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round" />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className="text-3xl font-extrabold">{score}</span>
+              <span className="text-[10px] opacity-60">מתוך 100</span>
             </div>
           </div>
+          <div className="flex-grow">
+            <p className="text-[14px] font-medium text-landlord-green mb-4">
+              {score >= 80 ? "דירוג מעולה!" : score >= 60 ? "דירוג טוב" : "דירוג בסיסי"}
+            </p>
+            <div className="space-y-3">
+              <div>
+                <div className="flex justify-between text-[12px] mb-1"><span>{onTimePercentage}%</span><span>תשלומים בזמן</span></div>
+                <div className="w-full bg-[#1a365d] h-1 rounded-full overflow-hidden">
+                  <div className="bg-landlord-green h-full transition-all duration-500" style={{ width: `${onTimePercentage}%` }} />
+                </div>
+              </div>
+              <div>
+                <div className="flex justify-between text-[12px] mb-1">
+                  <span>{kycStatus === "APPROVED" ? "מאומת" : kycStatus === "PENDING" ? "באימות" : "טרם אומת"}</span>
+                  <span>אימות זהות (KYC)</span>
+                </div>
+                <div className="w-full bg-[#1a365d] h-1 rounded-full overflow-hidden">
+                  <div className="bg-landlord-green h-full transition-all duration-500" style={{ width: kycStatus === "APPROVED" ? "100%" : kycStatus === "PENDING" ? "50%" : "0%" }} />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+        <div className="absolute -left-10 -top-10 w-40 h-40 bg-[#1a365d]/20 rounded-full blur-3xl" />
       </div>
-      <div className="absolute -left-10 -top-10 w-40 h-40 bg-[#1a365d]/20 rounded-full blur-3xl" />
-    </div>
+    </Link>
   );
 }
 
@@ -83,6 +141,7 @@ export default function DashboardPage() {
   const { data: notifications } = useSWR<{ notifications: Notification[] }>("/api/notifications?limit=3", fetcher);
   const { data: renterJournal } = useSWR<any>(user ? `/api/v3/renter-journal/${user.id}` : null, fetcher);
   const { data: journalData } = useSWR<any>("/api/tenant/journal", fetcher);
+  const { data: onboarding } = useSWR<ChecklistResponse>("/api/v3/onboarding/checklist", fetcher);
 
   if (role === "landlord") {
     return <LandlordDashboard />;
@@ -153,6 +212,13 @@ export default function DashboardPage() {
         <p className="text-[18px] leading-[26px] font-semibold text-on-surface-variant opacity-80">מה תרצה לעשות היום?</p>
       </header>
 
+      {onboarding && onboarding.completionPct < 100 && (
+        <ProfileCompletionWidget
+          checklist={onboarding.checklist}
+          completionPct={onboarding.completionPct}
+        />
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-[24px] mb-[24px]">
         <QuickActionCard href="/search" icon="search" ghostIcon="apartment" label="חפש דירה" gradient="bg-gradient-to-br from-landlord-green to-[#006b5f]" />
         <QuickActionCard href="/matches" icon="handshake" ghostIcon="favorite" label="צפה בהתאמות" gradient="bg-tenant-blue" />
@@ -167,11 +233,13 @@ export default function DashboardPage() {
               <Link href="/search" className="text-[#006b5f] text-[14px] font-medium hover:underline">צפה בכל הדירות</Link>
             </div>
             <div className="space-y-4">
-              {recommendedApts.length > 0 ? recommendedApts.map((apt) => (
+              {recommendedApts.length > 0 ? recommendedApts.map((apt) => {
+                const thumb = getFirstApartmentImageUrl(apt.images);
+                return (
                 <Link key={apt.id} href={`/apartment/${apt.id}`}
                   className="bg-surface-container-lowest rounded-xl p-4 flex items-center soft-shadow hover:bg-surface-container-low transition-colors border border-transparent hover:border-outline-variant block">
                   <div className="w-32 h-24 rounded-lg overflow-hidden shrink-0 bg-surface-container flex items-center justify-center">
-                    {apt.images?.[0] ? <img src={apt.images[0]} alt="" className="w-full h-full object-cover" /> : <span className="material-symbols-outlined text-[40px] text-outline/30">apartment</span>}
+                    {thumb ? <img src={thumb} alt="" className="w-full h-full object-cover" /> : <span className="material-symbols-outlined text-[40px] text-outline/30">apartment</span>}
                   </div>
                   <div className="mr-4 flex-grow">
                     <div className="flex justify-between items-start">
@@ -189,7 +257,8 @@ export default function DashboardPage() {
                     </div>
                   </div>
                 </Link>
-              )) : (
+              );
+              }) : (
                 <div className="bg-surface-container-lowest rounded-xl p-8 text-center soft-shadow">
                   <span className="material-symbols-outlined text-[48px] text-outline/30 mb-2">search</span>
                   <p className="text-on-surface-variant">אין דירות מומלצות עדיין</p>

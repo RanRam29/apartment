@@ -42,8 +42,15 @@ async function handleWebhook(rawBody, signature) {
   const payload = JSON.parse(rawBody);
   const inquiryId = payload.data?.attributes?.inquiry_id || payload.data?.id;
   const status = payload.data?.attributes?.status;
+  const referenceId = payload.data?.attributes?.reference_id;
 
-  const kyc = await UserKycProfile.findOne({ where: { personaInquiryId: inquiryId } });
+  let kyc = await UserKycProfile.findOne({ where: { personaInquiryId: inquiryId } });
+  if (!kyc && referenceId) {
+    kyc = await UserKycProfile.findOne({ where: { userId: referenceId } });
+    if (kyc) {
+      await kyc.update({ personaInquiryId: inquiryId });
+    }
+  }
   if (!kyc) return { processed: false };
 
   const newStatus = status === 'completed' ? 'APPROVED' : status === 'failed' ? 'REJECTED' : kyc.status;
@@ -56,6 +63,12 @@ async function handleWebhook(rawBody, signature) {
     try {
       const gamificationService = require('./gamificationService');
       await gamificationService.awardPoints(kyc.userId, 'identity_verified').catch(() => {});
+    } catch (_) {}
+
+    // Trigger Trust Score!
+    try {
+      const { applyTrustEvent } = require('./trustScoreService');
+      await applyTrustEvent(kyc.userId, 'kyc_approved');
     } catch (_) {}
   }
 

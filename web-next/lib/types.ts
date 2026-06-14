@@ -21,7 +21,15 @@ export interface User {
   whatsappOptIn: boolean;
   avatarUrl?: string;
   isVerified?: boolean;
+  bio?: string;
   createdAt: string;
+}
+
+export interface ApartmentImage {
+  url: string;
+  publicId?: string;
+  width?: number;
+  height?: number;
 }
 
 export interface Apartment {
@@ -41,7 +49,7 @@ export interface Apartment {
   arnona?: number;
   vaadBayit?: number;
   amenities: string[];
-  images: string[];
+  images: (string | ApartmentImage)[];
   availableFrom?: string;
   minLeaseDuration?: number;
   petsAllowed?: boolean;

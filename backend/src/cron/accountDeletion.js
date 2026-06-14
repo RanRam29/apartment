@@ -16,32 +16,39 @@ async function runAccountDeletion() {
     },
   });
 
+  let anonymized = 0;
   for (const user of users) {
-    await user.update({
-      email: `deleted-${user.id}@deleted.dirapp.local`,
-      firstName: 'משתמש',
-      lastName: 'שנמחק',
-      phone: null,
-      avatarUrl: null,
-      bio: null,
-      passwordHash: crypto.randomBytes(32).toString('hex'),
-      verificationToken: null,
-      isLocked: true,
-      whatsappOptIn: false,
-    });
-    await logAudit({
-      actorId: null,
-      actorRole: 'system',
-      action: 'GDPR_DELETION_EXECUTED',
-      resourceType: 'user',
-      resourceId: user.id,
-      outcome: AUDIT_OUTCOMES.SUCCESS,
-      statusCode: 200,
-    });
-    logger.info(`GDPR deletion executed for user ${user.id}`);
+    // Isolate each user — one failure must not abort the whole batch (BUG-018).
+    try {
+      await user.update({
+        email: `deleted-${user.id}@deleted.dirapp.local`,
+        firstName: 'משתמש',
+        lastName: 'שנמחק',
+        phone: null,
+        avatarUrl: null,
+        bio: null,
+        passwordHash: crypto.randomBytes(32).toString('hex'),
+        verificationToken: null,
+        isLocked: true,
+        whatsappOptIn: false,
+      });
+      await logAudit({
+        actorId: null,
+        actorRole: 'system',
+        action: 'GDPR_DELETION_EXECUTED',
+        resourceType: 'user',
+        resourceId: user.id,
+        outcome: AUDIT_OUTCOMES.SUCCESS,
+        statusCode: 200,
+      });
+      anonymized += 1;
+      logger.info(`GDPR deletion executed for user ${user.id}`);
+    } catch (err) {
+      logger.error(`GDPR deletion failed for user ${user.id}: ${err.message}`);
+    }
   }
 
-  return users.length;
+  return anonymized;
 }
 
 module.exports = { runAccountDeletion, GRACE_PERIOD_DAYS };

@@ -21,6 +21,36 @@ function hashVerificationToken(raw) {
   return crypto.createHash('sha256').update(raw).digest('hex');
 }
 
+// Resolve the public web base URL for links inside emails (e.g. verification).
+// Honours APP_BASE_URL, then CLIENT_ORIGIN, then the first entry of the
+// comma-separated CLIENT_ORIGINS (used by CORS on Render), then a localhost
+// fallback for local dev. Prevents verification links pointing at localhost in
+// production when only CLIENT_ORIGINS is configured.
+function resolveWebBaseUrl() {
+  const fromOrigins = String(process.env.CLIENT_ORIGINS || '')
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean)[0];
+  const base =
+    process.env.APP_BASE_URL ||
+    process.env.CLIENT_ORIGIN ||
+    fromOrigins ||
+    'http://localhost:3000';
+  return String(base).replace(/\/$/, '');
+}
+
+function sanitizeIsraeliPhone(value) {
+  if (!value) return null;
+  let cleaned = String(value).replace(/[-\s]/g, '');
+  if (cleaned.startsWith('972')) {
+    cleaned = '+' + cleaned;
+  }
+  if (/^[2-9][0-9]{8}$/.test(cleaned)) {
+    cleaned = '0' + cleaned;
+  }
+  return cleaned;
+}
+
 async function issueVerificationTokenForUser(user) {
   const verificationToken = crypto.randomBytes(32).toString('hex');
   const verificationCacheKey = `email:verify:${verificationToken}`;
@@ -36,11 +66,7 @@ async function issueVerificationTokenForUser(user) {
     logger.warn(`Failed to persist verification token for user ${user.id}: ${err.message}`);
   }
 
-  const appBaseUrl =
-    process.env.APP_BASE_URL ||
-    process.env.CLIENT_ORIGIN ||
-    'http://localhost:3000';
-  const cleanBase = String(appBaseUrl).replace(/\/$/, '');
+  const cleanBase = resolveWebBaseUrl();
   const verificationUrl = `${cleanBase}/verify-email?token=${verificationToken}`;
 
   try {
@@ -420,12 +446,13 @@ router.get('/me', require('../middleware/auth').authenticate, async (req, res, n
 // PATCH /api/auth/profile — update name and/or phone
 router.patch('/profile', require('../middleware/auth').authenticate, async (req, res, next) => {
   try {
-    const { firstName, lastName, phone, whatsappOptIn } = req.body;
+    const { firstName, lastName, phone, whatsappOptIn, bio } = req.body;
     const updates = {};
     if (firstName && typeof firstName === 'string') updates.firstName = firstName.trim();
     if (lastName && typeof lastName === 'string') updates.lastName = lastName.trim();
-    if (phone !== undefined) updates.phone = phone ? String(phone).trim() : null;
+    if (phone !== undefined) updates.phone = sanitizeIsraeliPhone(phone);
     if (whatsappOptIn !== undefined) updates.whatsappOptIn = !!whatsappOptIn;
+    if (bio !== undefined) updates.bio = typeof bio === 'string' ? bio.trim() : bio;
 
     if (Object.keys(updates).length === 0) {
       return res.status(422).json({ error: 'No valid fields to update' });
@@ -434,7 +461,25 @@ router.patch('/profile', require('../middleware/auth').authenticate, async (req,
     const user = await User.findByPk(req.user.id);
     if (!user) return res.status(404).json({ error: 'User not found' });
 
+    const wasOptedIn = user.whatsappOptIn;
     await user.update(updates);
+    if (updates.whatsappOptIn === true && !wasOptedIn) {
+      try {
+        const { applyTrustEvent } = require('../services/trustScoreService');
+        await applyTrustEvent(user.id, 'whatsapp_opt_in');
+      } catch (_) {}
+
+      // Send a welcome message via WhatsApp!
+      try {
+        const { sendText } = require('../services/whatsappApiClient');
+        if (user.phone) {
+          await sendText({
+            phoneNumber: user.phone,
+            body: `היי ${user.firstName}, ברוך הבא ל-DirApp! חשבון ה-WhatsApp שלך מחובר כעת לקבלת עדכונים על תשלומים, חוזים ותחזוקה. 🛡️`
+          }).catch(() => {});
+        }
+      } catch (_) {}
+    }
     const { passwordHash: _, ...safeUser } = user.toJSON();
     await logAudit({
       ...req.getAuditContext?.(),
@@ -613,8 +658,26 @@ router.put('/notification-preferences', require('../middleware/auth').authentica
     const user = await User.findByPk(req.user.id);
     if (!user) return res.status(404).json({ error: 'User not found' });
 
+    const wasOptedIn = user.whatsappOptIn;
     const merged = { ...(user.notificationPreferences || {}), ...prefs };
     await user.update({ notificationPreferences: merged, whatsappOptIn: merged.whatsapp });
+    if (merged.whatsapp === true && !wasOptedIn) {
+      try {
+        const { applyTrustEvent } = require('../services/trustScoreService');
+        await applyTrustEvent(user.id, 'whatsapp_opt_in');
+      } catch (_) {}
+
+      // Send a welcome message via WhatsApp!
+      try {
+        const { sendText } = require('../services/whatsappApiClient');
+        if (user.phone) {
+          await sendText({
+            phoneNumber: user.phone,
+            body: `היי ${user.firstName}, ברוך הבא ל-DirApp! חשבון ה-WhatsApp שלך מחובר כעת לקבלת עדכונים על תשלומים, חוזים ותחזוקה. 🛡️`
+          }).catch(() => {});
+        }
+      } catch (_) {}
+    }
 
     await logAudit({
       ...req.getAuditContext?.(),

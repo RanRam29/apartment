@@ -1,80 +1,200 @@
-# Handoff — Claude Code Session 2026-06-12 (ערב)
-> **Orchestrator:** Claude Code | למפגש הבא: קרא MASTER.md (v3.5) ואת הקובץ הזה.
+# Briefing → Claude Code (Orchestrator) — Cursor Handoff Jun 12
+
+> **Worktree:** `C:\apartmentapp-cursor`  
+> **Base:** `main` @ `225bf29` (Scheduled Notifications — `afe8bf2` + `225bf29` already on main)  
+> **Agent:** Cursor — **לא בוצע merge**; 4 ענפים מוכנים ל-review + merge  
+> **MASTER.md:** עודכן ל-v3.6 על `cursor/branch-cleanup` בלבד — יש לוודא שהגרסה הסופית נכנסת ל-main עם המיזוגים
 
 ---
 
-## מה נעשה במפגש הזה (merged + pushed to main)
+## 1. סיכום מנהלים
+
+| # | עדיפות | משימה | ענף | Commit | Tests |
+|---|--------|--------|-----|--------|-------|
+| K6 | P1 | V2-5 Trust Score auto-calc | `cursor/trust-score-auto-calc` | `81f3033` | 5/5 |
+| K7 | P2 | Admin scheduled notifications | `cursor/admin-scheduled-notifications` | `dc43efa` | 4/4 |
+| K8 | P2 | V2-2 Guarantor Claims (backend) | `cursor/guarantor-claims` | `7d91466` | 7/7 |
+| K9 | P3 | Branch cleanup (remote) + handoff brief | `cursor/branch-cleanup` | `9dfec98` | — |
+
+**סה"כ tests חדשים:** 16/16 passing (runInBand).
+
+---
+
+## 2. K6 — Trust Score auto-calc (V2-5)
+
+**בעיה:** `users.trustScore` default 50 — אין workflow שמעדכן אחרי התנהגות אמיתית.
+
+**פתרון:**
+- `backend/src/services/trustScoreService.js`
+  - `recalcTrustScore(userId)` — base מ-`AppConfig.initial_trust_score` (50)
+  - **+2** תשלום בזמן (PAID + `confirmedByLandlord` ≤ dueDate)
+  - **−5** כל שורת OVERDUE
+  - **+5** checkout הושלם בלי `checkoutNotes` בחדרים
+  - **+2** לכל תקלת תחזוקה CLOSED עם `landlordResponse` (landlord)
+  - clamp 0–100 (`max_trust_score`)
+- **Hooks:**
+  - `ledgerService.confirmPayment` + `autoConfirmStalePayments`
+  - `POST /api/v3/contracts/:id/checkout/complete` (`contractsV3.js`)
+
+**UI:** לא נגע — Antigravity מציג.
+
+**Verify:**
+```bash
+cd backend && npx jest tests/trustScoreService.test.js --runInBand
+```
+
+---
+
+## 3. K7 — Admin Scheduled Notifications
+
+**תלות:** `225bf29` — `scheduled_notifications`, `scheduleReminder`, `cancelReminder` כבר על main.
+
+**Endpoints חדשים** (`backend/src/routes/admin.js`):
+| Method | Path | תיאור |
+|--------|------|--------|
+| GET | `/api/v3/admin/scheduled-notifications?status=&page=&limit=` | paginated + `user.email` |
+| POST | `/api/v3/admin/scheduled-notifications/:id/cancel` | רק `SCHEDULED` → `cancelReminder({ id })` |
+
+**Verify:**
+```bash
+cd backend && npx jest tests/adminScheduledNotifications.test.js --runInBand
+```
+
+---
+
+## 4. K8 — V2-2 Guarantor Claims (backend)
+
+**מודל:** `backend/src/models/pg/WarrantyClaim.js` → `warranty_claims`  
+**שדות:** UUID PK, `agreementId`, `guarantorId`, `amount`, `reason`, `status` STRING + `isIn: [FILED, ACCEPTED, DISPUTED, RESOLVED]`, `filedByUserId`, `resolutionNote`
+
+**Routes:** `backend/src/routes/claimsV3.js` → mount `app.use('/api/v3/claims', ...)`
+
+| Action | Route | Auth |
+|--------|-------|------|
+| Landlord file | `POST /api/v3/claims` | landlord, agreement owner only (**IDOR → 404**) |
+| List | `GET /api/v3/claims` | landlord (own) / admin (all) |
+| Guarantor accept | `POST /api/v3/claims/:id/guarantor/accept` | `{ invitationToken }` |
+| Guarantor dispute | `POST /api/v3/claims/:id/guarantor/dispute` | `{ invitationToken }` |
+| Admin resolve | `POST /api/v3/claims/:id/resolve` | admin |
+
+**notify()** על כל מעבר סטטוס → landlord.
+
+**Verify:**
+```bash
+cd backend && npx jest tests/warrantyClaims.test.js --runInBand --forceExit
+```
+
+**DB:** Sequelize sync יוצר `warranty_claims` ב-boot; אין migration נפרד.
+
+---
+
+## 5. K9 — Branch cleanup
+
+**בוצע על remote (GitHub):**
+- **31** ענפי merged נמחקו (83 → **52** remote branches)
+- `origin/HEAD` → `origin/main`
+- **Protected (לא נמחקו):** `main`, `cursor/financial-admin`, `fix/ledger-idor-gdpr`
+
+**לא הגענו ליעד <15** — נשארו **52** unmerged/stale. פירוט: `docs/internal/branch-cleanup-jun12.md`
+
+**המלצה ל-Orchestrator — מחיקה בטוחה (unmerged stale):**
+- 25× `origin/claude/phase4-*` … `phase28-*`
+- 19× unmerged `origin/cursor/critical-bug-inspection-*` / `critical-bug-investigation-*`
+- `origin/claude/build-dirapp-ui-PB8Jz`, `origin/claude/free-deploy-render-upstash`
+- `origin/cursor/dev-environment-setup-1e70`
+- `origin/feat/mobile-dirapp-design-baseline-checkpoint`
+
+**Script לעתיד:** `backend/scripts/delete-merged-branches.ps1`
+
+---
+
+## 6. Backlog — הושלם (`cursor/backlog-jun12`)
+
+**ענף:** `cursor/backlog-jun12` @ `64fff5a` — **pushed**
 
 | Commit | תוכן |
 |--------|------|
-| `afe8bf2` | Dead-End Audit — change-password endpoint+UI, notification prefs per-category persisted, fake WhatsApp OTP→opt-in אמיתי, fake 2FA disabled, stub route נמחק, JSON 404 ל-API, error boundaries ל-web-next, footer links |
-| `225bf29` | Scheduled Notifications — `scheduled_notifications` table, `scheduleReminder`/`cancelReminder`, delivery cron כל 5 דק', safeCron wrapper לכל הקרונים, 7/7 tests |
+| `aa96c77` | schema-drift test + database-schema/socket mock fixes (16 user cols) |
+| `5a5fc49` | `npm run smoke` + `backend/scripts/smoke.js` |
+| `8a8a8d2` | scheduleReminder ב-ledgerDueAlerts (T-3), guarantor 24h, cancel on PAID |
+| `64fff5a` | RFC Stripe Connect + MASTER v3.8 |
 
-**Deploy:** Vercel production READY (אומת דרך MCP, commit 225bf29). **Render לא אומת** —
-הרשת הארגונית חוסמת CLI; אימות ידני בדפדפן: `GET /api/anything-fake` צריך להחזיר
-`{"error":"Not found"}` (JSON, לא HTML) = הקוד החדש חי. + `GET /health`.
+**Tests:** 15/15 (`schema-drift`, `database-schema`, `socket`, `financialScheduledReminders`)  
+**npm audit:** High/Critical — נקי (exit 0)
 
-**ידוע:** ~21 סוויטות backend נכשלות מקומית בריצה מקבילה (אין Mongo מקומי) — לא רגרסיה.
-database-schema.test.js + socket.test.js אדומות גם על main נקי (mock drift) — משימה אצל Cursor.
-
----
-
-## תור משימות — Antigravity (Windsurf) — `C:\apartmentapp-windsurf`
-
-> לכל משימה: branch נפרד `wind/<desc>`, main עדכני, בלי merge — Claude Code ממזג. עדכן MASTER.md בסיום.
-
-| # | עדיפות | משימה | תמצית |
-|---|--------|--------|--------|
-| W1 | P1 | B4 — כפתורים מתים (סריקה סטטית) | `grep Alert.alert mobile/src` → showAlert(); onPress ריקים; API בלי catch. FINDINGS.md |
-| W2 | P1 | Mobile change-password | endpoint חדש `POST /api/auth/change-password` {currentPassword,newPassword≥8}; מסך מ-ProfileScreen; בלי 2FA toggle |
-| W3 | P1 | **Google Sign-In (web)** | בריף מלא נמסר לראן בצ'אט — תמצית בהמשך הקובץ ⬇ |
-| W4 | P1 | **W5 — Forgot Password מלא** | אין route ואין מסך למרות ש-ROADMAP מסמן ✅. forgot-password + reset-password (דפוס hashVerificationToken קיים) + עמוד web |
-| W5 | P2 | דפי privacy/terms | app/privacy + app/terms (עברית RTL) + חיבור לינקים בפוטר page.tsx |
-| W6 | P2 | Notifications badge realtime | socket קיים → עדכון badge בניווט בלי refresh |
-| W7 | P2 | Skeleton loading states | אין אף loading.tsx; הוסף ל-dashboard/search/contracts/payments/matches/chat |
-| W8 | P3 | Trust Score UI למשכיר | הצג trustScore בכרטיס ליד + match (backend קיים) |
-| W9 | P3 | Google Sign-In mobile | expo-auth-session; אחרי W3; דורש OAuth clients מראן |
-| W10 | P3 | Dark-mode QA | מעבר על 26 דפי web-next במצב כהה; תקן טקסט/רקע לא קריאים |
-| W11 | P3 | Empty states | search ללא תוצאות, matches ריק, contracts ריק — איור + CTA במקום עמוד ריק |
-
-### W3 — Google Sign-In: הכרעת ארכיטקטורה
-חיבור ראשון יוצר user בלי תפקיד מחויב → response מחזיר `needsRoleSelection:true` →
-מסך בחירה חד-פעמי "אני שוכר / אני משכיר" → `POST /api/auth/set-role` (חד-פעמי, מחזיר JWT חדש
-כי role בתוך הטוקן). Backend: עמודות `googleId`+`roleSelectedAt` (גם ב-USER_V3_COLUMNS!),
-`POST /api/auth/google` מאמת credential מול `https://oauth2.googleapis.com/tokeninfo?id_token=`
-(aud === GOOGLE_CLIENT_ID, email_verified), find-or-create לפי googleId/email,
-passwordHash אקראי, isVerified:true. register רגיל מקבל roleSelectedAt:now.
-Web: GIS script על הכפתור הקיים (login/page.tsx:172) + register. Env ידני של ראן:
-GOOGLE_CLIENT_ID (Render) + NEXT_PUBLIC_GOOGLE_CLIENT_ID (Vercel) + origins ב-Google Console.
+**Merge אחרי K6–K8** (או במקביל — אין conflict צפוי עם K6/K7/K8):
+```bash
+git merge cursor/backlog-jun12
+```
 
 ---
 
-## תור משימות — Cursor — `C:\apartmentapp-cursor`
+## 7. סדר merge מומלץ
 
-> לכל משימה: branch נפרד `cursor/<desc>`, Jest runInBand, בלי merge. עדכן MASTER.md בסיום.
+```
+main (e7f8f5c)
+  ├── merge cursor/trust-score-auto-calc      # K6 — אין conflict צפוי
+  ├── merge cursor/admin-scheduled-notifications  # K7
+  ├── merge cursor/guarantor-claims           # K8 — מודל + route חדש
+  ├── merge cursor/backlog-jun12              # P1/P2 backlog — tests, smoke, cron adoption
+  └── merge cursor/branch-cleanup             # K9 — MASTER v3.6 + docs (reconcile MASTER with v3.8)
+```
 
-| # | עדיפות | משימה | תמצית |
-|---|--------|--------|--------|
-| K1 | P1 | C4 — schema-drift guard | tests/schema-drift.test.js: attributes של כל מודל pg מול ensure*Columns() |
-| K2 | P1 | C3 — smoke script | backend/scripts/smoke.js: health+login+apartments מול BASE_URL; exit 1 על כשל |
-| K3 | P1 | תיקון 2 סוויטות אדומות | database-schema + socket: mock של queryInterface חסר addColumn (database.js:115). mocks בלבד |
-| K4 | P2 | אימוץ scheduled notifications | scheduleReminder עם dedupeKey `ledger:{id}:due3d` + cancelReminder כששולם; תזכורת ערב 24h. תבנית: tests/scheduledNotifications.test.js |
-| K5 | P2 | npm audit backend | High/Critical בלבד, בלי major bumps |
-| K6 | P1 | **V2-5 Trust Score auto-calc** | trustScoreService.js: recalc על PAID/OVERDUE/checkout; hooks בלדגר+checkout; clamp 0-100; בלי UI |
-| K7 | P2 | Admin scheduled-notifications | GET list (paginated) + POST /:id/cancel ב-routes/admin.js |
-| K8 | P2 | V2-2 Guarantor Claims backend | warranty_claims model (STRING+isIn), routes /api/v3/claims, IDOR test חובה, notify() על מעברים |
-| K9 | P3 | C2 — ניקוי ענפים | מחק merged; יעד <15; אל תיגע ב-worktree branches פעילים |
-| K10 | P3 | Ledger CSV export | GET /api/v3/ledger/:agreementId/export.csv למשכיר (לרו"ח/מס); אותו actor-auth כמו שאר ledger |
-| K11 | P3 | Audit retention 7y (V2-7) | cleanupOldAuditLogs קיים עם env שעות — יישר לקונפיג admin `audit_retention_days` (default 2555) |
-| K12 | P3 | Stripe Connect RFC | docs/internal/RFC-stripe-connect.md בלבד (אין רישיון עיבוד) — סכמות, webhook flow, reconciliation |
+**Push branches לפני PR (אם לא על remote):**
+```bash
+git push -u origin cursor/trust-score-auto-calc
+git push -u origin cursor/admin-scheduled-notifications
+git push -u origin cursor/guarantor-claims
+git push -u origin cursor/branch-cleanup
+```
 
 ---
 
-## תור Orchestrator (Claude Code — מפגש הבא)
+## 8. Regression suite (לפני promote)
 
-1. **A1** — אימות Render בדפדפן (JSON 404 + health + smoke login) → עדכן MASTER "אומת בייצור"
-2. **A3** — secrets scan על היסטוריית git (הריפו PUBLIC!) — gitleaks/trufflehog
-3. **B1** — QA sweep (skill `qa`) → triage ל-BUGS.md → גל 2 ל-Antigravity
-4. **C1** — GitHub Actions CI (test+build על PR, חוסם merge)
-5. Merge ענפי wind/* + cursor/* כשמדווחים מוכנים
-6. פעולות ידניות בהמתנה אצל ראן: Google OAuth client + env vars; Meta WhatsApp env vars (C5)
+```bash
+cd backend
+npx jest tests/trustScoreService.test.js \
+         tests/adminScheduledNotifications.test.js \
+         tests/warrantyClaims.test.js \
+         tests/scheduledNotifications.test.js \
+         --runInBand --forceExit
+```
+
+**צפוי:** 5 + 4 + 7 + 7 = **23/23** (בנוסף ל-suite הקיים).
+
+---
+
+## 9. MASTER.md — שינויים v3.6
+
+על `cursor/branch-cleanup`:
+- NF1 Trust Score → auto-calc backend ✅
+- שורות חדשות: V2-2, V2-5, Admin scheduled notifications
+- Changelog 3.6
+
+**אחריות Orchestrator:** לאחר merge כל הענפים — `MASTER.md` על main = מקור אמת יחיד.
+
+---
+
+## 10. המשך לצוותים אחרים
+
+| נושא | מי | הערה |
+|------|-----|------|
+| Trust Score UI | Antigravity | Backend מוכן; הצג `trustScore` מעודכן |
+| Stripe Connect | TBD | RFC: `docs/internal/RFC-stripe-connect.md` על backlog-jun12 — לא מימוש (רישיון) |
+| Backlog P1/P2 tests/smoke/cron | Cursor | ✅ `cursor/backlog-jun12` @ `64fff5a` |
+| Branch <15 | Claude Code | מחק 44 stale unmerged (רשימה §5) |
+
+---
+
+## 11. Worktrees פעילים (אל תמחק)
+
+| Path | Branch |
+|------|--------|
+| `C:\apartmentapp` | main (Orchestrator) |
+| `C:\apartmentapp-cursor` | `cursor/branch-cleanup` (Cursor) |
+| `C:\apartmentapp-windsurf` | `wind/web-refactor-ui` (Antigravity) |
+
+---
+
+*Prepared by Cursor — 2026-06-12*

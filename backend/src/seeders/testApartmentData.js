@@ -34,8 +34,7 @@ const AMENITY_POOL = ['parking', 'balcony', 'elevator', 'ac', 'storage', 'furnis
 
 // Curated Unsplash apartment/interior photos — stable IDs, no auth required
 const PHOTO_POOL = [
-  '1502672023488-203a3bb6e526', // bright living room
-  '1555041469-db819a8be170',   // modern sofa living room
+  '1600585154340-be6161a56a0c', // modern apartment exterior
   '1484154218962-a197022b5858', // open kitchen
   '1560448204-e02f11c3d0e2',   // airy bedroom
   '1522708323590-d24dbb6b0267', // kitchen dining
@@ -46,6 +45,7 @@ const PHOTO_POOL = [
   '1570129477492-45c003edd2be', // apartment building
   '1558618666-fcd25c85cd64',   // balcony view city
   '1574362848149-11496d93a7c7', // minimalist bedroom
+  '1560448204-e02f11c3d0e2',   // airy bedroom
 ];
 
 const TITLE_TEMPLATES = [

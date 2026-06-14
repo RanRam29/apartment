@@ -29,7 +29,18 @@ const registerValidator = [
     .withMessage('Role must be tenant or landlord'),
 
   body('phone')
-    .optional()
+    .optional({ checkFalsy: true })
+    .customSanitizer((value) => {
+      if (!value) return null;
+      let cleaned = String(value).replace(/[-\s]/g, '');
+      if (cleaned.startsWith('972')) {
+        cleaned = '+' + cleaned;
+      }
+      if (/^[2-9][0-9]{8}$/.test(cleaned)) {
+        cleaned = '0' + cleaned;
+      }
+      return cleaned;
+    })
     .matches(/^(\+972|0)[0-9]{8,9}$/)
     .withMessage('Invalid Israeli phone number'),
 ];

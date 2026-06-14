@@ -1,4 +1,8 @@
-const { ensureUserVerificationColumns, ensureApartmentStreetColumn } = require('../src/config/database');
+const {
+  sequelize,
+  ensureUserVerificationColumns,
+  ensureApartmentStreetColumn,
+} = require('../src/config/database');
 
 describe('Database schema compatibility', () => {
   it('adds missing email verification columns to existing users tables', async () => {
@@ -13,7 +17,7 @@ describe('Database schema compatibility', () => {
 
     await ensureUserVerificationColumns(queryInterface);
 
-    expect(queryInterface.addColumn).toHaveBeenCalledTimes(9);
+    expect(queryInterface.addColumn).toHaveBeenCalledTimes(16);
     expect(queryInterface.addColumn).toHaveBeenCalledWith(
       'users',
       'verification_token',
@@ -22,6 +26,16 @@ describe('Database schema compatibility', () => {
     expect(queryInterface.addColumn).toHaveBeenCalledWith(
       'users',
       'verified_at',
+      expect.objectContaining({ allowNull: true })
+    );
+    expect(queryInterface.addColumn).toHaveBeenCalledWith(
+      'users',
+      'tos_accepted_at',
+      expect.objectContaining({ allowNull: true })
+    );
+    expect(queryInterface.addColumn).toHaveBeenCalledWith(
+      'users',
+      'verification_token_expires_at',
       expect.objectContaining({ allowNull: true })
     );
   });
@@ -42,13 +56,28 @@ describe('Database schema compatibility', () => {
         id: {},
         city: {},
       }),
+      addColumn: jest.fn().mockResolvedValue(undefined),
+      removeColumn: jest.fn().mockResolvedValue(undefined),
     };
-    const database = { query: jest.fn().mockResolvedValue(undefined) };
+    const querySpy = jest.spyOn(sequelize, 'query').mockResolvedValue(undefined);
 
-    await ensureApartmentStreetColumn(queryInterface, database);
+    await ensureApartmentStreetColumn(queryInterface);
 
-    expect(database.query).toHaveBeenCalledTimes(1);
-    expect(database.query.mock.calls[0][0]).toContain('ADD COLUMN IF NOT EXISTS "street"');
+    expect(queryInterface.addColumn).toHaveBeenCalledTimes(2);
+    expect(queryInterface.addColumn).toHaveBeenCalledWith(
+      'apartments',
+      'street',
+      expect.objectContaining({ allowNull: true })
+    );
+    expect(queryInterface.addColumn).toHaveBeenCalledWith(
+      'apartments',
+      'building_fee',
+      expect.objectContaining({ allowNull: true })
+    );
+    expect(querySpy).not.toHaveBeenCalled();
+    expect(queryInterface.removeColumn).not.toHaveBeenCalled();
+
+    querySpy.mockRestore();
   });
 
   it('backfills blank street values before dropping legacy neighborhood column', async () => {
@@ -58,14 +87,23 @@ describe('Database schema compatibility', () => {
         street: {},
         neighborhood: {},
       }),
+      addColumn: jest.fn().mockResolvedValue(undefined),
+      removeColumn: jest.fn().mockResolvedValue(undefined),
     };
-    const database = { query: jest.fn().mockResolvedValue(undefined) };
+    const querySpy = jest.spyOn(sequelize, 'query').mockResolvedValue(undefined);
 
-    await ensureApartmentStreetColumn(queryInterface, database);
+    await ensureApartmentStreetColumn(queryInterface);
 
-    expect(database.query).toHaveBeenCalledTimes(2);
-    expect(database.query.mock.calls[0][0]).toContain('NULLIF(TRIM("street"), \'\') IS NULL');
-    expect(database.query.mock.calls[0][0]).toContain('NULLIF(TRIM("neighborhood"), \'\') IS NOT NULL');
-    expect(database.query.mock.calls[1][0]).toContain('DROP COLUMN IF EXISTS "neighborhood"');
+    expect(queryInterface.addColumn).toHaveBeenCalledTimes(1);
+    expect(queryInterface.addColumn).toHaveBeenCalledWith(
+      'apartments',
+      'building_fee',
+      expect.objectContaining({ allowNull: true })
+    );
+    expect(querySpy).toHaveBeenCalledTimes(1);
+    expect(querySpy.mock.calls[0][0]).toContain('SET street = neighborhood');
+    expect(queryInterface.removeColumn).toHaveBeenCalledWith('apartments', 'neighborhood');
+
+    querySpy.mockRestore();
   });
 });

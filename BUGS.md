@@ -11,11 +11,15 @@
 
 | סטטוס | כמות |
 |--------|------|
-| 🔴 OPEN | 0 |
+| 🔴 OPEN | 1 |
 | 🔵 IN_PROGRESS | 0 |
-| ✅ FIXED (ממתין אימות) | 2 |
+| ✅ FIXED (ממתין אימות) | 8 |
 | 🏁 CLOSED (RCA הושלם) | 17 |
-| **סה"כ** | **19** |
+| **סה"כ** | **26** |
+
+> 🆕 **2026-06-13 — BUG-019:** מייל אימות לא מגיע בפרודקשן. שורש הבעיה = קונפיג Resend ב-Render (לא קוד). תיקוני קוד נלווים נדחפו; ממתין לפעולת קונפיג של ראן.
+
+> 🆕 **2026-06-13 — Debug session (NF3 Trust Score + cron code review):** 6 באגים לוגיים חדשים נמצאו (BUG-013..018). ראה למטה.
 
 ---
 
@@ -23,6 +27,7 @@
 
 | ID | כותרת | עדיפות | סטטוס | מדווח | מטפל | תאריך פתיחה |
 |----|--------|---------|--------|--------|------|-------------|
+| [BUG-019](#bug-019) | מייל אימות לא מגיע בפרודקשן (Resend config) | P1 | 🔴 OPEN | ראן | ראן (config) + Claude Code (code) | 2026-06-13 |
 | [BUG-001](#bug-001) | Admin login 503 — DB columns missing | P0 | 🏁 CLOSED | ראן | Claude Code | 2026-05-27 |
 | [BUG-002](#bug-002) | Admin login 401 — password hash out of sync | P1 | 🏁 CLOSED | ראן | Claude Code | 2026-05-28 |
 | [BUG-010](#bug-010) | פרסום מודעה חדשה — 500 Internal Server Error | P1 | 🏁 CLOSED | ראן | Claude Code | 2026-05-28 |
@@ -42,6 +47,12 @@
 | [SEC-005](#sec-005) | Verification token plaintext + no expiry | P1 | 🏁 CLOSED | Security Review | Claude Code | 2026-06-12 |
 | [SEC-006](#sec-006) | Chat imageUrl stored XSS vector | P1 | 🏁 CLOSED | Security Review | Claude Code | 2026-06-12 |
 | [SEC-007](#sec-007) | Frontend JWT base64url decode → random logouts | P1 | 🏁 CLOSED | Security Review | Antigravity | 2026-06-12 |
+| [BUG-013](#bug-013) | SIGNED transition — TOCTOU race seeds duplicate ledger rows | P1 | ✅ FIXED | Debug session | Claude Code | 2026-06-13 |
+| [BUG-014](#bug-014) | Revoked `isOnce` trust event can never be re-granted | P2 | ✅ FIXED | Debug session | Claude Code | 2026-06-13 |
+| [BUG-018](#bug-018) | accountDeletion cron — no per-user error isolation | P2 | ✅ FIXED | Debug session | Claude Code | 2026-06-13 |
+| [BUG-015](#bug-015) | Trust `cap` accounting uses score-clamped delta | P3 | ✅ FIXED | Debug session | Claude Code | 2026-06-13 |
+| [BUG-016](#bug-016) | Admin user-edit writes unvalidated `parseInt` (NaN / no clamp) | P3 | ✅ FIXED | Debug session | Claude Code | 2026-06-13 |
+| [BUG-017](#bug-017) | Onboarding `dismiss` accepts arbitrary keys → JSONB growth | P3 | ✅ FIXED | Debug session | Claude Code | 2026-06-13 |
 
 ---
 
@@ -123,6 +134,170 @@
 ---
 
 ## 🔴 OPEN
+
+---
+
+### BUG-013
+**כותרת:** SIGNED transition — TOCTOU race seeds duplicate ledger rows
+**עדיפות:** P1 — data corruption בפרודקשן תחת מקביליות
+**סטטוס:** ✅ FIXED (ממתין deploy + אימות פרודקשן)
+**מדווח על ידי:** Debug session (Claude Code) | **תאריך:** 2026-06-13
+**מטפל:** Claude Code
+
+**🔬 RCA — Root Cause:**
+`seedLedgerRows` היה אידמפוטנטי *סדרתית* בלבד (בדיקת `findOne`+skip per period) — TOCTOU שלא מחזיק תחת מקביליות. שני seeds מקבילים מריצים את כל בדיקות ה-`findOne` לפני ה-`create`, שניהם רואים "ריק", שניהם יוצרים → עד 24 שורות. לא היה אכיפת ייחודיות ברמת ה-DB על `(agreementId, period)`.
+
+**Fix שיושם (TDD — RED→GREEN):**
+| קובץ | שינוי |
+|------|--------|
+| `backend/tests/ledgerSeedService.test.js` | RED: בדיקת מקביליות — שני `seedLedgerRows` ב-`Promise.all` → ציפייה ל-12 שורות (נכשל ב-22 לפני התיקון) |
+| `backend/src/models/pg/LedgerRow.js` | unique index מורכב `ledger_rows_agreement_period_unique` על `(agreement_id, period)` |
+| `backend/src/services/ledgerSeedService.js` | `create` עטוף ב-try/catch — `SequelizeUniqueConstraintError` → `continue` (המפסיד ב-race מדלג בשקט) |
+| `backend/src/config/database.js` | `ensureLedgerRowPeriodUniqueIndex()` — dedup הגנתי של נתונים קיימים (keep earliest by ctid) + `CREATE UNIQUE INDEX IF NOT EXISTS`, מחווט ל-`initPostgres` (טבלה קיימת לא מקבלת index מ-`sync({alter:false})`) |
+
+**אימות:** 3/3 ב-`ledgerSeedService.test.js`, 31/31 ב-`ledger`+`agreements`+`ledger-idor`. הלוג מאשר split 11+1=12 ב-seed מקבילי.
+
+**מניעה עתידית:**
+- [ ] לשקול הוספת row lock (`SELECT … FOR UPDATE`) על ה-agreement במעבר ה-SIGNED ב-`agreements.js` כהגנה נוספת (defense-in-depth)
+- [x] DB unique constraint הוא מקור האמת לייחודיות שורות לדגר
+
+**תיאור:**
+מעבר `READY_SIGN → SIGNED` ב-`backend/src/routes/agreements.js:120-201` קורא את ה-agreement, מוודא את המעבר (שורה 136), ואז מריץ `seedLedgerRows` (שורה 201) — הכל **ללא טרנזקציה ו/או נעילת שורה**. שתי בקשות POST במקביל קוראות שתיהן `status='READY_SIGN'`, עוברות את השומר, וזורעות 12 שורות לדגר כל אחת.
+
+**שלבים לשחזור:**
+1. agreement במצב `READY_SIGN` שעבר את כל ולידציות ה-KYC/habitability
+2. שלח שתי בקשות `POST /api/v1/agreements/:id/transition` במקביל עם `targetStatus: SIGNED`
+3. שתיהן מצליחות
+
+**צפוי:** 12 שורות לדגר, מעבר אחד ל-SIGNED
+**קיבלנו:** 24 שורות לדגר כפולות (+ פעמיים אירוע `digital_signing`; ה-cap מגן על ה-trust score אך לא על הלדגר)
+
+**השפעה על משתמשים:** לדגר תשלומים משובש — חיובים כפולים לשוכר.
+
+**Fix מוצע:**
+- [ ] לעטוף את המעבר ב-`sequelize.transaction` עם `RentalAgreement.findByPk(id, { lock: true, transaction })` (SELECT … FOR UPDATE)
+- [ ] בנוסף/חלופי: להפוך את `seedLedgerRows` לאידמפוטנטי — לדלג אם כבר קיימות שורות ל-agreement
+
+---
+
+### BUG-014
+**כותרת:** Revoked `isOnce` trust event can never be re-granted
+**עדיפות:** P2 — מלכודת רדומה (אין קוראים ל-`revokeTrustEvent` כרגע)
+**סטטוס:** ✅ FIXED (TDD)
+**מדווח על ידי:** Debug session (Claude Code) | **תאריך:** 2026-06-13
+**מטפל:** Claude Code
+
+**Fix שיושם:** ב-`revokeTrustEvent` ([trustScoreService.js](backend/src/services/trustScoreService.js)) — `UPDATE ... SET dedupeKey = NULL` לכל אירועי ה-(userId, eventKey) שבוטלו, כדי לשחרר את האינדקס הייחודי ולאפשר הענקה מחדש. בדיקת RED: apply→revoke→apply של `kyc_approved` מצפה לשחזור הניקוד (`trustScoreService.test.js`). 8/8 + 17/17 ב-trustScore.test.js.
+
+**תיאור:**
+ב-`backend/src/services/trustScoreService.js`, `applyTrustEvent` קובע `dedupeKey = ${eventKey}:${userId}` לאירועי `isOnce` (שורות 24-26) ונשען על האינדקס הייחודי כדי למנוע כפילות (catch שורה 63). `revokeTrustEvent` (שורות 70-108) יוצר אירוע מקזז שלילי אבל **משאיר את שורת ה-dedupeKey המקורית**. הענקה חוזרת תיתקל באינדקס הייחודי → `null` בשקט → המשתמש לא מקבל בחזרה את הנקודות.
+
+**שלבים לשחזור (תיאורטי — revoke עוד לא מחובר):**
+1. KYC אושר → +20, נוצרת שורת dedupeKey
+2. KYC נדחה → `revokeTrustEvent` → -20 (שורת dedupeKey נשארת)
+3. KYC אושר שוב → unique violation → null → אין +20
+
+**Fix מוצע:**
+- [ ] ב-`revokeTrustEvent` למחוק/לנטרל את שורת ה-dedupeKey, או
+- [ ] בהענקה חוזרת לזהות מצב נטו-אפס (sum ≤ 0) ולאפשר הענקה מחדש
+
+---
+
+### BUG-018
+**כותרת:** accountDeletion (GDPR) cron — no per-user error isolation
+**עדיפות:** P2 — כשל אחד מפיל את כל ה-batch
+**סטטוס:** ✅ FIXED (TDD)
+**מדווח על ידי:** Debug session (Claude Code) | **תאריך:** 2026-06-13
+**מטפל:** Claude Code
+
+**Fix שיושם:** כל איטרציה ב-[accountDeletion.js](backend/src/cron/accountDeletion.js) עטופה ב-try/catch — כשל מתועד כ-error וממשיך לבא בתור; ה-return משקף כעת מספר הצלחות בפועל. בדיקת RED: `accountDeletionIsolation.test.js` מזריק throw ב-`logAudit` ומוודא שהמשתמש השני עדיין מאונונם. 5/5. **נותר פתוח להחלטת מוצר:** היקף האנונימיזציה (כרגע שורת User בלבד; PII בטבלאות קשורות לא נוגעות).
+
+**תיאור:**
+ב-`backend/src/cron/accountDeletion.js:19-42`, הלולאה על המשתמשים למחיקה אינה עטופה ב-try/catch per-user. אם `user.update` או `logAudit` זורקים לאחד המשתמשים (collision, DB error), כל הריצה קורסת והמשתמשים הנותרים לא מעובדים — חשבונות שעברו את תקופת החסד נשארים לא-אנונימיים.
+
+**הערה נלווית (GDPR scope):** האנונימיזציה מנקה את שורת ה-`User` בלבד. PII בטבלאות קשורות (`UserKycProfile`, הודעות chat, `RentalAgreement`, `WhatsAppMessage`) עלול להישאר. להחלטת מוצר/משפט אם נדרש לטיפול במחיקה אמיתית.
+
+**Fix מוצע:**
+- [ ] לעטוף כל איטרציה ב-try/catch; להמשיך לבא בתור ולספור כשלים
+- [ ] לשקול הרחבת היקף האנונימיזציה לטבלאות PII קשורות
+
+---
+
+### BUG-019
+**כותרת:** מייל אימות לא מגיע בפרודקשן (verification email never arrives)
+**עדיפות:** P1 — חוסם הרשמת משתמשים אמיתיים
+**סטטוס:** 🔴 OPEN — קוד תוקן, ממתין לפעולת קונפיג
+**מדווח על ידי:** ראן (screenshot, `randram@gmail.com`) | **תאריך:** 2026-06-13
+**מטפל:** ראן (Render/Resend config) + Claude Code (code)
+
+**שורש הבעיה (לא קוד):** נתיב השליחה תקין — `register` → `issueVerificationTokenForUser` → `sendVerificationEmail` (Resend). השליחה **נכשלת בשקט בפרודקשן**: `resend.emails.send` זורק, השגיאה נתפסת ב-`logger.warn` ([auth.js](backend/src/routes/auth.js)) + `logger.error` ([emailService.js](backend/src/services/emailService.js)) — ההרשמה מצליחה אבל המייל לא יוצא. שני חשודים:
+1. `RESEND_API_KEY` לא מוגדר ב-Render → `new Resend(undefined)` → "Missing API key" (ראינו בדיוק את ההודעה בלוגי הטסטים). לא היה מתועד ב-`render.yaml`.
+2. דומיין `dirapp.co.il` לא מאומת ב-Resend → Resend מאפשר לשלוח רק לכתובת בעל החשבון, דוחה נמענים אחרים.
+
+**ראיה מכריעה:** השורה `Error sending verification email via Resend` כבר בלוגי Render — ההודעה שם מבדילה בין החשודים.
+
+**תיקוני קוד שיושמו ונדחפו:**
+- `65a8d2a` — `resolveWebBaseUrl()` קורא גם `CLIENT_ORIGINS` (היה `APP_BASE_URL || CLIENT_ORIGIN` בלבד → קישור האימות נפל ל-`http://localhost:3000` בפרודקשן). 23/23.
+- `68a5aa7` — תיעוד `RESEND_API_KEY`/`RESEND_FROM_EMAIL`/`APP_BASE_URL` ב-`render.yaml` (`sync:false`).
+
+**פעולה פתוחה (ראן):**
+- [ ] להזין `RESEND_API_KEY` אמיתי ב-Render Dashboard
+- [ ] להזין `RESEND_FROM_EMAIL` מדומיין מאומת (זמני: `onboarding@resend.dev`)
+- [ ] לאמת את דומיין `dirapp.co.il` ב-Resend (DNS) להפקת מייל מהמותג
+- [ ] לאחר deploy — לנסות הרשמה ולוודא הגעת מייל; לסגור באג
+
+---
+
+### BUG-015
+**כותרת:** Trust `cap` accounting uses score-clamped delta
+**עדיפות:** P3 — אי-דיוק שמתקן את עצמו
+**סטטוס:** ✅ FIXED (TDD)
+**מדווח על ידי:** Debug session (Claude Code) | **תאריך:** 2026-06-13
+**מטפל:** Claude Code
+
+**Fix שיושם:** שדה חדש `cappedDelta` ב-`TrustScoreEvent` שמאחסן את ה-delta המכוון (לפני clamp ל-100). `applyTrustEvent`/`getTrustStatus`/`revokeTrustEvent` סופרים caps ו-tasks לפי `cappedDelta`, בעוד `delta` נשאר התרומה המיושמת לניקוד. `ensureTrustScoreEventCappedDeltaColumn` ב-boot מוסיף עמודה + backfill מ-`delta`. בדיקת RED: אירוע מוגבל ליד תקרת 98 — task points מצפה ל-25 (cap 30 − intended 5), לא 28. 9/9.
+
+**תיאור:**
+ב-`backend/src/services/trustScoreService.js:46-55`, האירוע נשמר עם `actualDelta` (אחרי clamp ל-0–100), אבל בדיקת ה-`cap` (שורות 35-43) סוכמת את ה-delta השמור. ליד תקרת 100 נרשם פחות מ-`config.delta`, ה-cap נספר בחסר והאירוע יכול לירות שוב. הניקוד הסופי נכון, אך ה-cap אינו נאכף לפי הכוונה.
+
+**Fix מוצע:**
+- [ ] לסכום cap מול `deltaToApply` המבוקש (לפני clamp), או לאחסן `intendedDelta` נפרד
+
+---
+
+### BUG-016
+**כותרת:** Admin user-edit writes unvalidated `parseInt` (NaN / no clamp)
+**עדיפות:** P3 — admin-only
+**סטטוס:** ✅ FIXED (TDD)
+**מדווח על ידי:** Debug session (Claude Code) | **תאריך:** 2026-06-13
+**מטפל:** Claude Code
+
+**Fix שיושם:** ב-[admin.js](backend/src/routes/admin.js) — `trustScore` מוודא `Number.isInteger` + clamp 0–100, `blockedCount` מוודא integer ≥0; קלט לא תקין → 422. בדיקת RED: `trustScore: 5000` ו-`'abc'` מצפים ל-422 + ערך ב-DB ללא שינוי. 4/4 ב-adminUsersV3.test.js.
+
+**תיאור:**
+ב-`backend/src/routes/admin.js:116,120`, `trustScore`/`blockedCount` נכתבים עם `parseInt(...)` ללא בדיקת NaN וללא clamp. `trustScore: 5000` עוקף את תקרת 0–100; `"abc"` → `NaN` → Postgres דוחה ל-INTEGER → 500.
+
+**Fix מוצע:**
+- [ ] `Number.isInteger` + clamp 0–100 ל-trustScore; להחזיר 422 על קלט לא תקין
+
+---
+
+### BUG-017
+**כותרת:** Onboarding `dismiss` accepts arbitrary keys → unbounded JSONB growth
+**עדיפות:** P3 — abuse vector קל
+**סטטוס:** ✅ FIXED (TDD)
+**מדווח על ידי:** Debug session (Claude Code) | **תאריך:** 2026-06-13
+**מטפל:** Claude Code
+
+**Fix שיושם:** `VALID_STEP_KEYS` (איחוד שתי ה-checklists) ב-[onboarding.js](backend/src/routes/onboarding.js); `dismiss` מחזיר 400 על מפתח לא מוכר. בדיקת RED: dismiss של `not-a-real-key` מצפה ל-400. 18/18 ב-trustScore.test.js.
+
+**תיאור:**
+ב-`backend/src/routes/onboarding.js:91-105`, `POST /step/:key/dismiss` כותב כל `:key` שרירותי ל-`onboardingState.dismissed` (JSONB) בלי לוודא מול ה-checklist. לקוח זדוני יכול לנפח את ה-JSONB.
+
+**Fix מוצע:**
+- [ ] whitelist של מפתחות חוקיים; להחזיר 400 על מפתח לא מוכר
+
+> **הערה (לא BUG פורמלי):** `whatsapp_opt_in` מעניק +5 קבוע (isOnce) על toggle בוליאני ללא דרישת טלפון/אימות — וקטור gaming קל. ייתכן שזה בכוונת התכנון; להחלטת מוצר.
 
 ---
 

@@ -93,6 +93,47 @@ describe('POST /api/auth/register', () => {
       .send({ email: INVALID_EMAIL });
     expect(res.status).toBe(422);
   });
+
+  it('registers successfully when phone is an empty string and sets it to null', async () => {
+    const email = `tenant_empty_phone_${Date.now()}@test.com`;
+    const res = await request(app)
+      .post('/api/auth/register')
+      .send({
+        email,
+        password: TEST_PASSWORD,
+        firstName: 'Test',
+        lastName: 'Tenant',
+        role: 'tenant',
+        phone: '',
+      });
+
+    expect(res.status).toBe(201);
+    
+    // Check in database that phone is stored as null
+    const { User } = require('../src/models');
+    const createdUser = await User.findOne({ where: { email } });
+    expect(createdUser.phone).toBeNull();
+  });
+
+  it('registers successfully and sanitizes phone numbers with dashes/spaces/missing prefixes', async () => {
+    const email = `tenant_sanitized_phone_${Date.now()}@test.com`;
+    const res = await request(app)
+      .post('/api/auth/register')
+      .send({
+        email,
+        password: TEST_PASSWORD,
+        firstName: 'Test',
+        lastName: 'Tenant',
+        role: 'tenant',
+        phone: '50-123 4567', // Will be sanitized to 0501234567
+      });
+
+    expect(res.status).toBe(201);
+    
+    const { User } = require('../src/models');
+    const createdUser = await User.findOne({ where: { email } });
+    expect(createdUser.phone).toBe('0501234567');
+  });
 });
 
 describe('POST /api/auth/login', () => {

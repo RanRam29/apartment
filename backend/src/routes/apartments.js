@@ -12,6 +12,7 @@ const axios = require('axios');
 const logger = require('../utils/logger');
 const { logAudit } = require('../services/auditLogService');
 const { AUDIT_ACTIONS, AUDIT_OUTCOMES } = require('../constants/logging');
+const { normalizeApartmentPayload } = require('../utils/apartmentImages');
 
 async function geocodeNominatim(params) {
   const { data } = await axios.get('https://nominatim.openstreetmap.org/search', {
@@ -245,7 +246,10 @@ router.get(
       const cacheKey = `feed:v2:${req.user.id}:${city || 'all'}:${minPrice || 0}:${maxPrice || 99999}:${rooms || 'all'}:${page}`;
       const cached = await cacheGet(cacheKey);
       if (cached) {
-        return res.json({ ...cached, fromCache: true });
+        const apartments = Array.isArray(cached.apartments)
+          ? cached.apartments.map(normalizeApartmentPayload)
+          : cached.apartments;
+        return res.json({ ...cached, apartments, fromCache: true });
       }
 
       // Exclude apartments this user already swiped
@@ -287,7 +291,7 @@ router.get(
       });
 
       const payload = {
-        apartments,
+        apartments: apartments.map(normalizeApartmentPayload),
         total: count,
         page: parseInt(page),
         totalPages: Math.ceil(count / parseInt(limit)),
@@ -308,7 +312,7 @@ router.get('/:id', authenticate, async (req, res, next) => {
   try {
     const cacheKey = `apartment:${req.params.id}`;
     const cached = await cacheGet(cacheKey);
-    if (cached) return res.json({ apartment: cached, fromCache: true });
+    if (cached) return res.json({ apartment: normalizeApartmentPayload(cached), fromCache: true });
 
     const apartment = await Apartment.findByPk(req.params.id, {
       include: [{ model: User, as: 'landlord', attributes: ['id', 'firstName', 'lastName', 'avatarUrl', 'isVerified', 'trustScore'] }],
@@ -319,7 +323,7 @@ router.get('/:id', authenticate, async (req, res, next) => {
     // Increment view count (fire-and-forget)
     apartment.increment('viewCount').catch(() => {});
 
-    const payload = { ...apartment.toJSON(), costBreakdown: computeCostBreakdown(apartment) };
+    const payload = normalizeApartmentPayload({ ...apartment.toJSON(), costBreakdown: computeCostBreakdown(apartment) });
     await cacheSet(cacheKey, payload, 600);
     res.json({ apartment: payload });
   } catch (err) {

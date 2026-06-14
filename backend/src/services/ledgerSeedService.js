@@ -27,14 +27,21 @@ async function seedLedgerRows(agreement) {
 
     const dueDateStr = `${periodDate.getFullYear()}-${String(periodDate.getMonth() + 1).padStart(2, '0')}-${String(paymentDueDay).padStart(2, '0')}`;
 
-    const row = await LedgerRow.create({
-      agreementId: agreement.id,
-      period,
-      dueDate: dueDateStr,
-      amount,
-      status: 'PENDING',
-    });
-    created.push(row);
+    try {
+      const row = await LedgerRow.create({
+        agreementId: agreement.id,
+        period,
+        dueDate: dueDateStr,
+        amount,
+        status: 'PENDING',
+      });
+      created.push(row);
+    } catch (err) {
+      // A concurrent seed already created this period's row — the unique
+      // index on (agreement_id, period) is the source of truth (BUG-013).
+      if (err.name === 'SequelizeUniqueConstraintError') continue;
+      throw err;
+    }
   }
 
   logger.info(`seedLedgerRows: created ${created.length} rows for agreement ${agreement.id}`);

@@ -5,6 +5,7 @@ import { useApi } from "@/hooks/useApi";
 import Link from "next/link";
 import { useState } from "react";
 import type { Apartment, Match, Contract, LedgerRow } from "@/lib/types";
+import { getApartmentImageUrls } from "@/lib/apartment-images";
 
 // Type definition for backend landlord dashboard API payload
 interface LandlordDashboardData {
@@ -203,17 +204,20 @@ export function LandlordDashboard() {
 
   // Determine property list
   const propertiesList = dashboardData?.listings
-    ? dashboardData.listings.map((a) => ({
-        id: a.id,
-        title: a.title,
-        city: a.city,
-        price: a.price,
-        rooms: a.rooms,
-        images: a.images && a.images.length > 0 ? a.images : [mockProperties[0].images[0]],
-        isActive: a.isActive,
-        status: a.isActive ? "מושכר" : "פנוי",
-        occupancy: a.isActive ? "תפוסה 100%" : "דרוש שיווק",
-      }))
+    ? dashboardData.listings.map((a) => {
+        const imageUrls = getApartmentImageUrls(a.images);
+        return {
+          id: a.id,
+          title: a.title,
+          city: a.city,
+          price: a.price,
+          rooms: a.rooms,
+          images: imageUrls.length > 0 ? imageUrls : mockProperties[0].images,
+          isActive: a.isActive,
+          status: a.isActive ? "מושכר" : "פנוי",
+          occupancy: a.isActive ? "תפוסה 100%" : "דרוש שיווק",
+        };
+      })
     : [];
 
   // Determine leads list
@@ -331,49 +335,58 @@ export function LandlordDashboard() {
 
             {propertiesList.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {propertiesList.map((property) => (
-                  <div
-                    key={property.id}
-                    className="bg-white rounded-xl overflow-hidden soft-shadow group transition-all duration-300 hover:-translate-y-1"
-                  >
-                    <div className="h-40 overflow-hidden relative">
-                      <img
-                        alt={property.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        src={property.images[0]}
-                      />
-                      <div
-                        className={`absolute top-3 right-3 text-white text-[10px] font-bold px-2.5 py-1 rounded-full ${
-                          property.status === "מושכר"
-                            ? "bg-tenant-blue"
-                            : "bg-landlord-green text-tenant-blue"
-                        }`}
-                      >
-                        {property.status}
-                      </div>
-                    </div>
-                    <div className="p-4 flex flex-col items-start">
-                      <h4 className="text-[18px] font-semibold text-tenant-blue mb-1">
-                        {property.title}
-                      </h4>
-                      <div className="flex justify-between items-center w-full mt-3">
-                        <span className="text-[14px] text-on-surface-variant font-bold">
-                          ₪{property.price.toLocaleString()} / חודש
-                        </span>
+                {propertiesList.map((property) => {
+                  const cover = property.images[0];
+                  return (
+                    <div
+                      key={property.id}
+                      className="bg-white rounded-xl overflow-hidden soft-shadow group transition-all duration-300 hover:-translate-y-1 relative"
+                    >
+                      <div className="h-40 overflow-hidden relative">
+                        {cover ? (
+                          <img
+                            alt={property.title}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            src={cover}
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-surface-container flex items-center justify-center">
+                            <span className="material-symbols-outlined text-[40px] text-outline/30">apartment</span>
+                          </div>
+                        )}
                         <div
-                          className={`flex items-center gap-1 text-[12px] font-semibold ${
-                            property.status === "מושכר" ? "text-secondary" : "text-admin-red"
+                          className={`absolute top-3 right-3 text-white text-[10px] font-bold px-2.5 py-1 rounded-full ${
+                            property.status === "מושכר"
+                              ? "bg-tenant-blue"
+                              : "bg-landlord-green text-tenant-blue"
                           }`}
                         >
-                          <span className="material-symbols-outlined text-[16px]">
-                            {property.status === "מושכר" ? "trending_up" : "error_outline"}
+                          {property.status}
+                        </div>
+                      </div>
+                      <div className="p-4 flex flex-col items-start">
+                        <h4 className="text-[18px] font-semibold text-tenant-blue mb-1">
+                          {property.title}
+                        </h4>
+                        <div className="flex justify-between items-center w-full mt-3">
+                          <span className="text-[14px] text-on-surface-variant font-bold">
+                            ₪{property.price.toLocaleString()} / חודש
                           </span>
-                          <span>{property.occupancy}</span>
+                          <div
+                            className={`flex items-center gap-1 text-[12px] font-semibold ${
+                              property.status === "מושכר" ? "text-secondary" : "text-admin-red"
+                            }`}
+                          >
+                            <span className="material-symbols-outlined text-[16px]">
+                              {property.status === "מושכר" ? "trending_up" : "error_outline"}
+                            </span>
+                            <span>{property.occupancy}</span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <div className="bg-white rounded-xl p-8 text-center soft-shadow flex flex-col items-center justify-center">

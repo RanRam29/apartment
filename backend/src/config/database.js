@@ -48,6 +48,7 @@ const USER_V3_COLUMNS = {
   bio: { type: DataTypes.TEXT, allowNull: true },
   deletion_requested_at: { type: DataTypes.DATE, allowNull: true },
   verification_token_expires_at: { type: DataTypes.DATE, allowNull: true },
+  onboarding_state: { type: DataTypes.JSONB, allowNull: true, defaultValue: {} },
 };
 const APARTMENT_STREET_COLUMN = {
   street: { type: DataTypes.STRING(100), allowNull: true },
@@ -235,6 +236,57 @@ async function ensureUserKycRoleTypeColumn(queryInterface = sequelize.getQueryIn
   }
 }
 
+// Existing ledger_rows tables won't get the unique index from sync({alter:false}),
+// so create it explicitly. Dedups any legacy duplicate periods first so the
+// index can be built on pre-existing data (BUG-013 — keeps the earliest row).
+async function ensureLedgerRowPeriodUniqueIndex() {
+  try {
+    await sequelize.getQueryInterface().describeTable('ledger_rows');
+  } catch (err) {
+    return; // table not created yet — sync() will build it with the index
+  }
+  try {
+    await sequelize.query(`
+      DELETE FROM ledger_rows a
+      USING ledger_rows b
+      WHERE a.agreement_id = b.agreement_id
+        AND a.period = b.period
+        AND a.ctid > b.ctid
+    `);
+    await sequelize.query(
+      'CREATE UNIQUE INDEX IF NOT EXISTS ledger_rows_agreement_period_unique ON ledger_rows (agreement_id, period)'
+    );
+    logger.info('Ensured ledger_rows (agreement_id, period) unique index');
+  } catch (err) {
+    logger.warn(`ledger_rows unique index ensure skipped: ${err.message}`);
+  }
+}
+
+// Existing trust_score_events tables won't get the capped_delta column from
+// sync({alter:false}); add it and backfill legacy rows (cap accounting used to
+// rely on `delta`) so caps aren't under-counted near the score ceiling (BUG-015).
+async function ensureTrustScoreEventCappedDeltaColumn(queryInterface = sequelize.getQueryInterface()) {
+  let table;
+  try {
+    table = await queryInterface.describeTable('trust_score_events');
+  } catch (err) {
+    return; // table not created yet — sync() will build it with the column
+  }
+  if (!table.capped_delta) {
+    try {
+      await queryInterface.addColumn('trust_score_events', 'capped_delta', {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+      });
+      await sequelize.query('UPDATE trust_score_events SET capped_delta = delta');
+      logger.info('Added trust_score_events.capped_delta column + backfilled from delta');
+    } catch (err) {
+      if (!isDuplicateColumnError(err)) throw err;
+    }
+  }
+}
+
 async function initPostgres() {
   await sequelize.authenticate();
   await ensureUserVerificationColumns();
@@ -242,6 +294,8 @@ async function initPostgres() {
   await ensureContractAmendmentsTable();
   await ensureRentalAgreementLifecycleColumns();
   await ensureUserKycRoleTypeColumn();
+  await ensureLedgerRowPeriodUniqueIndex();
+  await ensureTrustScoreEventCappedDeltaColumn();
   const syncAlter =
     process.env.NODE_ENV === 'development' ||
     process.env.POSTGRES_SYNC_ALTER === 'true';
@@ -261,5 +315,7 @@ module.exports = {
   ensureContractAmendmentsTable,
   ensureRentalAgreementLifecycleColumns,
   ensureUserKycRoleTypeColumn,
+  ensureLedgerRowPeriodUniqueIndex,
+  ensureTrustScoreEventCappedDeltaColumn,
 };
 

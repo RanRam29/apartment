@@ -190,11 +190,14 @@ app.use('/api/v1/agreements', require('./routes/agreements'));
 // v3 routes (DirApp MVP v3.0)
 const contractsV3Routes = require('./routes/contractsV3');
 app.use('/api/v3/contracts', contractsV3Routes);
+app.use('/api/v3/trust', require('./routes/trust'));
+app.use('/api/v3/onboarding', require('./routes/onboarding'));
 
 // CASCADE routes
 app.use('/api/v3/kyc', require('./routes/kycV3'));
 app.use('/api/v3/maintenance', require('./routes/maintenanceV3'));
 app.use('/api/v3/guarantor', require('./routes/guarantor'));
+app.use('/api/v3/claims', require('./routes/claimsV3'));
 app.use('/api/v3/ledger', require('./routes/ledger'));
 app.use('/api/v3/admin', require('./routes/admin'));
 app.use('/api/v3/admin/stats', require('./routes/adminStats'));
@@ -208,6 +211,18 @@ app.use('/webhooks/whatsapp', require('./routes/whatsapp'));
 const { authenticate: userAuth } = require('./middleware/auth');
 const { User } = require('./models');
 
+function sanitizeIsraeliPhone(value) {
+  if (!value) return null;
+  let cleaned = String(value).replace(/[-\s]/g, '');
+  if (cleaned.startsWith('972')) {
+    cleaned = '+' + cleaned;
+  }
+  if (/^[2-9][0-9]{8}$/.test(cleaned)) {
+    cleaned = '0' + cleaned;
+  }
+  return cleaned;
+}
+
 app.put('/api/users/me', userAuth, async (req, res, next) => {
   try {
     const { whatsappOptIn, phone } = req.body;
@@ -217,14 +232,20 @@ app.put('/api/users/me', userAuth, async (req, res, next) => {
     const updates = {};
     if (whatsappOptIn !== undefined) updates.whatsappOptIn = Boolean(whatsappOptIn);
     if (phone !== undefined) {
-      const trimmedPhone = String(phone).trim();
-      if (trimmedPhone && !/^(\+972|0)[0-9]{8,9}$/.test(trimmedPhone)) {
+      const sanitized = sanitizeIsraeliPhone(phone);
+      if (sanitized && !/^(\+972|0)[0-9]{8,9}$/.test(sanitized)) {
         return res.status(422).json({ error: 'Invalid Israeli phone number format' });
       }
-      updates.phone = trimmedPhone || null;
+      updates.phone = sanitized;
     }
 
     await user.update(updates);
+    if (updates.whatsappOptIn === true) {
+      try {
+        const { applyTrustEvent } = require('./services/trustScoreService');
+        await applyTrustEvent(user.id, 'whatsapp_opt_in');
+      } catch (_) {}
+    }
     const { passwordHash: _, ...safeUser } = user.toJSON();
     res.json({ user: safeUser });
   } catch (err) {

@@ -106,6 +106,24 @@ describe('Admin Users Management V3 E2E Integration Suite', () => {
     expect(dbUser.isPremium).toBe(true);
   });
 
+  it('PUT /api/v3/admin/users/:id - rejects out-of-range or non-numeric trustScore (BUG-016)', async () => {
+    const tooHigh = await request(app)
+      .put(`/api/v3/admin/users/${targetUser.id}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ trustScore: 5000 });
+    expect(tooHigh.status).toBe(422);
+
+    const notNumeric = await request(app)
+      .put(`/api/v3/admin/users/${targetUser.id}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ trustScore: 'abc' });
+    expect(notNumeric.status).toBe(422);
+
+    // trustScore must be unchanged (still 85 from the previous test)
+    const dbUser = await User.findByPk(targetUser.id);
+    expect(dbUser.trustScore).toBe(85);
+  });
+
   it('POST /api/v3/admin/users/:id/kyc-override - safely handles APPROVED, REJECTED, and NONE/Clear', async () => {
     // 1. Override to APPROVED
     let kycRes = await request(app)

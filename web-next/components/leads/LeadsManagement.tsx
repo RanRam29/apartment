@@ -158,10 +158,31 @@ export function LeadsManagement() {
     }
   ];
 
+  const [mockLeadsState, setMockLeadsState] = useState<Record<"pending" | "accepted" | "rejected", Lead[]>>({
+    pending: mockLeads,
+    accepted: [],
+    rejected: [],
+  });
+
   // Action handlers: Accept (Approve) / Reject (Decline)
   const handleAccept = async (leadId: string, e: React.MouseEvent) => {
     e.stopPropagation(); // prevent opening side panel
     setActionLoadingId(leadId);
+    if (leadId.startsWith("mock-")) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      setMockLeadsState(prev => {
+        const lead = prev.pending.find(l => l.id === leadId);
+        if (!lead) return prev;
+        return {
+          ...prev,
+          pending: prev.pending.filter(l => l.id !== leadId),
+          accepted: [...prev.accepted, { ...lead, status: "accepted" }],
+        };
+      });
+      setActionLoadingId(null);
+      if (selectedLead?.id === leadId) setSelectedLead(null);
+      return;
+    }
     try {
       await api(`/api/matches/${leadId}/accept`, {
         method: "POST",
@@ -179,6 +200,21 @@ export function LeadsManagement() {
   const handleReject = async (leadId: string, e: React.MouseEvent) => {
     e.stopPropagation(); // prevent opening side panel
     setActionLoadingId(leadId);
+    if (leadId.startsWith("mock-")) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      setMockLeadsState(prev => {
+        const lead = prev.pending.find(l => l.id === leadId);
+        if (!lead) return prev;
+        return {
+          ...prev,
+          pending: prev.pending.filter(l => l.id !== leadId),
+          rejected: [...prev.rejected, { ...lead, status: "rejected" }],
+        };
+      });
+      setActionLoadingId(null);
+      if (selectedLead?.id === leadId) setSelectedLead(null);
+      return;
+    }
     try {
       await api(`/api/matches/${leadId}/reject`, {
         method: "POST",
@@ -193,11 +229,17 @@ export function LeadsManagement() {
     }
   };
 
-  const activeLeads = data?.leads?.length ? data.leads : mockLeads;
+  const activeLeads = data?.leads?.length ? data.leads : mockLeadsState[activeTab];
   // Apply visual filter tabs count (mock values if not supplied by API)
-  const pendingCount = activeTab === "pending" ? activeLeads.length : 7;
-  const acceptedCount = activeTab === "accepted" ? activeLeads.length : 23;
-  const rejectedCount = activeTab === "rejected" ? activeLeads.length : 5;
+  const pendingCount = activeTab === "pending"
+    ? (data ? data.total : mockLeadsState.pending.length)
+    : (data ? 7 : mockLeadsState.pending.length);
+  const acceptedCount = activeTab === "accepted"
+    ? (data ? data.total : mockLeadsState.accepted.length)
+    : (data ? 23 : mockLeadsState.accepted.length);
+  const rejectedCount = activeTab === "rejected"
+    ? (data ? data.total : mockLeadsState.rejected.length)
+    : (data ? 5 : mockLeadsState.rejected.length);
 
   return (
     <div className="space-y-8 text-right relative min-h-screen pb-[64px]">

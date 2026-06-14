@@ -26,7 +26,7 @@ jest.mock('../src/models/mongo/UserPreferences', () => {
 const { sequelize, initPostgres } = require('../src/config/database');
 const { initRedis, getRedisClient } = require('../src/config/redis');
 const app = require('../src/app');
-const { User, UserKycProfile, AgreementParty, RentalAgreement, Apartment } = require('../src/models');
+const { User, UserKycProfile, AgreementParty, RentalAgreement, Apartment, Swipe, Match } = require('../src/models');
 const UserPoints = require('../src/models/mongo/UserPoints');
 
 const { validateIsraeliId, verifyWebhookSignature } = require('../src/services/kycServiceV3');
@@ -44,7 +44,7 @@ describe('KYC Service & Webhooks Integration Suite (M6)', () => {
     await initPostgres();
     await initRedis().catch(() => {});
 
-    await sequelize.sync({ force: false });
+    await sequelize.sync({ force: true });
 
     const password = 'Password123!';
     const unique = Date.now();
@@ -76,25 +76,27 @@ describe('KYC Service & Webhooks Integration Suite (M6)', () => {
     landlordToken = llRes.body.token;
     landlord = await User.findOne({ where: { email: `landlord-kyc-${unique}@test.com` } });
     await landlord.update({ isVerified: true });
-
-    // Clean up any old test records to make the test idempotent
-    const oldAgreements = await RentalAgreement.findAll({ where: { propertyId: '00000000-0000-4000-8000-000000000777' } });
-    const oldAgreementIds = oldAgreements.map(a => a.id);
-    if (oldAgreementIds.length > 0) {
-      await AgreementParty.destroy({ where: { agreementId: oldAgreementIds } }).catch(() => {});
-      await RentalAgreement.destroy({ where: { id: oldAgreementIds } }).catch(() => {});
-    }
-    await Apartment.destroy({ where: { id: '00000000-0000-4000-8000-000000000777' } }).catch(() => {});
+    // Clear old test data to prevent unique constraints issues
+    await Match.destroy({ where: {} }).catch(() => {});
+    await Swipe.destroy({ where: {} }).catch(() => {});
+    await AgreementParty.destroy({ where: {} }).catch(() => {});
+    await RentalAgreement.destroy({ where: {} }).catch(() => {});
+    await Apartment.destroy({ where: {} }).catch(() => {});
 
     // Seed mock apartment
-    await Apartment.create({
-      id: '00000000-0000-4000-8000-000000000777',
-      landlordId: landlord.id,
-      title: 'דירת בדיקה לקבוצת KYC',
-      price: 5000,
-      rooms: 3,
-      city: 'תל אביב',
-    });
+    try {
+      await Apartment.create({
+        id: '00000000-0000-4000-8000-000000000777',
+        landlordId: landlord.id,
+        title: 'דירת בדיקה לקבוצת KYC',
+        price: 5000,
+        rooms: 3,
+        city: 'תל אביב',
+      });
+    } catch (err) {
+      console.error("APARTMENT CREATE ERROR:", err.message, err.parent || err);
+      throw err;
+    }
 
     // Seed mock rental agreement and party
     const agreement = await RentalAgreement.create({

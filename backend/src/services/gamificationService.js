@@ -55,9 +55,7 @@ async function awardPoints(userId, action) {
   // Find or create the points document in MongoDB
   let doc = await UserPoints.findOne({ userId: String(userId) });
   if (!doc) {
-    // Look up starting trustScore in PostgreSQL User table
-    const user = await User.findByPk(userId, { attributes: ['trustScore'] });
-    const startingPoints = user ? (user.trustScore ?? 50) : 50;
+    const startingPoints = 50;
     doc = new UserPoints({
       userId: String(userId),
       points: startingPoints,
@@ -79,11 +77,6 @@ async function awardPoints(userId, action) {
   await doc.save();
 
   logger.info(`Gamification: user=${userId} action=${action} +${earned}pts total=${doc.points} level=${doc.level}`);
-
-  // Sync back to PostgreSQL users table
-  User.update({ trustScore: doc.points }, { where: { id: userId } }).catch((err) => {
-    logger.warn(`Failed to sync trustScore to Postgres user=${userId}: ${err.message}`);
-  });
 
   return {
     userId: doc.userId,
