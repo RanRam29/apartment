@@ -186,6 +186,42 @@ router.post(
   }
 );
 
+// ─── GET /api/apartments — list apartments (public/authenticated) ────────────
+router.get('/', authenticate, async (req, res, next) => {
+  try {
+    const { limit = 20, offset = 0, city } = req.query;
+    const parsedLimit = parseInt(limit);
+    const parsedOffset = parseInt(offset);
+    const where = { isActive: true };
+    if (city) {
+      where.city = { [Op.iLike]: `%${city}%` };
+    }
+    const { rows: apartments, count } = await Apartment.findAndCountAll({
+      where,
+      include: [{
+        model: User,
+        as: 'landlord',
+        attributes: ['id', 'firstName', 'lastName', 'avatarUrl', 'isVerified', 'trustScore', 'isPremium']
+      }],
+      order: [
+        [{ model: User, as: 'landlord' }, 'isPremium', 'DESC'],
+        ['createdAt', 'DESC']
+      ],
+      limit: Math.min(Math.max(1, isNaN(parsedLimit) ? 20 : parsedLimit), 100),
+      offset: Math.max(0, isNaN(parsedOffset) ? 0 : parsedOffset),
+      distinct: true,
+    });
+    res.json({
+      apartments,
+      total: count,
+      page: Math.floor(Math.max(0, isNaN(parsedOffset) ? 0 : parsedOffset) / Math.min(Math.max(1, isNaN(parsedLimit) ? 20 : parsedLimit), 100)) + 1,
+      totalPages: Math.ceil(count / Math.min(Math.max(1, isNaN(parsedLimit) ? 20 : parsedLimit), 100))
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // ─── GET /api/apartments/feed — swipe feed (tenants only) ────────────────────
 router.get(
   '/feed',

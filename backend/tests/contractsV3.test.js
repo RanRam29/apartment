@@ -1,7 +1,7 @@
 process.env.JWT_SECRET = 'test_jwt_secret_for_verification_tests';
 const request = require('supertest');
 const app = require('../src/app');
-const { User, RentalAgreement, AgreementParty, UserKycProfile, LedgerRow } = require('../src/models');
+const { User, RentalAgreement, AgreementParty, UserKycProfile, LedgerRow, Apartment, Match, Swipe } = require('../src/models');
 const { sequelize } = require('../src/config/database');
 const { initRedis, getRedisClient } = require('../src/config/redis');
 
@@ -83,6 +83,22 @@ describe('Contract Upload & AI Extraction (M1/M2)', () => {
       userId: landlord.id,
       status: 'APPROVED',
       personaInquiryId: `inq_ll_${Date.now()}`,
+    });
+
+    // Clean up database tables to make the test idempotent and avoid unique constraints
+    await Match.destroy({ where: {} }).catch(() => {});
+    await Swipe.destroy({ where: {} }).catch(() => {});
+    await AgreementParty.destroy({ where: {} }).catch(() => {});
+    await RentalAgreement.destroy({ where: {} }).catch(() => {});
+    await Apartment.destroy({ where: {} }).catch(() => {});
+
+    await Apartment.create({
+      id: '00000000-0000-4000-8000-000000000002',
+      landlordId: landlord.id,
+      title: 'דירת בדיקה',
+      price: 5000,
+      rooms: 3,
+      city: 'תל אביב',
     });
   });
 
